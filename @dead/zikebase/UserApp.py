@@ -35,9 +35,8 @@ class UserApp(weblib.Actor):
 
     def act_save(self):
         try:
-            ed = zikebase.ObjectEditor(self.userClass,
-                                       self.ds,
-                                       input=self.input)
+            ed = zikebase.ObjectEditor(
+                     self.userClass, self.ds, self.input, self.input.get("ID"))
             ed.do("save")
         except ValueError, err:
             #@TODO: clean up the type mess on ValueError
@@ -57,7 +56,7 @@ class UserApp(weblib.Actor):
             self.next = "on_signup"
 
     def act_on_signup(self):
-        print 'welcome!'
+        print >> self.out, 'welcome!'
 
     ## request password process ############################
     ## requestpass --> sendpass --> msg_sentpass
@@ -103,8 +102,5 @@ class UserApp(weblib.Actor):
     def act_update(self):
         self.auth.check()
         self.consult(zdc.ObjectView(self.auth.user))
+        import os
         print >> self.out, zebra.fetch(self.tplDir + "/frm_update", self.model)
-
-
-
-
