@@ -91,6 +91,10 @@ class MockStorageTest(unittest.TestCase):
         self.s.delete("test_person", 1)
         people = self.s.match("test_person")
         assert people == [{"ID":2, "name":"wanda"}]
-        self.s.delete("test_person", where("ID") == 2)
+        self.s.delete("test_person", ID=2)
         people = self.s.match("test_person")
         assert people == []
+
+    def check_delete_with_long_id(self):
+        self.check_store_insert()
+        self.s.delete("test_person", 1L)

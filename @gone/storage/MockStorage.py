@@ -111,7 +111,7 @@ class MockStorage(Storage):
     def delete(self, table, ID):
         self._ensuretable(table)
         rows = self._tables[table]
-        if type(ID) == int:
+        if type(ID) in (int,long):
             for i in range(len(rows)):
                 if rows[i]["ID"]==ID:
                     rows.remove(rows[i])
