@@ -3,6 +3,8 @@ import unittest
 import weblib
 import zikeshop.test
 
+import sys
+sys.path.append('admin/')
 
 class AdminPagesTestCase(unittest.TestCase):
 
@@ -28,10 +30,10 @@ class AdminPagesTestCase(unittest.TestCase):
                             request=weblib.Request(form = \
                                                    {"action": "save",
                                                     "code": "XY001",
-                                                    "product": "Xylaphone",
+                                                    "name": "Xylaphone",
                                                     "descriptLong": "makes music" }))
         eng.run()
-        self.cur.execute("select code, product, descriptLong from shop_product where ID=1")
+        self.cur.execute("select code, name, descriptLong from shop_product where ID=1")
 
         assert self.cur.fetchone() == ("XY001", "Xylaphone", "makes music"), \
                "Product admin page doesn't add products!!"
@@ -46,10 +48,10 @@ class AdminPagesTestCase(unittest.TestCase):
                                                    {"action": "save",
                                                     "ID" : 1,
                                                     "code": "XY001",
-                                                    "product": "Xylaphone",
+                                                    "name": "Xylaphone",
                                                     "descriptLong": "makes music" }))
         eng.run()
-        self.cur.execute("select code, product, descriptLong from shop_product where ID=1")
+        self.cur.execute("select code, name, descriptLong from shop_product where ID=1")
         
         assert self.cur.fetchone() == ("XY001", "Xylaphone", "makes music"), \
                "Product admin page doesn't update products correctly!!"
