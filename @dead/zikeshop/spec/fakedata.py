@@ -8,23 +8,17 @@ import zikeshop
 
 def load():
     import zdc, zikeshop, zikebase
-    from zikeshop.test import dbc
+    from zikeshop import dbc
 
     ## clear out old data..
-    dbc.cursor().execute("DELETE FROM base_contact")
-    dbc.cursor().execute("DELETE FROM base_user")
-    dbc.cursor().execute("DELETE FROM web_sess")
-    dbc.cursor().execute("DELETE FROM base_node")
-    dbc.cursor().execute("DELETE FROM shop_product")
-    dbc.cursor().execute("DELETE FROM shop_card")
-    dbc.cursor().execute("DELETE FROM shop_sale")
-    dbc.cursor().execute("DELETE FROM shop_detail")
-    #dbc.cursor().execute("DELETE FROM shop_sale_item")
-    dbc.cursor().execute("DELETE FROM shop_product_node")
-    #dbc.cursor().execute("DELETE FROM shop_style")
-    #dbc.cursor().execute("DELETE FROM shop_location")
-    #dbc.cursor().execute("DELETE FROM shop_inventory")
-
+    dbc.delete("base_contact")
+    dbc.delete("base_user")
+    dbc.delete("base_node")
+    dbc.delete("shop_product")
+    dbc.delete("shop_card")
+    dbc.delete("shop_sale")
+    dbc.delete("shop_detail")
+    dbc.delete("shop_product_node")
 
     user = zikebase.User()
     user.username=user.uid=user.email="username"
@@ -36,29 +30,25 @@ def load():
     user.password="michal"
     user.save()
 
-    for n in ("toys", "books", "electronics", "games", "michal's stuff"):
+    nodeIDs={}
+    for n in ("toys", "books", "electronics", "games"):
         node = zikebase.Node()
         node.descript=""
         node.name=n
         if n=="games":
-            node.parentID=1
+            node.parentID=nodeIDs["toys"]
         node.save()
+        nodeIDs[n] = node.ID
 
 
     ## PRODUCTS#################################
 
-    for p in (("DIC00", "dictionary", "defines words", (2,)),
-              ("GUN00", "ray gun", "shoots people", (1,3)),
-              ("GAM00", "monopoly", "get rich quick", (4,)),
-              ("GAM01", "candyland", "an old game", (4,)),
-              ("GAM02", "chess", "an ancient game", (4,)),
-              ("PDA00", "palm pilot", "stores stuff", (3,)),
-
-              ("COOKI", "a scary cookie", "oh the horror!", (5,), 2),
-              ("FIDO!", "doggy", "a glowing alien slime beast and his little doggy.",
-                       (5,), 1),
-              ("SKULL", "Self portrait", "a self portrait of the developer, " + \
-               "as seen through rose colored X-Ray glasses.", (5,), 3)):
+    for p in (("DIC00", "dictionary", "defines words", ("books",)),
+              ("GUN00", "ray gun", "shoots people", ("toys","electronics")),
+              ("GAM00", "monopoly", "get rich quick", ("games",)),
+              ("GAM01", "candyland", "an old game", ("games",)),
+              ("GAM02", "chess", "an ancient game", ("games",)),
+              ("PDA00", "palm pilot", "stores stuff", ("electronics",))):
 
         prod = zikeshop.Product()
         prod.code=p[0]
@@ -67,7 +57,7 @@ def load():
         prod.descript=p[2]
         #if len(p)>4:
         #    prod.pictureID = p[4]
-        prod.categories=p[3]
+        prod.categories=map(nodeIDs.get, p[3])
         prod.save()
 
         ## set up 10 of each product in inventory..
@@ -98,7 +88,7 @@ def load():
     ## SALES #######################
     sale = zikeshop.Sale()
     det = zikeshop.Detail()
-    det.productID = 1
+    det.productID = zikeshop.Product(code="GAM02").ID # chess
     sale.status = "new"
     sale.details << det
     sale.save()
