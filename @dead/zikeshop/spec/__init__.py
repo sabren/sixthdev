@@ -13,6 +13,7 @@ from testProduct import *
 from testSale import *
 from testSaleEditor import *
 from testStore import *
+from testStyle import *
 suites = {}
 
 ## suites = zdc.test.suites
@@ -31,3 +32,4 @@ suites['Product'] = unittest.makeSuite(ProductTestCase, "check_")
 suites['Sale'] = unittest.makeSuite(SaleTestCase, "check_")
 suites['Saleeditor'] = unittest.makeSuite(SaleEditorTestCase, "check_")
 suites['Store'] = unittest.makeSuite(StoreTestCase, "check_")
+suites['Style'] = unittest.makeSuite(StyleTestCase, "check_")

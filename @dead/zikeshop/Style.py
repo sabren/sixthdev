@@ -15,7 +15,7 @@ class Style(zikeshop.Product):
     
     def get_product(self):
         if self.parentID:
-            return zikeshop.Product(ID=self.parentID)
+            return zikeshop.Product(self._ds, ID=self.parentID)
         else:
             return None
 
