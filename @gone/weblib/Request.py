@@ -18,7 +18,8 @@ import weblib
 
 class Request:
     
-    def __init__(self, querystring=None, form=None, environ=None, cookie=None, engine=weblib):
+    def __init__(self, querystring=None, form=None, environ=None,
+                 cookie=None, engine=weblib, content=None):
 
         self.engine = engine
         if self.engine is weblib:
@@ -84,10 +85,13 @@ class Request:
         if not form:
             self.form = {}
             try:
-                contentLength = int(os.environ["CONTENT_LENGTH"])
-                import sys
-                content = sys.stdin.read(contentLength)
-                for pair in string.split(content, "&"):
+                if content is None:
+                    contentLength = int(os.environ["CONTENT_LENGTH"])
+                    import sys
+                    self.content = sys.stdin.read(contentLength)
+                else:
+                    self.content = content
+                for pair in string.split(self.content, "&"):
                     l = string.split(pair, "=", 1)
                     k = l[0]
                     if len(l) > 1:
