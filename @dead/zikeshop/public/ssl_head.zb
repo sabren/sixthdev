@@ -16,3 +16,10 @@ body, td, p {
 <table width="500" align="center" cellpadding="5"><tr><td bgcolor="993333">
 <font face="verdana" size="2">
 
+* exec:
+    #@TODO: fix this hack!
+    if not scope.get("errors"):
+        errors = []
+* for errors:
+    <b>error: <span style="color:red">{:error:}</span></b><br>
+
