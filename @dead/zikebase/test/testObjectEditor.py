@@ -30,10 +30,8 @@ class ObjectEditorTestCase(unittest.TestCase):
         node.name="fred"
         node.save()
 
-        ed = zikebase.ObjectEditor(
-            zikebase.Node,
-            {"action":"save", "parentID":"1"},
-            ID=1)
+        ed = zikebase.ObjectEditor(zikebase.Node, 1,
+                                   input={"action":"save", "parentID":"1"})
         try:
             gotError = 0
             ed.act()
