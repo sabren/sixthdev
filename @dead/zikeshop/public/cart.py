@@ -47,7 +47,7 @@ class CartApp(zikeshop.PublicApp):
         self.model["contents"] = self.cart.q_contents()
         self.model["total"] = self.cart.subtotal()
         if not self.silent:
-            zebra.show("dsp_cart", self.model)
+            self.write(zebra.fetch("dsp_cart", self.model))
 
 
     def act_remove(self):
@@ -71,5 +71,4 @@ class CartApp(zikeshop.PublicApp):
 
 
 if __name__=="__main__":
-    CartApp(zikeshop.Cart(sess), ds).act()
-    sess.stop()
+    print >> RES, CartApp(REQ, zikeshop.Cart(SESS), DBC).act()

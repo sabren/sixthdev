@@ -7,25 +7,21 @@ import unittest
 import zikeshop
 
 import sys, os
-#sys.path.append("public")
+from zikeshop.public.checkout import CheckoutApp
 
 class CheckoutAppTestCase(unittest.TestCase):
     
     def setUp(self):
         self.ds = zikeshop.test.dbc
-        from zikeshop.public.checkout import CheckoutApp
-
-        # a hack to make the storage thing work.
-        import weblib
-        self.sess = {}
-        weblib.sess = self.sess
-
+        
         # wipe the database clean.
         self.cur = zikeshop.test.dbc.cursor()
         self.cur.execute("DELETE FROM shop_sale")
         self.cur.execute("DELETE FROM shop_detail")
+        
+        self.sess = {}
+        self.app = CheckoutApp({}, zikeshop.Cart({}), self.ds, self.sess)
 
-        self.app = CheckoutApp(zikeshop.Cart({}), self.ds)
         self.cwd = os.getcwd()
         os.chdir("public")
         
@@ -42,13 +38,12 @@ class CheckoutAppTestCase(unittest.TestCase):
 
         import weblib
         weblib.request = weblib.Request()
-        weblib.sess = {}
 
 
         myCart = zikeshop.Cart({})
         myCart.add("super-evil-destructo-ray")
 
-        app = CheckoutApp(myCart, self.ds)
+        app = CheckoutApp({}, myCart, self.ds, self.sess)
 
         # check for xxxData
         app.enter()
@@ -58,12 +53,10 @@ class CheckoutAppTestCase(unittest.TestCase):
 
         # just call get_billing to  make sure no error.
         # @TODO: compare this to an expected version..
-        import sys, StringIO
-        fakeout = StringIO.StringIO()
 
-        stdout, sys.stdout = sys.stdout, fakeout
+        RES = weblib.Response()
+
         app.do("get_billing")
-        sys.stdout = stdout
 
         # try adding a bad address
         app.input = {
@@ -96,9 +89,7 @@ class CheckoutAppTestCase(unittest.TestCase):
 
         # try showing the get_shipping form:
         # @TODO: compare this to an expected version..
-        stdout, sys.stdout = sys.stdout, fakeout
         app.do("get_shipping")
-        sys.stdout = stdout
 
         # ship to billing box..
         app.input["shipToBilling"]="1"
@@ -125,9 +116,7 @@ class CheckoutAppTestCase(unittest.TestCase):
 
         # credit card form
         # @TODO: compare this to an expected version..
-        stdout, sys.stdout = sys.stdout, fakeout
         app.do("get_card")
-        sys.stdout = stdout
         assert app.cardData["name"]=="michal wallace", \
                "didn't guess name from billing"
 
@@ -178,9 +167,7 @@ class CheckoutAppTestCase(unittest.TestCase):
 
         # show the confirmation page
         #@TODO: compare to expected
-        stdout, sys.stdout = sys.stdout, fakeout
         app.do("confirm")
-        sys.stdout = stdout
 
         #assert app.where["gohere"][:16]=="?action=checkout", \
         #       "didn't redirect to checkout page: %s" \

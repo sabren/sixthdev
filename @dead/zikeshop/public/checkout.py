@@ -10,8 +10,8 @@ class CheckoutApp(zikeshop.PublicApp):
 
     ## Actor methods ############################
 
-    def __init__(self, cart, ds, sess, input=None):
-        self.__super.__init__(self, cart, ds, input)
+    def __init__(self, input, cart, ds, sess):
+        self.__super.__init__(self, input, cart, ds)
         self.sess = sess
 
     def enter(self):
@@ -60,13 +60,13 @@ class CheckoutApp(zikeshop.PublicApp):
         self.consult(self.billData)
         self.model['shipToBilling']=self.input.get('shipToBilling') \
                                      or (self.billData==self.shipData)
-        zebra.show('frm_billing', self.model)
+        self.write(zebra.fetch('frm_billing', self.model))
 
 
     def act_get_shipping(self):
         import zebra
         self.consult(self.shipData)
-        zebra.show('frm_shipping', self.model)
+        self.write(zebra.fetch('frm_shipping', self.model))
 
 
     def act_add_address(self):
@@ -184,7 +184,7 @@ class CheckoutApp(zikeshop.PublicApp):
         # it doesn't stick if you leave the page...
         self.model["check_issuer"]=self.input.get("check_issuer")
         self.consult(self.cardData)
-        zebra.show("frm_card", self.model)
+        self.write(zebra.fetch("frm_card", self.model))
 
     def act_confirm(self):
         import zebra, zdc
@@ -206,7 +206,7 @@ class CheckoutApp(zikeshop.PublicApp):
         self.model["shipContact"] = [zdc.ObjectView(ship)]
         self.model["card"] = [zdc.ObjectView(card)]
 
-        zebra.show("frm_confirm", self.model)
+        self.write(zebra.fetch("frm_confirm", self.model))
 
     def act_show_receipt(self):
         assert self.data.get("saleID"), \
@@ -217,7 +217,7 @@ class CheckoutApp(zikeshop.PublicApp):
         self.consult(zdc.ObjectView(sale))
         self.model["billContact"] = [zdc.ObjectView(sale.billAddress)]
         self.model["shipContact"] = [zdc.ObjectView(sale.shipAddress)]
-        zebra.show("dsp_receipt", self.model)
+        self.write(zebra.fetch("dsp_receipt", self.model))
 
         # clear the session info: @TODO - this is duplicated above.
         self.billData = zikebase.Contact(self.ds)._data.copy()
@@ -300,5 +300,4 @@ class CheckoutApp(zikeshop.PublicApp):
         
         
 if __name__=="__main__":
-    CheckoutApp(zikeshop.Cart(sess), ds, sess).act()
-    sess.stop()
+    print >> RES, CheckoutApp(REQ, zikeshop.Cart(SESS), DBC, SESS).act()

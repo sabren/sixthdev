@@ -5,12 +5,10 @@ __ver__="$Id$"
 
 import weblib, zikeshop
 
-#@TODO: is this class really useful?
-
 class PublicApp(weblib.Actor):
     __super = weblib.Actor
 
-    def __init__(self, cart, ds, input=None):
+    def __init__(self, input, cart, ds):
         self.__super.__init__(self, input)
         self.ds = ds
         self.cart = cart
@@ -18,7 +16,6 @@ class PublicApp(weblib.Actor):
     def enter(self):
         self.__super.enter(self)
         self.cart.start()
-
 
     def exit(self):
         self.cart.purge()
