@@ -32,15 +32,16 @@ class RecordObject(zdc.Object):
         #    _table = "mas_person"
         
         if _table:
-            self._table = _table
-        assert self._table is not None, "RecordObjects must have a table."
+            self.__dict__['_table'] = _table
+        assert self._table is not None, \
+               "RecordObjects must have a table."
 
         # same thing with the defaults, except they're optional       
         if _defaults:
-            self._defaults = _defaults
+            self.__dict__['_defaults'] = _defaults
 
         # if all's well, go ahead with the init:
-        apply (zdc.Object.__init__, (self, self._table.dbc), where)
+        apply (zdc.Object.__init__, (self,), where)
 
 
     ## public methods ################################################
@@ -60,7 +61,7 @@ class RecordObject(zdc.Object):
     #@TODO: test delete(), too...
     
     def delete(self):
-        if self.isNew:
+        if getattr(self, self.__key__, None) is None:
             pass # nothing to delete
         else:
             self._record.delete()
@@ -80,28 +81,29 @@ class RecordObject(zdc.Object):
     ## private methods ###############################################
 
     def _new(self):
-        """Override this if youy need to change behavior of new RecordObjects,
+        """
+        Override this if you need to change behavior of new RecordObjects,
         for example, if a default value needs to be calculated rather than
         just assigned. BUT, make sure your new version calls this one or
         otherwise handles defaults.
         """
         
-        self._record = zdc.Record(self._table)
+        self.__dict__['_record'] = zdc.Record(self._table)
         for f in self._record.table.fields:
             
             # populate with default values.
             # use __dict__ to avoid overhead/errors with setattr
             if self._defaults.has_key(f.name):
-                self.__dict__[f.name] =  self._defaults[f.name]
+                self._data[f.name] =  self._defaults[f.name]
             else:
-                self.__dict__[f.name] = None
+                self._data[f.name] = None
 
 
     #@TODO: TEST THIS - it was just an off-the-top-of-my-head thing
 
     def _fetch(self, **where):
-        self._record = apply(zdc.Record, (self._table,), where)
+        self.__dict__['_record'] = apply(zdc.Record, (self._table,), where)
         for f in self._record.table.fields:
             # use __dict__ to avoid overhead/errors with setattr
-            self.__dict__[f.name] = self._record[f.name]
+            self._data[f.name] = self._record[f.name]
 

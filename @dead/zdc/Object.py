@@ -1,34 +1,29 @@
-# zdc.Object
-#
-# a base class for building database objects
-
+"""
+zdc.Object - a base class for building database objects
+"""
+__ver__ = "$Id$"
 
 import Record
 
 class Object:
-    """A base class for building database objects.
+    """
+    A base class for building business objects.
 
-    zdc.Object is a generic base class for manipulating
-    records in a databae. It is intended to be used as a
-    wrapper for one or more zdc.Record objects.
+    zdc.Object is a generic base class for business
+    objects. It has the ability to reject adding
+    attributes that don't apply to it.
 
     see RecordObject and ModelObject (?) for examples..
     """
 
     __key__="ID" # field that uniquely identifies this object
     _locks = []
-    _isNew = 0
     
-    def _init(self):
-        pass
-
-    
-    def __init__(self, dbc, key=None, **where):
-        """Don't override this. override _init(), _new() or _fetch() instead."""
-
-        self.dbc = dbc
-        self.isNew = not ((key) or (where))
-
+    def __init__(self, key=None, **where):
+        """
+        Don't override this! override _init(), _new() or _fetch() instead.
+        """
+        self.__dict__['_data']={}
         self._init()
 
         if key is None:
@@ -44,14 +39,20 @@ class Object:
 
     ### Abstract Protected Methods ##########################
 
+    def _init(self):
+        """
+        Override this to initialize an Object before
+        the data is filled in by _new or _fetch.
+        """
+        pass
+    
+
     def _new(self):
         raise NotImplementedError, "Object._new()"
 
 
-
     def _fetch(self, key=None, **kw):
         raise NotImplementedError, "Object._fetch()"
-
 
 
     def _lock(self):
@@ -80,7 +81,8 @@ class Object:
 
 
     def get__isLocked(self):
-        """Makes sure we're unlocked by default.
+        """
+        Makes sure we're unlocked by default.
         
         we can't put this in __init__ because child classes
         might want to do stuff before calling _new() or _save()
@@ -93,7 +95,8 @@ class Object:
 
 
     def _findmember(self, member):
-        """self._findmember(member) : does self define or inherit member?
+        """
+        self._findmember(member) : does self define or inherit member?
 
         with subclasses, It's hard to tell if we have get_XXX,
         because we have to iterate through all the base classes.
@@ -133,33 +136,40 @@ class Object:
             if name in self._locks:
                 raise AttributeError, name + " is read-only."
 
-            ## B2: normal (editable) attribute
+            ## B2: editable object attribute
+            elif self._data.has_key(name):
+                self._data[name] = value
+
+            ## B3: normal python attribute:
             elif self.__dict__.has_key(name):
                 self.__dict__[name] = value
-
-            ## B3: Attribute isn't part of the object
+                
+            ## B4: Attribute isn't part of the object
             else:
-                raise AttributeError, "can't add new attributes to locked object."
+                raise AttributeError, \
+                      "can't add new attributes to locked object."
 
         ## case C: unlocked, so do whatever you want
         else:
-            self.__dict__[name] = value
+            self.__dict__['_data'][name] = value
         
 
 
     def __getattr__(self, name):
 
-        ## case A: there's a get_XXX method:
+        ## case A: the name is already in __dict__
+        ## python (1.52 anyway) won't call __getattr__,
+        ## and there's not a damn thing we can do about it.
+
+        ## case B: there's a get_XXX method:
         meth = self._findmember('get_' + name)
         if meth is not None:
             return meth(self)
 
+        ## case C: the attribute is in _data
+        elif self._data.has_key(name):
+            return self._data[name]
 
-        ## case B: the object has the attribute
-        elif self.__dict__.has_key(name):
-            return self.__dict__[name]
-
-        ## case C: it does not have the attribute
+        ## case D: it does not have the attribute
         else:
             raise AttributeError, "no such attribute [" + name + "]"
-
