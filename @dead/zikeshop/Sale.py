@@ -11,7 +11,7 @@ class Sale(zdc.RecordObject):
     _links = {
         "details": [zdc.LinkSet, zikeshop.Detail, "saleID"],
         }
-    _tuples = []
+    _tuples = ['details']
 
     def _new(self):
         self.__super._new(self)
