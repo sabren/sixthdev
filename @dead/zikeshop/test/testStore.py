@@ -11,9 +11,12 @@ class StoreTestCase(unittest.TestCase):
     def setUp(self):
         self.store = zikeshop.Store()
         try:
+            try:
+                state = zikeshop.State(CD="CA")
+            except:
+                state = zikeshop.State()
+                state.CD = "CA"
             import zdc
-            state = zikeshop.State()
-            state.CD = "CA"
             state.salestax = zdc.FixedPoint("8.25")
             state.save()
         except:
