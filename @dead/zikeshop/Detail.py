@@ -25,12 +25,15 @@ class Detail(zdc.RecordObject):
         self._data['_prod'] = value
 
     def get_product(self):
+        res = None
         if  hasattr(self, "_prod"):
             return self._prod
         elif self.productID:
-            return zikeshop.Product(ID=self.productID)
-        else:
-            return None
+            #@TODO: this is a HORRIBLE way to do this:
+            res = zikeshop.Product(ID=self.productID)
+            if res._data["class"]=="style":
+                res = zikeshop.Style(ID=self.productID)
+        return res
 
     ### subtotal calculation #######################################
     def get_subtotal(self):
