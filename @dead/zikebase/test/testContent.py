@@ -1,6 +1,6 @@
 
 import unittest
-import test
+import zikebase.test
 
 from zikebase import Content
 
@@ -9,8 +9,8 @@ from zikebase import Content
 class ContentTestCase(unittest.TestCase):
 
     def setUp(self):
-        cur = test.dbc.cursor()
-        cur.execute("DELETE FROM base_content")
+        self.cur = zikebase.test.dbc.cursor()
+        self.cur.execute("DELETE FROM base_content")
 
     def check_add(self):
         cont = Content()
@@ -18,9 +18,8 @@ class ContentTestCase(unittest.TestCase):
         cont.save()
         del cont
 
-        cur = test.dbc.cursor()
-        cur.execute("SELECT title FROM base_content WHERE ID=1")
-        row = cur.fetchone()
+        self.cur.execute("SELECT title FROM base_content WHERE ID=1")
+        row = self.cur.fetchone()
 
         assert row is not None, "adding content failed!"
         assert row[0]=="a simple test", "title wasn't saved!"
