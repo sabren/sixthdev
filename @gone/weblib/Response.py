@@ -93,7 +93,8 @@ class Response:
 
 
     def redirect(self, url):
-        self.addHeader("Status", "302")
+        # http://ppewww.ph.gla.ac.uk/~flavell/www/post-redirect.html
+        self.addHeader("Status", "303")
         self.addHeader("Location", url)
         self.end()
 

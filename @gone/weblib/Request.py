@@ -34,7 +34,11 @@ class Request:
         self._doCookieJunk(cookie)
         self._doMethodJunk(method, content)
         self._doTypeJunk(contentType)
-        self._doContentJunk(content, form)
+        # @TODO: This is a hack for IIS redirects:
+        if not self.query.get("__weblib_ignore_form__",0):
+            self._doContentJunk(content, form)
+        else:
+            self.form = {}
         
     ## private methods #################################################
 

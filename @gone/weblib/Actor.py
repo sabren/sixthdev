@@ -156,12 +156,22 @@ class Actor:
             self.where["gohere"]=url
         else:
             import string, weblib
-            # this next bit is so, in case the current page is a GET with a ? in it..
-            # (otherwise, we'd pass the querystring to the next page - a recipe for disaster!)
-            me = string.split(weblib.request.environ["REQUEST_URI"], "?")[0]
+            # this next bit is in case the current page
+            # is a GET with a ? in it..
+            # (otherwise, we'd pass the querystring to the next page
+            # - a recipe for disaster!)
+            
+            # Apache uses REQUEST_URI, IIS uses SCRIPT_NAME
+            # (SCRIPT_NAME is weblib.cgi on Apache..)
+            if weblib.request.environ.has_key("REQUEST_URI"):
+                me = string.split(weblib.request.environ["REQUEST_URI"],
+                                  "?")[0]
+            else:
+                me = weblib.request.environ["SCRIPT_NAME"]
 
-            # okay.. no go there.
-            self.where["gohere"]="%s?action=%s" % (me, action)
+            # okay.. now go there.
+            self.where["gohere"]="%s?action=%s&__weblib_ignore_form__=1" \
+                                  % (me, action)
         self.next  = ("jump", {"where":"gohere"})
 
 
