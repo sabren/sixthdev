@@ -16,25 +16,15 @@ class RecordTestCase(unittest.TestCase):
         self.cur.execute("delete from test_types")
         self.table = zdc.Table(zdc.test.dbc, "test_fish")
 
-
-    def check_quotes(self):
-        rec = zdc.Record(self.table)
-        assert rec._sqlQuote(rec.table.fields["fish"], "foo'fish") \
-               == "'foo\\'fish'", \
-               "quoting failed for STRING"
-        assert rec._sqlQuote(rec.table.fields["ID"], 0) == "0",\
-               "quotes failed for NUMBER"
-        # @TODO: test BINARY .. but what should it do?
-
-
     def check_fetch(self):
         self.cur.execute("INSERT INTO test_fish (fish) VALUES ('pufferfish')")
-        rec = zdc.Record(self.table, ID=1)
+        rec = self.table.fetch(1)
 
         assert rec["fish"] == 'pufferfish', \
                "didn't fetch correct record!"
         
     def check_insert(self):
+        #@TODO: make this read self.table.new()
         rec = zdc.Record(self.table)
         rec['fish'] = 'salmon'
         rec.save()
@@ -53,7 +43,7 @@ class RecordTestCase(unittest.TestCase):
 
     def check_update(self):
         self.cur.execute("INSERT INTO test_fish (fish) VALUES ('glo_fish')")
-        rec = zdc.Record(self.table, ID=1)
+        rec = self.table.fetch(1)
         rec["fish"] = "glowfish"
         rec.save()
         
@@ -78,7 +68,7 @@ class RecordTestCase(unittest.TestCase):
         assert rec.isNew, "New record doesn't have true .isNew"
 
         self.cur.execute("INSERT INTO test_fish (fish) VALUES ('silverfish [ugh!]')")
-        rec = zdc.Record(self.table, ID=1)
+        rec = self.table.fetch(1)
         assert (not rec.isNew), "existing record is considered new!"
         
 
@@ -125,7 +115,7 @@ class RecordTestCase(unittest.TestCase):
         
         
         # also test that it READS them correctly:
-        rec = zdc.Record(zdc.Table(zdc.test.dbc, "test_types"), ID=1)
+        rec = zdc.Table(zdc.test.dbc, "test_types").fetch(1)
         assert rec["f_int"] == fInt, \
                "Record doesn't retrieve ints correctly."
         assert rec["f_string"] == fString, \

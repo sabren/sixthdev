@@ -109,7 +109,8 @@ class RecordObject(zdc.Object):
     #@TODO: TEST THIS - it was just an off-the-top-of-my-head thing
 
     def _fetch(self, **where):
-        self.__dict__['_record'] = apply(zdc.Record, (self._table,), where)
+        key = where[self._table.rowid]
+        self.__dict__['_record'] = self._table.fetch(key)
         for f in self._record.table.fields:
             # use __dict__ to avoid overhead/errors with setattr
             self._data[f.name] = self._record[f.name]

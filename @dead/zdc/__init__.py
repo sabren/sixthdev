@@ -19,7 +19,14 @@ from FixedPoint import FixedPoint
 from Connection import Connection
 
 
+    
+# @TODO: we need to know which module 'dbc' comes from, because
+# we need to get certain constants (eg, for field types)
+# that are in the module, but not connected to the
+# connection object... This is a shortcoming of the DB-API.. :/
 from MySQLdb import NUMBER, TIMESTAMP
+
+###############
 
 def sqlEscape(s):
     #@TODO: get the real version of this out of Record

@@ -21,10 +21,20 @@ class TableTestCase(unittest.TestCase):
                 self.table.fields[1].name) == ('ID', 'fish'), \
                "Table object doesn't get correct fields."
 
+    def check_quotes(self):
+        table = zdc.Table(zdc.test.dbc, "test_fish")
+        assert table._sqlQuote(table.fields["fish"], "foo'fish") \
+               == "'foo\\'fish'", \
+               "quoting failed for STRING"
+        assert table._sqlQuote(table.fields["ID"], 0) == "0",\
+               "quotes failed for NUMBER"
+        # @TODO: test BINARY .. but what should it do?
 
-    def check_getRecord(self):
+
+
+    def check_fetch(self):
         self.cur.execute("INSERT INTO test_fish (fish) VALUES ('squid')")
-        rec = self.table.getRecord(ID=1)
+        rec = self.table.fetch(1)
         assert rec["fish"] == 'squid', \
                "table.getRecord doesn't return the correct record."
        
