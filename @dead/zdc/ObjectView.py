@@ -13,7 +13,7 @@ class ObjectView:
         if res is notfound:
             raise KeyError, name
         else:
-            if type(res) == type([]):
+            if (type(res) == type([])) or isinstance(res, zdc.LinkSet):
                 lst = []
                 for item in res:
                     lst.append(zdc.ObjectView(item))
