@@ -191,9 +191,9 @@ class Request:
 
 
     def has_key(self, key):
-        if self.get(key):
-            return 1
-        else:
-            return 0
+        for dict in [self.query, self.form, self.cookie, self.environ]:
+            if dict.has_key(key):
+                return 1
+        return 0
             
             
