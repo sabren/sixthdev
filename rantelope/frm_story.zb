@@ -1,0 +1,34 @@
+*#
+*# This file displays a form for editing stories.
+*#
+*# $Id$
+
+* include header;
+
+* exec:
+    from zebra import html
+
+
+<form action="rantelope.app" method="POST">
+  <input type="hidden" name="what" value="story">
+  {:html.hidden("channelID", channelID):}
+
+* if ID:
+    <b>edit this story:</b>
+    <input type="hidden" name="ID" value="{:ID:}">
+* el:
+    <b>add a new story:</b>
+
+  <table border="1">
+    <tr><th>title:</th>
+        <td>{:html.text("title",title):}</td></tr>
+    <tr><th>link:</th>
+        <td>{:html.text("link",link):}</td></tr>
+    <tr><th colspan="2">description:</th></tr>
+    <tr><td colspan="2"><textarea name="description"
+            rows="10" cols="60">{:description:}</textarea></td></tr>
+  </table>
+
+  <br/>
+  <input name="action" value="save" type="submit">
+</form>
