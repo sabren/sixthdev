@@ -133,6 +133,17 @@ class Cart:
         return subt
             
 
+    def calcWeight(self):
+        """calculate order weight by summing product weights"""
+        weight = 0
+        import weblib, zikeshop
+        for item in self.q_contents():
+            weight = weight + \
+                     (zikeshop.FixedPoint(weblib.deNone(item["extra"]
+                                                        ["weight"],0))
+                      * item["quantity"])
+        return weight
+
     ## queries #########################################################
 
     def q_contents(self):

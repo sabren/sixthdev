@@ -103,6 +103,13 @@ class CartTestCase(unittest.TestCase):
                % self.cart.subtotal()
 
 
+    def check_calcWeight(self):
+        self.cart.add("2 tens", 1, 2, extra={"weight":10})
+        self.cart.add("3 ones", 1, 3, extra={"weight":1})
+        actual = self.cart.calcWeight()
+        assert actual == 23, \
+               "calcWeight() returns wrong value: %s" % actual
+
     def tearDown(self):
         del self.cart
 

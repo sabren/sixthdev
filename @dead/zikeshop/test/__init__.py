@@ -14,6 +14,7 @@ from testCashier import *
 from testCustomer import *
 from testAddress import *
 from testShopActor import *
+from testWizard import *
 
 suites = {}
 
@@ -33,3 +34,4 @@ suites['cashier'] = unittest.makeSuite(CashierTestCase, "check_")
 suites['customer'] = unittest.makeSuite(CustomerTestCase, "check_")
 suites['address'] = unittest.makeSuite(AddressTestCase, "check_")
 suites['shopactor'] = unittest.makeSuite(ShopActorTestCase, "check_")
+suites['wizard'] = unittest.makeSuite(WizardTestCase, "check_") #@TODO: take this out!

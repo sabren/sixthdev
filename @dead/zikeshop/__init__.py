@@ -1,8 +1,10 @@
+#@TODO: lazy module loading..
 from config import dbc
 from Product import Product
 from Cart import Cart
 from Style import Style
 from ShopActor import ShopActor
+from Wizard import Wizard #@TODO: move to weblib
 from Bagger import Bagger
 from Cashier import Cashier
 from Category import Category

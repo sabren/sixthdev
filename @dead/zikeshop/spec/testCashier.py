@@ -14,7 +14,7 @@ class CashierTestCase(unittest.TestCase):
         self.cur.execute("DELETE FROM shop_sale")
         self.cur.execute("DELETE FROM shop_sale_item")
 
-    def NO_______check_checkout(self):
+    def NO_check_checkout(self):
 
         ## @TODO: turn this test back on
         ## I turned this off temporarily until I can update

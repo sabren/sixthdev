@@ -4,7 +4,7 @@
 
 import zikeshop
 zikeshop.siteID = 1
-zikeshop.basehref = "/workshop/zikeshop/public"
+zikeshop.basehref = "/zikeshop/public"
 zikeshop.checkouturl = "checkout.py?auth_logout_flag=1"
 zikeshop.authorizenetmerchant = "aggressive"
 zikeshop.owneremail = "terrys_weblib_py@sabren.com" # for cashier.act_checkout
