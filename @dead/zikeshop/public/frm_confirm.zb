@@ -1,0 +1,65 @@
+* include dsp_head;
+
+<div class="contentcopy">
+<h1>Confirmation</h1>
+
+<p>Please check the information below for errors.
+   If you need to change anything, follow the links
+   to return to the input forms.</p>
+
+<p><a href="cart.py">Your order</a>:</p>
+
+<table>
+* for details:
+    <tr><td>{:label:}
+    * if quantity > 1:
+         &nbsp;<b>(x {:quantity:})</b>
+    </td>
+    <td align="right">${:subtotal:}</td>
+    </tr>
+
+<tr><td colspan="2">&nbsp;</td></tr>
+<tr><td>Subtotal:</td>
+    <td align="right"><b>${:grandsubtotal:}</b></td></tr>
+* if salestax:
+    <tr><td>salestax:</td>
+        <td align="right"><b>${:salestax:}</b></td></tr>
+<tr><td>Shipping:</td>
+    <td align="right"><b>To be determined</td></tr>
+</table>
+
+<p>Acual shipping amount will be billed to your credit
+   card in addition to ordered merchandise.</p>
+
+<p><a href="checkout.py?action=get_billing">Billing Information</a>:</p>
+* for billContact:
+    {:fname:}&nbsp;{:lname:}<br>
+    {:address1:}<br>
+    * if address2:
+        {:address2:}<br>
+    * if address3:
+        {:address2:}<br>
+    {:city:}, {:stateCD:}, {:postal:}<br>
+    {:countryCD:}<br>
+
+
+<p><a href="checkout.py?action=get_shipping">Shipping Information</a>:</p>
+* for shipContact:
+    {:fname:}&nbsp;{:lname:}<br>
+    {:address1:}<br>
+    * if address2:
+        {:address2:}<br>
+    * if address3:
+        {:address2:}<br>
+    {:city:}, {:stateCD:}, {:postal:}<br>
+    {:countryCD:}<br>
+
+
+<form action="checkout.py" method="POST">
+<p>If you agree with the above information,
+   then proceed to <input type="submit" name="action" value="checkout"/>.</p>
+</form>
+
+
+</div>
+* include dsp_foot;
