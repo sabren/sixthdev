@@ -74,10 +74,13 @@ class Z2X:
 
                 ## find the new left edge:
                 topx = x = x + 1
-                for i in range(len(lines[topx])):
-                    if lines[topx][i]!=" ":
-                        newleft = i
-                        break
+                if topx >= len(lines):
+                    newleft = left - 1
+                else:
+                    for i in range(len(lines[topx])):
+                        if lines[topx][i]!=" ":
+                            newleft = i
+                            break
 
                 ## find the end of the block, which should be
                 ## less indented than the inside of the block.
@@ -139,8 +142,8 @@ class Z2X:
     def parse_glue(self, tokens):
         return '' # no options yet
 
-    def parse_import(self, tokens):
-        return 'module="%s"' % tokens[1]
+    def parse_include(self, tokens):
+        return 'file="%s"' % tokens[1]
 
 
 ### HELPER FUNCTIONS ############################################

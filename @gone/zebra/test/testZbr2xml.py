@@ -180,6 +180,28 @@ class Zbr2xmlTestCase(unittest.TestCase):
             
 
 
+    def check_include(self):
+        #@TODO: drop trailing : from include syntax
+        zbr = zebra.trim(
+            """
+            * include includefile:
+            """)
+
+        #@TODO: it should realy be <include file="includefile"/>
+        goal = zebra.trim(
+            """
+            <?xml version="1.0"?>
+            <zebra>
+            <include file="includefile">
+            </include>
+            </zebra>
+            """)
+        actual = zebra.Z2X().translate(zbr)
+        assert actual==goal, \
+               "doesn't handle includes right:\n%s" % actual
+    
+
+
     def check_for(self):
         zbr = zebra.trim(
             """

@@ -189,3 +189,18 @@ class BootstrapTestCase(unittest.TestCase):
         actual = zebra.Bootstrap().toObject(zbx).fetch(model)
         assert actual == goal, \
                "head/tails don't work:\n%s" % actual
+
+    def check_include(self):
+        zbx = zebra.trim(
+            """
+            <zebra>            
+            <include file="test/includefile">
+            </include>
+            </zebra>
+            """)
+
+        goal = "This is the include file!"
+        actual = zebra.Bootstrap().toObject(zbx).fetch()
+        assert actual == goal, \
+               "includes don't work:\n%s" % actual
+

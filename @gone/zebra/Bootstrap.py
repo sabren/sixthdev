@@ -240,8 +240,11 @@ class Bootstrap:
         return res
 
 
-    ## <import> ##
-    def handle_import(self, model, attrs):
-        res = "import %s\n" % attrs["module"]
-        res = res + "zres = zres+ %s.fetch(scope)\n" % attrs["module"]
+    ## <include> ##
+    def handle_include(self, model, attrs):
+        res = "import zebra\n"
+        res = res + "zres=zres + zebra.fetch('%s')\n" % attrs["file"]
+
+        # @TODO: include shouldn't depend on zebra!
+        #res = res + "zres = zres+ %s.fetch(scope)\n" % attrs["module"]
         return res
