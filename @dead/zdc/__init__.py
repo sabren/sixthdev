@@ -80,3 +80,18 @@ def toListDict(cur):
             dict[cur.description[i][0]] = row[i]
         res.append(dict)
     return res
+
+def viewToXML(view, itemLabel="item", listLabel="list"):
+    """
+    viewToXML(view, itemLabel='item', listLabel='list')
+    """
+    res = "<%s>" % listLabel
+    for item in view:
+        attrs = ""
+        for key in item.keys():
+            attrs = attrs + ' %s="%s"' % (key, item[key])
+        res = res + "<%s%s/>" % (itemLabel, attrs)
+        
+    res = res + "</%s>" % listLabel
+    return res
+
