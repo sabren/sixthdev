@@ -46,6 +46,15 @@ class RecordObject(zdc.Object):
                 setattr(self, f.name, None)
 
 
+    #@TODO: TEST THIS - it was just an off-the-top-of-my-head thing
+
+    def _fetch(self, key):
+        rec = zdc.Record(self.dbc, self.table)
+        rec.fetch(key)
+        for f in rec.fields:
+            setattr(self, f.name, rec[f.name])
+
+            
     def save(self):
         rec = zdc.Record(self.dbc, self.table)
         for f in rec.fields:
