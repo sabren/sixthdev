@@ -2,7 +2,7 @@
 Stealthbox: a strongbox that is not Observable
 """
 
-from strongbox import attr
+from strongbox import attr, link
 
 
 class Accessorize(type):
@@ -26,7 +26,7 @@ class Accessorize(type):
     
 class Attributize(type):
     """
-    Metaclass that adds a __attrs__ member.
+    Metaclass that adds __attrs__  member.
     __attrs__ works like __slots__ but uses static
     typing provided by the attr object.
     """
@@ -37,7 +37,6 @@ class Attributize(type):
             if isinstance(dict[name], attr):
                 cls.__attrs__[name] = dict[name]
                 delattr(cls, name)
-                del dict[name]
 
 
 class PrivateNamespace(object):
@@ -68,11 +67,17 @@ class Stealthbox(object):
         instance.__dict__['private'] = PrivateNamespace()
         instance.__dict__['__values__'] = {}
         for a in klass.__attrs__:
-            default = klass.__attrs__[a].default
-            instance.__values__[a] = klass.__attrs__[a].cast(default)
+            instance.__values__[a] = klass.__attrs__[a].initialValue()
         if dbc:
             instance.private.dbc = dbc
         return instance
+
+    def __get_links__(klass):
+        return [(k,v) for (k,v)
+                in klass.__attrs__.items()
+                if isinstance(v,link)]
+    __get_links__ = classmethod(__get_links__)
+
 
     def __init__(self, **args):
         """
