@@ -17,6 +17,7 @@ class NodeTestCase(unittest.TestCase):
     def check_path(self):
         node = zikebase.Node(ID=2)
         node.name="subnode"
+        node.save()
 
         assert node.path == "top/subnode", \
                "Node doesn't generate the proper path when name is changed."             
