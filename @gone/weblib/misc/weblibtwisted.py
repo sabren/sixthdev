@@ -91,7 +91,7 @@ class RantResource(Resource):
         self.registry = registry
 
     def render(self, request):
-        import pdb; pdb.set_trace()
+        #import pdb; pdb.set_trace()
         return self._thread(request)
         #d = threads.deferToThread(self._thread, request)
         #d.addCallback(self._finish, request)
