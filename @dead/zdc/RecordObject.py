@@ -79,6 +79,12 @@ class RecordObject(zdc.Object):
     ## private methods ###############################################
 
     def _new(self):
+        """Override this if youy need to change behavior of new RecordObjects,
+        for example, if a default value needs to be calculated rather than
+        just assigned. BUT, make sure your new version calls this one or
+        otherwise handles defaults.
+        """
+        
         self._record = zdc.Record(self._table)
         for f in self._record.table.fields:
             
