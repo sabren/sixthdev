@@ -1,0 +1,26 @@
+<h1>Your Shopping Cart</h1>
+
+* for contents:
+    * head:
+        <h4>contents of cart:</h4>
+        <form action="cart.py" method="POST">
+        <ul>
+
+    <li><a href="{link}">{label}</a>
+    <input name="quantity_{_}" size="3" value="{quantity}">
+
+    * foot:
+        </ul>
+        <input type="submit" name="action" value="update">
+        </form>
+        <a href="checkout.py">checkout</a>
+
+* none:
+    <h4>your cart is empty</h4>
+
+
+<hr>
+<a href="{basehref}/category/">top</a>
+<hr>
+zikeshop alpha (c)2000 zike interactive, inc
+

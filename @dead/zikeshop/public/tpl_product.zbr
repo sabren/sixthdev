@@ -1,0 +1,28 @@
+<h1>{name}</h1>
+
+* if pictureID:
+    <img src="picture.py?ID={pictureID}">
+
+<p>{descript}</p>
+
+* for styles:
+    * if not style:
+        <A HREF="{basehref}/cart.py?action=add&styleID={ID}">add to cart</a>
+    * el:
+        style: {style} <a href="{basehref}/cart.py?action=add&styleID={ID}">
+        add to cart</a><br>
+
+* for nodes:
+    * head:
+        <h2>this product is in these categories:</h2>
+    <a href="{basehref}/category/{path}">{path}</a><br>
+* none:
+    <h2>this product is not categorized.</h2>
+
+<hr>
+<a href="cart.py">view cart</a>
+<hr>
+zikeshop alpha (c)2000 zike interactive, inc
+
+
+

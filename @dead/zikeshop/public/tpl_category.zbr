@@ -1,0 +1,35 @@
+
+* if name:
+    <h1><a href="{basehref}/category">top</a> :
+    * for crumbs:
+        <a href={basehref}/category/{path}">{name}</a> :
+    {name}</h1>
+
+    * for children:
+        * head:
+            <h2>subcategories</h2>
+        <a href="{basehref}/category/{path}">{name}</a><br>
+
+    * for products:
+        * head:
+            <h2>Products in this Category:</h2>
+        <a href="{basehref}/product/{code}">{name}</a><br>
+    * none:
+        (No products in this category.)
+
+
+* el:
+    <h1>top</h1>
+    * for children:
+        * head:
+            <h2>Categories</h2>
+        
+        <a href="{basehref}/category/{path}">{name}</A><br>
+
+<hr>
+<a href="{basehref}/cart.py">view cart</a>
+<hr>
+zikeshop alpha (c)2000 zike interactive, inc
+
+
+
