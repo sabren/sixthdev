@@ -22,7 +22,8 @@ class UserAppTestCase(unittest.TestCase):
             }
         app = zikebase.UserApp(input=req)
         app.do("save")
-        assert not app.errors, "got errors saving fred: %s" % str(app.errors)
+        assert not app.errors, \
+               "got errors saving fred: %s" % str(app.errors)
                
         #@TODO: I want to search by a field besides the key, but can't
         # until I finish refactoring zdc..
@@ -31,3 +32,10 @@ class UserAppTestCase(unittest.TestCase):
         assert fred.email == 'fred@tempyco.com', \
                "email is wrong: %s" % fred.email
         
+        # try to save again..
+        app = zikebase.UserApp(input=req)
+        app.do("save")
+        assert app.errors, \
+               "didn't get errors saving duplicate fred"
+        assert app.next == "signup", \
+               "wrong next: %s" % app.next

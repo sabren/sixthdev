@@ -43,7 +43,8 @@ class UserTestCase(unittest.TestCase):
             gotError = 0
         except:
             gotError = 1
-        assert gotError, "didn't get error trying to save usernameless User"
+        assert gotError, \
+               "didn't get error trying to save usernameless User"
 
         user.username ="elmer"
         try:
@@ -51,8 +52,17 @@ class UserTestCase(unittest.TestCase):
             gotError = 0
         except:
             gotErrror = 1
-        assert not gotError, "got error after setting username!"
-            
+        assert not gotError, \
+               "got error after setting username!"
+
+        user2 = zikebase.User()
+        try:
+            user2.username = "elmer"
+            gotError = 0
+        except:
+            gotError = 1
+        assert gotError, \
+               "didn't get error setting duplicate username"
         
     def tearDown(self):
 	pass
