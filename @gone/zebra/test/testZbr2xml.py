@@ -237,25 +237,25 @@ class Zbr2xmlTestCase(unittest.TestCase):
                "Doesn't do for..none right:\n%s" % actual
 
 
-    def check_blocks(self):
-        """
-        @TODO: this test is really stupid. it should
-        really test to make sure that non-blocked commands
-        use a ; a the end and blocked-commands use a :..
-        further, for .. ; should cause a syntax error, not
-        pass like this test says.
-        """
+    def check_notBlocks(self):
         zbr = zebra.trim(
             """
-            * for this_won't_work;
-                {?name?} is a nice person.
+            * if x==1:
+                * include page_one;
+            * ef x==2:
+                * include page_two;
             """)
         
         goal = zebra.trim(
             """
             <?xml version="1.0"?>
             <zebra>
-                <var>name</var> is a nice person.
+            <if condition="x==1">
+            <include file="page_one"/>
+            </if>
+            <ef condition="x==2">
+            <include file="page_two"/>
+            </ef>
             </zebra>
             """)
 

@@ -114,6 +114,12 @@ class Z2X:
 
                     ## we've already added 1, so jump back to the top:
                     continue
+
+
+                else:
+                    # not a block...
+                    res = res + "<%s %s/>\n" % (tok, attrs)
+                    
                 
             ## just a normal line..
             else:
