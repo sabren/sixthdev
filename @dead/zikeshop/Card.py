@@ -41,12 +41,17 @@ class Card(zdc.RecordObject):
         self._data['expYear']=int(value)
 
     def set_number(self, value):
-        if self.checkdigits(value):
-            self._data['number']=value
+        # Strip dashes and spaces..
+        # I'm leaving letters and other characters in
+        # so that they generate an error.
+        num = ""
+        for ch in str(value):
+            if ch not in "- ":
+                num = num + ch
+        if self.checkdigits(num):
+            self._data['number']=num
         else:
             raise ValueError, "Invalid credit card number."
-
-
 
 
 ##### @TODO: THIS CAME FROM THE PAYMENT MODULE. PUT IT BACK THERE! #######
