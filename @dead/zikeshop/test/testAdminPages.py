@@ -83,21 +83,22 @@ class AdminPagesTestCase(unittest.TestCase):
                             request=weblib.Request(querystring=self.qStr,
                                                    form = \
                                                    {"action": "save",
-                                                    "ID" : 1,
+                                                    "ID" : "1",
                                                     "code": "XY001",
                                                     "name": "Xylaphone",
                                                     "nodeIDs": ("1","2"),
                                                     }))
         eng.run()
-
         assert eng.result == eng.SUCCESS, \
                "got error trying to update product:\n%s" \
                % eng.error
         
         self.cur.execute("SELECT code, name "\
                          "FROM shop_product WHERE ID=1")
-        assert self.cur.fetchone() == ("XY001", "Xylaphone"), \
-               "Product admin page doesn't update products correctly!!"
+        actual = self.cur.fetchone()
+        assert actual == ("XY001", "Xylaphone"), \
+               "Product admin page doesn't update products correctly! %s" \
+               % str(actual)
 
         self.cur.execute("SELECT nodeID FROM shop_product_node "\
                          "WHERE productID=1")

@@ -4,6 +4,10 @@ import tpl_category
 
 #@TODO: have a zikeshop.rootnode()
 
+#@TODO: cleanup .siteID stuff..
+# stupid patch:
+zikeshop.siteID = getattr(zikeshop, "siteID", 0)
+
 if weblib.request.get("path"):
     cat = zikeshop.Category(path=weblib.request["path"],
                             siteID=zikeshop.siteID)

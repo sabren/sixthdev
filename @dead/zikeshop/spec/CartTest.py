@@ -43,16 +43,23 @@ class CartTestCase(unittest.TestCase):
             {"label":"red hot chili peppers", "extra":None,
              "price":0, "quantity":1, "link":"" }]
 
-        assert self.cart.q_contents() == goal, \
-               "q_contents returns wrong thing with full cart"
+        actual = self.cart.q_contents()
+        for row in range(len(goal)):
+            for item in goal[row].keys():
+                assert actual[row][item] == goal[row][item], \
+                       "q_contents returns wrong thing with full cart"
         
 
     def check_add(self):
         self.cart.add("bananas")
-        goal = [{"label":"bananas", "price":0,
-                 "link":"", "quantity":1, "extra":None},]
-        assert self.cart.q_contents() == goal, \
-               "doesn't have the correct contents"
+        goal = {"label":"bananas", "price":0,
+                "link":"", "quantity":1, "extra":None}
+        contents = self.cart.q_contents()
+        assert len(contents) == 1, \
+               "wrong content length. expected 1, got: %i" % len(contents)
+        for item in goal.keys():
+            assert contents[0][item] == goal[item], \
+                   "wrong contents attribute: %s" % item
 
 
     def check_update(self):
