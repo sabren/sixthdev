@@ -61,7 +61,7 @@ class ZikeShopAdminApp(zikebase.AdminApp):
     def list_sale(self):
         self.model = self.input
         self.consult("mdl_sale")
-        self.model["includeFilled"]=self.input.get("includeFilled",0)
+        self.model["includeFilled"]=int(self.input.get("includeFilled",0))
         self.model["isSearch"]=0
         zebra.show("lst_sale", self.model)
 
