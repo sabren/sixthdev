@@ -1,0 +1,208 @@
+
+* 2:43 PM 4/25/2004
+
+I'm starting from scratch here. not really.
+i'm going to try and get a working system out of planaconda 
+within the next 6 hours. 
+
+BUDGET:
+   30m requirements 
+   30m design
+   4h coding (test first)
+   1h acceptance testing / fixing
+
+
+What I have are a bunch of files that Durran and I put 
+together. The scope on that project is out of control. 
+It included everything from goals and tasks (good) to 
+a code generator and new app framework (bad).
+
+Okay. it's 245.. no more exposition. Time to start.
+
+
+
+* 3:16 PM 4/25/2004
+
+Wow. My requirement looks very much like my old TreeServer
+idea, or yahoo or something. But crap! I left out the whole
+part about assigning projects to a plate. Okay...
+
+
+* 3:24 PM 4/25/2004
+
+Okay. I went over by 10mins (33%) on requirements, but I think
+I have a solid list of requirements in mind. Now I need to figure
+out how to build it. Desisgn. Let's go.
+
+
+* 3:48 PM 4/25/2004
+
+Huh. My design turned out to be fairly simple, so I gained back a
+few minutes (but I'm still 3m late)... This looks like a system 
+with two tables and two data classes... Though there are some
+recursive joins. Okay. I'm into the 4 hours of coding phase... But
+I think what I really need is a plan for how to attack the design.
+Since I'll be testing the whole way through development, I think 
+I'll cut 30 min from my acceptance testing phase and make out a plan.
+Hrm. Do I need 30 mins for the plan? 15 then. Erm. Okay, Let's just 
+say I'll start coding at 4:00pm.
+
+
+3:53 PM 4/25/2004 lost a couple minutes from writing that, writing
+this, getting water, and visiting the restroom... no problem. let's
+make a plan.
+
+
+3:58 PM 4/25/2004 shit. my design doesn't address all the requirements.
+hrm. okay so I have a few more pages than I expected. I left out
+add/edit node and split node... Okay. no big deal. back on track...
+
+4:11 PM 4/25/2004
+
+Still chugging along on the development plan. I found a snag with
+the template system on the tree view... I planned out an hour
+for implementing everything about nodes... and I think it's probably
+going to take more like 2 hours. :/
+
+Besides that, I haven't even decided if I'm going to use old school
+dictionary models or my new idea for platonic web apps (which I got
+partially working yesterday)... Okay, no, that's a no-brainer. Stick
+with what I know. I'm on a budget.
+
+Shit. I haven't even started coding yet and I'm half an hour
+behind schedule. I hope all this up front work pays off.
+
+4:16 PM 4/25/2004 since i don't know when I'm going to start
+i put the plan in terms of relative time... and 0:00-2:00 for
+this node business.
+
+
+4:19 PM 4/25/2004
+Here's what I had in the plan.. yanked it out once i made a
+decision but wanted to preserve for posterity: :)
+        # shit. i don't think these two are going
+        # to work with zebra... the split screen
+        # would want a "with".. hrm.. wait.. 
+        # it'll have two copies of the same data,
+        # so the HTML form is going to need different
+        # field names... So it's really two forms.
+        # okay... No fancy template tricks. The
+        # two halves of the screen might not even
+        # look the same so I'll leave that to HTML.
+        #
+        # the tree page is a bitch though. zebra 
+        # doesn't do recursion well. normally I'd
+        # be tempted to extend zebra but I'm on a
+        # budget here. XSLT or another template
+        # system would probably work better. I know
+        # a little XSLT, but that means I've got to
+        # generate XML and then style it... The
+        # alternative is straight python... but that
+        # means pulling html from somewhere or putting
+        # it in the code... I think XSLT is the clear
+        # winner here. 
+        #
+        # So should I abandon zebra? No... The other
+        # pages fit it perfectly, so I'll use it 
+        # and minimize my risk, especially since I'm
+        # only so-so with XSLT.
+
+
+
+4:30 PM 4/25/2004
+Crap. I'm stuck here. Alright, lemme spell this out... I have a plate.
+Why? The idea is to be able to see what I'm working on NOW, and not
+have to deal with the whole tree or project... Because the project
+might take weeks, and I might only have a little while to develop
+anything. That happens to me all the time, and not having that separation
+is one of the main reasons I stopped using my old project tools. 
+I mean, it's one of the main features that makes planaconda useful. 
+So I can't cut it.
+
+Okay. So what's the problem? The problem is how to deal with 
+checkboxes. 
+
+No. For starters... Where are the checkboxes? I didn't really 
+spec that out to begin with. The original idea was to be able
+to add them to the plate from the show all page. That page is
+going to be huge if we start at the root. And if we don't start
+at the root... Then we get some number of checkboxes that have
+to be accounted for. In other words... I might have T number of
+total nodes... and an arbitrary collection of N nodes on the 
+screen. T > N... So when I post the form... I can't just wipe
+the plate clean. I can only change the status on the nodes on
+the page. Which means I have to pass it which nodes I'm talking
+about. It being the form handler. It either has to requery the
+whole tree... Or I need to pass in the list of all the
+checkboxes (because checkboxes only get posted if they're
+actually checked)... Hrm. As I'm typing this, the thing that
+comes to mind is two lists: expect_checked and excpect_unchecked
+... so when i put a checkbox up there, I add a second hidden
+field like <input type="hidden" name="expect_checked" value="1523">
+or something - meaning node 1523 was on the page and checked to
+begin with. So on post, I'll get a list of IDs for "expect_checked" 
+and "expect_unchecked"... And then I can compare that to the
+list of ID's in "plate_node"  (or whatever I call the checkbox)
+i'll have to do some funky dictionary manipulation to compare
+all that and see which ones changed... 
+
+the alternative is to just have one list of "expected" fields..
+which I think zebra.html does already.. then i check whether
+each ID is in the list of checkboxes, and if so, just update
+the record no matter what. 
+
+Here it would be really nice to make arlo match on a list of
+values... Do the query tools that Rick and I made handle that?
+If so, I'll use them. if not, I'll just do a huge loop and 
+make a bunch of queries. That's a performance issue and I'm
+cool with one slow page here - for this version.
+
+Okay. Problem solved. I'll go with the simple list of expected,
+grab all the objects, and if it changed, store it.
+
+
+5:19 PM 4/25/2004 well into my third hour of analysis here. 
+I just realized that I *don't* need the recursive logic on
+the tree page, because the whole concept of the treeserver 
+is that it caches the flattened tree. So I can get the whole 
+damn thing at once and even have a depth measurement. I don't
+need XSLT at all. Anyway, now I'm thinking I'd rather do some
+kind of color coding as you get deeper into the tree anyway.
+Like projects are white on black, goals are dark gray, sub
+goals are lighter gray, and so on n levels down. Hrm. 
+Eventually I'll run out of shades of gray but I don't expect 
+ever to use more than 6 levels ... 3 is probably the norm.
+yeah... basically project=>subproject=>goal=>task  ... and anyway
+i can just handle the depth with a stylesheet... 
+
+
+5:30 PM 4/25/2004 Well great! Given that, it looks like 4 
+hours of development SHOULD do it. I know I had some issues
+with arlo and recursive data structures before, but I'm 
+pretty sure I worked those out a few months ago. 
+
+So... 2:45 to 5:30 was 2 hours, 45 mins for analysis. My
+current estimate is 4 hours of work... Meaning I'd finish
+after six hours, 45 mins -- 45 minutes over the original 
+budget. However, I've cut out acceptance testing and have
+no buffer.
+
+My original 6 hour estimate was pie in the sky. I just stole
+it from a story in the Rapid development book. Really what I
+WANT is my 4 hours, plus 25% (1h for QA/buffer) and another
+hour for graphic design (not part of my original spec). That
+comes to 6 hours from NOW, or 11:39 at night. Okay. Let's aim
+for 11:45 - making this a 9 hour total project.
+
+5:41 PM 4/25/2004 So wait.. I'm not sure if my project is over  
+budget or not. It was 6 hours. 2:45... approaching 3...I said
+oh hell no this ain't gonna work... and now I have a revised
+budget for another 6 hours. 
+
+5:45 PM 4/25/2004 Okay. time to start. I made a new document
+for the schedule, so I'm goin to check all this crap in and
+get started. 
+
+
+
+
