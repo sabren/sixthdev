@@ -62,8 +62,7 @@ class BootstrapTestCase(unittest.TestCase):
             alice, betty, carol
             alaska
             """)
-        
-
+       
         actual = zebra.Bootstrap().toObject(zbx).fetch(model)
         assert actual == goal, \
                "for() loops don't work:\n---\n%s---" % actual

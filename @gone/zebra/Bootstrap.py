@@ -102,10 +102,29 @@ class Bootstrap:
 
                 def fetch(self, model={}):
                     import copy   # used for pushing scope onto stack
-                    scope = locals()
+
+                    scope = globals()
+                    # This scope thing is so that we can generate
+                    # code that says:
+                    #
+                    #         zres = zres + x
+                    # *OR*
+                    #         zres = zres + scope.get(x, '')
+                    #
+                    # It also actually does variable scoping,
+                    # when combined with scope_stack, below.
+                    #
+                    # I wanted to use scope=locals(), but
+                    # then the 'zres + x' wouldn't work.
+                    # @TODO: is this scope scheme threadsafe?
+                    
                     scope_stack = []
+
+                    # scope.update(model), but model might be a UserDict:
                     for item in model.keys():
                         scope[item] = model[item]
+
+                    # zres is the result (the output we're building)
                     zres = ""
             """)
         res = res + zebra.indent(self.walk(model), 2)
@@ -138,13 +157,12 @@ class Bootstrap:
                 # can't do .update if it's a UserDict:
                 mdl = model["%(series)s"][_]
                 for item in mdl.keys():
-                    exec '%%s=mdl[item]' %% item
+                    scope[item]=mdl[item]
             """ % attrs)
         res = res + zebra.indent(self.walk(model), 1)            
         res = res + zebra.trim(
             """
-            locals().update(scope_stack.pop())
-            #X# del _
+            globals().update(scope_stack.pop())
             """)
         return res
 
@@ -163,12 +181,14 @@ class Bootstrap:
 
     ## <xpr> ##
     def handle_xpr(self, model, attrs):
-        res = "zres = zres + str(%s)\n" % self.scopify(model[0])
+        res = "zres = zres + str(%s)\n" % model[0]
         return res
 
     ## <exec> ##
     def handle_exec(self, model, attrs):
-        res = model[0] + "\nscope.update(locals())\n"
+        res = "locals().update(scope)\n" \
+              + model[0] + "\n" \
+              "scope.update(locals())\n"
         return res
 
 
