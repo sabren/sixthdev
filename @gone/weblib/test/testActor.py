@@ -19,11 +19,12 @@ class ActorTestCase(unittest.TestCase):
 
 
     def check_input(self):
-        
-        weblib.request = "GOAL"
+
+        weblib.request = {"GOAL":"GOAL"}
         actor = weblib.Actor()
-        assert actor.input == "GOAL", \
-               "Wrong default input when weblib.request IS defined"
+        assert actor.input == {"GOAL":"GOAL"}, \
+               "Wrong default input when weblib.request IS defined:\n%s" \
+               % actor.input
         del weblib.request
 
         actor = weblib.Actor()
@@ -73,13 +74,11 @@ class ActorTestCase(unittest.TestCase):
             """
             import weblib
             a = weblib.Actor()
-            assert a.input is weblib.request
-            assert a.input.form == {"E":"X"}
+            assert a.input["E"] == "X", 'form failed'
             """))
 
         eng.run()
         assert eng.result == eng.SUCCESS, \
-               "Doesn't use correct request when in an Engine: %s" \
+               "Doesn't use correct request when in an Engine:\n %s" \
                % eng.error
         
-

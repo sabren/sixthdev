@@ -34,36 +34,44 @@ class Actor:
                 for key in weblib.request.keys():
                     # .update doesn't work with non-dicts
                     self.input[key] = weblib.request[key]
+                    
             else:
                 self.input = {}
 
-        # jumpMap is a special variable that tells you where
+        # where is a special variable that tells you where
         # you can jump. It's basically a way to let you
         # redirect pages as you see fit via act_jump
         # without letting anyone use your page to redirect
         # things arbitrarily..
-        self.jumpMap = {}
+        self.where = {}
         
         self.action = None
         self.next = None
         self.model = {}
-        self.model.update(self.input)
+        for key in self.input.keys():
+            self.model[key] = self.input[key]
 
 
     ## public methods ############################################
 
     def enter(self):
-        """Override this with stuff to do before acting. called by act()."""
+        """
+        Override this with stuff to do before acting. called by act().
+        """
         pass
 
 
     def exit(self):
-        """Override this with stuff to do after acting. called by exit()."""
+        """
+        Override this with stuff to do after acting. called by exit().
+        """
         pass
     
 
     def act(self, action=None):
-        """ex: actor.act();   actor.act("jump")"""
+        """
+        ex: actor.act();   actor.act('jump')
+        """
 
         if action is not None:
             self.action = action
@@ -89,12 +97,9 @@ class Actor:
         """
         if input is not None:
             self.input = input
-        self.input.update(params)
+        for key in params.keys():
+            self.input[key]=params[key]
 
-        self.perform(action)
-            
-
-    def perform(self, action=None):
         oldaction = self.action
         if action is not None:
             self.action = action
@@ -109,18 +114,59 @@ class Actor:
 
 
     def complain(self, problem):
-        raise Error, problem
+        """
+        Generic error handler. Prints a pretty error message.
+        You should probably override this.
+        """
+        print '<b>[<span style="color:red">error:</span></b> %s<b>]</b><br>' \
+              % problem
+
+
+    def consult(self, model):
+        """
+        updates the Actor's internal model based on the
+        passed in model. model can be either a module
+        name or a dict.
+
+        if it's a module name, the module should contain
+        a dict called model.
+        """
+        # models and modules.... heh... :)
+        if type(model) == type(""):
+            self.model.update(__import__(model).model)
+        else:
+            # assume it's a dict of sorts:
+            for item in model.keys():
+                self.model[item] = model[item]
+
+
+    def map_where(self, where):
+        """
+        Given a shortname, returns a url. Used to prevent
+        people from redirecting randomly through pages.
+
+        Returns None if no URL found.
+        """
+        return self.where.get(where)
 
 
     ## actions ###################################################
 
     def act_(self):
-        """Default action. Does nothing, but you can override it."""
+        """
+        Default action. Does nothing, but you can override it.
+        """
         pass
 
     def act_jump(self):
+        """
+        Jump to one of the urls defined in .where... expects where=xxx
+        """
         import weblib
-        weblib.response.redirect(self.jumpMap[self.input["where"]])
+        weblib.response.redirect(self.map_where(self.input["where"]))
 
     def act__error__(self):
+        """
+        This gets called when an unknown action is requested.
+        """
         self.complain("don't know how to %s" % self.action)
