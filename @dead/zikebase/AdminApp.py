@@ -1,177 +1,128 @@
 """
-AdminApp - an actor that uses zebra and zdc to simplify web apps.
+AdminApp - base class for apps that want to let you edit zdc.RecordObjects
+
+dispatches the following actions: list, show, edit, make, kill
+
+example: to let you list and edit Widgets:
+
+- define a 'lst_widget.zb' zebra file with the html to list widgets
+- define a 'dsp_widget.zb' zebra file with the html to show a single widget
+- define a 'frm_widget.zb' zebra file with the form to add/edit a single widget
+- define the widget adminapp, like so:
+
+class WidgetAdminApp(AdminApp):
+
+    def list_widget(self):
+        view = zdc.select(Widget)
+        self.generic_list(view, 'lst_widget')
+        
+    def show_widget(self):
+        self.generic_show(Widget, 'dsp_widget')
+
+    def edit_widget(self):
+        # edit is really just show with a different html view
+        self.generic_show(Widget, 'frm_widget')
+        
+    def make_widget(self):
+        # make is just edit with a new widget (no ID in url)
+        self.generic_make(Widget, 'frm_widget')
+
+    def save_widget(self):
+        self.generic_create(Widget, 'frm_widget')
+
+    # no kill_widget, so user can't delete...
+
+
 """
 __ver__="$Id$"
 
-import weblib, zebra
+import weblib
+import zdc
+import zebra
 
 class AdminApp(weblib.Actor):
     __super = weblib.Actor
 
-    def __init__(self, input=None):
+    def __init__(self, dbc, input):
         self.__super.__init__(self, input)
-        #@TODO: just make 'whatmap' into a dict, and get .what from input
-        self.what = {}
-
-    def map_what(self, what=None):
-        if what is None:
-            return self.what.get(self.input.get("what"))
-        else:
-            return self.what.get(what)
-
+        self.dbc = dbc
 
     ## list ###################################################
     
     def act_list(self):
-        """
-        calls list_{:what:} if defined, else generic_list
-        """
-        what = self.input.get("what", "")
-        if hasattr(self, "list_%s" % what):
-            getattr(self, "list_%s" % what)()
-        else:
-            self.generic_list(what)
+        self._dispatch("list")
 
-    def generic_list(self, what):
-        """
-        """
-        import zebra
-        if hasattr(self,"qry_%s" % what):
-            self.consult({
-                "list": getattr(self, "qry_%s" % what)()
-                })
-        else:
-            self.complain("self.qry_%s() not defined" % what)
-        try:
-            zebra.show("lst_%s" % what, self.model)
-        except IOError:
-            self.complain("unable to load lst_%s" % what)
+    def generic_list(self, listOfDicts, template):
+        self.model["list"] = listOfDicts
+        self._runZebra(template)
+        
 
-
-
-    ## show ######################################################
+    ## show/edit/make ###############################################
 
     def act_show(self):
-        """
-        generic show routine
-        """
-        # @TODO: consolidate with act_edit
-        what = self.input.get("what", "")
-        # allow overriding this without having to change actions:
-        if hasattr(self, "show_%s" % what):
-            getattr(self, "show_%s" % what)()
-        else:
-            self.generic_show(what)
-
-    def generic_show(self, what):
-        import zdc
-        #@TODO: this ID stuff is just a hack to get categories working.
-        #@TODO: there needs to be a generic scheme for doing this..
-        if self.input.get("ID"):
-            obj = self.map_what(what)(ID=self.input.get("ID"))
-        else:
-            obj = self.map_what(what)()
-            obj.ID = 0
-        self.consult(zdc.ObjectView(obj))
-        try:
-            zebra.show("dsp_%s" % what, self.model)
-        except IOError:
-            self.complain("dsp_%s template not found]" % what)
-
-    ## edit ########################################################
+        self._dispatch("show")
 
     def act_edit(self):
-        """
-        generic object-modifying mechanism
-        """
-        what = self.input.get("what", "")
-        if self.input.get("ID"):
-            if hasattr(self, "edit_%s" % what):
-                getattr(self, "edit_%s" % what)()
-            else:
-                self.generic_edit(what)
-        else:
-            self.complain("no ID given")
+        self._dispatch("edit")
 
-    def generic_edit(self, what):
-        import zdc
-        self.consult(self.input)
-        self.consult(zdc.ObjectView(
-            self.map_what(what)(ID=self.input.get("ID"))))
-        zebra.show("frm_%s" % what, self.model)
+    def act_make(self):
+        self._dispatch("make")
 
-    ## create #######################################################
+    def generic_show(self, klass, template):
+        self._showObject(klass(self.dbc, ID=self.input.get("ID")), template)
 
-    def act_create(self):
-        """
-        generic routine to display a form for adding an object
-        """
-        what = self.input.get("what", "")
-        try:
-            if hasattr(self, "create_%s" % what):
-                getattr(self, "create_%s" % what)()
-            else:
-                self.generic_create(what)
-        except IOError:
-            self.complain("frm_%s template not found" % what)
-
-    def generic_create(self, what):
-        import zdc
-        self.consult(zdc.ObjectView(
-            self.map_what(what)()))
-        self.consult(self.input) # goes second so we can modify via input..
-        zebra.show("frm_%s" % what, self.model)
-
+    def generic_make(self, klass, template):
+        self._showObject(klass(self.dbc), template)
 
     ## delete ######################################################
             
-    def act_delete(self):
-        """
-        Generic object-deletion mechanism.
-        """
-        what = str(self.input.get("what", ""))
-        self.objectEdit("delete")
-        self.redirect(action="list&what=" + what)
+    def act_kill(self):
+        self._dispatch("kill")
+
+    def generic_kill(self, klass, nextAction):
+        self._objectEdit(klass, "delete")
+        self.redirect(action=nextAction)
 
 
     ## save ########################################################
 
     def act_save(self):
-        """
-        Generic object-deletion mechanism.
-        """
-        what = str(self.input.get("what", ""))
-        if hasattr(self, "save_%s" % what):
-            getattr(self, "save_%s" % what)()
-        else:
-            self.generic_save(what)
-        if not self.next:
-            self.redirect(action="list&what=" + what)
+        self._dispatch("save")
 
-    def generic_save(self, what):
-        self.objectEdit("save")
+    def generic_save(self, klass):
+        self._objectEdit(klass, "save")
 
 
-    ###[helper method]##############################################
+    ###[ private methods ]###########################################
 
-    def objectEdit(self, command):
-        """
-        generic routine that invokes an ObjectEditor
-        and feeds it a command.. Requires that you pass
-        a 'what' in on the input string.
-        """
+    def _dispatch(self, action):
         what = self.input.get("what", "")
-        klass = self.map_what(what)
-        if klass:
-            import zikebase
-            ed = zikebase.ObjectEditor(klass,
-                     self.input.get("ID"), input=self.input)
-            ed.do(command)
-            if command == "delete":
-                self.objectID = None
-            else:
-                self.objectID=ed.object.ID
+        meth = getattr(self, "%s_%s" % (action, what), None)
+        if meth:
+            meth()
         else:
-            print "don't know how to %s a %s" % (command, what)
+            self.complain("don't know how to list %s" % what)
 
 
+    def _runZebra(self, template):
+        try:
+            print >> self, zebra.fetch(template, self.model)
+        except IOError:
+            self.complain("unable to load %s.zb" % template)
+
+
+    def _showObject(self, obj, template):
+        self.consult(zdc.ObjectView(obj))
+        self.consult(self.input) # so we can pre-populate via url
+        self._runZebra(template)
+
+    def _objectEdit(self, klass, command):
+        import zikebase
+        ed = zikebase.ObjectEditor(
+                 klass, self.dbc, self.input, self.input.get("ID"))
+        ed.do(command)
+        #@TODO: delete this!
+        if command == "delete":
+            self.objectID = None
+        else:
+            self.objectID=ed.object.ID
