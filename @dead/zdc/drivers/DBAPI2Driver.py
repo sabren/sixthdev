@@ -23,6 +23,19 @@ class DBAPI2Driver:
         self._fieldcache = {}
 
 
+    def execSQL(self, sql):
+        """
+        Executes SQL and traps errors.
+        """
+        cur = self.dbc.cursor()
+        try:
+            cur.execute(sql)
+        except Exception, e:
+            print 'ERROR: execSQL("%s")' % sql
+            raise e 
+        return cur
+    
+
     def select(self, tablename, wclause=None, orderBy=None, **wdict):
         """
         returns a list of records for the given table..
@@ -41,9 +54,7 @@ class DBAPI2Driver:
         sql = sql + self._whereClause(tablename, wclause, wdict)
         if orderBy:
             sql = sql + " ORDER BY " + orderBy
-        cur = self.dbc.cursor()
-        cur.execute(sql)
-        return zdc.toListDict(cur)
+        return zdc.toListDict(self.execSQL(sql))
 
 
     def update(self, tablename, key, data):
@@ -67,8 +78,7 @@ class DBAPI2Driver:
                               + self._sqlQuote(tablename, f.name, data[f.name]) + ","
         #@TODO: unhardcode "ID" without coupling this to table..
         sql = sql[:-1] + self._whereClause(tablename, None, {"ID":key})
-        cur = self.dbc.cursor()
-        cur.execute(sql)
+        self.execSQL(sql)
         
 
     def insert(self, tablename, data):
@@ -92,8 +102,7 @@ class DBAPI2Driver:
         # chop off those last commas:
         sql = sql[:-1] + ") VALUES (" + vals[:-1] + ")"
 
-        cur = self.dbc.cursor()
-        cur.execute(sql)
+        cur = self.execSQL(sql)
 
         # get the auto-generated ID, if any:
         # NOTE: THIS -ONLY- WORKS WITH MYSQL!!!
@@ -123,8 +132,7 @@ class DBAPI2Driver:
     def delete(self, tablename, wheredict):
         sql = "DELETE FROM %s %s" \
               % (tablename, self._whereClause(tablename, None, wheredict))
-        cur = self.dbc.cursor()
-        cur.execute(sql)
+        self.execSQL(sql)
 
 
     def _whereClause(self, tablename, wclause, wdict):
@@ -200,8 +208,7 @@ class DBAPI2Driver:
             res = zdc.IdxDict()
             # @TODO: get defaults, keys, etc?
             # select a blank record:
-            cur = self.dbc.cursor()
-            cur.execute("SELECT * FROM " + tablename + " WHERE 1=0")
+            cur = self.execSQL("SELECT * FROM " + tablename + " WHERE 1=0")
             for f in cur.description:
                 res[f[0]] = zdc.Field(f[0],               # name
                                       f[1],  #@TODO: make typeCode a string
