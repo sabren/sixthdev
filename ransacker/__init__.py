@@ -1,4 +1,8 @@
+"""
+ransacker: a python search engine
 
+$Id$
+"""
 from Index import *
 from WordHash import *
 
