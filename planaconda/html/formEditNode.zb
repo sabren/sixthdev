@@ -1,4 +1,51 @@
 
 * include head.zb;
+* exec:
+    from zebra import html
 
-howdy
+
+
+<form action="planaconda.app" method="POST">
+{:html.hidden("action", "postSaveNode"):}
+* if ID:
+    edit Node
+    {:html.hidden("ID", ID):}
+* el:
+    add new Node
+
+<table>
+
+<tr><td>status</td>
+    <td>{:html.text("status", status):}</td></tr>
+
+<tr><td>ntype</td>
+    <td>{:html.text("ntype", ntype):}</td></tr>
+
+<tr><td>actual</td>
+    <td>{:html.text("actual", actual):}</td></tr>
+
+<tr><td>name</td>
+    <td>{:html.text("name", name):}</td></tr>
+
+<tr><td>parent</td>
+    <td>{:html.select("parent", nodes, parent.ID):}</td></tr>
+
+<tr><td>importance</td>
+    <td>{:html.text("importance", importance):}</td></tr>
+
+<tr><td>revised</td>
+    <td>{:html.text("revised", revised):}</td></tr>
+
+<tr><td>isOnPlate</td>
+    <td>{:html.checkbox("isOnPlate", isOnPlate):}</td></tr>
+
+
+<tr><td>estimate</td>
+    <td>{:html.text("estimate", estimate):}</td></tr>
+
+<tr><td>data</td>
+    <td>{:html.textarea("data", data):}</td></tr>
+
+</table>
+<input type="submit" value="save">
+</form>

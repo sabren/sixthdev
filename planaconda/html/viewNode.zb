@@ -1,0 +1,8 @@
+
+* include head.zb;
+
+<p><b>view node</b></p>
+
+<div class="node">
+<p>name: <b>{:name:}</b></p>
+</div>

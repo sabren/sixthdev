@@ -22,7 +22,24 @@ class PlanAppTest(unittest.TestCase):
 
     def test_formEditNode(self):
         m = self.p.formEditNode()
+        assert m["nodes"] == [(0, "/")]
         assert m["ntype"] == "task"
+
+    def test_postSaveNode(self):
+        assert len(self.c.match(Node)) == 0
+        self.p.input["name"] = "post me"
+        self.p.input["parent"] = 0
+        self.assertRaises(weblib.Redirect, self.p.postSaveNode)
+        nodes = self.c.match(Node)
+        assert len(nodes) == 1
+        self.assertEquals("post me", nodes[0].name)
+
+    def test_viewNode(self):
+        n = self.c.store(Node(name="abc"))
+        self.p.input["ID"] = n.ID
+        m = self.p.viewNode()
+        assert m["name"] == "abc"
+        
         
 if __name__=="__main__":
     unittest.main()

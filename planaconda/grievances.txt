@@ -20,3 +20,18 @@
     store = shelf["store"]
     clerk = arlo.Clerk(store, config.DBMAP)
 
+
+- i wanted clerk to let me lazy load node.parent... 
+  it has the ability to do that, but there's no support
+  for it. Oh wait. It IS lazy loaded! I think. Is it?
+  it's not really clear. :)
+
+- however, I shouldn't have had to touch .private for the
+  mock root... :/ Or should I?
+
+
+- PlanApp is an AdminApp but doesn't use any of the old and
+  crappy dispatch stuff. That probably needs to be factored
+  out... In fact, the only thing it DOES use is the generic_save
+  which might make more sense as another ObjectEditor or BoxEditor
+

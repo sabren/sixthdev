@@ -294,3 +294,53 @@ This puts me at two hours into development. I'm supposed to
 be done with all the node stuff by now. by the looks of it,
 I'm still about an hour behind schedule.
 
+[0425.2004 08:04PM] okay. what's next? got to get this add
+node form working. 
+
+[0425.2004 08:06PM] Well, I have this old formgen.py script
+that's supposed to generate a form from a strongbox. It
+should still work. It would be nice if it were dynamic,
+but since this is just a throwaway form anyway, I guess
+I'll just run it. Might as well skip ahead and create
+all the fields I think I'll need first though.
+
+
+[0425.2004 09:08PM] already past 9. I can list, view,
+and add/edit nodes. the interface holing it together is
+pretty crappy but the features are there. I'm already
+into my buffer. 
+
+I feel like I'm moving pretty fast. It's all little stuff
+that I'm running into. No major gotchas or anything. I
+just made extremely aggressive estimates. 
+
+Anyway, it's time once again to look at the budget. I
+still want to meet the deadline of 11:45. Well, okay.
+Let's call it midnight, and I can postpone the HTML
+cleanup until tomorrow. Testing and Presentatino 
+will have to come tomorrow.
+
+So about 2 hours 45 minutes left. Can I realistically
+do that? What's left to do?
+
+   - tree page
+   - split page
+   - show plate
+   - alter plate
+
+   comment list on node
+   sort comments by date
+   add comment to each side on split
+   add comment on update node
+   add comment directly from view node page
+
+
+I had estimates on that list but they're actually in there.
+No error checking on invalid data, but they do get stored. 
+Also I kinda wanted them to show totals for projects and
+goals but I didn't actually spec that. I'll postpone that
+until next iteration.
+
+I know Steve McConnell warned about optimisim, but... 
+I think I can do this. 
+
