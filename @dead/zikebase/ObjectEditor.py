@@ -71,5 +71,4 @@ class ObjectEditor:
             if self.input.has_key(field):
                 setattr(self.object, field, self.tuplize(self.input[field]))
         self.object.save()
-        self.object = self.newObject()
 
