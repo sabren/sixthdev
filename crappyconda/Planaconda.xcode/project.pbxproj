@@ -1,0 +1,349 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 39;
+	objects = {
+		C610F1B205EBE53000ED88E7 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			lastKnownFileType = text.script.python;
+			name = Generator.py;
+			path = source/Generator.py;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		C610F1C305EBE56500ED88E7 = {
+			children = (
+				C610F37205ED56B000ED88E7,
+				C610F2B605ED528300ED88E7,
+				C610F1B205EBE53000ED88E7,
+				C610F21605ED4A0F00ED88E7,
+				C63C8A5C05ED660200AE6C13,
+				C63C8A7B05ED667A00AE6C13,
+				C63C8C6E05F019F400AE6C13,
+				C63C8C7505F01A4D00AE6C13,
+			);
+			isa = PBXGroup;
+			name = Source;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		C610F21605ED4A0F00ED88E7 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			lastKnownFileType = text.script.python;
+			name = Controller.py;
+			path = source/Controller.py;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		C610F2B605ED528300ED88E7 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text.script.python;
+			name = Planaconda.py;
+			path = source/Planaconda.py;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		C610F30105ED53EB00ED88E7 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text.script.python;
+			name = ControllerTest.py;
+			path = source/ControllerTest.py;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		C610F30205ED53EB00ED88E7 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text.script.python;
+			name = GoalTest.py;
+			path = source/GoalTest.py;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		C610F30305ED53EB00ED88E7 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text.script.python;
+			name = PlanTest.py;
+			path = source/PlanTest.py;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		C610F30405ED53EB00ED88E7 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text.script.python;
+			name = TaskTest.py;
+			path = source/TaskTest.py;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		C610F30505ED53EB00ED88E7 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text.script.python;
+			name = UserTest.py;
+			path = source/UserTest.py;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		C610F30C05ED53EF00ED88E7 = {
+			children = (
+				C610F30105ED53EB00ED88E7,
+				C610F30205ED53EB00ED88E7,
+				C610F30305ED53EB00ED88E7,
+				C610F30405ED53EB00ED88E7,
+				C610F30505ED53EB00ED88E7,
+				C610F39205ED573700ED88E7,
+			);
+			isa = PBXGroup;
+			name = Test;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		C610F37205ED56B000ED88E7 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text.script.python;
+			name = Workshop.py;
+			path = source/Workshop.py;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		C610F39205ED573700ED88E7 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			lastKnownFileType = text.script.python;
+			name = ApplicationTest.py;
+			path = source/ApplicationTest.py;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		C623B56405E56CF800AB11AF = {
+			children = (
+				C63C8CA005F01BF200AE6C13,
+				C610F30C05ED53EF00ED88E7,
+				C610F1C305EBE56500ED88E7,
+			);
+			isa = PBXGroup;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		C623B56605E56CF800AB11AF = {
+			buildRules = (
+			);
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			isa = PBXBuildStyle;
+			name = Development;
+		};
+		C623B56705E56CF800AB11AF = {
+			buildRules = (
+			);
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+			};
+			isa = PBXBuildStyle;
+			name = Deployment;
+		};
+		C623B56805E56CF800AB11AF = {
+			buildSettings = {
+			};
+			buildStyles = (
+				C623B56605E56CF800AB11AF,
+				C623B56705E56CF800AB11AF,
+			);
+			hasScannedForEncodings = 1;
+			isa = PBXProject;
+			mainGroup = C623B56405E56CF800AB11AF;
+			projectDirPath = "";
+			targets = (
+			);
+		};
+		C63C8A5C05ED660200AE6C13 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			lastKnownFileType = text.script.python;
+			name = __init__.py;
+			path = source/__init__.py;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		C63C8A7B05ED667A00AE6C13 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			lastKnownFileType = text.script.python;
+			name = PlanApplication.py;
+			path = source/PlanApplication.py;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		C63C8C6E05F019F400AE6C13 = {
+			fileEncoding = 4;
+			isa = PBXFileReference;
+			lastKnownFileType = text.script.python;
+			name = .weblib.py;
+			path = source/.weblib.py;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		C63C8C7505F01A4D00AE6C13 = {
+			explicitFileType = text.script.python;
+			isa = PBXFileReference;
+			name = planaconda.app;
+			path = source/planaconda.app;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		C63C8CA005F01BF200AE6C13 = {
+			children = (
+				C63C8CA105F01BF200AE6C13,
+				C63C8CA305F01BF300AE6C13,
+				C63C8CA405F01BF300AE6C13,
+				C63C8CA505F01BF300AE6C13,
+				C63C8CA605F01BF300AE6C13,
+				C63C8CA805F01BF300AE6C13,
+				C63C8CA905F01BF300AE6C13,
+				C63C8CAB05F01BF300AE6C13,
+				C63C8CAC05F01BF300AE6C13,
+				C63C8CAD05F01BF300AE6C13,
+				C63C8CAE05F01BF300AE6C13,
+				C63C8CAF05F01BF300AE6C13,
+			);
+			isa = PBXGroup;
+			path = gui;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		C63C8CA105F01BF200AE6C13 = {
+			children = (
+				C63C8CA205F01BF300AE6C13,
+			);
+			isa = PBXGroup;
+			path = css;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		C63C8CA205F01BF300AE6C13 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			path = standard.css;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		C63C8CA305F01BF300AE6C13 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text.html;
+			path = goal_detail.html;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		C63C8CA405F01BF300AE6C13 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text.html;
+			path = goal_edit.html;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		C63C8CA505F01BF300AE6C13 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text.html;
+			path = goals.html;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		C63C8CA605F01BF300AE6C13 = {
+			children = (
+				C63C8CA705F01BF300AE6C13,
+			);
+			isa = PBXGroup;
+			path = images;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		C63C8CA705F01BF300AE6C13 = {
+			isa = PBXFileReference;
+			lastKnownFileType = image.gif;
+			path = spacer.gif;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		C63C8CA805F01BF300AE6C13 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text.html;
+			path = index.html;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		C63C8CA905F01BF300AE6C13 = {
+			children = (
+				C63C8CAA05F01BF300AE6C13,
+			);
+			isa = PBXGroup;
+			path = js;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		C63C8CAA05F01BF300AE6C13 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.javascript;
+			path = standard.js;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		C63C8CAB05F01BF300AE6C13 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text.html;
+			path = plans.html;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		C63C8CAC05F01BF300AE6C13 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text.html;
+			path = task_edit.html;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		C63C8CAD05F01BF300AE6C13 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text.html;
+			path = tasks.html;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		C63C8CAE05F01BF300AE6C13 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text.html;
+			path = user_edit.html;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		C63C8CAF05F01BF300AE6C13 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text.html;
+			path = users.html;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+	};
+	rootObject = C623B56805E56CF800AB11AF;
+}
