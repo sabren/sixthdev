@@ -5,7 +5,7 @@ __ver__ = "$Id$"
 
 #@TODO: subclass that uses Signature to pass values to act_XXX?
 
-class Actor:
+class Actor(object):
     """
     Actor(input) where input=a dict, usually with a key called 'action'.
     
