@@ -4,7 +4,7 @@ testObject - test cases for zdc.Object
 __ver__="$Id$"
 
 import unittest
-import zdc.Object
+from zdc import Object
 
 class ObjectTestCase(unittest.TestCase):
 
@@ -14,13 +14,13 @@ class ObjectTestCase(unittest.TestCase):
         If you want to do stuff to locked fields, do it in
         _init(), _fetch(), or _new().
         """
-        tobj = zdc.Object()
+        tobj = Object()
         assert tobj._isLocked, \
-               "oh no! zdc.Object instances aren't locked!"
+               "oh no! Object instances aren't locked!"
 
     def check_locks(self):
         "Locked attributes should be readonly"
-        class TestObj(zdc.Object):
+        class TestObj(Object):
             _locks = ["ABC"]
             def _new(self):
                 self.ABC = 5
@@ -36,7 +36,7 @@ class ObjectTestCase(unittest.TestCase):
                "Didn't get an AttributeError assigning to locked field."
 
     def check_getMethod(self):
-        class GetClass(zdc.Object):
+        class GetClass(Object):
             aaa = 5
             def get_aaa(self):
                 return 1
@@ -55,7 +55,7 @@ class ObjectTestCase(unittest.TestCase):
 
 
     def check_setMethod(self):
-        class SetClass(zdc.Object):
+        class SetClass(Object):
             def set_xxx(self, value):
                 self._data['xyz'] = value
 
@@ -64,3 +64,12 @@ class ObjectTestCase(unittest.TestCase):
         assert obj.xyz == "testme!", \
                "set_XXX() methods don't work!"
 
+
+    def check_ancestors(self):
+        class Soup:
+            pass
+        class Primordial(Soup):
+            pass
+        class Descendent(Object, Primordial):
+            pass
+        assert Descendent()._ancestors() == [Object, Primordial, Soup]

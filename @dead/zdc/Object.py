@@ -120,7 +120,7 @@ class Object:
         raise NotImplementedError, "Object.getEditableTuples()"
 
 
-    ### private Methods ####################################
+    ### protected Methods ####################################
 
 
     def get__isLocked(self):
@@ -137,6 +137,18 @@ class Object:
         return self.__dict__["_isLocked"]
 
 
+    def _ancestors(self):
+        """
+        Return list of all ancestors (handles multiple inheritance)
+        @TODO: I think this follows python's search order, but I'm not sure.
+        """
+        # __bases__ is only the IMMEDIATE parent, so we have
+        # to climb the tree...        
+        ancestors = [self.__class__]
+        while ancestors[-1].__bases__ != ():
+            ancestors.extend(ancestors[-1].__bases__)
+        return ancestors[1:]
+
     def _findmember(self, member):
         """
         self._findmember(member) : does self define or inherit member?
@@ -145,19 +157,10 @@ class Object:
         because we have to iterate through all the base classes.
         This ought to be built in to python, but it isn't.. :/
         """
-        
-        # __bases__ is only the IMMEDIATE parent, so we have
-        # to climb the tree...        
-        #@TODO: handle multiple inheritence
-        ancestors = [self.__class__]
-        while ancestors[-1].__bases__ != ():
-            ancestors.append(ancestors[-1].__bases__[0])
-        
-        for ancestor in ancestors:
+        for ancestor in [self.__class__] + self._ancestors():
             if member in dir(ancestor):
                 # grab the first one we find:
                 return ancestor.__dict__[member]
-            
         return None
         
 
