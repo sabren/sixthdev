@@ -1,4 +1,4 @@
-#!c:/python22/python.exe
+#!/usr/bin/python
 """
 weblib.cgi : a wrapper script for weblib
 inspired by http://www.webtechniques.com/archives/1998/02/kuchling/
@@ -7,6 +7,11 @@ USAGE (Apache):
    Action application/python-script /cgi-bin/weblib.cgi
    AddType application/python-script .py
 """
+## import sys
+## sys.stderr = sys.stdout
+## print "content-type: text/plain"
+## print
+
 
 ## CONFIGURATION ############################
         
@@ -25,11 +30,6 @@ import os.path
 import string
 import StringIO
 
-def scriptDir():
-    res = os.environ["PATH_TRANSLATED"] # full path to script
-    res = res.split(os.sep)[:-1]        # split to remove filename
-    res = os.sep.join(res)              # put back together
-    return res
     
 def fixWin32BinaryIssue():
     if sys.platform=="win32":
@@ -39,12 +39,20 @@ def fixWin32BinaryIssue():
 
 if __name__=="__main__":
 
-    try:
+    try:  
         import weblib
         fixWin32BinaryIssue()
-        eng = weblib.Engine(SITE_MAIL=SITE_MAIL, SITE_NAME=SITE_NAME)
+
+        tmp = os.environ["PATH_TRANSLATED"].split(os.sep)
+        path = os.sep.join(tmp[:-1])
+        os.chdir(path)
+        script = open(tmp[-1]).read()
+        
+        req = weblib.RequestBuilder().build()
+        eng = weblib.Engine(script, req, SITE_MAIL, SITE_NAME)
+        
         eng.start()
-        eng.setDir(scriptDir())
+        eng.setDir(path)
         eng.runDotWeblibPy()
         eng.runScript()
         eng.stop()        
