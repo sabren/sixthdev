@@ -51,9 +51,8 @@ class EngineTestCase(unittest.TestCase):
         del weblib.MYFORM
 
 
-
     def check_simple(self):
-        engine = weblib.Engine(script="print 'hello'")
+        engine = weblib.Engine(script="print >> RES, 'hello'")
         engine.run()
         assert engine.response.buffer == "hello\n", \
                "engine doesn't execute the script!"
@@ -63,7 +62,7 @@ class EngineTestCase(unittest.TestCase):
         res = 1
         try:
             engine = weblib.Engine(
-                script="import weblib; weblib.response.end()")
+                script="import weblib; weblib.RES.end()")
             engine.run()
         except SystemExit:
             res = 0
@@ -74,15 +73,15 @@ class EngineTestCase(unittest.TestCase):
 
     def check_context(self):
         # default case:
-        eng1 = weblib.Engine(script="print 'eng1'")   
+        eng1 = weblib.Engine(script="RES.write('eng1')")   
 
         # explicit:
-        eng2 = weblib.Engine(script="print 'eng2'")
+        eng2 = weblib.Engine(script="RES.write('eng2')")
         eng2.request=weblib.Request(engine=eng2)
         eng2.response=weblib.Response(engine=eng2)
                              
         # defaults after setting another engine explicitly:
-        eng3 = weblib.Engine(script="print 'eng3'", )
+        eng3 = weblib.Engine(script="RES.write('eng3')", )
         
 
         for eng in (eng1, eng2, eng3):
@@ -161,15 +160,23 @@ class EngineTestCase(unittest.TestCase):
 
 
     def check_print(self):
-        eng = weblib.Engine(script='import weblib; print "hello"')
+        import sys, StringIO
+        eng = weblib.Engine(script=trim(
+            """
+            import weblib
+            print >> RES, 'this should show'
+            print 'this should not'
+            """))
+        tempout, sys.stdout = sys.stdout, StringIO.StringIO()
         eng.run()
-        assert eng.response.buffer == "hello\n", \
+        sys.stdout = tempout
+        assert eng.response.buffer == "this should show\n", \
                "doesn't grab prints after import weblib!"
 
 
 
     def check_runtwice(self):
-        eng = weblib.Engine(script='print "hello"')
+        eng = weblib.Engine(script='print >> RES, "hello"')
         eng.run()
         eng.run()
 
@@ -178,31 +185,23 @@ class EngineTestCase(unittest.TestCase):
 
 
     def check_result(self):
-        eng = weblib.Engine(script='print "hello"')
-
-
+        eng = weblib.Engine(script='1+1')
         assert eng.result == None, \
                "engine.result doesn't default to None"
-        
-        eng.run()
 
+        eng.run()
         assert eng.result == eng.SUCCESS, \
                "engine.result doesn't return SUCCESS on success"
 
         eng.script = "print 'cat' + 5"
         eng.run()
-
         assert eng.result == eng.EXCEPTION, \
                "engine.result doesn't return EXCEPTION on error."
 
-
-
         eng.script = "assert 1==0, 'math is working.. :('"
         eng.run()
-
         assert eng.result == eng.FAILURE, \
                "engine.result doesn't return FAILURE on assertion failure."
-
 
 
     def check_PATH_INFO(self):
@@ -210,4 +209,40 @@ class EngineTestCase(unittest.TestCase):
         eng.start()
         assert eng.request.environ.get("PATH_INFO") == "test/pathinfo.py", \
                "Engine doesn't set PATH_INFO correctly for open()ed scripts."
+
+        
+    def check_exit(self):
+        """
+        engine.do_on_exit(XXX) should remember XXX and call it at end of page.
+        """
+        def nothing():
+            pass
+        
+        eng = weblib.Engine(script="")
+        eng.start()
+        assert len(eng._exitstuff)==0, \
+               "exitstuff not empty by default"
+        
+        eng.do_on_exit(nothing)
+        assert len(eng._exitstuff)==1, \
+               "do_on_exit doesn't add to exitstuff" 
+
+        eng._exitstuff = [] # faggidaboudit
+        
+        eng = weblib.Engine(script=trim(
+            """
+            # underscores on next line are just for emacs.. (trim strips them)
+        ___ def cleanup():   
+                print >> RES, 'wokka wokka wokka'
+
+            ENG.do_on_exit(cleanup)
+            """))
+        eng.start()
+        eng.execute(eng.script)
+        assert len(eng._exitstuff) == 1, \
+               "didn't register exit function: %s" % str(eng._exitstuff)
+
+        eng.stop()
+        assert eng.response.buffer=='wokka wokka wokka\n', \
+               "got wrong response: %s" % eng.response.buffer
         

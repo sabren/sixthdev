@@ -110,29 +110,16 @@ class Engine:
         """
         Injects our parts into the weblib namespace.
         """
-
-        self._oldParts = {}
-       
-        for part in Engine.parts:
-            self._oldParts[part] = getattr(weblib, part, None)
-            setattr(weblib, part, getattr(self, part, None))
+        self.globals["ENG"] = self
+        self.globals["REQ"] = self.request
+        self.globals["RES"] = self.response
 
 
     def restoreParts(self):
         """
         Restore the old weblib parts..
         """
-
-        for part in Engine.parts:
-            if self._oldParts[part]:
-                setattr(weblib, part, self._oldParts[part])
-            else:
-                # There was nothing there to begin with...
-                # (This is usually the case.)
-                # We have to do this because we don't want the
-                # next engine that comes along to see our mess..
-                delattr(weblib, part)
-
+        #@TODO: do I still need this now that weblib is out of the picture?
 
     def setPathInfo(self):
         if not self.request.environ.get("PATH_INFO"):        
@@ -143,19 +130,32 @@ class Engine:
         
 
     def start(self):
+        self._exitstuff = []
         self.startParts()
         self.injectParts()
         self.setPathInfo()
-        self.interceptPrint()
+        #self.interceptPrint()
 
 
 
     def stop(self):
-        self.restorePrint()
+        self._exit()
+        #self.restorePrint()
         self.restoreParts()
         self.stopParts()
-            
 
+
+    def do_on_exit(self, func, *targs, **kargs):
+        self._exitstuff.append((func, targs, kargs))
+
+    def _exit(self):
+        """
+        run exit stuff.. based on python 2.0's atexit._run_exitfuncs()
+        """
+        while self._exitstuff:
+            func, targs, kargs = self._exitstuff[-1]
+            apply(func, targs, kargs)
+            self._exitstuff.remove(self._exitstuff[-1])
 
     def _execute(self, script):
         """
