@@ -1,6 +1,8 @@
 """
 ransacker.indexer module
 
+$Id$
+
 this uses shelf to store data for a search engine.
 
 rki is a ransacker index
@@ -52,56 +54,78 @@ class Index:
         
 
 
+    def delKey(self, key):
+        itemID, oldWordIDs = self.rki["k:"+key]
+
+        # for each word in the index, remove the reference to this key.
+        # @TODO: check whether we NEED to delete (eg, word might be in new text)
+        for wordID in oldWordIDs:
+            self.rki[`wordID`]= filter(lambda i,bad=itemID:i!=bad, self.rki[`wordID`])
+
+        return self.rki["k:"+key][0]
+
+
+    def addKey(self, key):
+        """Adds a new key and returns the ItemID"""
+        itemID = self.rki[NEXTNUM]
+        self.rki[NEXTNUM] = itemID + 1
+        self.rki["i:"+`itemID`] = key
+        self.rki["k:"+key] = (itemID, ())
+        return itemID
+
+
+
+    def freqs(self, text):
+        """Return a dict mapping words to frequencies"""
+        fd = {}
+        for word in string.split(text):
+            if fd.has_key(word):
+                fd[word] = fd[word] + 1
+            else:
+                fd[word] = 1
+        return fd
+
+
+    def newWordID(self):
+        wordID = self.rkw[NEXTNUM]
+        self.rkw[NEXTNUM] = self.rkw[NEXTNUM]+1
+        return wordID
+        
+
+
+    def getWordID(self, word):
+        # make sure the word is in the wordlist
+        if not self.rkw.has_key(word):
+            wordID = self.rkw[word] = self.newWordID()            
+            # add a blank tuple in the index
+            self.rki[`wordID`]=()
+            return wordID
+        else:
+            return self.rkw[word]
+
+
+
     def index(self, key, text):
         """index(key, text) Add text to index and label it with the given key"""
-        #@TODO: break index() into smaller chunks
-        count = {}
-
         assert type(key) == type(""), "key must be a string!"            
 
-        # get list of unique words, and number of times they appear
-        for word in string.split(text):
-            if count.has_key(word):
-                count[word] = count[word] + 1
-            else:
-                count[word] = 1
 
-        # clear out old stuff
         if self.rki.has_key("k:"+key):
-
-            itemID, oldWordIDs = self.rki["k:"+key]
-
-            # for each word in the index, remove the reference to this key.
-            # @TODO: check whether we NEED to delete (eg, word might be in new text)
-            for wordID in oldWordIDs:
-                self.rki[`wordID`]= filter(lambda i,bad=itemID:i!=bad, self.rki[`wordID`])
-
-        # or generate a new itemID
+            itemID = self.delKey(key)
         else:
-            itemID = self.rki[NEXTNUM]
-            self.rki[NEXTNUM] = itemID + 1
-            self.rki["i:"+`itemID`] = key
-            self.rki["k:"+key] = (itemID, ())
+            itemID = self.addKey(key)
 
 
         # now index
-        for word in count.keys():
-            
-            # make sure the word is in the wordlist
-            if not self.rkw.has_key(word):
-                # do the autonumber thing:
-                self.rkw[word] = self.rkw[NEXTNUM]
-                self.rkw[NEXTNUM] = self.rkw[NEXTNUM]+1
-
-                # add a blank tuple in the index
-                self.rki[`self.rkw[word]`]=()
-
-
+        newWordIDs = []
+        for word in self.freqs(text).keys():
             # now add the reference
-            wordID = self.rkw[word]
+            wordID = self.getWordID(word)
+            
             self.rki[`wordID`] = self.rki[`wordID`] + (itemID,)
-            self.rki["k:"+key] = tuple((self.rki["k:"+key][0],
-                                        self.rki["k:"+key][1] + (wordID,)))
+            newWordIDs.append(wordID)
+
+        self.rki["k:"+key] = tuple((self.rki["k:"+key][0], tuple(newWordIDs)))
 
 
 
@@ -141,3 +165,5 @@ class Index:
     def __del__(self):
         self.rki.close()
         self.rkw.close()
+
+
