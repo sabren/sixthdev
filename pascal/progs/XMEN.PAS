@@ -2,7 +2,7 @@
 {$R-}
 {$S-}
 program xmen;
-uses vuestuff,crtstuff, zokstuff, crt, filstuff, moustuff,  dos;
+uses vuestuff,crtstuff, zokstuff, crt, filstuff, moustuff, dos;
 
 {$I XMTAGG}
 

@@ -5,7 +5,10 @@ Uses Crt,crtstuff,zokstuff,sndstuff,filstuff,pntstuff;
 Type
  Pobj = ^obj;
  obj = object ( node )
+  active : boolean;
   constructor init;
+  procedure update;
+  procedure act; virtual;
   procedure draw; virtual;
  end;
  roomstring = array [ 1 .. 1400 ] of pobj; { for speedier broadcasting }
@@ -14,12 +17,10 @@ Type
 var
  progdone,
  gameon : boolean;
- back : pcel;
  room : array[1..70,1..20] of Pobj;
  player : pobj;
 
-{$I DPLAY.PIC}
-{$I DTITE.PIC}
+{$I DOTHSCR.Pas}
 
 { þ Global Procedures and Functions }
 
@@ -57,6 +58,7 @@ procedure menu;
    newsepbar(
    newchoice('(|)|WQ|()uit to DOS ', '', true,   'Q',  6, nil,
   nil )))))))))));
+  greyshadow( 4, 2, 19, 13 );
   repeat
     result := m.get;
    case result of
@@ -87,10 +89,19 @@ constructor obj.init;
  begin
  end;
 
+procedure obj.update;
+ begin
+  if active then act;
+ end;
+
 procedure obj.draw;
  begin
  end;
 
+
+procedure obj.act;
+ begin
+ end;
 
 { þ Normal Variables }
 var
@@ -108,8 +119,13 @@ Procedure nilObjects;
  end;
 
 Procedure UpdateObjects;
+ var
+  x, y : byte;
  begin
-  { Will use a linked list to scroll through active objects }
+  for y := 1 to 20 do
+   for x := 1 to 70 do
+     if room[x,y] <> nil then
+       room[x,y]^.update;
  end;
 
 Procedure ShowObjects;
@@ -125,9 +141,9 @@ Procedure ShowObjects;
 
 Procedure UpdateScreen;
  begin
-  dosscreen := screentype(dplay);
+  dosscreen := screentype(dothscreen);
   writeto := @dosscreen;
-  if back <> nil then stamp( 1, 1, 71, 21, back );
+  bar( 1, 1, 71, 21, $0F );
   ShowObjects;
   screen := dosscreen;
  end;
@@ -138,14 +154,12 @@ Procedure Initialize;
   randomize;
   progdone := false;
   gameon := false;
-  WriteTo := @Dplay;
+  WriteTo := @Dothscreen;
   setupcrt;
   spkr.on;
   nilobjects;
   player := nil;
-  back := @dtite;
-  stamp( 0, 0, 70, 20, back );
-  screen := screentype( dplay );
+  screen := screentype( dothscreen );
   repeat menu until gameon or progdone;
   if progdone then exit;
   updatescreen;

@@ -1,87 +1,150 @@
-program life;
+program life;           { implements the game of life }
 uses crt, crtstuff;
 
-var
- colormatrix,
- newcolormatrix : array [1..132, 1..44] of byte;
+{--[ Defines & Variables ]--------------------------------}
 
+const
+	maxx = 80;
+	maxy = 20;
+
+  dead  = ' ';
+  alive = 'þ';
 
 type
- cell = object
-  h,k,x, y, c : byte;
-  procedure init( hv, kv, a, b, hue : byte );
-  procedure CalcCol;
-  procedure show;
- end;
-
-procedure cell.init( hv, kv, a, b, hue : byte );
- begin
-  h := hv;
-  k := kv;
-  x := a;
-  y := b;
-  c := hue;
-  colormatrix[ x, y ] := c;
-  show;
- end;
-
-Procedure cell.CalcCol;
- var
-  cu, cl, cd, cr : byte;
-  cul, cur, cdl, cdr : byte;
- begin
-  show;
-  if y <>  1 then cu := colormatrix[x,y-1] else cu := 0;
-  if y <> tymax then cd := colormatrix[x,y+1] else cd := 0;
-  if x <>  1 then cl := colormatrix[x-1,y] else cl := 0;
-  if x <> txmax then cr := colormatrix[x+1,y] else cr := 0;
-  if (x <>  1) and (y <> 1) then cul := colormatrix[x-1,y-1] else cul := 0;
-  if (x <>  1) and (y <>tymax) then cdl := colormatrix[x-1,y+1] else cdl := 0;
-  if (x <> txmax) and (y <> 1) then cur := colormatrix[x+1,y-1] else cur := 0;
-  if (x <> txmax) and (y <>tymax) then cdr := colormatrix[x+1,y+1] else cdr := 0;
-  c := ( cu + cd + cl + cr + cul + cur + cdl + cdr + c ) mod 16;
-  newcolormatrix[ x, y ] := c;
- end;
-
-
-procedure cell.show;
- begin
-  colorxy( h+x, k+y, c,  '±' );
-{  sound( c * 32 );
-{  if c <> 0 then delay(1);
-  nosound;}
- end;
+	agrid = array[ 0..maxx+1, 0..maxy+1 ] of char; { grid + "dead" border }
 
 var
- matrix : array[1..132,1..44] of cell;
- countX, countY : byte;
- temp : screentype;
+	grid : agrid;
+  iteration : integer;
+
+{--[ Procedures ]-----------------------------------------}
+
+procedure drawthegrid;
+	var
+  	a, b : integer;
+	begin
+   	for b := 1 to maxy do
+	  	for a := 1 to maxx do
+      	colorxy( a, b, green, grid[ a, b ] )
+  end;
+
+procedure seedthegrid;
+	var
+  	ch : char;
+    a, b : integer;
+	begin
+  	iteration := 0;
+    a := maxx div 2;
+    b := maxy div 2;
+    gotoxy(a,b);
+    doscursoron;
+    repeat ch := readkey;
+    	case ch of
+      	#0 :
+					case readkey of
+            up: b := decwrap( b, 1, 1, maxy );
+            down: b :=incwrap( b, 1, 1, maxy );
+            left: a := decwrap( a, 1, 1, maxx );
+            right: a := incwrap( a, 1, 1, maxx );
+          end;
+        #32 :
+        	begin
+			  		if grid[ a, b ] = alive then
+	          	grid[ a, b ] := dead
+	          else
+	          	grid[ a, b ] := alive
+						;
+            drawthegrid;
+          end;
+      end;
+    	gotoxy( a, b );
+    until ch = #27;
+		doscursoroff;
+  end;
+
+procedure init;
+	var
+  	a, b : integer;
+	begin
+  	clrscr;
+  	for a := 0 to maxx+1 do
+    	for b := 0 to maxy+1 do
+      	grid[ a, b ] := dead;
+    seedthegrid;
+	end;
+
+function numliveneighbors( x, y : integer ) : byte;
+	var
+  	counter : byte;
+	begin
+  	counter := 0;                                   { keypad direction }
+    if grid[ x-1, y-1 ] = alive then inc( counter); { 7 }
+    if grid[ x-1, y   ] = alive then inc( counter); { 4 }
+    if grid[ x-1, y+1 ] = alive then inc( counter); { 1 }
+    if grid[ x  , y-1 ] = alive then inc( counter); { 8 }
+
+    if grid[ x  , y+1 ] = alive then inc( counter); { 2 }
+    if grid[ x+1, y-1 ] = alive then inc( counter); { 9 }
+    if grid[ x+1, y   ] = alive then inc( counter); { 6 }
+    if grid[ x+1, y+1 ] = alive then inc( counter); { 3 }
+    numliveneighbors := counter;
+	end;
+
+procedure iterate;
+	var
+    a, b : integer;
+  	tempgrid : agrid;
+	begin
+  	tempgrid := grid; {to snag the borders}
+    for a := 1 to maxx do
+    	for b := 1 to maxy do
+      	case grid[ a, b ] of
+        	alive:
+						case numliveneighbors( a, b ) of		{ using case to allow }
+					  	2,3: tempgrid[ a, b ] := alive;		{ messing with the rules }
+					    else tempgrid[ a, b ] := dead;		{ later on.}
+					    end;
+          dead:
+          	case numliveneighbors( a, b ) of		{ see above }
+            	3 : tempgrid[ a, b ] := alive;
+              else
+              	tempgrid[ a, b ] := dead;
+            end;
+          else
+        end;
+  	inc( iteration );
+    grid := tempgrid;
+	end;
+
+procedure run;
+	var
+  	ch : char;
+	begin
+    ch := #0;
+		repeat
+    	drawthegrid;
+      iterate;
+      if keypressed then
+				begin
+					ch := readkey;
+          case ch of
+          	#32 : seedthegrid;
+          end;
+        end;
+		until (ch in [#27,#13])
+	end;
+
+procedure done;
+	begin
+  	textmode( co80 );
+  	doscursoron;
+	end;
+
+
+{--[ Main Program ]---------------------------------------}
 
 begin
- setupcrt;
-{ setmode( 51 );}
- writeto := @screen;
- txmax := 80;
- tymax := 25;
- blinking( off );
- doscursoroff;
- randomize;
-{ rectangle( 20, 5, 61, 17, $0F );}
- for countx := 1 to txmax do
-  for county := 1 to tymax do
-    matrix[ countx, county].init( 0, 0, countx,county,0);
-{  matrix[ txmax, tymax ].init( 0, 0, txmax, tymax, 0 );}
- matrix[ random(txmax div 2), random(tymax div 2) ].init( 0, 0, txmax div 2, tymax div 2, random( 15 )+1 );
-{ matrix[ txmax div 2+1, tymax div 2 ].init( 0, 0, txmax div 2+1, tymax div 2, 1 );}
- repeat until enterpressed;
- writeto := @temp;
- repeat
-  for county := 1 to tymax do
-   for countx := 1 to txmax do
-    matrix[ countx, county].Calccol;
-  colormatrix := newcolormatrix;
-  move( temp, screen, sizeof( temp ) );
- until keypressed;
- blinking( on );
- doscursoron;
+	init;
+	run;
+	done;
 end.

@@ -1,0 +1,38 @@
+uses filstuff;
+
+FUNCTION Cipher (St, Passwd: String): String;
+VAR
+   SPtr, PPtr: Integer;
+BEGIN
+   IF Length(Passwd) > 0 THEN BEGIN
+      PPtr := 1;
+      FOR SPtr := 1 TO Length(St) DO BEGIN
+         St[SPtr] := CHR(Ord(St[SPtr]) XOR Ord(Passwd[PPtr]) XOR $80);
+         INC(PPtr);
+         IF PPtr > Length(Passwd) THEN
+            PPtr := 1;
+      END;
+   END;
+   Cipher := St;
+END;
+
+var
+ t1 : text;
+ t2 : file;
+ s, c : string;
+ i : byte;
+begin
+ randseed := 193;
+ assign( t1, 'C:\tp\blah.pas' ); reset( t1 );
+ filerewrite( t2, 'C:\tp\blah!.Foo' );
+ while not eof(t1) do
+  begin
+   readln( t1, s );
+   writeln( s );
+   c := '';
+   for i := 1 to 35 do c := c + char(random(50)+ord('A'));
+   savestring( t2, cipher(s,c) );
+  end;
+ close( t1 );
+ close( t2 );
+end.

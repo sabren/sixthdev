@@ -456,7 +456,7 @@ const
 { $I WIZARD.PAS}
 { $I STARS.PAS}
 { $I ICE.PAS}
-{$I DPLAY1.PIC}
+{$I DPLAY.Pas}
 
 procedure menu; forward;
 procedure edit; forward;
@@ -555,14 +555,14 @@ procedure stat.value( var l; digits : byte );
 
 procedure stat.draw;
  begin
-  writeto := @dplay1;
+  writeto := @dplay;
   cwritexy( x, y, s );
   writeto := @screen;
  end;
 
 procedure stat.erase;
  begin
-  writeto := @dplay1;
+  writeto := @dplay;
   cwritexy( x, y, '|!k|W'+chntimes( ' ', clength( s ) ) );
   writeto := @screen;
  end;
@@ -905,7 +905,7 @@ procedure heroobj.face( d : direction );
  begin
   if facing = d then exit;
   obj.face( d );
-  writeto := @dplay1;
+  writeto := @dplay;
   colorxyv( 73, 4, $07, ''#26'' );
   case facing of
    north : colorxy( 73, 4, $0F, '' );
@@ -1429,7 +1429,7 @@ constructor nextroomobj.init;
 
 Procedure LoadBackground;
  begin
-  temp := screentype( dplay1 );
+  temp := screentype( dplay );
   back := nil;
  end;
 
@@ -1488,7 +1488,7 @@ Procedure DisposeObjects;
 Procedure UpdateScreen;
  begin
   {ModifyBackground;}
-  temp := screentype( dplay1 );
+  temp := screentype( dplay );
   WriteTo := @Temp;
   if back <> nil then stamp( 1, 1, 71, 21, back );
   ShowObjects;
@@ -1759,7 +1759,7 @@ Procedure Initialize;
   nilobjects;
   nextlevel := new( pnextroomobj, init );
   player := nil;
-  screen := screentype( dplay1 );
+  screen := screentype( dplay );
   repeat menu until gameon or progdone;
   if progdone then exit;
   loadbackground;
@@ -1774,7 +1774,7 @@ Procedure ShutDown;
   DosCursorOn;
  end;
 
-{$I dmmscr.pic }
+{ $I dmmscr.pic }
 
 procedure edit;
  var
@@ -1821,7 +1821,6 @@ procedure plot;
   texttog := false;
   repeat
    writeto := @temp;
-   temp := screentype( dmmscr );
    showobjects;
    if toggle then colorxy( 78, 20, $0D, '' ) else colorxy( 78,20, $0D, '');
    if drawtog then cwritexy( 76, 14, '|MDR|Ra|MW' );
@@ -1922,8 +1921,6 @@ procedure plot;
   doscursoroff;
 end;
 
- var
-   takethisout : wallobj;
 begin
  Initialize;
  while not progdone do
@@ -1935,5 +1932,5 @@ begin
     end;
     if not progdone then menu;
   end;
- shutdown;
+  Shutdown;
 end.
