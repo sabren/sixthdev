@@ -4,6 +4,8 @@ Response.py - loosely emulates the ASP Response object for python CGI's
 __ver__="$Id$"
 
 import weblib
+import string
+import sys
 
 class Response:
     """
@@ -75,14 +77,12 @@ class Response:
 
     def end(self):
         self.flush()
-        import sys
         sys.exit()
 
 
     def redirect(self, url):
         # http://ppewww.ph.gla.ac.uk/~flavell/www/post-redirect.html
         # except it doesn't work with IIS, so:
-        import string, weblib
         server = self.engine.request.environ.get('SERVER_SOFTWARE', '')
         if string.find(server, 'Microsoft')<>-1:
             self.clear()
