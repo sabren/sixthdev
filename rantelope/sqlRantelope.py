@@ -5,7 +5,6 @@ __ver__="$Id$"
 import storage
 import arlo
 from schema import *
-from rantelope import Author
 
 ## database connection ############################
 # ( you could also use MySQLdb and MySQLStorage here )

@@ -3,11 +3,27 @@
 __ver__="$Id"
 
 from strongbox import *
+import crypt
 
 # NOTE: all ID attributes must default
 # to "None" for SQLite's autonumbering
 # this doesn't effect MySQL's auto_increment 
 auto = None
+
+
+class Author(Strongbox):
+    ID = attr(long, default=auto)
+    username = attr(str)
+    cryptpwd = attr(str)
+    
+    def set_password(self, value):
+        #@TODO: randomize the crypt salt
+        self.cryptpwd = crypt.crypt(value, "xx")
+    def get_password(self, value):
+        raise ValueError, "passwords are encrypted"
+    def isPassword(self, value):
+        return self.cryptpwd == crypt.crypt(value, self.cryptpwd[:2])
+
 
 class Comment(Strongbox):
     """

@@ -1,3 +1,3 @@
 
-from Author import Author
+from schema import *
 from AuthorAuth import AuthorAuth
