@@ -46,6 +46,9 @@ class MySQLStorage(Storage):
             sql += " " + col + "='" + str(val) + "',"
         sql = sql[:-1]
 
+        # whoops! thanks to Andy Todd for this line:
+        sql += " WHERE ID = %d" % row["ID"]
+
         self.cur.execute(sql)
         return self.fetch(table, row["ID"])
         
