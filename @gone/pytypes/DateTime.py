@@ -20,7 +20,8 @@ class DateTime:
         if type(s) != type(""):
             raise TypeError, "usage: DateTime(string)"
         if s == "now":
-            s = "%04i-%02i-%02i %02i:%02i:%02i" % time.localtime(time.time())[:6]
+            s = "%04i-%02i-%02i %02i:%02i:%02i" \
+                % time.localtime(time.time())[:6]
         elif s == "today":
             s = "%i-%i-%i 00:00:00" % time.localtime(time.time())[:3]
         if " " in s:

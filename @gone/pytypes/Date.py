@@ -25,18 +25,18 @@ class Date(DateTime):
     def toUS(self):
         return "%02i/%02i/%04i" % (self.m, self.d, self.y)        
 
-    def __cmp__(self, other):
-        if isinstance(other, Date):
-            return cmp([self.y, self.m, self.d], [other.y, other.m, other.d])
-        elif isinstance(other, DateTime):
-            # NOTE: uses arcane DateTime knowledge.
-            # Originally coded as
-            #    return cmp(other, self)*-1
-            return cmp([self.y, self.m, self.d, 0, 0, 0],
-                       [other.y, other.m, other.d,
-                        other.hh, other.mm, other.ss])
-        else:
-            return cmp(self, Date(other))
+##     def __cmp__(self, other):
+##         if isinstance(other, Date):
+##             return cmp([self.y, self.m, self.d], [other.y, other.m, other.d])
+##         elif isinstance(other, DateTime):
+##             # NOTE: uses arcane DateTime knowledge.
+##             # Originally coded as
+##             #    return cmp(other, self)*-1
+##             return cmp([self.y, self.m, self.d, 0, 0, 0],
+##                        [other.y, other.m, other.d,
+##                         other.hh, other.mm, other.ss])
+##         else:
+##             return cmp(self, Date(other))
 
     def __str__(self):
         return self.toSQL()
