@@ -13,11 +13,17 @@ class SixthDayTestResult(unittest._TextTestResult):
     def __init__(self, stream):
         unittest._TextTestResult.__init__(self, stream, 1, 1)
 
+    def addError(self, test, err):
+        if err[0] == "skip":
+            self.stream.write('s')
+        else:
+            unittest._TextTestResult.addError(self, test, err)
+
+
 
 class SixthDayTestRunner(unittest.TextTestRunner):
     def __init__(self):
         stream = sys.stdout
-        #stream = open("logfile.txt","w")
         unittest.TextTestRunner.__init__(self, stream)
 
     def run(self, test):
