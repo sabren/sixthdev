@@ -22,11 +22,11 @@ class User(zdc.RecordObject):
 
     def get_password(self):
         """returns a zikebase.Password object for testing against plaintext."""
-        return self.passwordClass(self.__dict__["cryptedpass"])
+        return self.passwordClass(self._data["cryptedpass"])
     
     def set_password(self, value):
         "user.password = 'whatever'  # Transparently encrypt the password"
         pw = self.passwordClass()
         pw.set(value)
-        self.__dict__["cryptedpass"] = pw.crypted
+        self._data["cryptedpass"] = pw.crypted
         
