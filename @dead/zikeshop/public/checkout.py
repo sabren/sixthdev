@@ -198,7 +198,7 @@ class CheckoutApp(zikeshop.PublicApp):
         #@TODO: zebra ought to have a * with XXX: like for [xxxx]:
         self.model["billContact"] = [zdc.ObjectView(bill)]
         self.model["shipContact"] = [zdc.ObjectView(ship)]
-        self.model["card"] = zdc.ObjectView(card)
+        self.model["card"] = [zdc.ObjectView(card)]
 
         zebra.show("frm_confirm", self.model)
 
@@ -222,6 +222,16 @@ class CheckoutApp(zikeshop.PublicApp):
 
         # but remember the last sale in case they refresh..
         self.data={"saleID":self.data["saleID"]}
+
+    def act_jumptocheckout(self):
+        """
+        This is just a dummy action to clear the
+        screen and redirect to the checkout page.
+        The idea is to not have people clicking
+        the submit order button 234234234 times
+        while the email sends...
+        """
+        self.redirect(action="checkout")
 
 
     def act_checkout(self):
