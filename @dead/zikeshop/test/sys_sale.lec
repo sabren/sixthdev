@@ -1,0 +1,32 @@
+"""
+a simple sale
+"""
+__ver__="$Id$"
+
+import lecter
+from lecter import read, grab
+
+#############################
+
+class SaleTest(lecter.SystemTest):
+
+    def plan(self):
+        execfile("w:/zikeshop/test/fakedata.py")
+        self.score_category()
+
+    def score_category(self):
+        actual = grab("category.py")
+        goal = read("category.htm")
+        self.check("display corrrect category page", actual == goal)
+
+    def score_
+
+
+if __name__=="__main__":
+    test = SaleTest()
+    print "testing... "
+    score = test.score()
+    for line in test.results:
+        print line
+    print "score:", score
+

@@ -1,0 +1,149 @@
+"""
+system tests for zikeshop administration
+"""
+__ver__="$Id$"
+
+import lecter
+from lecter import read, grab
+
+
+#@TODO: clean up weblib.auth stuff...
+import weblib, zike; weblib.auth = zike.ZikeAuth()
+
+#############################
+
+class AdminTest(lecter.SystemTest):
+
+    def plan(self):
+        execfile("w:/zikeshop/test/fakedata.py")
+        #@TODO: clean this directory stuff up:
+        import os; os.chdir("w:/zikeshop/admin/")
+        import index
+        self.app = index.ZikeShopAppActor()
+        self.score_addproduct()
+    
+    def score_addproduct(self):
+        self.app.act("")
+
+
+if __name__=="__main__":
+    test = AdminTest()
+    print "testing... "
+    score = test.score()
+    for line in test.results:
+        print line
+    print "score:", score
+
+
+
+'''
+import unittest
+import weblib
+import zikebase
+import zikeshop.test
+
+import sys
+sys.path.append('admin/')
+
+# tests:
+# for category, product, style, affiliate, sales
+#    list, view, add, edit, delete (except sales)
+#    make sure all pages show up correctly
+
+
+class AdminPagesTestCase(unittest.TestCase):
+
+    def setUp(self):
+        if hasattr(weblib, "auth"): del weblib.auth
+        if hasattr(weblib, "request"): del weblib.request
+
+        #weblib.auth = zikebase.UserAuth()
+        import zike
+        weblib.auth = zike.ZikeAuth() # because of siteID
+        
+        self.cur = zikeshop.test.dbc.cursor()
+        self.cur.execute("delete from shop_product")
+        self.cur.execute("delete from base_node")
+        self.qStr = "auth_check_flag=1&auth_username=username"\
+                    "&auth_password=password"
+
+        from zikebase import md5crypt
+        self.cur.execute("DELETE FROM base_user")
+        self.cur.execute("INSERT INTO base_user (username,cryptedpass,siteID)"
+                         "VALUES ('username', '%s', 1)" \
+                         % md5crypt.md5crypt("password", "pw"))
+
+
+
+
+    def check_ProductAdd(self):
+
+        eng = weblib.Engine(script=open('admin/e_product.py'),
+                            request=weblib.Request(querystring=self.qStr,
+                                                   form=
+                                                   {"action": "save",
+                                                    "code": "XY001",
+                                                    "name": "Xylaphone",
+                                                    }
+                                                   ))
+        eng.run()
+        self.cur.execute("SELECT code, name " \
+                         "FROM shop_product WHERE ID=1")
+
+        assert self.cur.fetchone() == ("XY001", "Xylaphone" ), \
+               "Product admin page doesn't add products!!"
+        
+
+
+    def check_ProductEdit(self):
+        self.cur.execute("insert into shop_product (code) values ('SADFASDF')")
+        
+        eng = weblib.Engine(script=open('admin/e_product.py'),
+                            request=weblib.Request(querystring=self.qStr,
+                                                   form = \
+                                                   {"action": "save",
+                                                    "ID" : "1",
+                                                    "code": "XY001",
+                                                    "name": "Xylaphone",
+                                                    "nodeIDs": ("1","2"),
+                                                    }))
+        eng.run()
+        assert eng.result == eng.SUCCESS, \
+               "got error trying to update product:\n%s" \
+               % eng.error
+        
+        self.cur.execute("SELECT code, name "\
+                         "FROM shop_product WHERE ID=1")
+        actual = self.cur.fetchone()
+        assert actual == ("XY001", "Xylaphone"), \
+               "Product admin page doesn't update products correctly! %s" \
+               % str(actual)
+
+        self.cur.execute("SELECT nodeID FROM shop_product_node "\
+                         "WHERE productID=1")
+        assert self.cur.rowcount == 2, \
+               "Product admin doesn't put products in nodes correctly"
+
+
+
+    def check_NodeAdd(self):
+        eng = weblib.Engine(script=open('admin/e_category.py'),
+                            request=weblib.Request(querystring=self.qStr,
+                                                   form = \
+                                                   {"action": "save",
+                                                    "name": "My Node",
+                                                    "parentID": "0",
+                                                    "descript":
+                                                          "just a node" }))
+        eng.run()
+        assert eng.result == eng.SUCCESS, \
+               "Trouble running e_category.py:\n%s" % eng.error
+        
+        self.cur.execute("SELECT name, parentID, descript, path " + \
+                         "FROM base_node WHERE ID=1")
+        goal = ("My Node", 0, "just a node", "My Node")
+        actual = self.cur.fetchone()
+
+        assert actual == goal, \
+               "Node admin page creadted bad node: %s" % actual
+'''
