@@ -21,14 +21,14 @@ class Connection:
 
     # delegate everything else to the source...
 
-    def select(self, table, where=None, **wdict):
+    def select(self, tableOrClass , where=None, **wdict):
         import types
-        if type(table) == types.ClassType:
-            tablename = table._tablename
-            res =  [table(self, ID=row["ID"])
+        if type(tableOrClass ) == types.ClassType:
+            tablename = tableOrClass._tablename
+            res =  [tableOrClass (self, ID=row["ID"])
                     for row in self.source.select(tablename, where, **wdict)]
         else:
-            tablename = table
+            tablename = tableOrClass 
             res = self.source.select(tablename, where, **wdict)
         return res
 
