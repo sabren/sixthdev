@@ -1,6 +1,11 @@
 
+
 if REQ.get("name"):
-    print >> RES, "<h2>hello, %s!</h2>" % REQ["name"]
+    if REQ["name"]=="jump":
+        RES.redirect("http://www.twistedmatrix.com/")
+    else:
+        print >> RES, "<h2>hello, %s!</h2>" % REQ["name"]
+
 else:
     print >> RES, '<h2>what is your name?</h2>'
     print >> RES, '<form method="post">'

@@ -1,0 +1,5 @@
+
+print >> RES, "hello world!"
+
+
+
