@@ -10,29 +10,23 @@ import sys
 import os
 
 class Engine(object):
-    
-    parts=("request", "response")
-
-    script = None
-    result = None
-    
-    traceback = None
-    error     = None
 
     SUCCESS   = "* success *"
     FAILURE   = "* failure *"
     EXCEPTION = "* exception *"
     REDIRECT  = "* redirect *"
     EXIT      = "* exit *"
-      
 
-    def __init__(self, script=None, SITE_NAME=None, SITE_MAIL=None, **kw):
+    def __init__(self, script=None, request=None, response=None,
+                 SITE_NAME=None, SITE_MAIL=None, **kw):
         """
         script can be a string with actual code or a file object.
-        acceptable keyword arguments are 'request' and 'response',
-        which should be weblib.Request and weblib.Response objects,
-        respectively.
         """
+        self.script = script
+        self.request = request or weblib.Request()
+        self.response = response or weblib.Response()
+        self.result = None
+        self.error = None
 
         # set up internal namespaces..
         self.globals = {
@@ -41,28 +35,9 @@ class Engine(object):
             'SITE_MAIL': SITE_MAIL,
         }
         self.locals  = self.globals
-        self.script = script       
+
+        # stuff to do at exit:
         self._exitstuff = []
-
-        # first make sure they haven't passed us any bogus
-        # keywords..
-        
-        for item in kw.keys():
-            if item not in Engine.parts:
-                raise TypeError, "unexpected keyword argument: " + item
-
-        # Any of the singletons can be turned off by passing
-        # None, or customized by passing an instance..
-
-        for item in Engine.parts:
-            if kw.has_key(item):
-                # use the one they supplied
-                setattr(self, item, kw[item])
-                kw[item].engine = self
-            else:
-                # use new copy as default (eg, self.request=weblib.Request())
-                setattr(self, item, weblib.__dict__[string.capitalize(item)]())
-
 
 
     def injectParts(self):
@@ -119,7 +94,7 @@ class Engine(object):
 
     def _execute(self, script):
         """
-        This is so you can restrict execution in a subclass if you like.
+        This is in its own method so a subclass can restrict execution.
         """
         exec(script, self.globals, self.locals)
 
