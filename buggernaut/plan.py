@@ -17,7 +17,7 @@ import zikebase  # http://sourceforge.net/projects/zikebase/
 ## if you're not using MySQL, your best bet is to probably
 ## override zikebase.ObjectEditor.act_save()
 ##
-import sqlBugs, zdc.drivers
+import sqlBugs, zdc.drivers.DBAPI2Driver
 dbc=zdc.Connection(zdc.drivers.DBAPI2Driver.DBAPI2Driver(sqlBugs.dbc))
 
 class Story(zdc.RecordObject):
