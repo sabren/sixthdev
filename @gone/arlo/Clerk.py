@@ -18,6 +18,7 @@ class Clerk(object):
     def __init__(self, storage, dbmap=None):
         self.storage = storage
         self.dbmap = dbmap or {}
+        self.memo = {} # used so we get the same object on multiple fetch
 
     ## public interface ##############################################
         
@@ -67,9 +68,15 @@ class Clerk(object):
         res = []
         for row in self.storage.match(self._unmap_class(klass), **where):
             attrs, othercols = self._attr_and_other_columns(klass, row)
-            obj = klass(**attrs)
-            self._add_injectors(obj, othercols)
-            obj.private.isDirty = 0
+            uid = (klass, attrs.get("ID"))
+            if ("ID" in attrs) and (uid in self.memo):
+                obj = self.memo[uid]
+            else:
+                obj = klass(**attrs)
+                self._add_injectors(obj, othercols)
+                obj.private.isDirty = 0
+                if ("ID" in attrs):
+                    self.memo[uid]=obj
             res.append(obj)
         return res
    

@@ -28,7 +28,7 @@ class ClerkTest(unittest.TestCase):
         self.clerk.dbmap[Node.__attrs__["kids"]] = (Node, 'parentID')
 
 
-    def check_store(self):
+    def test_store(self):
         """
         When we store a record, the attrs get
         stored but the links do not.. 
@@ -37,13 +37,13 @@ class ClerkTest(unittest.TestCase):
         actual =self.storage.match("Record")
         assert actual == [{"ID":1, "val":""}]
 
-    def check_store_again(self):
+    def test_store_again(self):
         self.clerk.store(Record())
         r = self.clerk.fetch(Record, 1)
         r.val = "abc"
         self.clerk.store(r)
 
-    def check_store_link(self):
+    def test_store_link(self):
         r = Record(val="a")
         r.next = Record(val="b")
 
@@ -54,7 +54,7 @@ class ClerkTest(unittest.TestCase):
         assert r.next is not None, "didn't store the link"
         assert r.next.val=="b", "didn't store link correctly"
 
-    def check_store_linksets(self):
+    def test_store_linksets(self):
         n = Node(data="a")
         n.kids << Node(data="aa")
         n.kids << Node(data="ab")
@@ -70,19 +70,19 @@ class ClerkTest(unittest.TestCase):
         assert n.kids[1].kids[0].data=="aba", "didn't store link correctly"
         
         
-    def check_fetch(self):
+    def test_fetch(self):
         self.clerk.store(Record(val="howdy"))
         obj = self.clerk.fetch(Record, 1)
         assert obj.val == "howdy"
 
 
-    def check_delete(self):
-        self.check_fetch()
+    def test_delete(self):
+        self.test_fetch()
         self.clerk.delete(Record, 1)
         assert self.storage.match("Record") == []
 
 
-    def check_link_injection(self):
+    def test_link_injection(self):
         self.storage.store("Record", val="a", nextID=2)
         self.storage.store("Record", val="b", nextID=3)
         self.storage.store("Record", val="c", nextID=None)
@@ -95,7 +95,7 @@ class ClerkTest(unittest.TestCase):
         assert a.next.next.next is None
 
 
-    def check_linkset_injection(self):
+    def test_linkset_injection(self):
         self.storage.store("Node", data="top", parentID=None)
         self.storage.store("Node", data="a",   parentID=1)
         self.storage.store("Node", data="a.a", parentID=2)
@@ -109,7 +109,7 @@ class ClerkTest(unittest.TestCase):
 
         
 
-    def check_fetch_from_wide_table(self):
+    def test_fetch_from_wide_table(self):
         """
         Supose a strongbox has 1 slot, but the table has 2+ columns.
         We can't just jam those columns into the strongbox,
@@ -139,7 +139,7 @@ class ClerkTest(unittest.TestCase):
         except AttributeError:
             self.fail("shouldn't die when columns outnumber attributes")
 
-    def check_dirt(self):
+    def test_dirt(self):
         # dirty by default (already tested in strongbox)
         r = Record()
         assert r.private.isDirty
@@ -157,7 +157,7 @@ class ClerkTest(unittest.TestCase):
         assert not r.private.isDirty
 
 
-    def check_recursion(self):
+    def test_recursion(self):
         r = Record()
         r.next = Record()
         r.next.next = r
@@ -182,10 +182,10 @@ class ClerkTest(unittest.TestCase):
         
         
 
-    def check_complex_recursion(self):
+    def test_complex_recursion(self):
         """
         test case from cornerhost that exposed a bug.
-        this is probably redundant given check_recursion
+        this is probably redundant given test_recursion
         but it doesn't hurt to keep it around. :)
 
         This test is complicated. Basically it sets up
@@ -253,3 +253,11 @@ class ClerkTest(unittest.TestCase):
         assert not d.private.isDirty
         assert not d.site.private.isDirty # this failed.
         clerk.store(d)                    # so this would recurse forever
+
+
+    def test_identity(self):
+        self.clerk.store(Record(val="one"))
+        rec1a = self.clerk.fetch(Record, 1)
+        rec1b = self.clerk.fetch(Record, 1)
+        assert rec1a is rec1b
+        
