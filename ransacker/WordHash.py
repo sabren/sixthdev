@@ -25,11 +25,10 @@ class WordHash(UserDict.UserDict):
 
 
     def get(self, word):
-        try:
-            res = self.add(word)
-        except KeyError:
-            res = int(self.data[word])
-        return res
+        if self.data.has_key(word):
+            return int(self.data[word])
+        else:
+            return self.add(word)
 
 
     def add(self, word):

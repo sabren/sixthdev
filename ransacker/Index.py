@@ -79,8 +79,9 @@ class Index:
 
         newWordIDs = []
         for word in ransacker.uniqueWords(text):
-            self.linkPageIDToWord(pageID, word)
-            newWordIDs.append(self.wordHash.get(word))
+            wordID = self.wordHash.get(word)
+            self.linkPageIDToWordID(pageID, wordID)
+            newWordIDs.append(wordID)
 
         pageData = [pageID] + newWordIDs
         self.rki["k:"+label] = ransacker.intListToStr(pageData)
@@ -112,8 +113,7 @@ class Index:
             self.rki[`wordID`]= ransacker.intListToStr(pageIDs)
 
 
-    def linkPageIDToWord(self, pageID, word):
-        wordID = self.wordHash.get(word)
+    def linkPageIDToWordID(self, pageID, wordID):
 
         pageIDs = []
         if self.rki.has_key(str(wordID)):
