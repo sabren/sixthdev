@@ -5,16 +5,11 @@ __ver__ = "$Id$"
 
 import weblib
 import string
+import traceback
+import sys
+import os
 
 class Engine(object):
-    """
-    Engine - a wrapper class that runs a script in a custom environment.
-
-    You should be able to run a weblib script as a regular cgi just by
-    putting a #!/python line up top, and making it executable.. But,
-    as an alternative, you can run it inside an Engine class. this is
-    especially useful for testing or for restricted execution, etc..
-    """
     
     parts=("request", "response")
 
@@ -31,7 +26,7 @@ class Engine(object):
     EXIT      = "* exit *"
       
 
-    def __init__(self, script=None, **kw):
+    def __init__(self, script=None, SITE_NAME=None, SITE_MAIL=None, **kw):
         """
         script can be a string with actual code or a file object.
         acceptable keyword arguments are 'request' and 'response',
@@ -39,7 +34,15 @@ class Engine(object):
         respectively.
         """
 
+        # set up internal namespaces..
+        self.globals = {
+            '__name__':'__main__',
+            'SITE_NAME': SITE_NAME,
+            'SITE_MAIL': SITE_MAIL,
+        }
+        self.locals  = self.globals
         self.script = script       
+        self._exitstuff = []
 
         # first make sure they haven't passed us any bogus
         # keywords..
@@ -60,11 +63,6 @@ class Engine(object):
                 # use new copy as default (eg, self.request=weblib.Request())
                 setattr(self, item, weblib.__dict__[string.capitalize(item)]())
 
-
-        # set up internal namespaces..
-        self.globals = {'__name__':'__main__'}
-        self.locals  = self.globals
-        self._exitstuff = []
 
 
     def injectParts(self):
@@ -151,20 +149,165 @@ class Engine(object):
             except SystemExit:
                 pass
         except:
-            self.result = self.EXCEPTION
-            import traceback, sys, string
+            self.result = self.EXCEPTION            
             self.error = string.join(traceback.format_exception(
                 sys.exc_type,
                 sys.exc_value,
                 sys.exc_traceback), '')
 
-    def run(self):
-        """
-        Run the engine! (calls start, execute, and stop)
-        """
+
+    def setDir(self, directory):
+        self.directory = directory
+        if not directory in sys.path:
+            sys.path.append(directory) # @TODO: Shouldn't chdir be enough?
+        os.chdir(directory)            # @TODO: this should be elsewhere.
+
+    def runDotWeblibPy(self):
+        path = self.directory + os.sep + ".weblib.py"
+        if os.path.exists(path):
+            # we use execute instead of run because we only want
+            # to run the setup once.
+            self.execute(open(path))
+
+
+    def getScriptName(self):
+        return os.environ["PATH_TRANSLATED"]
+
+    def runScript(self):
+        eng = self
+        # eng.result is None if nothing's been run yet
+        # it would be error or exception if dotWeblibPy had a problem
+        if (eng.result is None) or (eng.result == eng.SUCCESS):
+            if os.path.exists(self.getScriptName()):
+                eng.execute(open(self.getScriptName()))
+            else:
+                eng.stop()
+                print "Status: 404"
+                sys.exit()
+
+
+    def run(self): # @TODO: is this ever actually used?
         self.start()
         try:
             self.execute(self.script)
         finally:
             self.stop()
-            
+
+    def printResponse(self):
+        print self.response.getHeaders() + self.response.buffer
+
+
+    ## ERROR HANDLING @TODO: test cases for these!
+        
+    def sendError(eng):
+        assert self.SITE_MAIL, "must define SITE_MAIL first!"
+        hr = "-" * 50 + "\n"
+        msg = weblib.trim(
+            """
+            To: %s
+            From: weblib.cgi <%s>
+            Subject: uncaught exception in %s
+
+            """ % (self.SITE_MAIL, self.SITE_MAIL, self.SITE_NAME))
+        msg = msg + "uncaught exception in %s\n\n" % self.getScriptName()
+        msg = msg + hr
+        msg = msg + self.error
+        msg = msg + hr
+        msg = msg + "FORM: %s\n"  % self.request.form
+        msg = msg + "QUERYSTRING: %s\n" % self.request.querystring
+        msg = msg + "COOKIE: %s\n" % self.request.cookie
+        msg = msg + "SESSION DATA:\n"
+        for item in self.sess.keys():
+            msg = msg + item + ': '
+            try:
+                msg = msg + self.sess[item] + "\n"
+            except:
+                msg = msg + "(can't unpickle)\n"
+        msg = msg + hr
+        msg = msg + "OUTPUT:\n\n"
+        msg = msg + self.response.getHeaders() + "\n"
+        msg = msg + self.response.buffer + "\n"
+        msg = msg + hr
+
+        from weblib.handy import sendmail
+        sendmail(msg)
+
+    def printException(self):
+        print "<b>uncaught exception while running %s</b><br>" \
+              % self.getScriptName()
+        print '<pre class="traceback">' \
+              + weblib.htmlEncode(self.error) + "</pre>"
+        print "<b>script input:</b>"
+        print '<ul>'
+        print '<li>form: %s</li>' % self.request.form
+        print '<li>querystring: %s</li>' % self.request.querystring
+        print '<li>cookie: %s</li>' % self.request.cookie
+        print '</ul>'
+
+        if self.globals.has_key("SESS"):
+            print '<b>session data:</b><br>'
+            print '<ul>'
+
+            for item in self.globals["SESS"].keys():
+                print '<li>', item, ': '
+                try:
+                   print self.globals["SESS"][item]
+                except:
+                   print '(can\'t unpickle)'
+                print '</li>'
+            print '</ul>'
+
+        print "<b>script output:</b>"
+        print '<pre class="output">' + \
+              weblib.htmlEncode(self.response.getHeaders()) + \
+              weblib.htmlEncode(self.response.buffer) + \
+              "</pre>"
+
+    def errorPageHeader(self):
+        print "Content-Type: text/html"
+        print
+        print weblib.trim(
+            """
+            <html>
+            <head>
+            <title>weblib.cgi exception</title>
+            <style type="text/css">
+                body, p {
+                   background: #cccccc;
+                   font-family: verdana, arial;
+                   font-size: 75%;
+                }
+                pre { font-size: 120%; }
+                pre.traceback { color: red; }
+                pre.output{ color : green }
+            </style>
+            </head>
+            <body>
+            """)
+
+
+    def printFooter(self):
+        print "<hr>"
+        print '<a href="http://www.sixthdev.com/wiki.cgi/weblib/">weblib</a>'
+        print '(c) copyright 2000-2002 '
+        print '<a href="http://www.sabren.com/">Sabren Enterprises, Inc</a>. '
+        print 'All rights reserved.'
+        print "</body>"
+        print "</html>"
+
+    def printFullResponse(self):        
+        eng = self
+        SITE_MAIL=eng.locals["SITE_MAIL"]
+        SITE_NAME=eng.locals["SITE_NAME"]
+        if eng.result in (eng.SUCCESS, eng.REDIRECT, eng.EXIT):
+            eng.printResponse()
+        else:
+            eng.errorPageHeader()
+            if eng.result == eng.FAILURE:
+                print "<b>assertion failure:</b>", eng.error
+            elif eng.result == eng.EXCEPTION:
+                eng.printException()
+            eng.printFooter()
+            sys.stdout.flush()
+            if (SITE_MAIL):
+                self.sendError(eng, SITE_MAIL, SITE_NAME)
