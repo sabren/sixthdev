@@ -27,6 +27,26 @@ def trim(s):
     return string.join(lines, "\n")
 
 
+#### indent() for the opposite of trim ##########################
+
+def indent(s, depth=1, indenter="    "):
+    import string
+    lines = string.split(s, "\n")
+
+    # don't indent trailing newline
+    trailer = ""
+    if lines[-1] == "":
+        lines = lines[:-1]
+        # BUT.. add it back in later
+        trailer = "\n"
+        
+    for i in range(len(lines)):
+        lines[i] = (indenter * depth) + lines[i]
+        
+    return string.join(lines, "\n") + trailer
+   
+
+
 ### unique identifier generator, for sessions, etc #######
 
 def uid():
