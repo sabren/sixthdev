@@ -3,3 +3,5 @@
 <title>{?title?}</title>
 </head>
 <body bgcolor="#ccccff">
+* if error:
+    <h4>error: <span style="color:red">{:error:}</span></h4>
