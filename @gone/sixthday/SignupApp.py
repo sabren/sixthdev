@@ -5,7 +5,6 @@ __ver__="$Id$"
 
 import weblib
 import zebra
-import zdc
 from handy import sendmail
 from sixthday import App
 from sixthday import User

@@ -3,9 +3,8 @@ Generic class for hierarchical structures.
 """
 __ver__="$Id$"
 
-import zdc
 import sixthday
-from strongbox import Strongbox, attr, link, future
+from strongbox import Strongbox, attr, link, forward
 
 
 ##----------------------------------------------
@@ -15,11 +14,11 @@ from strongbox import Strongbox, attr, link, future
 ##----------------------------------------------
 
 class Node(Strongbox):
-
     ID = attr(long)
     name = attr(str)
     path = attr(str)
     note = attr(str)
+    parent = link(forward)
 
     def set_path(self, value):
         # only allow setting once
@@ -29,7 +28,6 @@ class Node(Strongbox):
     def get_crumbs(self):
         res = []
         node = self
-        raise "@TODO: can't use crumbs until 'parent' works"
         while node.parent:
             node = node.parent
             res.append( node )
@@ -54,3 +52,4 @@ class Node(Strongbox):
 ##             child = Node(self._ds, ID=kid["ID"])
 ##             child._updatePaths(parent=self)
 ##             child.save()  
+Node.__attrs__["parent"].type=Node
