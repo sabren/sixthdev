@@ -1,0 +1,43 @@
+*# show products in particular nodes.
+*# $Id$
+
+* exec:
+    from selectnode import selectnode # @TODO: fix this!
+
+*# a dropdown for selecting which product to show...
+*# @TODO: break this off into a separate file?
+<form action="index.py" METHOD="get">
+show products in...
+*# @TODO: UGH! clean this up!
+* exec:
+    # problem is with keyword (blank)
+    zres = zres + selectnode("nodeID", scope.get("nodeID"), blank=0)
+    
+<input type="hidden" name="action" value="lst_product">
+<input type="submit" value="go">
+
+
+*# by default, we show recent products..
+* if nodeID is None:
+    <b>recent products</b>
+    
+*# otherwise, show a link...
+* el:
+    &nbsp;
+    <a href="index.py?action=lst_product">[recent products]</a>
+    <br>&nbsp;<br>
+
+    * if nodeID == 0:
+        <b>products without a category</b>
+    * el:
+        <b>products in category [{:path:}]</b>
+
+*# link to add a product
+&nbsp;&nbsp;<a href="index.py?action=create&what=product">[add]</a><br>
+
+*# show the products:
+* for products:
+    <A HREF="index.py?action=show&what=product&ID={:ID:}">{:code:}</a>
+    &nbsp;{:name:} <br>
+
+</form>

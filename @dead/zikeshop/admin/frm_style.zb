@@ -1,0 +1,27 @@
+*# form for product styles
+*# $Id$
+
+* if ID:
+    <b>edit this style:</b>
+* el:
+    <b>add a new style:</b>
+
+<form action="index.py?what=style" method="POST">
+code: <input type="text" name="code" value="{:code:}"><br>
+name: <input type="text" name="name" value="{:name:}"><br>
+
+* if (productID) and not (parentID):
+    * exec:
+        #@TODO: clean up this scope issue:
+        parentID = scope.get("productID")
+<input type="hidden" name="parentID" value="{:parentID:}">
+
+* if ID:
+    <input type="hidden" name="ID" value="{:ID:}">
+
+<input type="hidden" name="_next_"
+       value="action=show&what=product&ID={:parentID:}">
+<input type="submit" name="action" value="delete">&nbsp;
+<input type="submit" name="action" value="save">
+</form>
+

@@ -1,0 +1,42 @@
+*# Sale Form for Zikeshop
+*# $Id$
+
+<h1>enter a new sale</h1>
+<form action="index.py?action=save&what=sale" method="post">
+<table border="1">
+<tr><th>code</th><th>product</th><th>price</th>
+<th>quantity</th></tr>
+
+* for products:
+    <tr>
+    <td valign="top">{:code:}</td>
+    <td valign="top">{:name:}</td>
+    <td valign="top">{:price:}</td>
+
+    * for styles:
+        * head:
+            <td align="right">
+        {:name:}: <input type="text" size="5" name="qty_{:ID:}"><br>
+        * foot:
+            </td>
+    * none:
+        <td align="right">
+        <input type="text" style="background: #ccffcc"
+               size="5" name="qty_{:ID:}">
+        </td>
+</tr>
+</table>
+
+*## shipping, adjustment, salestax ################
+shipping: <input type="text" size="5" name="shipping" value="0.00"><br>
+
+adjustment: <input type="text" size="5" name="adjustment" value="0.00">
+(eg: "-2.00"  takes $2 off price) <br>
+
+charge sales tax:
+<input type="checkbox" name="usetax" value="yes" checked><br>
+
+*## end the form ###################################
+<input type="submit" value="save">
+</form>
+

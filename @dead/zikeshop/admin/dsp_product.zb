@@ -1,0 +1,54 @@
+*# show product page for zikeshop
+*# $Id$
+
+<h3>view product</h3>
+<table border="0"><tr><td width="300">
+
+<b>code:</b>  {:code:}<br>
+<b>name:</b>  {:name:}<br>
+<b>price:</b> {:price:}<br>
+<b>retail:</b>{:retail:}<br>
+
+*# @TODO: allow for weight in kg or oz whatever..
+<b>weight:</b> {:weight:} lbs<br>
+<b>categories:</b><br>
+
+* for nodes:
+    <a href="index.py?action=lst_product&nodeID={:ID:}">{:path:}</a><br>
+* none:
+    Not in any categories.<br>
+
+<b>description:</b><br>{:descript:}<br>
+
+<b>picture:</b><br>
+* if pictureID:
+    <img src="picture.py?ID={:pictureID:}"><br>
+* el:
+    No picture<br>
+
+[<a href="index.py?action=edit&what=product&ID={:ID:}"
+    >edit this product</a>]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+[<a href="index.py?action=delete&what=product&ID={:ID:}"
+    >delete this product</a>]
+
+</td><td valign="top">
+
+
+
+<b>styles/inventory:</b><br>
+* for styles:
+    * head:
+        <table>
+    <tr>
+    <td><a href="index.py?action=edit&what=style&ID={:ID:}">{:name:}</a></td>
+    <td>{:inStock:}</td><td>{:onHold:}</td></tr>
+    * foot:
+        </table>
+* none:
+    {:inStock:} in stock, {:onHold:} on hold
+
+<br>
+[<a href="index.py?action=create&what=style&productID={:ID:}">add style</a>]
+</td></tr>
+</table>

@@ -1,0 +1,30 @@
+*# A form for adding/editing categories...
+*# $Id$ 
+* exec:
+    from selectnode import selectnode # @TODO: fix this!
+
+* if ID:
+    <b>edit this category:</b>
+* el:
+    <b>add a new category:</b>
+
+<form action="index.py" method="POST">
+
+* if ID:
+    <input type="hidden" name="ID" value="{:ID:}">
+
+name: <input type="text" name="name" value="{:name:}"><br>
+
+subcategory of: 
+{: selectnode("parentID", parentID, blank=0) :}
+(optional) <br>
+
+description:<br>
+<textarea cols="30" rows="5" name="descript">{:descript:}</textarea><br>
+<input name="what" value="category" type="hidden">
+<input name="action" value="save" type="submit">
+</form>
+
+* if ID:
+    <a href="index.py?action=delete&what=category&ID={:ID:}">
+    [delete this category]</a>

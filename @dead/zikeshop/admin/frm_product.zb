@@ -1,0 +1,59 @@
+*# zikeshop product administration form
+*# $Id$
+
+* if ID:
+    <b>edit this product:</b>
+* el:
+    <b>add a new product:</b>
+
+<table width="90%"><tr><td width="50%" style="background:silver">
+<form action="index.py?action=save&what=product"
+      method="POST" enctype="multipart/form-data">
+
+* if ID:
+    <input type="hidden" name="ID" value="{:ID:}">
+
+code: <input type="text" name="code" value="{:code:}"><br>
+name: <input type="text" name="name" value="{:name:}"><br>
+price: $<input type="text" name="price" size="7" value="{:price:}">
+retail: $<input type="text" name="retail" size="7" value="{:retail:}"><br>
+weight (lbs): <input type="text" name="weight"
+                     size="7" value="{:weight:}"><br>
+
+categories:<br>
+* exec:
+    #@TODO: fix dis!
+    from selectnode import selectnode
+    #@TODO: evil zebra bracket thing..
+    values = map(lambda node: node.get("ID"), scope.get("nodes"))
+    zres = zres + selectnode("nodeIDs", values, attrs="multiple")
+<br>
+
+description:<br>
+<textarea cols="30" rows="5" name="descript">{:descript:}</textarea><br>
+
+email you when inventory drops to:
+<input type="text" name="instock_warn" value="{:instock_warn:}" size="5"><br>
+<i>(leave blank if you don't want email)</i><br>
+
+
+<input type="checkbox" name="isHidden"
+* if isHidden:
+     CHECKED
+> hide this product<br>
+
+<br>upload a new picture:<br>
+<input name="picture" type="file"><br>
+
+<input value="save" type="submit">
+</form>
+
+
+* if pictureID:
+    <td valign="top">Image:<br>
+    <img src="picture.py?ID={:pictureID:}">
+* el:
+    <td valign="top">
+
+</td></tr></table>
+

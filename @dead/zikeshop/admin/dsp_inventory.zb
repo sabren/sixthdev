@@ -1,0 +1,13 @@
+*# zikeshop inventory screen
+*# $Id$
+
+* for products:
+    * head:
+        <table border="1">
+        <tr><td>product</td><td>on hold</td><td>instock</td></tr>
+    <tr><td>{:name:}</td><td>{:onHold:}</td><td>{:inStock:}</td></tr>
+    * foot:
+        </table>
+* none:
+    No products found.
+

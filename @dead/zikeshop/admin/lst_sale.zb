@@ -1,0 +1,95 @@
+*# list zikeshop sales
+*# $Id$
+
+<h2>Sales</h2>
+
+<form action="index.py?action=lst_sale" method="POST">
+<input type="hidden" name="is_search" value="1">
+<table border="0" cellspacing="0" cellpadding="2">
+  <tr><th align="left" colspan="2" style="color:white; background:#666">
+      Search
+      </th></tr>
+  <!-- date -->
+  <tr><td bgcolor="#eeeeee">dates (y/m/d)</td>
+      <td bgcolor="#eeeeee">
+      <input type="text" name="dmin" size="10" maxlength="10" 
+             value="{:dmin:}">
+      <input type="text" name="dmax" size="10" maxlength="10"',
+             value="{:dmax:}">
+  </td></tr>
+  <!-- name -->
+  <tr><td bgcolor="#eeeeee">customer name:</td>
+      <td bgcolor="#eeeeee">
+         <input type="text" name="name" value="{:name:}"></td></tr>
+
+*############### AFFILIATE STUFF @TODO: (later) #################
+*## <!-- affiliate -- >
+*##   <tr><td bgcolor="#eeeeee">affiliate:</td>
+*##       <td bgcolor="#eeeeee">
+*##          <select name="affiliateID">
+*##             <option value=""> </option>
+*##             <option value="0"
+*## '''
+*## if (affiliateID==0):
+*##     print " CHECKED"
+*## print '>[none]</option>'
+*#############PHP##########33333
+*##             <? $db = new ShopsiteID;
+*##                $db->query("select * from affiliate order by affiliate");
+*##                while ($db->next_record()) {:
+*##                  print '<option value="' . $db->f("ID") . '"';
+*##                  if ($db->f("ID") == $affiliateID) {: print ' SELECTED'; :}
+*##                  print '>' . $db->f("affiliate") . "</option>\n";
+*##                :}
+*##             ?>
+*##          </select>
+*##       </td></tr>
+*################################################################
+
+  <!-- search -->
+  <tr><td colspan="2" align="right">
+      <table border="0" width="100%" cellpading="2" cellspacing="0">
+      <tr><td><input type="checkbox" name="includeFilled"
+
+*# @TODO: fix this!
+* if (includeFilled):
+    CHECKED
+
+> include filled orders </td>
+          <td align="right">
+              <input type="submit" value="search"></td></tr>
+      </table></td></tr>
+</table>
+</form>
+
+<form action="index.py" method="get">
+<input type="hidden" name="action" value="show">
+<input type="hidden" name="what" value="sale">
+Jump to order #: <input type="text" name="ID" size="5">
+<input type="submit" value="submit">
+</form>
+
+
+* if not isSearch:
+    <h2>unfilled orders</h2>
+* el:
+    <h2>search results</h2>
+
+
+* for sales:
+    * head:
+        <table border="1">
+        <tr><th>ID</th>
+            <th>Date</th>
+            <th align="left">customer</th>
+            <th>subtotal</th>
+            <th>total</th></tr>
+    <tr><td><a href="index.py?action=show&what=sale&ID={:ID:}">{:ID:}</a></td>
+        <td>{:tsSold:}</td>
+        <td>{:lname:}, {:fname:}</td>
+        <td>{:subtotal:}</td>
+        <td>{:total:}</tr>
+    * foot:
+        </table>
+* none:
+    No sales found.
