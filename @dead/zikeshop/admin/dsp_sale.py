@@ -19,7 +19,7 @@ sale = zikeshop.Sale(ID=saleID)
 # @TODO: move comments off into the content table. (??)
 # @TODO: explicitly track partially filled orders.
 
-print '<a href="index.py?action=lst_sale">back to sales list</a>'
+print '<a href="index.py?action=list&what=sale">back to sales list</a>'
 print '<h2>Sale #%s</h2>' % int(sale.ID)
 
 if sale.customerID != 0:
