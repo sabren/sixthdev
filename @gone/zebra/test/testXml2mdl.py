@@ -1,5 +1,7 @@
 """
 test the xml2mdl routine
+
+$Id$
 """
 import unittest
 import zebra

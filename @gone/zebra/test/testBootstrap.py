@@ -35,8 +35,7 @@ class BootstrapTestCase(unittest.TestCase):
             {"a":"apple", "b":"banana", "c":"cherry"},
             {"a":"aardvark", "b":"bull weevil", "c":"catepillar"},
             {"a":"alice", "b":"betty", "c":"carol"},
-            ],
-            }
+            ]}
         
         zbx = zebra.trim(
             """
