@@ -194,6 +194,13 @@ class EngineTestCase(unittest.TestCase):
         eng.script = "print 'cat' + 5"
         eng.run()
 
-        assert eng.result == eng.ERROR, \
-               "engine.result doesn't return ERROR on error."
+        assert eng.result == eng.EXCEPTION, \
+               "engine.result doesn't return EXCEPTION on error."
 
+
+
+        eng.script = "assert 1==0, 'math is working.. :('"
+        eng.run()
+
+        assert eng.result == eng.FAILURE, \
+               "engine.result doesn't return FAILURE on assertion failure."

@@ -13,14 +13,16 @@
 
 import os, weblib
 
-
 eng = weblib.Engine()
 eng.script=open(os.environ["PATH_TRANSLATED"])
 eng.run()
 
+
 if eng.result == eng.SUCCESS:
+    ## print the results    
     print eng.response.getHeaders() + eng.response.buffer
 else:
+    ## print debug output
     print "Content-Type: text/html"
     print
     print weblib.trim("""
@@ -28,21 +30,29 @@ else:
           <head>
           <title>pyweb error</title>
           <style type="text/css">
-          body, p { background: #cccccc; font-family: verdana, arial; font-size: 75%; }
-          pre { font-size: 120%; }
-          pre.traceback { color: red; }
-          pre.output{ color : green }
+              body, p { background: #cccccc; font-family: verdana, arial; font-size: 75%; }
+              pre { font-size: 120%; }
+              pre.traceback { color: red; }
+              pre.output{ color : green }
           </style>
           </head>
           """)
-    print "<b>pyweb error while running %s</b><br>" % os.environ["PATH_TRANSLATED"]
-    print '<pre class="traceback">' + weblib.htmlEncode(eng.error) + "</pre>"
 
-    print "<b>script output:</b>"
-    print '<pre class="output">' + \
-          weblib.htmlEncode(eng.response.getHeaders()) + \
-          weblib.htmlEncode(eng.response.buffer) + \
-          "</pre>"
+    if eng.result == eng.FAILURE:
+        print "<b>assertion failure:</b>", eng.error
+
+    elif eng.result == eng.EXCEPTION:
+    
+        print "<b>pyweb error while running %s</b><br>" % os.environ["PATH_TRANSLATED"]
+        print '<pre class="traceback">' + weblib.htmlEncode(eng.error) + "</pre>"
+
+        print "<b>script output:</b>"
+        print '<pre class="output">' + \
+              weblib.htmlEncode(eng.response.getHeaders()) + \
+              weblib.htmlEncode(eng.response.buffer) + \
+              "</pre>"
+
+
     print "<hr>"
     print '<a href="http://weblib.sourceforge.net/">weblib</a> ' + \
           '(c) copyright 2000 <a href="http://www.zike.net/">Zike Interactive</a>. ' + \

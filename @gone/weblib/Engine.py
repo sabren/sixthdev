@@ -31,7 +31,7 @@ class Engine:
 
     SUCCESS  = "* success *"
     FAILURE  = "* failure *"
-    ERROR    = "* error *"
+    EXCEPTION = "* exception *"
       
 
     def __init__(self, script=None, pool=None, **kw):
@@ -145,8 +145,9 @@ class Engine:
                 pass # don't really quit on response.end()
             except AssertionError, e:
                 self.result = self.FAILURE
+                self.error = e
             except:
-                self.result = self.ERROR
+                self.result = self.EXCEPTION
                 import traceback, sys, string
                 self.error = string.join(traceback.format_exception(
                     sys.exc_type,
