@@ -16,6 +16,11 @@ class ProductTestCase(unittest.TestCase):
         self.cur.execute("delete from base_node")
         self.cur.execute("delete from shop_product")
         self.cur.execute("delete from shop_product_node")
+
+        self.cur.execute("insert into base_node (name) values ('cat1')")
+        self.cur.execute("insert into base_node (name) values ('cat2')")
+        self.cur.execute("insert into base_node (name) values ('cat3')")
+        self.cur.execute("insert into base_node (name) values ('cat4')")
         
         self.cur.execute("INSERT INTO shop_product (code, name) "
                          "VALUES ('some01', 'something')")
@@ -40,20 +45,21 @@ class ProductTestCase(unittest.TestCase):
 
     def check_categories(self):
         prod = zikeshop.Product()
-        assert prod.categories == [], \
+        assert len(prod.categories)==0, \
                "categories should be empty list by default"
 
-        node = zikebase.Node()
-        node.name="abc"
-        node.save()
-        node = zikebase.Node()
-        node.name="xyz"
-        node.save()
+        nodeA = zikebase.Node()
+        nodeA.name="abc"
+        nodeA.save()
+        
+        nodeB = zikebase.Node()
+        nodeB.name="xyz"
+        nodeB.save()
         
         prod = zikeshop.Product()
         prod.code = 'some03'
         prod.name = 'something else'
-        prod.nodeIDs = (1, 2)
+        prod.categories = (nodeA.ID, nodeB.ID)
         prod.save()
 
         cats = prod.categories
@@ -61,27 +67,30 @@ class ProductTestCase(unittest.TestCase):
                ".categories broke."
 
 
-    def check_nodeIDs(self):
+    def check_categories(self):
         prod = zikeshop.Product()
         prod.code = 'some02'
         prod.name = 'something else'
-        prod.nodeIDs = (1, 2, 3, 4)
+        prod.categories = (1, 2, 3, 4)
         prod.save()
 
         self.cur.execute("SELECT nodeID FROM shop_product_node "
                          "WHERE productID=2 "
                          "ORDER by nodeID ")
 
-        assert self.cur.fetchall() == [(1,),(2,),(3,),(4,)], \
-               "Product doesn't save nodeIDs properly"
+        actual = self.cur.fetchall()
+        assert actual == [(1,),(2,),(3,),(4,)], \
+               "Product doesn't save nodeIDs properly: %s" % str(actual)
 
-        assert prod.nodeIDs == (1, 2, 3, 4), \
-               "Product doesn't return nodeIDs properly"
+        #@TODO: do I really need this?
+        actual = prod.categories.IDs()
+        assert  actual == (1, 2, 3, 4), \
+               "Product.categories.IDs() screws up: %s " % str(actual)
 
         
         ## make sure it still works after an update:
 
-        prod.nodeIDs = (1, 2)
+        prod.categories = (1, 2)
         prod.save()
         
         self.cur.execute("SELECT nodeID FROM shop_product_node "
@@ -91,19 +100,19 @@ class ProductTestCase(unittest.TestCase):
         assert self.cur.fetchall() == [(1,),(2,)], \
                "Product doesn't update nodeIDs properly"
 
-        assert prod.nodeIDs == (1, 2), \
+        assert prod.categories.IDs() == (1, 2), \
                "Product doesn't return nodeIDs properly after an update"
 
 
 
     def check_single_nodeID(self):
         prod = zikeshop.Product()
-        prod.nodeIDs = 1
+        prod.categories = 1
         prod.code =""
         try:
             prod.save()
         finally:
-            assert prod.nodeIDs == (1,), \
+            assert prod.categories.IDs() == (1,), \
                    "product doesn't cope with single nodeID"
 
 
