@@ -84,6 +84,7 @@ else:
 
 ## @TODO: abstract this into a "view" class
 print '<table border="1"><tr>'
+print '<td>code</td>'
 print '<td>item</td>'
 print '<td>quantity</td>'
 print '<td>price</td>'
@@ -93,7 +94,8 @@ print '</tr>'
 
 for det in sale.details:
     print '<tr>'
-    print '<td>%s</td>' % det.product.name
+    print '<td>%s</td>' % det.product.code
+    print '<td>%s</td>' % det.product.label
     print '<td>%s</td>' % det.quantity
     print '<td>%s</td>' % det.product.price # @TODO: olap for prices?
     print '<td>%s</td>' % det.subtotal
