@@ -87,7 +87,7 @@ class ApplicationTest(unittest.TestCase):
                "PlanApp should have render_list_user method"
         
         class TestPlanApplication(PlanApplication):
-            def render_list_task(self, model):
+            def render_list_user(self, model):
                 template = zebra.old_parse(handy.trim(
                     """
                     * for each:

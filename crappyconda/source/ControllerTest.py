@@ -11,6 +11,11 @@ class ControllerTest(unittest.TestCase):
 		self.clerk = MockClerk()
 		self.clerk.store(Goal(name="Test Goal 1"))
 		self.clerk.store(Goal(name="Test Goal 2"))
+		self.clerk.store(Task(name="Test Task 1"))
+		self.clerk.store(Task(name="Test Task 2"))
+		self.clerk.store(User(name="Durran"))
+		self.clerk.store(User(name="Michal"))
+		self.clerk.store(Plan())
 		self.controller = Controller(self.clerk)
 		
 	# Test the listing of goals

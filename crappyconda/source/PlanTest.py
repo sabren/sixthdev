@@ -3,7 +3,7 @@ import unittest
 
 from Planaconda import Plan
 
-class UserTest(unittest.TestCase):
+class PlanTest(unittest.TestCase):
 
 	def setUp(self):
 		self.user = Plan(ID=1000, tasks="Tasks")
