@@ -3,5 +3,8 @@
 ## import sys
 ## sys.stderr = sys.stdout
 
+import zikebase, zdc, sqlTest
+zikebase.dbc.open(zdc.drivers.DBAPI2Driver.DBAPI2Driver(sqlTest.dbc))
+
 import zikeshop
-zikeshop.tpldir = "w:/zikeshop/public"
+zikeshop.tpldir = "/usr/home/sabren/work/zikeshop/public/"

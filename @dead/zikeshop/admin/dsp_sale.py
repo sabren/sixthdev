@@ -40,8 +40,9 @@ if sale.billAddress:
     %(fname)s %(lname)s""" % rec
 
     ## hide empty address lines
+    import weblib
     for line in range(3):
-        if string.strip(rec["address%i" % (line+1)]) != "":
+        if string.strip(weblib.deNone(rec.get("address%i" % (line+1),""))) != "":
             print rec["address%i" % (line+1)]
 
     print """%(city)s, %(stateCD)s, %(postal)s
@@ -58,7 +59,7 @@ if sale.billAddress:
 
     ## hide empty address lines
     for line in range(3):
-        if string.strip(rec["address%i" % (line+1)]) != "":
+        if string.strip(weblib.deNone(rec.get("address%i" % (line+1),""))) != "":
             print rec["address%i" % (line+1)]
 
     print """%(city)s, %(stateCD)s, %(postal)s
@@ -74,7 +75,7 @@ if sale.billAddress:
     <pre><b>Credit Card:</b>
     name on card: %(name)s
     number: %(number)s
-    expiration: %(expMonth)02i/%(expYear)04i</pre>
+    expiration: %(expMonth)s/%(expYear)s</pre>
     """ % sale.card._record
 
 else:
