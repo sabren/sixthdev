@@ -94,6 +94,18 @@ class Response:
 
     def redirect(self, url):
         # http://ppewww.ph.gla.ac.uk/~flavell/www/post-redirect.html
+        # except it doesn't work with IIS, so:
+        import string, weblib
+        server = self.engine.request.environ.get('SERVER_SOFTWARE', '')
+        if string.find(server, 'Microsoft')<>-1:
+            self.clear()
+            self.write(weblib.trim(
+                '''
+                <SCRIPT language="Javascript">
+                document.location='%s';
+                </SCRIPT>
+                ''' % url))
+            self.end()
         self.addHeader("Status", "303")
         self.addHeader("Location", url)
         self.end()
