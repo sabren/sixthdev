@@ -1,5 +1,7 @@
+import zikebase
+from zikebase.config import dbc
+
 #@TODO: lazy module loading..
-from config import dbc
 from Product import Product
 from Cart import Cart
 from Style import Style
