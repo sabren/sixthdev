@@ -46,18 +46,14 @@ class Z2X:
             ## but space in there a little later..
             line = lines[x][left:]
 
-            ## compress blank lines
-            if string.strip(line)=="":
-               res = res + "<nl/>\n"
-
             ## comments are single lines starting with * #
-            elif string.lstrip(string.lstrip(line[1:]))[0:1] == "#":
+            if string.lstrip(string.lstrip(line[1:])).startswith("#"):
                 # this little mess just strips off the * and #
                 res = res + "<rem>%s</rem>\n" \
                       % xmlEncode(string.lstrip(line[1:])[2:])
 
             ## zebra commands begin with *
-            elif string.lstrip(line)[0] == "*":
+            elif string.lstrip(line).startswith("*"):
                 line = string.strip(line)
 
                 ## .. and end with : or ;
@@ -123,13 +119,14 @@ class Z2X:
                 
             ## just a normal line..
             else:
-                
-               if (line.endswith(chr(92))):
+               if tag == "exec":
+                    end = "\n"
+               elif (line.endswith(chr(92))):
                     line = line[:-1]
-                    res = res + deCurl(xmlEncode(line)) 
+                    end = "" 
                else:  
-                    res = res + deCurl(xmlEncode(line)) + "<nl/>\n"
-
+                    end = "<nl/>\n"
+               res = res + deCurl(xmlEncode(line)) + end
             ## move on to the next line and continue with the while() loop:
             x = x + 1
 

@@ -11,6 +11,7 @@ from Bootstrap import Bootstrap
 
 ###[ Utility Functions ]#######################################
 
+
 def compile(template):
     ifp = open(template + ".zb", "r")
     data = Z2X().translate(ifp.read())

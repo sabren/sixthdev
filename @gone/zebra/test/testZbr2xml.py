@@ -107,6 +107,8 @@ class Zbr2xmlTestCase(unittest.TestCase):
                 xml = '<xml>woohoo!</xml>'
                 dict = {}
                 dict['a'] = 'b'
+
+                hope(there_was_no_nl_tag_there)
             """)
 
         goal = zebra.trim(
@@ -114,10 +116,12 @@ class Zbr2xmlTestCase(unittest.TestCase):
             <?xml version="1.0"?>
             <zebra>
             <exec>
-            name = 'fred'<nl/>
-            xml = '&lt;xml&gt;woohoo!&lt;/xml&gt;'<nl/>
-            dict = {}<nl/>
-            dict['a'] = 'b'<nl/>
+            name = 'fred'
+            xml = '&lt;xml&gt;woohoo!&lt;/xml&gt;'
+            dict = {}
+            dict['a'] = 'b'
+
+            hope(there_was_no_nl_tag_there)
             </exec>
             </zebra>
             """)
@@ -287,6 +291,8 @@ class Zbr2xmlTestCase(unittest.TestCase):
 
             this test is good \\
             if there is no break here
+            i want a newline after this<tag/>
+            the end
             """)
 
         goal = zebra.trim(
@@ -296,6 +302,8 @@ class Zbr2xmlTestCase(unittest.TestCase):
             hello, world!<nl/>
             <nl/>
             this test is good if there is no break here<nl/>
+            i want a newline after this&lt;tag/&gt;<nl/>
+            the end<nl/>
             </zebra>
             """)
 
