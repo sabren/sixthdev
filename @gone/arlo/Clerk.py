@@ -1,6 +1,8 @@
 from arlo import LinkInjector, LinkSetInjector
 from pytypes import IdxDict
 from strongbox import *
+from storage import where
+import operator
 
 class ClerkError(Exception): pass
 
@@ -67,7 +69,6 @@ class Clerk(object):
         self._make_memo(obj)
         return obj
 
-
     def classToTable(self, klass):
         return self._unmap_class(klass)
 
@@ -84,7 +85,7 @@ class Clerk(object):
 
     def match(self, klass, *args, **kwargs):
         return [self.rowToInstance(row, klass)
-                for row in self.storage.match(self._unmap_class(klass), *args, **kwargs)]
+                for row in self.storage.match(self.classToTable(klass), *args, **kwargs)]
    
     def fetch(self, klass, __ID__=None, **kw):
         if __ID__:
