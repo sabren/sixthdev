@@ -2,6 +2,7 @@ from FixedPoint import *
 from DateTime import *
 from Date import *
 from IdxDict import *
+from EmailAddress import EmailAddress
 
 def toDate(thing):
     """
