@@ -1,4 +1,4 @@
-* import tpl_head:
+* import tpl_sslhead:
 <h1>Billing Address</h1>
 
 * for addressbook:
@@ -6,11 +6,11 @@
         <form action="checkout.py" method="POST">
         <h3>Select an address to bill to...</h3>
         <select name="billAddressID">
-    <option value="{ID}">{fname} {lname}/{address1}/{city}
+    <option value="{ID}">{fname}&nbsp;{lname}/{address1}/{city}
     * foot:
         </select>
         <input type="hidden" name="action" value="update">
-        <input type="submit" value="submit">
+        &nbsp;<input type="submit" value="submit">
         </form>
 
         <h3>... or enter a new address below:</h3>
@@ -18,22 +18,12 @@
     <h3>enter a <b>billing</b> address below:</h3>
 
 <form action="newaddress.py" method="post">
-<b>name:</b>
-first: <input type="text" name="fname" value="">
-last: <input type="text" name="lname" value=""><br>
-address 1: <input type="text" name="address1" value=""><br>
-address 2: <input type="text" name="address2" value=""><br>
-address 3: <input type="text" name="address3" value=""><br>
-city: <input type="text" name="city" value=""><br>
-state: <input type="text" size="2" name="stateCD" value=""><br>
-zip/postal code: <input type="text" name="postal" value="">
-country: <input type="text" name="countryCD" value=""><br>
-phone: <input type="text" name="phone" value=""><br>
+<table border="0">
+* import tpl_address:
+</table>
 <input type="hidden" name="isPrimary" value="0">
 <input type="hidden" name="context" value="checkout">
 <input type="hidden" name="whichone" value="bill">
-<input type="submit" name="action" value="save">
 </form>
-    
-* import tpl_foot:
+* import tpl_sslfoot:
 

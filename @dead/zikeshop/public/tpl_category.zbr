@@ -1,32 +1,38 @@
 * import tpl_head:
 * if name:
-    <h1><a href="{basehref}/category">top</a> :
+    <font face="verdana" size="2"><a href="{basehref}/category">top</a> :
     * for crumbs:
         <a href="{basehref}/category/{path}">{name}</a> :
-    {name}</h1>
+    {name}</font><br><br>
 
     * for children:
         * head:
-            <h2>subcategories</h2>
-        <a href="{basehref}/category/{path}">{name}</a><br>
+            <font font="verdana" size="3">subcategories</font><br>
+        <a href="{basehref}/category/{encpath}">{name}</a><br>
 
     * for products:
         * head:
-            <h2>Products in this Category:</h2>
-        <a href="{basehref}/product/{code}">{name}</a><br>
+            <font face="verdana" size="3">Products in this Category:</font><br>
+        <table width="88%" border="1" bordercolor="#800000" cellpadding="0" cellspacing="0" bgcolor="#000000" align="center">
+        <tr><td align="right" width="50%"><img src="{basehref}/picture.py?ID={pictureID}&size=100"></td>
+        <td width="50%"><a href="{basehref}/product/{code}">{name} - ${price}</a><br></td></tr>
+        </table>
     * none:
-        (No products in this category.)
-
+        (No products in this category)
 
 * el:
-    <h1>top</h1>
+    <font font="verdana" size="2">top</font><br><br>
     * for children:
         * head:
-            <h2>Categories</h2>
+            <font font="verdana" size="3">Categories</font><br>
         
-        <a href="{basehref}/category/{path}">{name}</A><br>
+        <a href="{basehref}/category/{encpath}">{name}</A><br>
 
 <hr>
 <a href="{basehref}/cart.py">view cart</a>
 * import tpl_foot:
+
+
+
+
 

@@ -12,11 +12,11 @@ class Report:
         import tpl_head
         zres = zres+ tpl_head.fetch(scope)
         zres = zres + '<'
-        zres = zres + 'h1'
+        zres = zres + 'h2'
         zres = zres + '>'
         zres = zres + 'Your Shopping Cart'
         zres = zres + '<'
-        zres = zres + '/h1'
+        zres = zres + '/h2'
         zres = zres + '>'
         _ = 0
         _max_ = len(self.model["contents"])
@@ -111,6 +111,9 @@ class Report:
         zres = zres + 'continue shopping'
         zres = zres + '<'
         zres = zres + '/a'
+        zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + '/font'
         zres = zres + '>'
         import tpl_foot
         zres = zres+ tpl_foot.fetch(scope)

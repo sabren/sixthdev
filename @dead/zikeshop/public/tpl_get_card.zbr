@@ -1,9 +1,9 @@
-* import tpl_head:
-<h1>Credit Card</h1>
+* import tpl_sslhead:
 
 * if error:
-    <h2><font color="red">{error}</font></h2>
+    <h2><font color="gold">{error}</font></h2>
 
+<h1>Credit Card</h1>
 
 * for creditcards:
     * head:
@@ -23,11 +23,13 @@
     <h3>enter your credit card info below:</h3>
 
 <form action="checkout.py" method="post">
-<b>name on card:</b>
-<input type="text" name="name" value=""><br>
-card number: <input type="text" name="number"><br>
-
-expiration month:
+<table border="0">
+<tr>
+<td><b>name on card:</b></td>
+<td><input type="text" name="name" value=""></td></tr>
+<tr><td>card number</td><td><input type="text" name="number"></td></tr>
+<tr><td>expiration date</td>
+<td>
 <select name="expMonth">
     <option>01</option>
     <option>02</option>
@@ -43,7 +45,7 @@ expiration month:
     <option>12</option>
 </select>
 
-year:
+/
 <select name="expYear">
     <option>2000</option>
     <option>2001</option>
@@ -54,6 +56,8 @@ year:
     <option>2006</option>
     <option>2007</option>
 </select>
+</td></tr>
+</table>
 
 <br>
 <input type="hidden" name="context" value="checkout">
@@ -61,7 +65,24 @@ year:
 <input type="submit" value="submit">
 </form>
 
-* import tpl_foot:
+<h2>Your Order</h2>
+<table border="1">
+* for products:
+     <tr><td>{label}
+     * if quantity > 1:
+         <b>(* {quantity})</b>
+     </td><td align="right">${subtotal}</td></tr>
+<tr><td bgcolor="#666666">SalesTax</td><td align="right">${salestax}</td></tr>
+<tr><td bgcolor="#666666">Shipping</td><td align="right">${shipping}</td></tr>
+* if adjustment:
+    <tr><td bgcolor="#666666">Adjustment</td><td align="right">{adjustment}</td></tr>
+<tr><td bgcolor="#000000">Total</td><td align="right">${total}</td></tr>
+</table>
+
+* import tpl_sslfoot:
+
+
+
 
 
 

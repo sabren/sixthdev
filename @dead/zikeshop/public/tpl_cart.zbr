@@ -1,5 +1,5 @@
 * import tpl_head:
-<h1>Your Shopping Cart</h1>
+<h2>Your Shopping Cart</h2>
 
 * for contents:
     * head:
@@ -24,6 +24,7 @@
 
 <hr>
 <a href="{basehref}/category/">continue shopping</a>
+</font>
 * import tpl_foot:
 
 

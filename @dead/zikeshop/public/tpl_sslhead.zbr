@@ -1,9 +1,19 @@
 <html>
 <head>
 <title>aggressivemall.com: {title}</title>
+<style type="text/css">
+<!--
+body, td, p \{
+    font-family: verdana, arial, helvetica;
+    font-size: 11pt;
+\}
+-->
+</style>
 </head>
 
 <body bgcolor="#383438" text="#FFFFFF" link="#FFFF00" vlink="#FFFF00" alink="#FFFF00">
+<table width="500" align="center" cellpadding="1"><tr><td bgcolor="black">
+<table width="500" align="center" cellpadding="5"><tr><td bgcolor="993333">
 <font face="verdana" size="2">
 
 

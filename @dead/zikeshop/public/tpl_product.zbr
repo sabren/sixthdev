@@ -1,25 +1,31 @@
 * import tpl_head:
 <h1>{name}</h1>
+<h4><font color="yellow">${price}</font></h4>
 
 * if pictureID:
     <img src="{basehref}/picture.py?ID={pictureID}">
 
 <p>{descript}</p>
-
 * for styles:
-    * if not style:
-        <A HREF="{basehref}/cart.py?action=add&styleID={ID}">add to cart</a>
+    * if instock:
+        * if not style:
+            <A HREF="{basehref}/cart.py?action=add&styleID={ID}">add to cart</a>
+        * el:
+            style: {style}
+            &nbsp;<a href="{basehref}/cart.py?action=add&styleID={ID}">
+            add to cart</a><br>
     * el:
-        style: {style}
-        &nbsp;<a href="{basehref}/cart.py?action=add&styleID={ID}">
-        add to cart</a><br>
+        * if not style:
+            (this product is not in stock)<br>
+        * el:
+            style: {style} (this style is not in stock)<br>
 
 * for nodes:
     * head:
-        <h2>this product is in these categories:</h2>
-    <a href="{basehref}/category/{path}">{path}</a><br>
+        <font face="verdana" size="3">this product is in these categories:</font><br>
+    <a href="{basehref}/category/{encpath}">{path}</a><br>
 * none:
-    <h2>this product is not categorized.</h2>
+    <font face="verdana" size="2">this product is not categorized.</font><br>
 
 * import tpl_foot:
 

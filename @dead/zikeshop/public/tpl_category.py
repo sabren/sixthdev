@@ -13,7 +13,7 @@ class Report:
         zres = zres+ tpl_head.fetch(scope)
         if scope.get('name',''):
             zres = zres + '<'
-            zres = zres + 'h1'
+            zres = zres + 'font face=\"verdana\" size=\"2\"'
             zres = zres + '>'
             zres = zres + '<'
             zres = zres + 'a href=\"'
@@ -24,7 +24,7 @@ class Report:
             zres = zres + '<'
             zres = zres + '/a'
             zres = zres + '>'
-            zres = zres + ' :'
+            zres = zres + ' :'
             _ = 0
             _max_ = len(self.model["crumbs"])
             scope_stack.append(scope)
@@ -44,12 +44,18 @@ class Report:
                 zres = zres + '<'
                 zres = zres + '/a'
                 zres = zres + '>'
-                zres = zres + ' :'
+                zres = zres + ' :'
             scope = scope_stack.pop()
             del _
             zres = zres + str(scope.get('name',''))
             zres = zres + '<'
-            zres = zres + '/h1'
+            zres = zres + '/font'
+            zres = zres + '>'
+            zres = zres + '<'
+            zres = zres + 'br'
+            zres = zres + '>'
+            zres = zres + '<'
+            zres = zres + 'br'
             zres = zres + '>'
             _ = 0
             _max_ = len(self.model["children"])
@@ -61,17 +67,20 @@ class Report:
                 scope["_"] = _
                 if _ == 0:
                     zres = zres + '<'
-                    zres = zres + 'h2'
+                    zres = zres + 'font font=\"verdana\" size=\"3\"'
                     zres = zres + '>'
                     zres = zres + 'subcategories'
                     zres = zres + '<'
-                    zres = zres + '/h2'
+                    zres = zres + '/font'
+                    zres = zres + '>'
+                    zres = zres + '<'
+                    zres = zres + 'br'
                     zres = zres + '>'
                 zres = zres + '<'
                 zres = zres + 'a href=\"'
                 zres = zres + str(scope.get('basehref',''))
                 zres = zres + '/category/'
-                zres = zres + str(scope.get('path',''))
+                zres = zres + str(scope.get('encpath',''))
                 zres = zres + '\"'
                 zres = zres + '>'
                 zres = zres + str(scope.get('name',''))
@@ -93,12 +102,38 @@ class Report:
                 scope["_"] = _
                 if _ == 0:
                     zres = zres + '<'
-                    zres = zres + 'h2'
+                    zres = zres + 'font face=\"verdana\" size=\"3\"'
                     zres = zres + '>'
                     zres = zres + 'Products in this Category:'
                     zres = zres + '<'
-                    zres = zres + '/h2'
+                    zres = zres + '/font'
                     zres = zres + '>'
+                    zres = zres + '<'
+                    zres = zres + 'br'
+                    zres = zres + '>'
+                zres = zres + '<'
+                zres = zres + 'table width=\"88%\" border=\"1\" bordercolor=\"#800000\" cellpadding=\"0\" cellspacing=\"0\" bgcolor=\"#000000\" align=\"center\"'
+                zres = zres + '>'
+                zres = zres + '<'
+                zres = zres + 'tr'
+                zres = zres + '>'
+                zres = zres + '<'
+                zres = zres + 'td align=\"right\" width=\"50%\"'
+                zres = zres + '>'
+                zres = zres + '<'
+                zres = zres + 'img src=\"'
+                zres = zres + str(scope.get('basehref',''))
+                zres = zres + '/picture.py?ID='
+                zres = zres + str(scope.get('pictureID',''))
+                zres = zres + '&'
+                zres = zres + 'size=100\"'
+                zres = zres + '>'
+                zres = zres + '<'
+                zres = zres + '/td'
+                zres = zres + '>'
+                zres = zres + '<'
+                zres = zres + 'td width=\"50%\"'
+                zres = zres + '>'
                 zres = zres + '<'
                 zres = zres + 'a href=\"'
                 zres = zres + str(scope.get('basehref',''))
@@ -107,23 +142,40 @@ class Report:
                 zres = zres + '\"'
                 zres = zres + '>'
                 zres = zres + str(scope.get('name',''))
+                zres = zres + ' - $'
+                zres = zres + str(scope.get('price',''))
                 zres = zres + '<'
                 zres = zres + '/a'
                 zres = zres + '>'
                 zres = zres + '<'
                 zres = zres + 'br'
                 zres = zres + '>'
+                zres = zres + '<'
+                zres = zres + '/td'
+                zres = zres + '>'
+                zres = zres + '<'
+                zres = zres + '/tr'
+                zres = zres + '>'
+                zres = zres + '<'
+                zres = zres + '/table'
+                zres = zres + '>'
             scope = scope_stack.pop()
             del _
             if not _max_:
-                zres = zres + '(No products in this category.)\n\n'
+                zres = zres + '(No products in this category)\n'
         else:
             zres = zres + '<'
-            zres = zres + 'h1'
+            zres = zres + 'font font=\"verdana\" size=\"2\"'
             zres = zres + '>'
             zres = zres + 'top'
             zres = zres + '<'
-            zres = zres + '/h1'
+            zres = zres + '/font'
+            zres = zres + '>'
+            zres = zres + '<'
+            zres = zres + 'br'
+            zres = zres + '>'
+            zres = zres + '<'
+            zres = zres + 'br'
             zres = zres + '>'
             _ = 0
             _max_ = len(self.model["children"])
@@ -135,17 +187,20 @@ class Report:
                 scope["_"] = _
                 if _ == 0:
                     zres = zres + '<'
-                    zres = zres + 'h2'
+                    zres = zres + 'font font=\"verdana\" size=\"3\"'
                     zres = zres + '>'
                     zres = zres + 'Categories'
                     zres = zres + '<'
-                    zres = zres + '/h2'
+                    zres = zres + '/font'
+                    zres = zres + '>'
+                    zres = zres + '<'
+                    zres = zres + 'br'
                     zres = zres + '>'
                 zres = zres + '<'
                 zres = zres + 'a href=\"'
                 zres = zres + str(scope.get('basehref',''))
                 zres = zres + '/category/'
-                zres = zres + str(scope.get('path',''))
+                zres = zres + str(scope.get('encpath',''))
                 zres = zres + '\"'
                 zres = zres + '>'
                 zres = zres + str(scope.get('name',''))
