@@ -113,7 +113,11 @@ class Stealthbox(object):
     def __setattr__(self, name, value):
         # accessors
         if hasattr(self.__class__, name):
-            getattr(self.__class__, name).__set__(self, value)
+            try:
+                getattr(self.__class__, name).__set__(self, value)
+            except AttributeError, e:
+                raise AttributeError("couldn't set %s to %s: %s"
+                                     % (name, value, e))
         # attributes
         elif self.__values__.has_key(name):
             self.__values__[name] = self.__attrs__[name].sanitize(value)
