@@ -15,7 +15,7 @@ class UserApp(weblib.Actor):
         self.do("signup")
 
     def enter(self):
-        self.model["errors"] = []
+        self.errors = []
 
     ## signup process ##################################
     ## signup --> save
@@ -32,9 +32,9 @@ class UserApp(weblib.Actor):
         except ValueError, err:
             #@TODO: clean up the type mess on ValueError
             if type(err)==type([]):
-                self.errors = self.errors + err[0]
+                self.complain(err[0])
             else:
-                self.errors.append(err.args[0])
+                self.complain(err.args[0])
         if self.errors:
             # complain:
             self.consult(zdc.ObjectView(ed.object))
