@@ -13,6 +13,7 @@ from Customer import Customer
 from CustomerAuth import CustomerAuth
 from Detail import Detail
 from Sale import Sale
+from SaleEditor import SaleEditor
 from Store import Store
 from Card import Card
 from State import State
