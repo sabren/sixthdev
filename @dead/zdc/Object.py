@@ -35,13 +35,15 @@ class Object:
 
 
 
+    ### Abstract Protected Methods ##########################
+
     def _new(self):
-        pass
+        raise NotImplementedError
 
 
 
     def _fetch(self, key=None, **kw):
-        pass
+        raise NotImplementedError
 
 
 
@@ -49,9 +51,17 @@ class Object:
         self._isLocked = 1
 
 
+    ### Abstract Public Methods ############################
 
     def save(self):
-        pass
+        raise NotImplementedError
+
+
+    def delete(self):
+        raise NotImplementedError
+
+
+    ### private Methods ####################################
 
 
     def get__isLocked(self):
