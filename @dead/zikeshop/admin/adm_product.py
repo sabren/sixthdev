@@ -6,6 +6,7 @@ $Id$
 
 import zikeshop
 import weblib
+import zdc
 import sys
 
 
@@ -58,6 +59,13 @@ class ObjectEditor:
             pass # do nothing - no action given
 
 
+    def tuplize(self, input):
+        if type(input) != type(()):
+            return (input)
+        else:
+            return input
+
+
     ## actions ###########################################
 
     def act_delete(self):
@@ -69,10 +77,14 @@ class ObjectEditor:
         for field in self.object.getEditableAttrs():
             if self.input.has_key(field):
                 setattr(self.object, field, self.input[field])
+        for field in self.object.getEditableTuples():
+            print "<h2>DOING %s</h2>" % field
+            if self.input.has_key(field):
+                setattr(self.object, field, self.tuplize(self.input[field]))
         self.object.save()
 
 
-
+        
 
 def showForm(prod):
     if prod.ID:
@@ -93,7 +105,11 @@ def showForm(prod):
 
     print 'categories:<br>'
     cur = zikeshop.dbc.cursor()
-    sql = "SELECT ID, path, 0 from base_node order by path"
+    if prod.nodeIDs:
+        sql = "SELECT ID, path, ID in %s FROM base_node order by path" \
+              % zdc.sqlSet(prod.nodeIDs)
+    else:
+        sql = "SELECT ID, path, 0 from base_node order by path"
     cur.execute(sql)
     print weblib.selectBox("nodeIDs", cur.fetchall(), extra="MULTIPLE")
     print '<br>'
