@@ -17,6 +17,7 @@
 * el:
     <b>add a new channel:</b>
 
+{:html.hidden("parentID", parentID):}
 
 <table border="1">
 
