@@ -117,7 +117,7 @@ class CheckoutApp(zikeshop.PublicApp):
 
     def act_get_card(self):
         import zebra, zdc
-        self.consult(zdc.ObjectView(self.cust.user))
+        self.consult(zdc.ObjectView(self.cust))
         zebra.show("frm_card", self.model)
 
 
@@ -141,7 +141,6 @@ class CheckoutApp(zikeshop.PublicApp):
             det = sale.details.new()
             det.productID = item["extra"]["ID"]
             det.quantity = item["quantity"]
-            det.subtotal = item["quantity"] * item["price"]
             sale.details << det
 
         sale.salestax = shop.calcSalesTax(sale.shipAddress, sale.subtotal)
