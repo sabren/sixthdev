@@ -1,5 +1,4 @@
 import weblib, zebra
-
 import zikebase
 zikebase.load("AdminApp")
 
@@ -11,6 +10,12 @@ class ZikeShopAdminApp(zikebase.AdminApp):
 
     def act_(self):
         self.list_category()
+
+    def enter(self):
+        zebra.show("dsp_head")
+
+    def exit(self):
+        zebra.show("dsp_foot")
         
     ## category stuff ##################################
         
@@ -30,6 +35,13 @@ class ZikeShopAdminApp(zikebase.AdminApp):
         self.consult("mdl_category")
         zebra.show("lst_product", self.model)
 
+    ## style stuff ######################################
+    def save_style(self):
+        self.generic_save("style")
+        self.next = ("show", {"what":"product",
+                              "ID":self.input.get('parentID')})
+        
+
     ## sale stuff ######################################
 
     def show_sale(self):
@@ -42,10 +54,14 @@ class ZikeShopAdminApp(zikebase.AdminApp):
         self.consult("mdl_product")
         zebra.show("frm_sale", self.model)
 
+    def save_sale(self):
+        sed = zikeshop.SaleEditor(zikeshop.Sale)
+        sed.act("save")
+
     def list_sale(self):
         self.model = self.input
         self.consult("mdl_sale")
-        self.model["includeFilled"]=0
+        self.model["includeFilled"]=self.input.get("includeFilled",0)
         self.model["isSearch"]=0
         zebra.show("lst_sale", self.model)
 
@@ -57,7 +73,6 @@ class ZikeShopAdminApp(zikebase.AdminApp):
 
 
     ######### THIS SHOULD BE IN A SUPERCLASS ############
-
 
     def map_what(self, what):
         """
@@ -75,7 +90,6 @@ class ZikeShopAdminApp(zikebase.AdminApp):
         elif what=="style":
             res = zikeshop.Style
         return res
-
 
 
 if __name__=="__main__":
