@@ -172,10 +172,9 @@ def urlDecode(what):
 # module. This means the module basically disappears, and all the user
 # sees is that weblib has a bunch of classes defined.
 
-from Actor import Actor
 from Engine import Engine
 from Request import Request
 from Response import Response
 from Sess import Sess
-from Auth import Auth
+
 
