@@ -1,58 +1,30 @@
 """
 zdc.Table - a module representing a single table in a database.
-
-$Id$
 """
+__ver__="$Id$"
+
 import zdc
-
-
 #@TODO: handle keys, defaults, autonumbers, etc..
 
-
-class Table:
+class Table(zdc.Object):
+    __super = zdc.Object
 
     ## attributes #############################################
-
-    name = ""
-    fields = {}
     rowid = 'ID'  # set rowid to None if you don't use autonumber
     
-    # we need to know which module 'dbc' comes from, because
+    # @TODO: we need to know which module 'dbc' comes from, because
     # we need to get certain constants (eg, for field types)
     # that are in the module, but not connected to the
     # connection object... This is a shortcoming of the DB-API.. :/
 
-    dbc = None
-    dbc_module = None
-    
 
     ## constructor ##############################################
                        
-    def __init__(self, dbc, name, module=None, rowid=''):
-        self.dbc = dbc
-        self.name = name
-        self.fields = self._getFields()
-
-
-        if rowid != '':
-            self.rowid = rowid
-
-
-        # Not all DB-API modules have a __class__.__module__
-        # so we're forced to guess..
-        # @TODO: a better way to guess the dbc's module
-        
-        if module:
-            self.module = module
-        else:
-            try:
-                mod = dbc.__class__.__module__
-                exec('import ' + mod)
-                self.dbc_module = eval(mod)
-            except:
-                raise "Couldn't guess DB-API module. Pass 'module' parameter to Table()"
-
-
+    def __init__(self, dbc, name):
+        self.__super.__init__(self)
+        self._data["dbc"] = dbc
+        self._data["name"] = name
+        self._data["fields"] = self._getFields()
 
     ## public methods ###########################################
 

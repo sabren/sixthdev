@@ -1,10 +1,9 @@
 """
 zdc.Record -  makes it easy to edit records in a database.
-
-$Id$
 """
+__ver__="$Id$"
 
-
+import zdc
 from IdxDict import IdxDict
 
 # @TODO: much of this ought to be moved to the 'Table' class..
@@ -126,7 +125,7 @@ class Record:
             res = "NULL"
         
         #@TODO: handle DATE types explicitly
-        elif field.type == self.table.dbc_module.NUMBER:
+        elif field.type == zdc.NUMBER:
             res = `value`
             
         # binary, text, and string are all treated the same,
@@ -170,7 +169,7 @@ class Record:
             #
             # actually, I think that it works with some dates and not
             # with others... but not sure..
-            if not f.type == self.table.dbc_module.TIMESTAMP:
+            if not f.type == zdc.TIMESTAMP:
                 if not f.isGenerated:
                     sql = sql + f.name + "=" + self._sqlQuote(f) + ","
         sql = sql[:-1] + self._whereClause()

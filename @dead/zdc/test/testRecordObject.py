@@ -1,8 +1,7 @@
 """
 testRecordObject.py - test cases for zdc.RecordObject
-
-$Id$
 """
+__ver__="$Id$"
 
 import unittest
 import zdc.test
@@ -88,8 +87,6 @@ class RecordObjectTestCase(unittest.TestCase):
 
         assert not gotError, \
                "problem saving RecordObject twice!"
-
-
 
 ## ## I removed this test because I don't think it applies
 ## ## anymore.. does it?  actually, there should be SOME kind of error

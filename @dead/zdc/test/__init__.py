@@ -1,6 +1,7 @@
-
 import unittest
-from sqlTest import dbc
+
+import sqlTestZdc, zdc
+dbc = zdc.Connection(sqlTestZdc.dbc)
 
 from testIdxDict import *
 from testRecord import *
@@ -9,8 +10,10 @@ from testRecordObject import *
 from testTable import *
 from testLinkSet import *
 from testJunction import *
+from testConnection import *
 
 suites = {
+    "Connection" : unittest.makeSuite(ConnectionTestCase, "check_"),
     "LinkSet": unittest.makeSuite(LinkSetTestCase, "check_"),
     "IdxDict": unittest.makeSuite(IdxDictTestCase, "check_"),
     "Junction": unittest.makeSuite(JunctionTestCase, "check_"),

@@ -1,5 +1,7 @@
-#
-# testRecord.py - test cases for zdc.Record
+"""
+test cases for zdc.Record
+"""
+__ver__="$Id$"
 
 import unittest
 import zdc.test

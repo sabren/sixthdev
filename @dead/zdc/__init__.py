@@ -3,16 +3,23 @@ zdc: zike data classes (wrapper for python db-api 2.0)
 """
 __ver__="$Id$"
 
+# the two basic classes:
 from IdxDict import IdxDict
+from Object import Object
+
+# these build on the above:
 from Field import Field
 from Table import Table
 from Record import Record
-from Object import Object
 from RecordObject import RecordObject
 from ObjectView import ObjectView
 from LinkSet import LinkSet
 from Junction import Junction
 from FixedPoint import FixedPoint
+from Connection import Connection
+
+
+from MySQLdb import NUMBER, TIMESTAMP
 
 def sqlEscape(s):
     #@TODO: get the real version of this out of Record
