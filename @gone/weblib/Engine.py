@@ -8,6 +8,7 @@ import string
 import traceback
 import sys
 import os
+import handy
 
 class Engine(object):
 
@@ -149,14 +150,13 @@ class Engine(object):
         return os.environ["PATH_TRANSLATED"]
 
     def runScript(self):
-        eng = self
-        # eng.result is None if nothing's been run yet
+        # self.result is None if nothing's been run yet
         # it would be error or exception if dotWeblibPy had a problem
-        if (eng.result is None) or (eng.result == eng.SUCCESS):
+        if (self.result is None) or (self.result == self.SUCCESS):
             if os.path.exists(self.getScriptName()):
-                eng.execute(open(self.getScriptName()))
+                self.execute(open(self.getScriptName()))
             else:
-                eng.stop()
+                self.stop()
                 print "Status: 404"
                 sys.exit()
 
@@ -174,8 +174,10 @@ class Engine(object):
 
     ## ERROR HANDLING @TODO: test cases for these!
         
-    def sendError(eng):
-        assert self.SITE_MAIL, "must define SITE_MAIL first!"
+    def sendError(self):
+        SITE_MAIL = self.locals["SITE_MAIL"]
+        SITE_NAME = self.locals["SITE_NAME"]
+        assert SITE_MAIL is not None, "must define SITE_MAIL first!"
         hr = "-" * 50 + "\n"
         msg = weblib.trim(
             """
@@ -183,29 +185,32 @@ class Engine(object):
             From: weblib.cgi <%s>
             Subject: uncaught exception in %s
 
-            """ % (self.SITE_MAIL, self.SITE_MAIL, self.SITE_NAME))
-        msg = msg + "uncaught exception in %s\n\n" % self.getScriptName()
-        msg = msg + hr
-        msg = msg + self.error
-        msg = msg + hr
-        msg = msg + "FORM: %s\n"  % self.request.form
-        msg = msg + "QUERYSTRING: %s\n" % self.request.querystring
-        msg = msg + "COOKIE: %s\n" % self.request.cookie
-        msg = msg + "SESSION DATA:\n"
-        for item in self.sess.keys():
-            msg = msg + item + ': '
-            try:
-                msg = msg + self.sess[item] + "\n"
-            except:
-                msg = msg + "(can't unpickle)\n"
-        msg = msg + hr
-        msg = msg + "OUTPUT:\n\n"
-        msg = msg + self.response.getHeaders() + "\n"
-        msg = msg + self.response.buffer + "\n"
-        msg = msg + hr
+            """ % (SITE_MAIL, SITE_MAIL, SITE_NAME))
+        msg += "uncaught exception in %s\n\n" % self.getScriptName()
+        msg += hr
+        msg += self.error
+        msg += hr
+        msg += "FORM: %s\n"  % self.request.form
+        msg += "QUERYSTRING: %s\n" % self.request.querystring
+        msg += "COOKIE: %s\n" % self.request.cookie
 
-        from weblib.handy import sendmail
-        sendmail(msg)
+        if hasattr(self, "sess"):
+            msg = msg + "SESSION DATA:\n"
+            for item in self.sess.keys():
+                msg += item + ': '
+                try:
+                    msg += self.sess[item] + "\n"
+                except:
+                    msg += "(can't unpickle)\n"
+        else:
+            msg += "NO SESSION DATA\n"
+        msg += hr
+        msg += "OUTPUT:\n\n"
+        msg += self.response.getHeaders() + "\n"
+        msg += self.response.buffer + "\n"
+        msg += hr
+
+        handy.sendmail(msg)
 
     def printException(self):
         print "<b>uncaught exception while running %s</b><br>" \
@@ -271,18 +276,15 @@ class Engine(object):
         print "</html>"
 
     def printFullResponse(self):        
-        eng = self
-        SITE_MAIL=eng.locals["SITE_MAIL"]
-        SITE_NAME=eng.locals["SITE_NAME"]
-        if eng.result in (eng.SUCCESS, eng.REDIRECT, eng.EXIT):
-            eng.printResponse()
+        if self.result in (self.SUCCESS, self.REDIRECT, self.EXIT):
+            self.printResponse()
         else:
-            eng.errorPageHeader()
-            if eng.result == eng.FAILURE:
-                print "<b>assertion failure:</b>", eng.error
-            elif eng.result == eng.EXCEPTION:
-                eng.printException()
-            eng.printFooter()
+            self.errorPageHeader()
+            if self.result == self.FAILURE:
+                print "<b>assertion failure:</b>", self.error
+            elif self.result == self.EXCEPTION:
+                self.printException()
+            self.printFooter()
             sys.stdout.flush()
-            if (SITE_MAIL):
-                self.sendError(eng, SITE_MAIL, SITE_NAME)
+            if self.locals["SITE_MAIL"]:
+                self.sendError()
