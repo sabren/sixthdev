@@ -1,13 +1,15 @@
-"""
-Product.py - product object for zikeshop
-"""
-__ver__="$Id$"
-
 import zdc
 import zikeshop
 from zikeshop import Picture
+from pytypes import FixedPoint
+from zdc import LinkSet
+from zdc import Junction
 
 class Product(zdc.RecordObject):
+    """
+    Product.py - product object for zikeshop
+    """
+    __ver__="$Id$"
     _tablename = "shop_product"
 
     # @TODO: fix this!!!!!! there should be no _tuples..
@@ -84,13 +86,13 @@ class Product(zdc.RecordObject):
     ## accessors ###############################################
 
     def get_price(self):
-        return zdc.FixedPoint(self._data.get('price', '0.00'))
+        return FixedPoint(self._data.get('price', '0.00'))
 
     def get_cost(self):
-        return zdc.FixedPoint(self._data.get('cost', '0.00'))
+        return FixedPoint(self._data.get('cost', '0.00'))
 
     def get_retail(self):
-        return zdc.FixedPoint(self._data.get('retail', '0.00'))
+        return FixedPoint(self._data.get('retail', '0.00'))
 
     def get_available(self):
         #@TODO: this is where styled/unstyled distinction
@@ -120,7 +122,7 @@ class Product(zdc.RecordObject):
 
     def get_styles(self):
         if not self._data.has_key("_styles"):
-            self._data["_styles"] = zdc.LinkSet(self,
+            self._data["_styles"] = LinkSet(self,
                                                 zikeshop.Style,
                                                 "parentID")
         return self._data["_styles"]
@@ -130,7 +132,7 @@ class Product(zdc.RecordObject):
 
     def get_categories(self):
         if not self._data.has_key("cats"):
-            self._data["cats"] = zdc.Junction(self,
+            self._data["cats"] = Junction(self,
                                               zikeshop.Category,
                                               "shop_product_node",
                                               "productID", "nodeID")

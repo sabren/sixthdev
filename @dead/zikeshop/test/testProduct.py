@@ -7,8 +7,7 @@ import sixthday
 import unittest
 import zikeshop
 import zikeshop.test
-import zdc
-
+from pytypes import FixedPoint
 from zikeshop import Product
 from zikeshop.test import clerk
 
@@ -34,15 +33,15 @@ class ProductTestCase(unittest.TestCase):
     ## price, cost, and retail should all be FixedPoints ###############
 
     def check_price(self):
-        assert isinstance(clerk.new(Product).price, zdc.FixedPoint), \
+        assert isinstance(clerk.new(Product).price, FixedPoint), \
                "price is wrong type!"
 
     def check_cost(self):
-        assert isinstance(clerk.new(Product).cost, zdc.FixedPoint), \
+        assert isinstance(clerk.new(Product).cost, FixedPoint), \
                "cost is wrong type!"
 
     def check_retail(self):
-        assert isinstance(clerk.new(Product).retail, zdc.FixedPoint), \
+        assert isinstance(clerk.new(Product).retail, FixedPoint), \
                "retail is wrong type!"
 
     ## inventory checking ############################################

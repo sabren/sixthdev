@@ -1,12 +1,12 @@
-"""
-Cart.py - a cart class for zikeshop
-"""
-__ver__="$Id$"
-
-
-import weblib, zdc
+import copy
+import weblib
+from pytypes import FixedPoint
 
 class Cart:
+    """
+    Cart.py - a cart class for zikeshop
+    """
+    __ver__="$Id$"
 
     ## constructor ###########################################
 
@@ -118,10 +118,9 @@ class Cart:
     def calcWeight(self):
         """calculate order weight by summing product weights"""
         weight = 0
-        import zdc
         for item in self.q_contents():
             weight = weight + \
-                     (zdc.FixedPoint(item["extra"]["weight"] or "",0)
+                     (FixedPoint(item["extra"]["weight"] or "",0)
                       * item["quantity"])
         return weight
 
@@ -129,10 +128,9 @@ class Cart:
 
     def q_contents(self):
         """Returns an editable copy of the cart's contents, plus subtotals"""
-        import copy, zikeshop, zdc
         res = copy.deepcopy(self._contents)
         for row in res:
-            row["subtotal"] = str(zdc.FixedPoint(row["price"]) \
+            row["subtotal"] = str(FixedPoint(row["price"]) \
                                   * row["quantity"])
         return res
 

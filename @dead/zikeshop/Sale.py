@@ -1,13 +1,14 @@
-"""
-zikeshop.Sale - for representing Sale events
-"""
-__ver__="$Id$"
-
 import zdc
 import zikeshop
 from zikeshop import Contact
+from pytypes import FixedPoint
+from pytypes import DateTime
 
 class Sale(zdc.RecordObject):
+    """
+    zikeshop.Sale - for representing Sale events
+    """
+    __ver__="$Id$"
     _tablename = "shop_sale"
     _links = {
         "details": [zdc.LinkSet, zikeshop.Detail, "saleID"],
@@ -23,7 +24,7 @@ class Sale(zdc.RecordObject):
         self.shiptypeID = 0
         self.cardID = 0 
         self.status = "new"
-        self.tsSold = zdc.TIMESTAMP
+        self.tsSold = DateTime("now")
         
         self.subtotal = 0
         self.shipping = 0
@@ -78,7 +79,7 @@ class Sale(zdc.RecordObject):
 
 
     def get_subtotal(self):
-        res = zdc.FixedPoint('0.00')
+        res = FixedPoint('0.00')
         for item in self.details:
             if item.productID:
                 if item.subtotal is not None:
@@ -90,7 +91,7 @@ class Sale(zdc.RecordObject):
         
         # @TODO: where should this go, and when should
         # it be updated?
-        self.total = zdc.FixedPoint('0.00') \
+        self.total = FixedPoint('0.00') \
                      + self.subtotal \
                      + self.shipping \
                      + self.salestax \

@@ -1,11 +1,6 @@
-"""
-test cases for zikeshop.Store
-"""
-__ver__ = "$Id$"
-
 import unittest
-import zdc
 import zikeshop
+from pytypes import FixedPoint
 from zikeshop import Contact
 from zikeshop import State
 from zikeshop import Store
@@ -13,6 +8,7 @@ from zikeshop.test import clerk
 from zikeshop.test import dbc
 
 class StoreTestCase(unittest.TestCase):
+    __ver__ = "$Id$"
 
     def setUp(self):
         self.store = Store(clerk)
@@ -22,8 +18,7 @@ class StoreTestCase(unittest.TestCase):
             except:
                 state = clerk.new(State)
                 state.CD = "CA"
-            import zdc
-            state.salestax = zdc.FixedPoint("8.25")
+            state.salestax = FixedPoint("8.25")
             state.save()
         except:
             pass
@@ -43,7 +38,7 @@ class StoreTestCase(unittest.TestCase):
         addr.stateCD = 'CA'
 
         actual = self.store.calcSalesTax(addr, 10)
-        goal = (zdc.FixedPoint(clerk.load(State, CD="CA").salestax)
+        goal = (FixedPoint(clerk.load(State, CD="CA").salestax)
                 * 10) / 100.0
         assert actual == goal, \
                "wrong sales tax after nexus established: %s vs %s" \

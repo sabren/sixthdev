@@ -47,7 +47,7 @@ class Store(zdc.Object): #(zdc.RecordObject):
 ##         if weight > 0:
 ##             ## ask ups for the price
 ##             import zikeshop.UPS
-##             res = zdc.FixedPoint(
+##             res = FixedPoint(
 ##                 zikeshop.UPS.getRate(fromZip, toZip, toCountryCD, weight))
 
 ##             ## it also occasionally charges 6 grand for invalid
