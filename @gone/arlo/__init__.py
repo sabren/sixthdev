@@ -1,3 +1,6 @@
+"""
+arlo: an object-relational mapping system
+"""
 __ver__="$Id$"
 from LinkInjector import *
 from LinkSetInjector import *
