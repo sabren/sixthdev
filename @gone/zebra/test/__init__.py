@@ -2,11 +2,11 @@
 # testzebra.py
 #
 import unittest
-import zebra
 import string
+import zebra
+from zebra import trim, indent
 from PHPGenerator import PHPGenerator
 from PyGenerator import PyGenerator
-from ziketools import *
 
 #######################################
 class ZebraTestCase(unittest.TestCase):

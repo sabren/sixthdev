@@ -1,0 +1,63 @@
+###################################################
+# zebra.py
+#
+#    python implementation of zebra,
+#    an XML-based template engine and code
+#       generator
+#
+#   This code is free and may be redistributed
+#   or copied under the terms of the GNU General
+#   Public License. See http://www.fsf.org/ for details
+#
+###################################################
+##[ configuration ]################################
+###################################################
+
+#@TODO: python 1.5.2 has a new version of xmllib
+import xmllib, re, string, types, sys, os
+
+## useMessy allows us to write ill-formed XML so we don't
+## have to litter our html with &lt; and &gt; entities
+## pretty much superceded by o2x, but what the hey?
+## @TODO: this should be part of the engine
+useMessy = 0
+
+from zebra import Parser, Generator
+###################################################
+## cleanup striped tags if useMessy is turned on ##
+###################################################
+## @TODO: this doesn't get called anymore! allow useMessy for non-o2x!
+## @TODO: account for freestanding <'s (eg, in a script)
+## @TODO: *OR* account for <![CDATA[]]>
+if (useMessy):
+    reTag    = re.compile("(<)([^>]+)(>)", re.I | re.S )
+    reClean = re.compile("[!?]|/?z:.*", re.I | re.S )
+
+    def tidy(mess):
+        if reClean.match(mess.group(2)):
+            return mess.group(0)
+        else:
+            return "&lt;" + mess.group(2) + "&gt;"
+
+    ## so clean it up already:
+    zbr = reTag.sub(tidy, zbr)
+
+
+
+from PyGenerator import PyGenerator
+from PHPGenerator import PHPGenerator
+
+# read in the file, if supplied,
+if len (sys.argv) > 1:
+    zbo = open(sys.argv[1]).read()
+
+# otherwise use stdin
+else:
+    zbo = sys.stdin.read()
+
+# compile it and print the results
+zEngine = Engine(PyGenerator())
+#print zEngine.parse(zbo)
+print zEngine.compile(zbo)
+
+

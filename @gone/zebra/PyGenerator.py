@@ -1,5 +1,4 @@
-from zebra import Generator
-from ziketools import trim, indent
+from zebra import Generator, trim, indent
 import types, string, re
 
 ###################################################

@@ -3,8 +3,13 @@ Zebra: a text generation and reporting system
 
 $Id$
 """
-
 import string
+from Generator import Generator
+from Parser import Parser
+from Engine import Engine
+
+
+###[ Utility Functions ]#######################################
 
 def trim(s):
     """strips leading indentation from a multi-line string."""
@@ -73,4 +78,5 @@ def uid():
         uid = uid + string.zfill(hex(ord(i))[2:],2)        
 
     return uid
+
 

@@ -1,11 +1,10 @@
-from zebra import Generator
-import types, string, re
+import zebra, types, string, re
 
 ###################################################
 ##[ zebra.PHPGenerator ]###########################
 ###################################################
 
-class PHPGenerator(Generator):
+class PHPGenerator(zebra.Generator):
     reZVar = re.compile("{([$!]?\w+)}", re.I | re.S )
     
     def __init__(self):
