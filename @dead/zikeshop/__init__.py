@@ -16,6 +16,8 @@ from Status import Status
 from Sale import Sale
 from Store import Store
 from Card import Card
+from State import State
+from Location import Location
 
 ### PICTURE ROUTINE #######################
 
