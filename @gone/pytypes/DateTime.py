@@ -111,3 +111,9 @@ class DateTime:
 
     def toDate(self):
         return pytypes.Date(self.toUS()[:-9])
+    
+    def toMx(self):
+        "return an mxDateTime if mx is available"
+        assert mxDateTime, "mx.DateTime is not installed"
+        return mxDateTime.DateTime(self.y, self.m, self.d,
+                                   self.hh, self.mm, self.ss)

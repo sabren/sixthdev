@@ -8,7 +8,7 @@ from pytypes import DateTime, Date
 
 class DateTimeTest(unittest.TestCase):
 
-    def check_add(self):
+    def test_add(self):
         assert DateTime("1/1/2001 1:23:45") + 1 \
                == DateTime("1/2/2001 1:23:45"), \
                "normal add didn't work."
@@ -31,7 +31,7 @@ class DateTimeTest(unittest.TestCase):
                == DateTime("1/2/2002 12:00:00"), \
                "adding more than a year didn't work"
 
-    def check_subtract(self):
+    def test_subtract(self):
         assert DateTime("1/2/2001") - 1 \
                == DateTime("1/1/2001"), \
                "normal subtract didn't work."
@@ -51,10 +51,10 @@ class DateTimeTest(unittest.TestCase):
                == DateTime("1/1/2001 1:23:45"), \
                "subtracting more than a year didn't work"
         
-    def check_convert(self):
+    def test_convert(self):
         assert Date("1/2/2002") == DateTime("1/2/2002 0:0:0")
 
-    def check_comparisons(self):
+    def test_comparisons(self):
         assert DateTime("06/20/1950 08:30:00") \
                == "1950-6-20 8:30:00", "eq string compare"
         assert DateTime("01/01/2001 00:00:00") \
@@ -64,7 +64,7 @@ class DateTimeTest(unittest.TestCase):
         assert Date("5/1/2001") < DateTime("2001-5-1 00:00:01"), \
                "lt comparison"
 
-    def check_todayandnow(self):
+    def test_todayandnow(self):
         """
         temporarily set time.time() to return 10/19/2001
         and test for today.
@@ -80,10 +80,10 @@ class DateTimeTest(unittest.TestCase):
         finally:
             time.time = _time
 
-    def check_gets(self):
+    def test_gets(self):
         pass
 
-    def check_repr(self):
+    def test_repr(self):
         d = DateTime('1/1/2001')
         assert repr(d) == "DateTime('01/01/2001 00:00:00')", \
                "wrong __repr__ from datetime"
@@ -91,12 +91,29 @@ class DateTimeTest(unittest.TestCase):
         assert repr(d) == "DateTime('01/01/2001 12:34:56')", \
                "wrong __repr__ from datetime"
 
-    def check_daysInMonth(self):
+    def test_daysInMonth(self):
         assert DateTime("1/1/2001").daysInMonth() == 31
         assert DateTime("2/1/2001").daysInMonth() == 28
         assert DateTime("2/1/2000").daysInMonth() == 29
         
-    def check_daysInYear(self):
+    def test_daysInYear(self):
         assert DateTime("1/1/1999").daysInYear() == 365
         assert DateTime("1/1/2000").daysInYear() == 366 # leap year
         assert DateTime("1/1/2001").daysInYear() == 365
+
+
+    def test_mxDate(self):
+        try:
+            import mx
+            dtNow = DateTime("1/1/2000")
+            mxNow = dtNow.toMx()
+            assert mxNow == mx.DateTime.DateTime(2000,1,1)
+        except ImportError:
+            print "[mxDate not installed, skipping test...]"
+            
+
+if __name__=="__main__":
+    unittest.main()
+
+    
+    
