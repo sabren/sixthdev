@@ -43,9 +43,8 @@ class PlanApp(sixthday.AdminApp):
         node = self.generic_save(Node)
         self.redirect("?action=viewNode&ID=%s" % node.ID)
 
-
     def viewNode(self):
         return BoxView(self._getInstance(Node))
     
-
+    
 

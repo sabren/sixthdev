@@ -21,3 +21,4 @@ ACTUAL
 06:00 - started development
 08:00 - list node page and add node form in progress,
         no working form posts yet...
+09:00 - basic forms and node lists working
