@@ -71,14 +71,32 @@ class AdminApp(weblib.Actor):
         """
         generic object-modifying mechanism
         """
+        what = self.input.get("what", "")
         if self.input.get("ID"):
-            what = self.input.get("what", "")
-            import zdc
-            zebra.show("frm_%s" % what, zdc.ObjectView(
-                self.map_what(what)(ID=self.input.get("ID"))))
+            if hasattr(self, "edit_%s" % what):
+                getattr(self, "edit_%s" % what)()
+            else:
+                import zdc
+                zebra.show("frm_%s" % what, zdc.ObjectView(
+                    self.map_what(what)(ID=self.input.get("ID"))))
         else:
-            print "[error: no ID given]"
-        
+            self.complain("no ID given")
+
+    def act_create(self):
+        """
+        generic routine to display a form for adding an object
+        """
+        what = self.input.get("what", "")
+        try:
+            if hasattr(self, "create_%s" % what):
+                getattr(self, "create_%s" % what)()
+            else:
+                import zdc
+                zebra.show("frm_%s" % what, zdc.ObjectView(
+                    self.map_what(what)()))
+        except IOError:
+            self.complain("frm_%s template not found" % what)
+            
     def act_delete(self):
         """
         Generic object-deletion mechanism.
@@ -99,7 +117,10 @@ class AdminApp(weblib.Actor):
         Generic object-deletion mechanism.
         """
         what = self.input.get("what", "")
-        self.objectEdit("save")
+        if hasattr(self, "save_%s" % what):
+            getattr(self, "save_%s" % what)()
+        else:
+            self.objectEdit("save")
         next = self._whatnext()
         if not next:
             self.do("list", what=what)
@@ -124,17 +145,6 @@ class AdminApp(weblib.Actor):
         else:
             print "don't know how to %s a %s" % (command, what)
 
-    def act_create(self):
-        """
-        generic routine to display a form for adding an object
-        """
-        what = self.input.get("what", "")
-        try:
-            import zdc
-            zebra.show("frm_%s" % what, zdc.ObjectView(
-                self.map_what(what)()))
-        except IOError:
-            self.complain("frm_%s template not found" % what)
 
     def _whatnext(self):
         _next_ = weblib.request.parse(self.input.get("_next_", ""))
