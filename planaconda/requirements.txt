@@ -1,0 +1,106 @@
+
+                  ===========================
+                  PLANACONDA 1.0 REQUIREMENTS 
+                  ===========================
+
+
+OVERVIEW
+--------
+
+Planaconda is a system for tracking projects, goals, and
+actions (tasks). It needs to collect ideas about future
+work while keeping that separate from current work. 
+
+For this iteration, planaconda will be a single-user 
+system.
+
+
+There should be at least three layers of abstraction:
+Projects >> Goals >> Tasks
+
+It's OKAY to have more than three, and for all layers
+to use the same concept... Except that leaf nodes need
+estimates, and aggregate nodes take their estimates 
+from their children.
+
+It should be possible to break a goal into smaller 
+chunks. This is how we track dependencies.
+
+There should be a project called inbox or slushpile
+or something where I can throw ideas that aren't 
+thought out or estimated yet. 
+
+It would be nice if I could keep everything separate 
+for different projects, and be able to select which
+one(s) I want to look at at any given time (like iCal).
+
+
+INTERFACE
+---------
+
+# Task List (plate)
+
+Shows all tasks marked as being on the plate. 
+
+Each task is for one project and one goal, but 
+the list will include tasks from multiple projects. 
+The list should show:
+
+  - task name
+  - current estimate of time left
+  - status: complete / unclear / in progress / rejected / orphan
+  - importance (0..9)
+
+
+The list should be sorted by importance. 
+
+
+# All Tasks
+
+Shows all active tasks everywhere, as a nested tree
+  - checkbox for plate
+
+# Task Detail 
+
+  - read only view of above fields
+  - longer body
+  - comments/history
+  - ability to add comment
+
+
+# Add Task/Edit Task
+
+  - task name
+  - description
+  - estimated work
+  - actual work
+  - importance (0..9)
+  - post change with note
+  - back to main screen
+  - parent dropdown
+
+
+# Split Task
+  - page should show two tasks
+  - both should look like parent
+  - on save, make new parent arangement
+  - add new task. 
+
+
+
+POSTPONED
+---------
+
+# link Task
+  - When multiple goals need same child. 
+
+# gantt chart like interface (baseline/etc)
+  - task/goal dependencies
+  - estimated start
+  - estimated end
+  - actual start
+  - actual end
+
+# delete/hide comments
+  - just put up with (or avoid) duplicate form posts, etc for now
+
