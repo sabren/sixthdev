@@ -8,28 +8,14 @@ import weblib, zdc
 
 class Cart:
 
-    ## attributes ############################################
-
-    name = None
-    pool = None
-    key = None
-
-    _contents = []
-
     ## constructor ###########################################
 
-    def __init__(self, pool=None, name=""):
-
-        # pool is so we can tell where to store the data
-        # it's just another hash, and most likey, the
-        # weblib.sess object:
-
-        if pool is None:
-            self.pool = weblib.sess
-        else:
-            self.pool = pool
-
-
+    def __init__(self, storage, name=""):
+        """
+        c=Cart(storage), where storage is some sort of persistent dict
+        (eg, a weblib.Sess or a shelf or whatever)
+        """
+        
         # Originally, I prevented a site from creating more
         # than one cart. Would you ever need two carts?
         # This is probably a case of YouArentGoingToNeedIt,
@@ -49,21 +35,17 @@ class Cart:
 
         self.name = name
         self.key = self._getKey()
-
-        # if we don't do this, self._contents will be shared
-        # by all Carts... I wish python had a way to declare
-        # variables.. :/
-        
         self._contents = []
+        self.storage = storage
         
 
     ## public methods ########################################
 
 
     def start(self):
-        """cart.start() - fetches the _contents from the pool."""
-        if self.pool.has_key(self.key):
-            self._contents = self.pool[self.key]
+        """cart.start() - fetches the _contents from storage."""
+        if self.storage.has_key(self.key):
+            self._contents = self.storage[self.key]
 
     
     def isEmpty(self):
@@ -121,8 +103,8 @@ class Cart:
 
 
     def stop(self):
-        """cart.stop() - Store the cart's _contents cart.pool"""
-        self.pool[self.key] = self._contents
+        """cart.stop() - Store the cart's _contents"""
+        self.storage[self.key] = self._contents
 
 
     def subtotal(self):
@@ -159,6 +141,6 @@ class Cart:
     ## private methods #################################################
 
     def _getKey(self):
-        """private method to generate a key for the pool."""
+        """private method to generate a key for storage."""
         return "__cart_" + self.name
 

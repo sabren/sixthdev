@@ -44,7 +44,7 @@ class CheckoutAppTestCase(unittest.TestCase):
         weblib.sess = {}
 
 
-        myCart = zikeshop.Cart()
+        myCart = zikeshop.Cart({})
         myCart.add("super-evil-destructo-ray")
 
         app = CheckoutApp(cart=myCart)

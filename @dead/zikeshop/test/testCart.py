@@ -10,7 +10,7 @@ import zikeshop
 class CartTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.cart = zikeshop.Cart(pool={})
+        self.cart = zikeshop.Cart({})
 
 
     def check_isEmpty(self):
@@ -26,7 +26,7 @@ class CartTestCase(unittest.TestCase):
         assert self.cart._getKey() == "__cart_", \
                "doesn't return the expected key."        
 
-        cart = zikeshop.Cart(pool={}, name="elvis")
+        cart = zikeshop.Cart({}, name="elvis")
         assert cart._getKey() == "__cart_elvis", \
                "doesn't properly encode the cart name in the key"
 

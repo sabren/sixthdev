@@ -5,6 +5,8 @@ __ver__="$Id$"
 
 import weblib, zikeshop
 
+#@TODO: is this class really useful?
+
 class PublicApp(weblib.Actor):
     __super = weblib.Actor
 
@@ -13,7 +15,7 @@ class PublicApp(weblib.Actor):
         if cart:
             self.cart = cart
         else:
-            self.cart = zikeshop.Cart()
+            self.cart = zikeshop.Cart({})
 
 
     def enter(self):
