@@ -7,6 +7,28 @@ class Node(zdc.RecordObject):
     _defaults = {"parentID" : 0,
                  "path" : ""}
 
+
+    def q_crumbs(self):
+        """Returns a list of dicts containing the data for the nodes leading
+        down to (but not including) this one."""
+
+        res = []
+        node = self
+        while node.parentID:
+            node = node.parent
+            res.append( {"ID": node.ID, "name": node.name, "path": node.path } )
+
+        res.reverse()  # because we want the crumbs to go down, and we went up
+        return res
+        
+
+
+    def q_children(self):
+        res = []
+        for node in self.getChildren(): # do I still need the old version?
+            res.append( {"ID": node.ID, "name": node.name, "path": node.path } )
+        return res
+
     def getChildren(self):
         res = []
         cur = self._table.dbc.cursor()
@@ -14,7 +36,6 @@ class Node(zdc.RecordObject):
             cur.execute("select ID from base_node where parentID=%s" % self.ID)
             for row in cur.fetchall():
                 res.append(Node(ID=row[0]))
-
         return res
         
 
@@ -64,4 +85,3 @@ class Node(zdc.RecordObject):
         for child in self.getChildren():
             child._updatePaths(parent=self)
             child.save()  
-

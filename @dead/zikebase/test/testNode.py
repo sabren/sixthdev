@@ -10,8 +10,32 @@ class NodeTestCase(unittest.TestCase):
 
         self.cur.execute("DELETE FROM base_node")
         self.cur.execute("INSERT INTO base_node (name, path) VALUES ('top', 'top')")
-        self.cur.execute("INSERT INTO base_node (name, parentID) VALUES ('sub', 1)")
+        self.cur.execute("INSERT INTO base_node (name, path, parentID) "
+                         "VALUES ('sub', 'top/sub', 1)")
+        self.cur.execute("INSERT INTO base_node (name, path, parentID) "
+                         "VALUES ('subsub', 'top/sub/subsub/', 2)")
 
+
+    def check_q_crumbs(self):
+        node = zikebase.Node(ID=1)
+        goal = []
+        assert node.q_crumbs() == goal, \
+               "Didn't get right crumbs for node 1."
+
+        node = zikebase.Node(ID=3)
+        goal = [{"ID": 1,  "name": "top",  "path": "top"},
+                {"ID": 2,  "name": "sub",  "path": "top/sub"}]
+        assert node.q_crumbs() == goal, \
+               "Didn't get right crumbs for node 3."
+        
+
+
+    def check_q_children(self):
+        node = zikebase.Node(ID=1)
+        goal = [{"ID":2, "name":"sub", "path":"top/sub"}]
+
+        assert node.q_children() == goal, \
+               "wrong q_children"
     
 
     def check_path(self):
@@ -41,8 +65,6 @@ class NodeTestCase(unittest.TestCase):
         # idle thought... this really doesn't account for record
         # locking... if a child is in memory, and you updatePaths,
         # it could be in conflict with the data in memory.. :/
-
-        self.cur.execute("INSERT INTO base_node (name, parentID) VALUES ('subsub', 2)")
 
         node1 = zikebase.Node(ID=1)
         node1.name="super"
