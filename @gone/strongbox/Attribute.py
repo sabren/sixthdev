@@ -80,7 +80,7 @@ class Attribute(property):
         else:
             val = self.cast(value)
         if not self.validate(val):
-            raise ValueError, repr(value) + " vs " + repr(self.okay)
+            raise ValueError, self.__name__ + ": " + repr(value) + " vs " + repr(self.okay)
         return val # so the instance can store it
 
 
