@@ -119,7 +119,8 @@ class App(object):
             raise TypeError, 'Multiple actions requested: %s' \
                   % str(self.action)
 
-        method = getattr(self, "act_" + self.action, self.act__error__)
+        method = getattr(self, "act_" + self.action, None)
+        assert method, "don't know how to %s" % self.action
         method()
         self.action = oldaction
 
@@ -197,8 +198,3 @@ class App(object):
         """
         pass
 
-    def act__error__(self):
-        """
-        This gets called when an unknown action is requested.
-        """
-        self.complain("don't know how to %s" % self.action)
