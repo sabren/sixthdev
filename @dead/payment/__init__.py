@@ -8,14 +8,15 @@ from AuthorizeNetPayment import *
 
 def create(which, **kwargs):
     """Factory routine for creating objects that implement the
-    Payment interface. Given an account type (as a string),
-    and various keyword args, creates an Payment object which
+    Payment interface. Given an account type (as a string
+    corresponding to a classname without the -Payment suffix),
+    and various keyword arguments, creates an Payment object which
     can be used to charge, credit, etc a credit card....
 
     eg:
 
     >>> payment.create("AuthorizeNet",
-    ...                card = "444444444444442")
+    ...                card = "4222222222222")
 
     """
 

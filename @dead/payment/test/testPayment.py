@@ -9,7 +9,7 @@ import payment
 class PaymentTestCase(unittest.TestCase):
 
     def check_create(self):
-        acct = payment.create("AuthorizeNet", card="4444444444444442")
+        acct = payment.create("AuthorizeNet", card="4222222222222")
         assert acct.__class__ == payment.AuthorizeNetPayment, \
                "create() didn't make the correct class."
 
