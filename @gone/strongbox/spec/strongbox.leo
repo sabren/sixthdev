@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <leo_file>
-<leo_header file_format="2" tnodes="0" max_tnode_index="14" clone_windows="0"/>
+<leo_header file_format="2" tnodes="0" max_tnode_index="15" clone_windows="0"/>
 <globals body_outline_ratio="0.5">
 	<global_window_position top="10" left="10" height="624" width="768"/>
 	<global_log_window_position top="0" left="0" height="0" width="0"/>
@@ -22,12 +22,13 @@
 <v t="T7"><vh>Strongbox turns accessors into properties</vh></v>
 <v t="T8"><vh>Private variables are explicitly private</vh></v>
 <v t="T9"><vh>Attributes have defaults, but can be initialized via the constructor</vh></v>
-<v t="T10" a="E"><vh>Attributes use static typing</vh></v>
-<v t="T11" a="EV"><vh>Attributes allow the None value by default</vh></v>
+<v t="T10" a="V"><vh>Without explicit defaults, strings default to '', ints and longs to 0</vh></v>
+<v t="T11" a="E"><vh>Attributes use static typing</vh></v>
+<v t="T12" a="E"><vh>Attributes allow "None" by default</vh></v>
 </v>
-<v t="T12" a="E"><vh>@file SubjectTest.py</vh>
-<v t="T13" a="E"><vh>Observers manage themselves with attach() and detatch()</vh></v>
-<v t="T14"><vh>subject.notify() sends messages to all the observers</vh></v>
+<v t="T13" a="E"><vh>@file SubjectTest.py</vh>
+<v t="T14" a="E"><vh>Observers manage themselves with attach() and detatch()</vh></v>
+<v t="T15"><vh>subject.notify() sends messages to all the observers</vh></v>
 </v>
 </vnodes>
 <tnodes>
@@ -196,7 +197,7 @@ def check_properties(self):
     assert instance.a == 1
     assert instance.b == 2
     instance.c = 3
-    assert instance.c is None
+    assert instance.c == 0 # see check_default_defaults
     assert instance.d == 4, instance.d</t>
 <t tx="T8">@
 All strongbox instances have a "private" namespace, which
@@ -223,6 +224,22 @@ def check_constructor(self):
     foo = Foo(bar=12)
     assert foo.bar == 12</t>
 <t tx="T10">
+def check_default_defaults(self):
+    class Foo(Strongbox):
+        m_str = attr(str)
+        m_int = attr(int)
+        m_long = attr(float)
+        m_float = attr(float)
+        n_int = attr(int, default=None)
+        n_str = attr(str, default=None)
+    foo = Foo()
+    assert foo.m_str == ''
+    assert foo.m_int == 0
+    assert foo.m_long == 0
+    assert foo.m_float == 0
+    assert foo.n_int is None
+    assert foo.n_str is None</t>
+<t tx="T11">
 def check_static_typing(self):
     class Foo(Strongbox):
        bar = attr(int)
@@ -273,7 +290,7 @@ def check_okay_regexp(self):
     except ValueError:
         goterr = 1
     assert goterr, "ssn regexp should reject even the most famous phone number in america..."</t>
-<t tx="T11">@
+<t tx="T12">@
 But of course, we can turn it off...
 
 @code
@@ -293,14 +310,14 @@ def check_allowNone(self):
 def check_dontAllowNone(self):
     class Foo(Strongbox):
        bar = attr(int,allowNone=0)
-    foo = Foo()
+    foo = Foo(bar=15)
     try:
        goterr = 0
        foo.bar = None
     except ValueError:
        goterr = 1
     assert goterr, "assigning None should have failed!"</t>
-<t tx="T12">@
+<t tx="T13">@
 Subject from the GoF Observer pattern.
 @code
 __ver__="$Id$"
@@ -318,7 +335,7 @@ class SubjectTest(unittest.TestCase):
        
     def tearDown(self):
         pass</t>
-<t tx="T13">
+<t tx="T14">
 
 def check_attach(self):
     subject = ObservableStrongbox()
@@ -333,7 +350,7 @@ def check_detach(self):
     subject.attach(object)
     subject.detach(object)
     assert len(subject.private.observers) == 0</t>
-<t tx="T14">
+<t tx="T15">
 def check_notify(self):
     class Observer:
         def update(self, subject): self.updated = 1

@@ -108,7 +108,7 @@ class StrongboxTest(unittest.TestCase):
         assert instance.a == 1
         assert instance.b == 2
         instance.c = 3
-        assert instance.c is None
+        assert instance.c == 0 # see check_default_defaults
         assert instance.d == 4, instance.d
     #@-body
 
@@ -157,7 +157,30 @@ class StrongboxTest(unittest.TestCase):
 
     #@-node:5::Attributes have defaults, but can be initialized via the constructor
 
-    #@+node:6::Attributes use static typing
+    #@+node:6::Without explicit defaults, strings default to '', ints and longs to 0
+
+    #@+body
+    
+    def check_default_defaults(self):
+        class Foo(Strongbox):
+            m_str = attr(str)
+            m_int = attr(int)
+            m_long = attr(float)
+            m_float = attr(float)
+            n_int = attr(int, default=None)
+            n_str = attr(str, default=None)
+        foo = Foo()
+        assert foo.m_str == ''
+        assert foo.m_int == 0
+        assert foo.m_long == 0
+        assert foo.m_float == 0
+        assert foo.n_int is None
+        assert foo.n_str is None
+    #@-body
+
+    #@-node:6::Without explicit defaults, strings default to '', ints and longs to 0
+
+    #@+node:7::Attributes use static typing
 
     #@+body
     
@@ -213,9 +236,9 @@ class StrongboxTest(unittest.TestCase):
         assert goterr, "ssn regexp should reject even the most famous phone number in america..."
     #@-body
 
-    #@-node:6::Attributes use static typing
+    #@-node:7::Attributes use static typing
 
-    #@+node:7::Attributes allow the None value by default
+    #@+node:8::Attributes allow "None" by default
 
     #@+body
 
@@ -243,7 +266,7 @@ class StrongboxTest(unittest.TestCase):
     def check_dontAllowNone(self):
         class Foo(Strongbox):
            bar = attr(int,allowNone=0)
-        foo = Foo()
+        foo = Foo(bar=15)
         try:
            goterr = 0
            foo.bar = None
@@ -252,7 +275,7 @@ class StrongboxTest(unittest.TestCase):
         assert goterr, "assigning None should have failed!"
     #@-body
 
-    #@-node:7::Attributes allow the None value by default
+    #@-node:8::Attributes allow "None" by default
 
     #@-others
 

@@ -16,14 +16,7 @@ class attr(object):
     def __init__(self, typ, okay=None, default=Notgiven, allowNone=1):
         self.type = typ
         self.allowNone = allowNone
-
-        if default is Notgiven:
-            if typ == str:
-                self.default = ''
-            else:
-                self.default = None
-        else:
-            self.default = default
+        self._determineDefault(typ, default)
             
         if type(okay) == str:
             self.okay = sre.compile(okay)
@@ -32,16 +25,31 @@ class attr(object):
         else:
             raise TypeError, "okay must be lambda, list, or string"
 
+    def _determineDefault(self, typ, default):
+        self.default = default
+        if default is Notgiven:
+            if typ == str:
+                self.default = ''
+            elif typ in (int, float, long):
+                self.default = 0
+            else:
+                self.default = None
+            
+
+
     def cast(self, value):
-        try:
-            return self.type(value)
-        except:
-            raise TypeError, "%s is wrong type (expecting %s)" \
-                  % (value, self.type)
+        if value is None:
+            return None
+        else:
+            try:
+                return self.type(value)
+            except:
+                raise TypeError, "%s is wrong type (expecting %s)" \
+                      % (value, self.type)
 
     def validate(self, value):
-        if (value is None) and (not self.allowNone):
-            return 0
+        if (value is None):
+            return self.allowNone
 
         if self.okay is None:
             return 1
@@ -58,7 +66,7 @@ class attr(object):
         else:
             val = self.cast(value)
         if not self.validate(val):
-            raise ValueError, value
+            raise ValueError, repr(value)
         return val # so the instance can store it
 
 
@@ -126,7 +134,8 @@ class Strongbox(object):
         instance.__dict__['private'] = PrivateNamespace()
         instance.__dict__['__values__'] = {}
         for a in klass.__attrs__:
-            instance.__values__[a] = klass.__attrs__[a].default
+            default = klass.__attrs__[a].default
+            instance.__values__[a] = klass.__attrs__[a].cast(default)
         if dbc:
             instance.private.dbc = dbc
         return instance
