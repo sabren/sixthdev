@@ -24,9 +24,7 @@ class Response(object):
 
     ## constructor #######################################
 
-    def __init__(self, engine=None, out=None):
-
-        self.engine = engine
+    def __init__(self, out=None):
         self.out = out
        
 
