@@ -49,7 +49,13 @@ class RecordObject(zdc.Object):
     def save(self):
         # save the data in our record:
         for f in self._table.fields:
-            self._record[f.name] = getattr(self, f.name)
+            data = getattr(self, f.name)
+            import types
+            if type(data) == types.InstanceType:
+                # this is mostly for FixedPoints
+                self._record[f.name] = str(data)
+            else:
+                self._record[f.name] = data
         self._record.save()
 
         # some fields may be calculated, so update our attributes:
