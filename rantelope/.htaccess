@@ -1,0 +1,2 @@
+AddHandler python-script /web/lib/weblib/adapters/weblib.cgi
+DirectoryIndex rantelope.app
