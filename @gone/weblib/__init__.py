@@ -13,24 +13,6 @@ class Redirect(Exception):
     """
     pass
 
-#### utility functions ###############################################
-
-def selectBox(name, rows, blank=None, extra=''):
-    """
-    display a selectbox
-    #@TODO: get rid of weblib.selectBox - we have html.select now
-    rows should be a sequence of (real value, displayed value, isSelected)
-    """
-    res = '<select name="%s" %s>\n' % (name, extra)
-    if blank is not None:
-        res = res + '<OPTION value="%s">&nbsp;</OPTION>\n' % blank
-    for row in rows:
-        res = res + '<OPTION value="%s"' % row[0]
-        if row[2]:
-            res = res + " SELECTED"
-        res = res + '>%s</OPTION>\n' % row[1]
-    res = res + '</select>'
-    return res
 
 def trim(s):
     """
@@ -54,39 +36,6 @@ def trim(s):
     return string.join(lines, "\n")
 
 
-def indent(s, depth=1, indenter="    "):
-    """
-    opposite of trim
-    @TODO: this should be in handy
-    """
-    import string
-    lines = string.split(s, "\n")
-
-    # don't indent trailing newline
-    trailer = ""
-    if lines[-1] == "":
-        lines = lines[:-1]
-        # BUT.. add it back in later
-        trailer = "\n"
-        
-    for i in range(len(lines)):
-        lines[i] = (indenter * depth) + lines[i]
-        
-    return string.join(lines, "\n") + trailer
-   
-
-def deNone(s, replacement=''):
-    """
-    replaces None with the replacement string
-    @TODO: this should be in handy
-    """
-    # if s won't be zero, you might as well use:
-    # "s or ''" instead of "deNone(s)"
-    if s is None:
-        return replacement
-    else:
-        return s
-    
 def uid():
     """
     unique identifier generator, for sessions, etc
@@ -111,27 +60,7 @@ def uid():
     return uid
 
 
-### HTML encoder #########################################
 
-import htmlentitydefs
-
-#@TODO: is there really no built-in way to turn a hash inside out?
-_entitymap = {}
-for i in htmlentitydefs.entitydefs.keys():
-    _entitymap[htmlentitydefs.entitydefs[i]] = i
-del i
-
-
-def htmlEncode(s):
-    res = ""
-    if s is not None:
-        for ch in s:
-            if _entitymap.has_key(ch):
-                res = res + "&" + _entitymap[ch] + ";"
-            else:
-                res = res + ch
-    return res
-        
 #### URL encoding ########################################
 
 def urlEncode(what):
@@ -164,6 +93,7 @@ def urlDecode(what):
         raise "urlDecode doesn't know how to deal with this kind of data"
 
     return res
+
 
 
 ## sub-modules ################################################
