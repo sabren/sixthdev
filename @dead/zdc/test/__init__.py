@@ -8,10 +8,12 @@ from testObject import *
 from testRecordObject import *
 from testTable import *
 from testLinkSet import *
+from testJunction import *
 
 suites = {
     "LinkSet": unittest.makeSuite(LinkSetTestCase, "check_"),
     "IdxDict": unittest.makeSuite(IdxDictTestCase, "check_"),
+    "Junction": unittest.makeSuite(JunctionTestCase, "check_"),
     "Record": unittest.makeSuite(RecordTestCase, "check_"),
     "Object": unittest.makeSuite(ObjectTestCase, "check_"),
     "RecordObject" : unittest.makeSuite(RecordObjectTestCase, "check_"),

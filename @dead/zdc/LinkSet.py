@@ -43,6 +43,11 @@ class LinkSet(zdc.IdxDict):
         self._loaded = 1
 
 
+    def save(self):
+        for item in self:
+            setattr(item, self.lKey, getattr(self.owner, "ID", None))
+            item.save()
+
     def new(self):
         return self.rClass()
 
