@@ -9,6 +9,10 @@
 #   or copied under the terms of the GNU General
 #   Public License. See http://www.fsf.org/ for details
 #
+# v0.3 1204.1999 sabren@manifestation.com
+#      can now be used as module..
+#      standalone reads from stdin by default
+#
 # v0.2 1124.1999 sabren@manifestation.com
 #      added o2x for emacs outline mode
 #      seperated <zebra> and <report> tags
@@ -23,10 +27,11 @@
 ###################################################
 
 #@TODO: python 1.5.2 has a new version of xmllib
-import xmllib, re, string, types, o2x, sys
+import xmllib, re, string, types, sys
 
 ## useMessy allows us to write ill-formed XML so we don't
 ## have to litter our html with &lt; and &gt; entities
+## pretty much superceded by o2x, but what the hey?
 ## @TODO: this should be part of the engine
 useMessy = 0
 
@@ -205,7 +210,9 @@ class Engine (xmllib.XMLParser):
 			## append the structure to the current stripe
 			self.stripe.append(self.struct)
 			self.struct = self.datstack[-1]
-		elif tag in ["stripe", "description", "content", "keywords", "show", "exec", "if", "el", "ef"]:
+			self.datstack = self.datstack[:-1]
+		elif tag in ["stripe", "description", "content", "keywords", \
+					 "show", "exec", "if", "el", "ef"]:
 			## all we have to do is shift our attention to the
 			## parent.. the current stripe is already a part of
 			## the parent..
@@ -225,17 +232,6 @@ class Engine (xmllib.XMLParser):
 		else:
 			pass # </zebra>, or unknown tag
 
-
-	###############################################
-
-	def parse(self, zbr):
-
-		self.reset()
-		self.feed(zbr)
-		self.close
-		return {"stripe" : self.stripe,
-				"named"  : self.named,
-				"suits"  : self.suits,}
 
 	###############################################
 
@@ -277,7 +273,7 @@ class Engine (xmllib.XMLParser):
 		for i in range(len(report["groups"])):
 			if report["grouph"][i]:
 				res = res + \
-					  "      if ($__nr[\"" + report["groups"][i] + "\"] != $__pr[\"" + \
+					  "      if ($__tr[\"" + report["groups"][i] + "\"] != $__pr[\"" + \
 					  report["groups"][i] + "\"]){\n" + \
 					  "         " + self.flatten(report["grouph"][i],depth,"show") + \
 					  "         unset($__pr);\n" + \
@@ -343,7 +339,7 @@ class Engine (xmllib.XMLParser):
 			test = conditional = ""
 			if type(stripe)==types.StringType:
 				## strip leading and trailing newlines
-				if stripe[1] == "\n": 
+				if stripe[0] == "\n": 
 					stripe = stripe[1:]
 				if stripe[-1] == "\n":
 					stripe = stripe[:-1]
@@ -400,9 +396,25 @@ class Engine (xmllib.XMLParser):
 
 	###############################################
 
+	def parse(self, zbr):
+
+		# if it's not XML-ish, assume it's an outline
+		if zbr[0:1] != "<?":
+			import o2x
+			zbr = o2x.o2x(zbr)
+
+		self.reset()
+		self.feed(zbr)
+		self.close
+		return {"stripe" : self.stripe,
+				"named"  : self.named,
+				"suits"  : self.suits,}
+
+	###############################################
+
 	def compile(self, xml):
 
-		return "<?\n" + self.flatten(self.parse(xml)) + "?>"
+		return "<?\n" + self.flatten(self.parse(xml)["stripe"], context="show") + "?>"
 
 
 ###################################################
@@ -430,16 +442,15 @@ if (useMessy):
 
 if __name__ == "__main__":
 
+	# read in the file, if supplied,
 	if len (sys.argv) > 1:
 		zbo = open(sys.argv[1]).read()
+
+	# otherwise use stdin
 	else:
 		zbo = sys.stdin.read()
 
-	## convert outline mode to XML:
-	xml = o2x.o2x(zbo)
-
-	## convert XML into python:
+	# compile it and print the results
 	zEngine = Engine()
-
-	#print zEngine.compile(xml)
-	print zEngine.parse(xml)
+	#print zEngine.parse(zbo)
+	print zEngine.compile(zbo)
