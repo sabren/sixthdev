@@ -1,7 +1,7 @@
 #!/usr/home/sabren/bin/python
 
 
-import weblib.script
+import weblib #.script
 from zikeshop import dbc
 
 # for now just show a list of products

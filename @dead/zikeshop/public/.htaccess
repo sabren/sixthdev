@@ -1,2 +1,0 @@
-AddType cgi-script .py
-DirectoryIndex list.py

@@ -1,7 +1,5 @@
-#!/usr/home/sabren/bin/python
 
-
-import weblib.script
+import weblib
 import zikeshop
 from zikeshop import dbc
 

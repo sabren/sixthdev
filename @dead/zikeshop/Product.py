@@ -1,9 +1,9 @@
 
 import zdc
+import zikeshop
 
 class Product(zdc.RecordObject):
-    table = "shop_product"
-    defaults = {
-        }
+    _table = zdc.Table(zikeshop.dbc, "shop_product")
+    _defaults = {}
 
     

@@ -1,37 +1,67 @@
-#!/usr/home/sabren/bin/python
 
-import weblib.script
+import weblib
 import zikeshop
 from zikeshop import dbc
 
 class Cart:
 
+    count = 0
     contents = []
+
+    def __init__(self):
+        
+        assert Cart.count == 0, "There can be only one cart."
+        Cart.count = Cart.count + 1
+
+        
+    def start(self):
+        if weblib.sess.has_key("__cart"):
+            self.contents = weblib.sess["__cart"]
+        
     
     def act(self):
         action = weblib.request.get("action")
         if action=='add':
-            self.do_add(weblib.request.get("code"))
+            self.add(weblib.request.get("code"),
+                     weblib.request.get("opts"),
+                     weblib.request.get("amt"))
         else:
             pass
 
 
-    def do_add(self,code):
+    def add(self,code,opts=None,amt=None):
         if code:
-            self.contents.append((code,1))
+            if amt is None:
+                amt = 1
+            self.contents.append((code,opts,amt))
         else:
-            pass
+            pass # nothing to add
 
 
-#if not weblib.sess.has_key("cart"):
-#    weblib.sess["cart"] = Cart()
-#
-#weblib.sess["cart"].act()
+    def stop(self):
+        weblib.sess["__cart"] = self.contents
+
+
+
+cart = Cart()
+cart.start()
+cart.act()
 
 print "<h1>CART PAGE</h1>"
 
-print "(nothing happens here yet)"
+print "<h4>contents of cart:</h4>"
+print cart.contents
 
+
+print "<h4>contents of sess:</h4>"
+print weblib.sess.keys()
+
+print "<h4>contents of __cart:</h4>"
+print weblib.sess["__cart"]
 
 print "<hr>"
 print "zikeshop alpha (c)2000 zike interactive, inc"
+
+print "<hr>"
+
+cart.stop()
