@@ -67,7 +67,7 @@ class Product(zdc.RecordObject):
         where = "code = '%s'" % (self.code)
         if self.ID:
             where = where + "AND ID != %i" % int(self.ID)
-        if zdc.find(zikeshop.Product, where):
+        if zikeshop.dbc.select(zikeshop.Product._table.name, where):
             raise ValueError, "This code already exists!"
 
         self.__super.save(self)
