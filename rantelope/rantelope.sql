@@ -25,6 +25,7 @@ CREATE TABLE rnt_story (
     authorID integer not null,
     channelID integer not null,
     categoryID integer,
+    posted datetime, 
     title varchar(255),
     url varchar(255),
     description text

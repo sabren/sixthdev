@@ -12,7 +12,11 @@ th {
     text-align: left;
 }
 </style>
-
+<script language="javascript">
+function window.onLoad() {
+    document.forms[0].auth_username.focus();
+}
+</script>
 </head>
 <body>
 
@@ -24,8 +28,12 @@ th {
    {:hidden:}
    <table>
    <tr><td>username:</td>
-       <td><input type="text" name="auth_username" value="admin"></td></tr>
+       <td><input type="text" name="auth_username" value=""></td></tr>
    <tr><td>password:</td>
-       <td><input type="password" name="auth_password" value="admin"></td></tr>
+       <td><input type="password" name="auth_password" value=""></td></tr>
    <tr><td>&nbsp;</td><td><input type="submit" value="log in"></td></tr>
 </form>
+
+
+</body>
+</html>

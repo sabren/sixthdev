@@ -5,11 +5,44 @@
 <style type="text/css">
 body, p, table { 
     font-family: verdana;
-    font-size:10pt;
+    font-size: x-small;
+    background: #ffeecc;
 }
+
+body {
+  margin-top: 5px;
+}
+
 th { 
     text-align: left;
 }
+
+h1 {
+  margin-top: 1em;
+  margin-bottom: 0px;
+  font-size: 100%;
+}
+
+.navbar {
+  background: #fff;
+  padding: 2px;
+  font-size:75%; 
+  border-bottom: solid maroon 1px; 
+  border-left: solid gray 1px; 
+  margin-bottom: 10px;
+  margin-left:0px;
+}
+
+.navbar a {
+  text-decoration: none;
+  color: blue;
+}
+
+.navbar td {
+  padding-left: 0px;
+  margin-left: 0px;
+}
+
 </style>
 
 </head>
@@ -17,20 +50,19 @@ th {
 
 <h1>Rantelope 0.02 alpha</h1>
 
-<table border="0" width="100%">
-<tr><td>
-<a accesskey="c" href="rantelope.app">[c]hannels</a>
+<table border="0" padding="0" spacing="0" width="100%" class="navbar">
+<tr><td><a accesskey="c" href="rantelope.app">[c]hannels</a>
 | <a href="rantelope.app?action=list&what=author">authors</a>
 | <a href="search.app">search</a>
+* if scope.get('channelID'):
+    | <a accesskey="p" href="rantelope.app?action=publish&channelID={:channelID:}">[p]ublish</a> |
+    | <a accesskey="s" target="_blank" href="{:siteurl:}">[s]how</a>
 </td>
 <td align="right">
 <a href="rantelope.app?auth_logout_flag=1">logout</a></td>
 </tr>
 </table>
 
-
-
-<hr>
 
 * for errors:
     * body:

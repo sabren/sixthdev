@@ -3,6 +3,7 @@
 __ver__="$Id"
 
 from strongbox import *
+from pytypes import DateTime
 import crypt
 
 # NOTE: all ID attributes must default
@@ -44,9 +45,10 @@ class Story(Strongbox):
     """
     A document, blog entry, or other text.
     """
-    ID = attr(long, default=auto)
+    ID = attr(long, default=auto)    
     channelID = attr(long)
     categoryID = attr(long, default=0)
+    posted = attr(DateTime, default="now")
     title = attr(str)
     url = attr(str)
     description = attr(str)
@@ -100,6 +102,7 @@ class Channel(Strongbox):
 
     def toRSS(self):
         import zebra
+        self.stories.sort(lambda a,b: -cmp(a.posted,b.posted))
         return zebra.fetch("rss", BoxView(self))
 
     def toHTML(self, input=None):

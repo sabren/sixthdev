@@ -84,11 +84,12 @@ class RantelopeApp(sixthday.AdminApp):
         self.model["categories"] = [(c.ID, c.name) for c in chan.categories]
         # @TODO: will need to limit number of past stories soon.
         self.model["stories"] = [BoxView(s) for s in chan.stories]
+	self.model["stories"].sort(lambda a,b: -cmp(a["posted"], b["posted"]))
         return chan
 
     def create_story(self):
         c = self.studyChannel(self.input.get("channelID"))
-        self.model["siteurl"] = c.url        
+        self.model["siteurl"] = c.url
         self.generic_create(Story, "frm_story")
         
     def edit_story(self):

@@ -12,33 +12,19 @@
 * if scope.get('status') == 'published':
      <p><b style="color:green">publish successful!</b></p>
 
-<a accesskey="p" href="rantelope.app?action=publish&channelID={:channelID:}">[p]ublish</a>
-
-|
-
-<a accesskey="s" target="_blank" href="{:siteurl:}">[s]how</a>
-
-
 <form action="rantelope.app" method="POST">
   <input type="hidden" name="what" value="story">
   {:html.hidden("channelID", channelID):}
 
 * if ID:
-    <b>edit this story:</b>
     <input type="hidden" name="ID" value="{:ID:}">
-    <!--
-    &nbsp;&nbsp;
-    [<a href="rantelope.app?action=show&what=story&ID={:ID:}">comments</a>]
-    -->
-* el:
-    <b>add a new story:</b>
 
-  <table border="1">
+  <table style="border-bottom:solid maroon 1px; border-left: solid gray 1px; background: white">
     <tr><th>title:</th>
-        <td>{:html.text("title",title):}</td></tr>
-    <tr><th>category</th>
-        <td>{:html.select("categoryID", categories, categoryID):}</td></tr>
-    <tr><th colspan="2">description:</th></tr>
+        <td>{:html.text("title",title,'size="40"'):}</td></tr>
+    <tr><th>posted:</th>
+        <td>{:html.text("posted", posted, 'size="20"'):}
+            in: {:html.select("categoryID", categories, categoryID):}</td></tr>
     <tr><td colspan="2"><textarea name="description"
             rows="10" cols="60">{:description:}</textarea></td></tr>
   </table>
@@ -54,7 +40,7 @@
         <table width="100%">
     * body:
         <tr><td style="border-top: solid silver 1px">
-            <a href="rantelope.app?action=show&what=story&ID={:ID:}"
+            <a href="rantelope.app?action=edit&what=story&ID={:ID:}"
                    >{:title:}</a></td></tr>
         <tr><td>{:description:}</td></tr>
     * foot:

@@ -9,6 +9,7 @@
     <description>{:xmlEncode(description):}</description>
     * for stories:
         <item>
+          <badDate>{:posted:}</badDate>
           <title>{:xmlEncode(title):}</title>
           <link>{:xmlEncode(url):}</link>
           <description>{:description:}</description>
