@@ -18,6 +18,6 @@ body, td, p {
 <tr><td style="color: white; background: black">
 <h1>DefaultShop</h1></td></tr>
 <tr><td style="background: white">
-* if error:
+* if scope.get('error'):
     <h4>error: <span style="color:red">{:error:}</span></h4>
 
