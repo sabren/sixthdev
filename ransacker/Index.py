@@ -35,10 +35,20 @@ class Index(object):
             self.remove(name)
         self._doIndexing(name, text)
 
+    def countWords(self, text):
+        """
+        Return a dict mapping words to frequencies
+        """
+        fd = {}
+        for word in text.split():
+            fd.setdefault(word, 0)
+            fd[word] += 1
+        return fd
+
     def _doIndexing(self, name, text):
         # fetch pageID only once for speed
         pageID = self._getPageID(name)
-        for chunk, count in ransacker.wordFreqs(text).items():
+        for chunk, count in self.countWords(text).items():
             self._storeFreq(pageID, chunk, count)
 
     def _storeFreq(self, name, word, count):
