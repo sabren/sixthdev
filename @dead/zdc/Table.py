@@ -64,9 +64,12 @@ class Table(zdc.Object):
         ## ensure exactly one record was returned:
         if recs == []:
             if key:
-                raise LookupError, "record not found for key %s" % key
+                raise LookupError, \
+                      "record not found in table %s for key %s" \
+                      % (self.name, key)
             else:
-                raise LookupError, "record not found where %s" % where
+                raise LookupError, "record not found in table %s where %s" \
+                      % (self.name, where)
         elif len(recs) > 1:
             raise LookupError, "mulitple records found for single key!!"
         return recs[0]
