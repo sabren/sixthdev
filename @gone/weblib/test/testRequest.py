@@ -160,3 +160,24 @@ class RequestTestCase(unittest.TestCase):
 
         assert request.form["twovalues"] == ("value1", "value2"), \
                "multi-value fields break on multi-part forms."
+
+
+
+
+    def check_ampersand(self):
+        """
+        ampersand is %26 .. what if the querystring or
+        form or whatever has an ampersand in it? At one
+        point, urlDecode()ing it would break the value in
+        two pieces...
+        """
+        ampstr = "a=apple&b=boys%26girls"
+        req = weblib.Request(content=ampstr, querystring=ampstr)
+        goal = {"a":"apple", "b":"boys&girls"}
+
+        assert req.query == goal, \
+               "Request.query doesn't grok ampersands."
+
+        assert req.form == goal, \
+               "Request.query doesn't grok ampersands."
+

@@ -54,21 +54,23 @@ class Request:
         
 
         ## query, a hash of the querystring:
-        self.query = self.parse(weblib.urlDecode(self.querystring))
+        self.query = self.parse(self.querystring, decode=1)
 
 
         ## cookie:
         ## @TODO: get some real cookie parsing abilities...
         self.cookie = cookie
         if cookie is None:
-            self.cookie = self.parse(self.environ.get("HTTP_COOKIE", ""), splitter=";")
+            self.cookie = self.parse(self.environ.get("HTTP_COOKIE", ""),
+                                     splitter=";")
         del cookie
         
 
         ## content & contentLength:
         self.content = content
         if content is None:
-            self.contentLength = int(self.environ.get("CONTENT_LENGTH", 0)) or None
+            self.contentLength = int(self.environ.get("CONTENT_LENGTH", 0)) \
+                                 or None
             if self.contentLength is not None:
                 import sys
                 self.content = sys.stdin.read(self.contentLength)
@@ -105,7 +107,7 @@ class Request:
         self.form = form
         if form is None:
             if self.contentType == "application/x-www-form-urlencoded":
-                self.form = self.parse(weblib.urlDecode(self.content))
+                self.form = self.parse(self.content, decode=1)
             else:
                 self.form = {}
         del form
@@ -159,9 +161,11 @@ class Request:
         return head + tail
 
 
-    def parse(self, what, splitter="&"):
+    def parse(self, what, splitter="&", decode=0):
         res = {}
         for pair in string.split(what, "&"):
+            if decode:
+                pair = weblib.urlDecode(pair)
             l = string.split(pair, "=", 1)
             k = l[0]
             if len(l) > 1:
@@ -192,6 +196,14 @@ class Request:
         return res
 
 
+    def __delitem__(self, key):
+        res = None
+        for dict in [self.query, self.form, self.cookie]:
+            if dict.has_key(key):
+                res = 1
+                del dict[key]
+        if res is None:
+            raise KeyError, key
 
     def get(self, key, failobj=None):
         try:
