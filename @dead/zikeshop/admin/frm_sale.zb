@@ -6,7 +6,8 @@
 <table border="1">
 <tr><th>code</th><th>product</th><th>price</th>
 <th>quantity</th></tr>
-
+* exec:
+    counter = 0
 * for products:
     <tr>
     <td valign="top">{:code:}</td>
@@ -16,13 +17,20 @@
     * for styles:
         * head:
             <td align="right">
+        * exec:
+            counter = counter + 1
         {:name:}: <input type="text" size="5" name="qty_{:ID:}"><br>
         * foot:
             </td>
     * none:
+        * exec:
+            counter = counter + 1
         <td align="right">
+        <input type="hidden" name="details(+{:counter:}|productID)"
+               value="{:ID:}">
         <input type="text" style="background: #ccffcc"
-               size="5" name="qty_{:ID:}">
+            value = ""
+            size="5" name="details(+{:counter:}|quantity)">
         </td>
 </tr>
 </table>
