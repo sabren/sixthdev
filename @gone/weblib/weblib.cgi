@@ -68,8 +68,10 @@ if (eng.result is None) or (eng.result == eng.SUCCESS):
 eng.stop()
 
 if eng.result in (eng.SUCCESS, eng.EXIT):
-    ## print the results    
+    ## print the results
     print eng.response.getHeaders() + eng.response.buffer
+    
+    #print eng.response.getHeaders() + eng.response.buffer
 else:
     ## print debug output
     print "Content-Type: text/html"
@@ -77,7 +79,7 @@ else:
     print weblib.trim("""
           <html>
           <head>
-          <title>weblib error</title>
+          <title>weblib.cgi exception</title>
           <style type="text/css">
               body, p {
                   background: #cccccc;
@@ -89,14 +91,18 @@ else:
               pre.output{ color : green }
           </style>
           </head>
+          <body>
           """)
 
     if eng.result == eng.FAILURE:
         print "<b>assertion failure:</b>", eng.error
+        print "</body>\n</html>"
 
     elif eng.result == eng.EXCEPTION:
-    
-        print "<b>weblib error while running %s</b><br>" \
+
+        ## html error message #################################
+
+        print "<b>uncaught exception while running %s</b><br>" \
               % whichfile
         print '<pre class="traceback">' \
               + weblib.htmlEncode(eng.error) + "</pre>"
@@ -111,6 +117,7 @@ else:
 
 	print '<b>session data:</b><br>'
         print '<ul>'
+
 	for item in eng.sess.keys():
             print '<li>', item, ': '
             try:
@@ -125,10 +132,51 @@ else:
               weblib.htmlEncode(eng.response.getHeaders()) + \
               weblib.htmlEncode(eng.response.buffer) + \
               "</pre>"
-        
+
     print "<hr>"
     print '<a href="http://weblib.sourceforge.net/">weblib</a> ' + \
-          '(c) copyright 2000 ' + \
+          '(c) copyright 2000-2001 ' + \
           '<a href="http://www.zike.net/">Zike Interactive</a>. ' + \
-          'All rights reserved.'    
+          'All rights reserved.'
+    print "</body>"
     print "</html>"
+
+    import sys
+    sys.stdout.flush()
+
+    ## email error message ################################
+    if (eng.result == eng.EXCEPTION) \
+       and getattr(weblib, "OWNER_EMAIL", None):
+        #@TODO: remove dependency on zikebase
+        import zikebase
+        hr = "-" * 50 + "\n"
+        site = getattr(weblib, "SITE_NAME", "unspecified site")
+        msg = weblib.trim(
+            """
+            To: %s
+            From: weblib.cgi <%s>
+            Subject: uncaught exception in %s
+
+            """ % (weblib.OWNER_EMAIL, weblib.OWNER_EMAIL, site))
+
+        msg = msg + "uncaught exception in %s\n\n" % whichfile
+        msg = msg + hr
+        msg = msg + eng.error
+        msg = msg + hr
+        msg = msg + "FORM: %s\n"  % eng.request.form
+        msg = msg + "QUERYSTRING: %s\n" % eng.request.querystring
+        msg = msg + "COOKIE: %s\n" % eng.request.cookie
+        msg = msg + "SESSION DATA:\n"
+        for item in eng.sess.keys():
+            msg = msg + item, ': '
+            try:
+                msg = msg + eng.sess[item] + "\n"
+            except:
+                msg = msg + '(can\'t unpickle)\n'
+        msg = msg + hr
+        msg = msg + "OUTPUT:\n\n"
+        msg = msg + eng.response.getHeaders() + "\n"
+        msg = msg + eng.response.buffer + "\n"
+        msg = msg + hr
+
+        zikebase.sendmail(msg)
