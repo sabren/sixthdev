@@ -20,4 +20,4 @@ class Style(zikeshop.Product):
             return None
 
     def __str__(self):
-        return "%s [%s]" % (self.product.name, self.style)
+        return "%s [%s]" % (self.product.name, self.name)
