@@ -120,10 +120,6 @@ class zebraTestCase(unittest.TestCase):
         
         """))
 
-        dump = open("actual.py","w")
-        dump.write(python)
-        dump.close
-
         # now compile it and run the report
         exec(python)
         output = fetch()
