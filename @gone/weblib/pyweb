@@ -28,7 +28,7 @@ else:
           <head>
           <title>pyweb error</title>
           <style type="text/css">
-          body, p { font-family: verdana, arial; font-size: 75%; }
+          body, p { background: #cccccc; font-family: verdana, arial; font-size: 75%; }
           pre { font-size: 120%; }
           pre.traceback { color: red; }
           pre.output{ color : green }
