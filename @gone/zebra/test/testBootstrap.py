@@ -45,12 +45,12 @@ class BootstrapTestCase(unittest.TestCase):
             <?xml version="1.0"?>
             <zebra>
             <rem>test scope</rem>
-            <xpr>a</xpr><br/>
+            <xpr>a</xpr><nl/>
             <for series="stuff">
             <xpr>a</xpr>, <xpr>b</xpr>, <xpr>c</xpr>
-            <br/>            
+            <nl/>            
             </for>
-            <xpr>a</xpr><br/>
+            <xpr>a</xpr><nl/>
             </zebra>
             """)
 

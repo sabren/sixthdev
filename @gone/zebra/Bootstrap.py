@@ -96,10 +96,9 @@ class Bootstrap:
 
     ## individual tag templates ####################################
 
-    ## <zebra> ##
     def handle_zebra(self, model, attrs):
         res = zebra.trim(
-            """            
+            '''
             class Report:
             
                 def show(self, model={}):
@@ -131,10 +130,10 @@ class Bootstrap:
 
                     # zres is the result (the output we're building)
                     zres = ""
-            """)
+            ''')
         res = res + zebra.indent(self.walk(model), 2)
         res = res + zebra.trim(
-            """
+            ''' 
             # end of Report.fetch()
                     return zres
 
@@ -143,18 +142,16 @@ class Bootstrap:
                 
             def show(model={}):
                 return Report().show(model)
-            """)
+            ''')
         return res
 
-    ## <rem> ##
     def handle_rem(self, model, attrs):
         return "" # @TODO: do we want comments after compliation?
 
 
-    ## <for> ##
     def handle_for(self, model, attrs):
         res = zebra.trim(
-            """
+            '''
             _ = 0
             _max_ = len(scope["%(series)s"])
             for _ in range(_max_):
@@ -166,35 +163,30 @@ class Bootstrap:
                 mdl = scope["%(series)s"][_]
                 for item in mdl.keys():
                     scope[item]=mdl[item]
-            """ % attrs)
+            ''' % attrs)
         res = res + zebra.indent(self.walk(model), 1)            
         res = res + zebra.trim(
-            """
+            '''
             #   ## close for-%(series)s loop ##########
                 globals().update(scope_stack.pop())
-            """ % attrs)
+            ''' % attrs)
         return res
 
-
-    ## <none> ##
     def handle_none(self, model, attrs):
         res = "if not _max_:\n"
         res = res + zebra.indent(self.walk(model), 1)
         return res
 
 
-    ## <var> ##
     def handle_var(self, model, attrs):
         res = "zres = zres + str(scope.get('%s',''))\n" % model[0]
         return res
 
-    ## <xpr> ##
     def handle_xpr(self, model, attrs):
         res = "zres = zres + str(%s)\n" \
               % self.walk(model, mode="exec")
         return res
 
-    ## <exec> ##
     def handle_exec(self, model, attrs):
         res = "globals().update(scope)\n" \
               + self.walk(model, mode="exec") + "\n" \
@@ -203,60 +195,46 @@ class Bootstrap:
         return res
 
 
-    ## <if> ##
     def handle_if(self, model, attrs):
         res = "if %s:\n" % attrs["condition"]
         res = res + zebra.indent(self.walk(model), 1)
         return res
 
 
-    ## <ef> ##
     def handle_ef(self, model, attrs):
         res = "elif %s:\n" % attrs["condition"]
         res = res + zebra.indent(self.walk(model), 1)
         return res
 
-
-    ## <el> ##
     def handle_el(self, model, attrs):
         res = "else:\n"
         res = res + zebra.indent(self.walk(model), 1)
         return res
 
-
-    ## <br> ##
-    def handle_br(self, model, attrs):
+    def handle_nl(self, model, attrs):
         return 'zres = zres + "\\n"\n'
 
-
-    ## <head> ##
     def handle_head(self, model, attrs):
         # @TODO: handle grouped heads
         res = "if _ == 0:\n"
         res = res + zebra.indent(self.walk(model), 1)
         return res
 
-    ## <body> ##
     def handle_body(self, model, attrs):
         "the body tag does nothing at all.. it's purely aesthetic"
         return self.walk(model)
 
-    ## <foot> ##
     def handle_foot(self, model, attrs):
         # @TODO: handle grouped feet
         res = "if _ + 1 == _max_:\n"
         res = res + zebra.indent(self.walk(model), 1)
         return res
 
-
-    ## <glue> ##
     def handle_glue(self, model, attrs):
         res = "if _ + 1 < _max_:\n"
         res = res + zebra.indent(self.walk(model), 1)
         return res
 
-
-    ## <include> ##
     def handle_include(self, model, attrs):
         res = "import zebra\n"
         res = res + "zres=zres + zebra.fetch('%s',scope)\n" % attrs["file"]
