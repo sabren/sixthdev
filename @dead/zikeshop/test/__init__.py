@@ -16,11 +16,6 @@ from testSaleEditor import *
 from testCheckoutApp import * 
 suites = {}
 
-
-## @TODO: rewrite testBagger as a test of cart.py?
-## from testBagger import *
-## suites['bagger'] = unittest.makeSuite(BaggerTestCase, "check_")
-
 ## suites = zdc.test.suites
 ##
 ## # merge the lists
