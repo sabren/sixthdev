@@ -36,7 +36,7 @@ class Attributize(type):
             if hasattr(b, "__attrs__"):
                 cls.__attrs__.update(b.__attrs__)
         for name in dict.keys():
-            if isinstance(dict[name], attr) and not name in cls.__attrs__:
+            if isinstance(dict[name], attr):
                 cls.__attrs__[name] = dict[name]
                 delattr(cls, name)
         
