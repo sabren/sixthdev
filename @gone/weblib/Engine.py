@@ -132,6 +132,8 @@ class Engine:
         """
         self.result = self.SUCCESS
         try:
+            self.script = script
+            self.setPathInfo() 
             self._execute(script)
         except SystemExit:
             self.result = self.EXIT
