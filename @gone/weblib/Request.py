@@ -142,3 +142,12 @@ class Request:
         except KeyError:
             return failobj
 
+
+    def has_key(self, key):
+        if self.get(key):
+            return 1
+        else:
+            return 0
+            
+            
+
