@@ -35,7 +35,7 @@ if weblib.request.has_key("action"):
     sale = ed.object
 
 print '<a href="sales.py">back to sales list</a>'
-print '<h2>Sale #%(ID)s</h2>' % sale._record
+print '<h2>Sale #%s</h2>' % int(sale.ID)
 
 if sale.customerID != 0:
 
@@ -55,7 +55,7 @@ if sale.customerID != 0:
     ## hide empty address lines
     for line in range(3):
         if string.strip(rec["address%i" % (line+1)]) != "":
-            print (line+1), rec["address%i" % (line+1)]
+            print rec["address%i" % (line+1)]
 
     print """%(city)s, %(stateCD)s, %(postal)s
     %(countryCD)s
@@ -72,7 +72,7 @@ if sale.customerID != 0:
     ## hide empty address lines
     for line in range(3):
         if string.strip(rec["address%i" % (line+1)]) != "":
-            print (line+1), rec["address%i" % (line+1)]
+            print rec["address%i" % (line+1)]
 
     print """%(city)s, %(stateCD)s, %(postal)s
     %(countryCD)s
