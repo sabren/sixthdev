@@ -200,11 +200,11 @@ class Clerk(object):
     def matchOne(self, klass, *args, **kwargs):
         res = self.match(klass, *args, **kwargs)
         if len(res)==0:
-            raise LookupError("fetch(%s, %s, **%s) didn't match anything!"
-                              % (klass, __ID__, kw))
+            raise LookupError("matchOne(%s, *%s, **%s) didn't match anything!"
+                              % (klass, args, kw))
         elif len(res)>1:
-            raise LookupError("fetch(%s) matched multiple values!"
-                              % (klass, __ID__, kw))
+            raise LookupError("matchOne(%s, *%s, **%s) matched %s objects!"
+                              % (klass, args, kw, len(res)))
         return res[0]
         
    
