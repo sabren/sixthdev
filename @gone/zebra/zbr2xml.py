@@ -132,6 +132,9 @@ class Z2X:
     def parse_glue(self, tokens):
         return '' # no options yet
 
+    def parse_import(self, tokens):
+        return 'module="%s"' % tokens[1]
+
 
 ### HELPER FUNCTIONS ############################################
 
