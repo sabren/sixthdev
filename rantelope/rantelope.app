@@ -36,7 +36,6 @@ class RantelopeApp(sixthday.AdminApp):
         model.update(BoxView(chan))
         print >> self, zebra.fetch("sho_channel", model)
 
-
     def save_channel(self):
         chan = self.generic_save(Channel)
         chan.writeFiles()
@@ -49,8 +48,7 @@ class RantelopeApp(sixthday.AdminApp):
         self.redirect(action='show&what=channel&ID=%s' % cat.channelID)
 
     def edit_category(self):
-        self.generic_show(Category, "frm_category")
-    
+        self.generic_show(Category, "frm_category")  
 
     ## stories #########################
 
@@ -90,12 +88,18 @@ class RantelopeApp(sixthday.AdminApp):
     def save_comment(self):
         cmt = self.generic_save(Comment)
         self.redirect(action='show&what=story&ID='
-                            + str(cmt.storyID))
-
-
+                      + str(cmt.storyID))
+        
 ### main code #######################################
 
 if __name__=="__main__":
-    from sqlRantelope import clerk   
+    from sqlRantelope import clerk, dbc
+    from AuthorAuth import AuthorAuth
+    from weblib import Sess, SessPool
+    sess = Sess(SessPool.SqlSessPool(dbc), REQ, RES)
+    sess.start()
+    auth = AuthorAuth(sess, clerk)
+    auth.check()
     print >> RES, RantelopeApp(clerk, REQ).act()
+    sess.stop()
 
