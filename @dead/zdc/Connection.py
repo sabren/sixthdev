@@ -8,6 +8,9 @@ class Connection:
     from MySQLdb import * # for NUMBER, etc..
 
     def __init__(self, driver=None, **params):
+        """
+        driver should be a class or a string.
+        """
         if driver:
             apply(self.open, (driver,), params)
 
