@@ -36,17 +36,15 @@
 
 
 
-<b>styles/inventory:</b><br>
+<b>styles</b><br>
 * for styles:
     * head:
         <table>
     <tr>
     <td><a href="index.py?action=edit&what=style&ID={:ID:}">{:name:}</a></td>
-    <td>{:inStock:}</td><td>{:onHold:}</td></tr>
+    </tr>
     * foot:
         </table>
-* none:
-    {:inStock:} in stock, {:onHold:} on hold
 
 <br>
 [<a href="index.py?action=create&what=style&productID={:ID:}">add style</a>]

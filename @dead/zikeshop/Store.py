@@ -51,17 +51,6 @@ class Store(zdc.RecordObject):
 
     ## calculations #######################################
 
-    def calcInventory(self, prod):
-        res = 0
-        for loc in self._locations:
-            res = res + loc.calcInventory(prod)
-        return res
-
-    
-    def calcAvailable(self, prod):
-        return self.calcInventory(prod) - self._onHold.get(prod, 0)
-
-
     def calcShipping(self, addr, weight):
         import zikeshop
         res = 0
