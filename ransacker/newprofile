@@ -3,9 +3,12 @@
 import ransacker, os, profile, sys, time
 now = time.asctime
 
-INDEX  = "spec/newprof"
-CLASS = ransacker.AllMkIndex
-FILE = "test/profile.this"
+INDEX = "spec/newprof"
+FILE  = "test/profile.this"
+
+#CLASS = ransacker.AllMkIndex
+CLASS = ransacker.MkIndex
+
 
 # make sure we have a fresh index
 for ext in [".rki", ".rkw", ".rkp"]:
