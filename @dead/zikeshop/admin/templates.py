@@ -6,21 +6,22 @@ __ver__="$Id$"
 import weblib
 import zebra
 
-tpls = [
-    'dsp_cart',
-    'dsp_category',
-    'dsp_foot',
-    'dsp_head',
-    'dsp_product',
-    'dsp_receipt',
-    'frm_billing',
-    'frm_card',
-    'frm_contact',
-    'frm_shipping',
-    'frm_signup',
-    'ssl_foot',
-    'ssl_head',
-    ]
+def tpldir():
+    import zikeshop
+    if hasattr(zikeshop, "tpldir"):
+        return zikeshop.tpldir
+    else:
+        raise hell
+        #@TODO: unhardcode base directory for templates
+
+
+import os, string
+# get a list of all *.zb files in the directory, without the ".zb"
+print tpldir()
+tpls = map(lambda filename: filename[:-3], 
+           filter(lambda filename: filename[-3:] == ".zb",
+                  os.listdir(tpldir())))
+tpls.sort()
 
 which = weblib.request.get("which")
 
@@ -33,14 +34,6 @@ for tpl in tpls:
 print '</select>'
 print '<input type="submit" value="go">'
 print '</form>'
-
-def tpldir():
-    import zikeshop
-    if hasattr(zikeshop, "tpldir"):
-        return zikeshop.tpldir
-    else:
-        raise hell
-        #@TODO: unhardcode base directory for templates
 
 if weblib.request.get("action") == "save":
     contents = weblib.request.get("contents")
