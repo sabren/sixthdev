@@ -36,8 +36,9 @@ __objs=(
     'Picture',
     'User',
     'UserAuth',
+    'Password',
     'ObjectEditor',
-    'Node'
+    'Node',
     )
 
 for __item in __objs:
