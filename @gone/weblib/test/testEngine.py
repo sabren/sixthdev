@@ -37,8 +37,12 @@ class EngineTestCase(unittest.TestCase):
 
         weblib.MYFORM = {"a":"bcd"}
 
-        myscript = "import weblib\n" +\
-                   "assert weblib.request.form is weblib.MYFORM, 'request uses wrong form'"
+        myscript = trim(
+            """
+            import weblib
+            assert weblib.request.form is weblib.MYFORM, \
+                'request uses wrong form'
+            """)
 
         req = weblib.Request(form=weblib.MYFORM)
         weblib.Engine(request=req, script=myscript).run()
@@ -58,7 +62,8 @@ class EngineTestCase(unittest.TestCase):
     def check_responseEnd(self):
         res = 1
         try:
-            engine = weblib.Engine(script="import weblib; weblib.response.end()")
+            engine = weblib.Engine(
+                script="import weblib; weblib.response.end()")
             engine.run()
         except SystemExit:
             res = 0
@@ -68,16 +73,20 @@ class EngineTestCase(unittest.TestCase):
 
 
     def check_context(self):
-        eng1 = weblib.Engine(script="print 'eng1'")   # default case
+        # default case:
+        eng1 = weblib.Engine(script="print 'eng1'")   
 
-        eng2 = weblib.Engine(script="print 'eng2'")   # explicit 
+        # explicit:
+        eng2 = weblib.Engine(script="print 'eng2'")
         eng2.sess=weblib.Sess(engine=eng2)
         eng2.auth=weblib.Auth(engine=eng2)
         eng2.perm=weblib.Perm(engine=eng2)
         eng2.request=weblib.Request(engine=eng2)
         eng2.response=weblib.Response(engine=eng2)
                              
-        eng3 = weblib.Engine(script="print 'eng3'", ) # default after explicit pass
+        # defaults after setting another engine explicitly:
+        eng3 = weblib.Engine(script="print 'eng3'", )
+        
 
         for eng in (eng1, eng2, eng3):
             eng.run()
@@ -85,15 +94,17 @@ class EngineTestCase(unittest.TestCase):
             for what in ("auth","sess","perm","request","response"):
                 assert getattr(eng, what).engine is eng, \
                        ".engine screws up for " + name + "." + what
-                assert getattr(getattr(eng, what).engine, what) is getattr(eng, what), \
+                assert getattr(getattr(eng, what).engine, what) \
+                       is getattr(eng, what), \
                        ".eng." + what + " screws up for " + name 
 
 
     def check_weblib_defaults(self):
-        
-        """Engine should ALWAYS create a new copy of the objects in
+        """
+        Engine should ALWAYS create a new copy of the objects in
         weblib.. The only time we use the ones in weblib is if we're
-        not inside an Engine."""
+        not inside an Engine.
+        """
         
         import weblib
         import __builtin__
@@ -108,12 +119,16 @@ class EngineTestCase(unittest.TestCase):
             """
             import weblib
             
-            assert weblib.auth is not orig["auth"], "weblib.auth isn't fresh!"
-            assert weblib.sess is not orig["sess"], "weblib.sess isn't fresh!"
-            assert weblib.perm is not orig["perm"], "weblib.perm isn't fresh!"
-            assert weblib.request is not orig["request"], "weblib.request isn't fresh!"
-            assert weblib.response is not orig["response"], "weblib.response isn't fresh!"
-
+            assert weblib.auth is not orig['auth'], \
+                  'weblib.auth isn\'t fresh!'
+            assert weblib.sess is not orig['sess'], \
+                  'weblib.sess isn\'t fresh!'
+            assert weblib.perm is not orig['perm'], \
+                  'weblib.perm isn\'t fresh!'
+            assert weblib.request is not orig['request'], \
+                  'weblib.request isn't fresh!'
+            assert weblib.response is not orig['response'], \
+                  'weblib.response isn't fresh!'
             """))
 
         eng.run()
@@ -121,9 +136,10 @@ class EngineTestCase(unittest.TestCase):
         
 
     def check_weblib_assigned(self):
-
-        """Almost the same as above.. but make sure the ones we pass in are
-        the ones that go into weblib.."""
+        """
+        Almost the same as above.. but make sure the ones we pass in are
+        the ones that go into weblib..
+        """
 
         import weblib
         import __builtin__
@@ -155,11 +171,16 @@ class EngineTestCase(unittest.TestCase):
             """
             import weblib
             
-            assert weblib.auth is good["auth"], "weblib.auth is wrong!"
-            assert weblib.sess is good["sess"], "weblib.sess is wrong!"
-            assert weblib.perm is good["perm"], "weblib.perm is wrong!"
-            assert weblib.request is good["request"], "weblib.request is wrong!"
-            assert weblib.response is good["response"], "weblib.response is wrong!"
+            assert weblib.auth is good['auth'], \
+                   'weblib.auth is wrong!'
+            assert weblib.sess is good['sess'], \
+                   'weblib.sess is wrong!'
+            assert weblib.perm is good['perm'], \
+                   'weblib.perm is wrong!'
+            assert weblib.request is good['request'], \
+                   'weblib.request is wrong!'
+            assert weblib.response is good['response'], \
+                   'weblib.response is wrong!'
             """)
 
             ).run()
@@ -215,7 +236,7 @@ class EngineTestCase(unittest.TestCase):
 
     def check_PATH_INFO(self):
         eng = weblib.Engine(script=open("test/pathinfo.py"))
-        eng.setUp()
+        eng.start()
         assert eng.request.environ.get("PATH_INFO") == "test/pathinfo.py", \
                "Engine doesn't set PATH_INFO correctly for open()ed scripts."
         

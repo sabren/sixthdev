@@ -1,15 +1,14 @@
 """
 A wrapper object for running weblib scripts.
-
-$Id$
 """
+__ver__ = "$Id$"
 
 import weblib
 import string
 
 class Engine:
-
-    """Engine - a wrapper class that runs a script in a custom environment.
+    """
+    Engine - a wrapper class that runs a script in a custom environment.
 
     You should be able to run a weblib script as a regular cgi just by
     putting a #!/python line up top, and making it executable.. But,
@@ -83,6 +82,9 @@ class Engine:
 
 
     def interceptPrint(self):
+        """
+        This replaces sys.stdout with the engine's response object.
+        """
         import sys
         self.stdout = sys.stdout
         sys.stdout = self.response
@@ -90,11 +92,17 @@ class Engine:
 
     
     def restorePrint(self):
+        """
+        This restores sys.stdout after a call to interceptPrint.
+        """
         import sys
         sys.stdout = self.stdout
 
 
     def startParts(self):
+        """
+        
+        """
         self.response.start()
         self.sess.start()
         self.auth.start()
@@ -136,7 +144,7 @@ class Engine:
                 self.request.environ["PATH_INFO"] = self.script.name
         
 
-    def setUp(self):
+    def start(self):
         self.startParts()
         self.injectParts()
         self.setPathInfo()
@@ -144,7 +152,7 @@ class Engine:
 
 
 
-    def tearDown(self):
+    def stop(self):
         self.restorePrint()
         self.restoreParts()
         self.stopParts()
@@ -172,12 +180,11 @@ class Engine:
                 sys.exc_value,
                 sys.exc_traceback), '')
 
-        
 
     def run(self):
-        self.setUp()
+        self.start()
         try:
             self.execute(self.script)
         finally:
-            self.tearDown()
+            self.stop()
             

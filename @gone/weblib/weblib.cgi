@@ -33,7 +33,7 @@ sys.path.append(dir)
 
 ## build the engine ##############################################
 eng = weblib.Engine()
-eng.setUp()
+eng.start()
 
 ## run .weblib.py ################################################
 
@@ -52,7 +52,7 @@ if (eng.result is None) or (eng.result == eng.SUCCESS):
 
 
 ## close down shop and show the results  ########################
-eng.tearDown()
+eng.stop()
 
 if eng.result == eng.SUCCESS:
     ## print the results    
