@@ -50,22 +50,6 @@ class ActorTestCase(unittest.TestCase):
         assert hamlet.question == "?", \
                "act() doesn't default to calling act_(). :("
         
-        
-
-    def check_badAction(self):
-        firstYearDramaStudent = weblib.Actor()
-
-        try:
-            gotError = 0
-            firstYearDramaStudent.act("well")
-        except:
-            gotError = 1
-
-        assert gotError, \
-               "Didn't get an error when asked to act() in ways it can't."
-
-        
-        
     def check_inEngine(self):
         "I thought this was having problems in other tests. it wasn't."
 

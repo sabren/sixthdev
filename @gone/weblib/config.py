@@ -12,7 +12,7 @@ pool : the default SessPool object
 
 
 import SessPool
-from sqlTest import dbc
+from sqlZikeShop import dbc
 
 pool = SessPool.SqlSessPool(dbc)
 
