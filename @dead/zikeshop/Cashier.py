@@ -287,16 +287,16 @@ class Cashier(zikeshop.ShopActor):
                                       zikeshop.owneremail,
                                       "inventory alert",
                                       msg)
-                    
+
                 msg = weblib.trim(
                     """
                     Subject: new order.
                     
                     you have a new order in zikeshop. click here
                     to see it:
-                    
-                    https://www.zike.net/zike/admin/zikeshop/sale.py?saleID=%i
 
+                    https://www.zike.net/zike/admin/zikeshop/sale.py?saleID=%i
+                    
                     """ % int(sale.ID))
                 zikeshop.sendmail("salebot@zike.net",
                                   zikeshop.owneremail,
@@ -304,7 +304,7 @@ class Cashier(zikeshop.ShopActor):
                 zikeshop.sendmail("salebot@zike.net",
                                   "info@zike.net",
                                   "new order.", msg)
-
+                
         except ValueError, e:
             import sys
             self.error = e
@@ -330,8 +330,8 @@ class Cashier(zikeshop.ShopActor):
 
     def get_model(self):
         res = {}
-        res["salestax"] = zikeshop.FixedPoint(getattr(self, "salestax") or 0)
-        res["shipping"] = zikeshop.FixedPoint(getattr(self, "shipping") or 0)
+        res["salestax"] = zikeshop.FixedPoint(getattr(self, "salestax", 0) or 0)
+        res["shipping"] = zikeshop.FixedPoint(getattr(self, "shipping", 0) or 0)
         res["addressbook"] = self.cust.q_addressbook()
         res["creditcards"] = self.cust.q_creditcards()
         res["error"] = getattr(self, "error", None)
@@ -342,3 +342,5 @@ class Cashier(zikeshop.ShopActor):
         res["date"] = time.asctime(time.localtime(time.time()))[:10] \
                       + ", " + time.asctime(time.localtime(time.time()))[-4:]
         return res
+
+
