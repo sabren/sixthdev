@@ -60,6 +60,17 @@ class RecordTestCase(unittest.TestCase):
                "didn't update correctly!"
 
 
+    def check_savetwice(self):
+        # this used to give a DuplicateError
+
+        rec = zdc.Record(self.table)
+        rec["fish"] = "onefish"
+        rec.save()
+
+        rec["fish"] = "twofish"
+        rec.save()
+
+
     def check_isNew(self):
         rec = zdc.Record(self.table)
         assert rec.isNew, "New record doesn't have true .isNew"
@@ -71,4 +82,6 @@ class RecordTestCase(unittest.TestCase):
 
     def tearDown(self):
         pass
+
+
 

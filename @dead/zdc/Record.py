@@ -51,6 +51,7 @@ class Record:
         """Inserts or Updates the record."""
         if self.isNew:
             self._insert()
+            self.isNew = 0
         else:
             self._update()
 
@@ -77,7 +78,11 @@ class Record:
             raise "record not found where" + `where`
 
         for f in range(len(row)):
-            self[self.table.fields[f].name]=row[f]
+            # we do this to get rid of the L at the end of longs:
+            if type(row[f]) == type(1L):
+                self[self.table.fields[f].name]=int(row[f])
+            else:
+                self[self.table.fields[f].name]=row[f]
 
 
     def _new(self):
@@ -169,8 +174,9 @@ class Record:
         # again later.. (or come up with an alternative)
        
         if self.table.rowid is not None:
-            self.key = self.table.dbc.insert_id()
+            self.key = int(self.table.dbc.insert_id())
             self[self.table.rowid] = self.key
+            self._where[self.table.rowid] = self.key
 
 
 

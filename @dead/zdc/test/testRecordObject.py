@@ -66,6 +66,27 @@ class RecordObjectTestCase(unittest.TestCase):
 
 
 
+    def check_saveTwice(self):
+
+        # created this test because it used to give DuplicateError
+        
+        robj = zdc.RecordObject(self.table)
+
+        robj.fish = 'eel'
+        robj.save()
+
+        try:
+            gotError = 0
+            robj.fish = 'electric eel'
+            robj.save()
+        except:
+            gotError = 1
+
+        assert not gotError, \
+               "problem saving RecordObject twice!"
+
+
+
 ## ## I removed this test because I don't think it applies anymore.. does it?
 ## ## actually, there should be SOME kind of error if you try to select a
 ## ## record that isn't there, but probably not a KeyError.. maybe NotFoundError?

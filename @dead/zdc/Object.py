@@ -15,17 +15,20 @@ class Object:
     see RecordObject and ModelObject (?) for examples..
     """
 
-    locks = []
-    isNew = 0
+    _locks = []
+    _isNew = 0
+    
+    def _init(self):
+        pass
 
     
     def __init__(self, dbc, key=None, **where):
-        """Don't override this. override _new() or _fetch() instead."""
+        """Don't override this. override _init(), _new() or _fetch() instead."""
 
-        self._locks = self.__class__.locks[:]
         self.dbc = dbc
-
         self.isNew = not ((key) or (where))
+
+        self._init()
 
         if key is None:
             if where:
