@@ -12,17 +12,18 @@ class Object:
     records in a databae. It is intended to be used as a
     wrapper for one or more zdc.Record objects.
 
-    see zikebase/linkwatcher for examples..
+    see RecordObject and ModelObject (?) for examples..
     """
 
-    table = None
     locks = []
     
     
-    def __init__(self, key=None, **kw):
+    def __init__(self, dbc, key=None, **kw):
         """Don't override this. override _new() or _fetch() instead."""
-        self._isLocked = 0
+
         self._locks = self.__class__.locks[:]
+        self.dbc = dbc
+        
         if key is None:
             if kw:
                 apply(self.fetch, (), kw)
@@ -53,15 +54,55 @@ class Object:
         pass
 
 
+    def get__isLocked(self):
+        """Makes sure we're unlocked by default.
+        
+        we can't put this in __init__ because child classes
+        might want to do stuff before calling _new() or _save()
+        and therefore, before __init__..
+        """
+        
+        if not self.__dict__.has_key("isLocked"):
+            self.__dict__["isLocked"] = 0
+        return self.__dict__["isLocked"]
+
+
+    def _findmember(self, member):
+        """self._findmember(member) : does self define or inherit member?
+
+        with subclasses, It's hard to tell if we have get_XXX,
+        because we have to iterate through all the base classes.
+        This ought to be built in to python, but it isn't.. :/
+        """
+
+        res = None
+
+        # __bases__ is only the IMMEDIATE parent, so we have
+        # to climb the tree...        
+        #@TODO: handle multiple inheritence
+        ancestors = [self.__class__]
+        while ancestors[-1].__bases__ != ():
+            ancestors.append(ancestors[-1].__bases__[0])
+        
+        for ancestor in ancestors:
+            for item in dir(ancestor):
+                if item == member:
+                    res = ancestor.__dict__[member]
+                    break
+
+        return res
+        
 
     def __setattr__(self, name, value):
+        
 
         ## case A: there's a set_XXX method.
-        if self.__class__.__dict__.has_key('set_' + name):
-            self.__class__.__dict__['set_' + name](self, value)
+        meth = self._findmember('set_' + name)
+        if meth is not None:
+            meth(self, value)
 
         ## case B: object is locked, so be careful
-        elif self.__dict__._isLocked:
+        elif self._isLocked:
             
             ## B1: locked (read only) attribute
             if name in self._locks:
@@ -84,8 +125,10 @@ class Object:
     def __getattr__(self, name):
 
         ## case A: there's a get_XXX method:
-        if self.__class__.__dict__.has_key('get_' + name):
-            return self.__class__.__dict__['get_' + name](self)
+        meth = self._findmember('get_' + name)
+        if meth is not None:
+            return meth(self)
+
 
         ## case B: the object has the attribute
         elif self.__dict__.has_key(name):
