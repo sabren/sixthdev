@@ -74,5 +74,17 @@ class NodeTestCase(unittest.TestCase):
         assert gotError, \
                "didn't get error assigning a node to itself."
 
+
+        # need to handle strings, too, because of the web.
+
+        try:
+            gotError = 0
+            node.parentID = "1"
+        except:
+            gotError = 1
+
+        assert gotError, \
+               "didn't get error assigning a node to itself when using a string"
+
         
         
