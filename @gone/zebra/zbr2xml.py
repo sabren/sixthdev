@@ -81,9 +81,12 @@ class Z2X:
                     ## the block is empty
                     pass
                 else:
-                    while (x<len(lines)) \
-                          and (lines[x][:newleft])==(" " * newleft):
-                        x = x + 1
+                    while (x<len(lines)):
+                        if (string.strip(lines[x])=="") \
+                           or (lines[x][:newleft])==(" " * newleft):
+                            x = x + 1
+                        else:
+                            break
                     
                 ## run this routine recursively on the inner block:
                 res = res + self._deBlock(lines[topx:x], tok, attrs, newleft)
