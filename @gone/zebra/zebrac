@@ -1,0 +1,36 @@
+#!/usr/home/sabren/bin/python
+"""
+The zebra compiler. Converts zbr or zbx files to .py.
+$Id$
+
+Usage: zebrac [-x] [filename]
+
+"""
+import sys
+import zebra
+
+## check for filename, options on command line
+
+ifp = sys.stdin
+fmt = "zbr"
+
+if len(sys.argv)==2:
+    if sys.argv[1]=="-x":
+        fmt = "zbx"
+        
+    if sys.argv[-1]!="-x":
+        ifp=open(sys.argv[-1])
+        
+elif len(sys.argv) > 3:
+    print __doc__
+        
+
+## read the lines of the file
+data = ifp.read()
+
+## if outline format, convert to xml
+if fmt=="zbr":
+    data = zebra.Z2X().translate(data)
+
+## parse the xml and output the python code.
+print zebra.Bootstrap().compile(data)
