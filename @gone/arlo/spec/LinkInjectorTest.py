@@ -46,7 +46,7 @@ class LinkInjectorTest(TestCase):
         class Parent(Strongbox):
             ID = attr(long)
             name = attr(str)
-            kids = linkset(Foreign)
+            kids = linkset(Foreign, None)
             
         class Uncle(Strongbox):
             brother = link(Parent)

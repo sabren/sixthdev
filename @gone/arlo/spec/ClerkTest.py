@@ -14,7 +14,7 @@ class Node(Strongbox):
     ID = attr(long)
     data = attr(str)
     parent = link(forward)
-    kids = linkset(forward)
+    kids = linkset(forward, "parent")
 Node.__attrs__["kids"].type=Node
 Node.__attrs__["parent"].type=Node   
 
@@ -227,8 +227,8 @@ class ClerkTest(unittest.TestCase):
         class User(Strongbox):
             ID = attr(long)
             username = attr(str)
-            domains = linkset(forward)
-            sites = linkset(forward)
+            domains = linkset(forward,None)
+            sites = linkset(forward,None)
         class Domain(Strongbox):
             ID = attr(long)
             user = link(User)

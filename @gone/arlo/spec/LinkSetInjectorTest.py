@@ -11,7 +11,7 @@ class Content(Strongbox):
 
 class Package(Strongbox):
     ID = attr(long)
-    refs = linkset(Content)
+    refs = linkset(Content, None)
 
 Content.__attrs__["box"].type=Package
 
