@@ -247,13 +247,19 @@ class FixedPoint:
         n, p = self.n, self.p
         i, f = divmod(abs(n), _tento(p))
         if p:
-            frac = str(f)[:-1]
+            # this snips off the trailing L.. (present in py1.52 but not 2.0)
+            # -mwallace 0118.2001:
+            frac = str(f)
+            if frac[-1]=="L":
+                frac = frac[:-1]
             frac = "0" * (p - len(frac)) + frac
         else:
             frac = ""
-        return "-"[:n<0] + \
-               str(i)[:-1] + \
-               "." + frac
+        # same for i: -mwallace
+        str_i = str(i)
+        if str_i =="L":
+            str_i =str_i[:-1]
+        return "-"[:n<0] + str_i + "." + frac
 
     def __repr__(self):
         return "FixedPoint" + `(str(self), self.p)`
