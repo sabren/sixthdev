@@ -46,8 +46,8 @@ class Attribute(object):
                 if value=="":
                     return None
                 else:
-                    raise TypeError, "%s is wrong type (expecting %s)" \
-                          % (value, self.type)
+                    raise TypeError, "%s: expected %s, got %s" \
+                          % (value, self.type, type(value))
 
     def validate(self, value):
         if (value is None):
