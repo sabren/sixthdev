@@ -70,7 +70,7 @@ elif which:
     print '<h3>editing %s</h3>' % which
     print '<form action="templates.py" method="post">'
     print '<table><tr><td>'
-    print '<textarea cols="75" rows="15" name="contents">%s</textarea>' \
+    print '<textarea cols="70" rows="15" name="contents">%s</textarea>' \
           % contents
     print '</td></tr><tr><td align="right">'
     print '<input type="hidden" name="which" value="%s">' % which
