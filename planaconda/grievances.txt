@@ -1,0 +1,22 @@
+
+- weblib.RequestBuilder().build() ?!?! ick.
+
+- MockClerk shouldn't need a DBMAP
+
+- DBMAP format is ugly as hell
+
+- no quick reference tutorial for mock database (shelve)
+- plus it's ugly!!!
+
+    import arlo
+    import shelve
+    import storage
+
+    shelf = shelve.open("data/planaconda.shf")
+    if not shelf.get("store"):
+        shelf["store"] = storage.MockStorage()
+    ENG.do_on_exit(shelf.close)
+
+    store = shelf["store"]
+    clerk = arlo.Clerk(store, config.DBMAP)
+

@@ -19,4 +19,5 @@ ACTUAL
 ======
 
 06:00 - started development
-
+08:00 - list node page and add node form in progress,
+        no working form posts yet...

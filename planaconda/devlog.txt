@@ -259,3 +259,38 @@ though, so let's see how adding Node goes.
 
 
 
+[0425.2004 07:02PM] argh.. i need to stop for a few minutes
+about every hour or so to stretch or eat or go to the bathroom.
+Or just to update this file. I should have planned for all
+this little stuff from the start. Is this project already
+too big? Even if my actual "billable" time comes close, I
+have to also worry about the deadline.  I better get cracking.
+
+[0425.2004 07:23PM] woohoo! the viewListProject page is
+working... Or rather it would be working if I had any
+data to show. Which would imply having a database. I
+think I'll go with a shelve for now. I should have a tutorial
+for that.
+
+[0425.2004 07:37PM] well.. bleh... okay, so I have a mock
+storage system. It's ugly as hell, too, but it works. Now
+what? Now I can store data but I need a form to collect it.
+I'm having to take my plan out of order here... Okay so
+next page: formEditProject
+
+[0425.2004 07:43PM] Huh! The logic for this these things is
+way easy. It's the surrounding hype that's giving me trouble.
+Okay, so I have the logic working for the node form... It's
+just one line. Now I need a template and a link to it.
+
+
+[0425.2004 07:56PM] hrm... had to do some quick thinking and
+reorganizing once I added a second template. I wound up just
+making an html directory and putting my zebra files in there.
+i've got two separate pages now and a shared header with a
+toolbar for navigation. woohoo! moving right along. 
+
+This puts me at two hours into development. I'm supposed to
+be done with all the node stuff by now. by the looks of it,
+I'm still about an hour behind schedule.
+
