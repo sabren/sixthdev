@@ -22,8 +22,7 @@ rki looks like: {
 
 import shelve
 import string
-
-NEXTNUM = "\t:nextnum"
+import ransacker
 
 class Index:
 
@@ -42,16 +41,14 @@ class Index:
         assert rki[-4:]==".rki", "index filename must end in .rki"
         
         if rkw is None:
+            # then assume it's the same name as the .rki
             rkw = rki[:-4] + ".rkw"
 
         self.rki = shelve.open(rki)
-        self.rkw = shelve.open(rkw)
+        self.wordHash = ransacker.WordHash(rkw)
 
-        if not self.rkw.has_key(NEXTNUM):
-            self.rkw[NEXTNUM] = 1
-        if not self.rki.has_key(NEXTNUM):
-            self.rki[NEXTNUM] = 1
-        
+        if not self.rki.has_key(ransacker.NEXTNUM):
+            self.rki[ransacker.NEXTNUM] = 1
 
 
     def delKey(self, key):
@@ -67,8 +64,8 @@ class Index:
 
     def addKey(self, key):
         """Adds a new key and returns the ItemID"""
-        itemID = self.rki[NEXTNUM]
-        self.rki[NEXTNUM] = itemID + 1
+        itemID = self.rki[ransacker.NEXTNUM]
+        self.rki[ransacker.NEXTNUM] = itemID + 1
         self.rki["i:"+`itemID`] = key
         self.rki["k:"+key] = (itemID, ())
         return itemID
@@ -86,25 +83,6 @@ class Index:
         return fd
 
 
-    def newWordID(self):
-        wordID = self.rkw[NEXTNUM]
-        self.rkw[NEXTNUM] = self.rkw[NEXTNUM]+1
-        return wordID
-        
-
-
-    def getWordID(self, word):
-        # make sure the word is in the wordlist
-        if not self.rkw.has_key(word):
-            wordID = self.rkw[word] = self.newWordID()            
-            # add a blank tuple in the index
-            self.rki[`wordID`]=()
-            return wordID
-        else:
-            return self.rkw[word]
-
-
-
     def index(self, key, text):
         """index(key, text) Add text to index and label it with the given key"""
         assert type(key) == type(""), "key must be a string!"            
@@ -120,9 +98,11 @@ class Index:
         newWordIDs = []
         for word in self.freqs(text).keys():
             # now add the reference
-            wordID = self.getWordID(word)
-            
-            self.rki[`wordID`] = self.rki[`wordID`] + (itemID,)
+            wordID = self.wordHash.get(word)
+            if self.rki.has_key(`wordID`):
+                self.rki[`wordID`] = self.rki[`wordID`] + (itemID,)
+            else:
+                self.rki[`wordID`] = (itemID,)
             newWordIDs.append(wordID)
 
         self.rki["k:"+key] = tuple((self.rki["k:"+key][0], tuple(newWordIDs)))
@@ -136,8 +116,8 @@ class Index:
         hits = {}
 
         for word in searchwords:
-            if self.rkw.has_key(word):
-                for item in self.rki[`self.rkw[word]`]:
+            if self.wordHash.has_key(word):
+                for item in self.rki[`self.wordHash[word]`]:
                     if hits.has_key(item):
                         hits[item] = res[item]+1
                     else:
@@ -164,6 +144,6 @@ class Index:
 
     def __del__(self):
         self.rki.close()
-        self.rkw.close()
+        self.wordHash.close()
 
 
