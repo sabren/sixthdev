@@ -9,7 +9,7 @@ class Foreign(Strongbox):
     data = attr(str)
 
 class InjecteeObj(Strongbox):
-    ref = link("Foreign")
+    ref = link(Foreign)
 
 class LinkInjectorTest(TestCase):
 
