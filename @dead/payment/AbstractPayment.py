@@ -1,3 +1,5 @@
+import urllib
+from M2Crypto import httpslib, SSL ## only until python 2 comes out 
 
 class AbstractPayment:
     """
@@ -30,17 +32,18 @@ class AbstractPayment:
             setattr(self, key, kwargs[key])
             
 
-    def _submit(self, dict):
+    def _submit(self, dict, headers=[]):
         """
         Given a dict of form variables, make the HTTPS POST.
         """
         data = urllib.urlencode(dict)
 
-        # @TODO: consolidate this code with the other Payment classes
-        h = httpslib.HTTPS(SSL.Context("sslv3"), self._secureServer)
+        h = httpslib.HTTPS(self._secureServer)
         h.putrequest('POST', "/" + self._securePage)
         h.putheader('Content-type', 'application/x-www-form-urlencoded')
         h.putheader('Content-length', '%d' % len(data))
+        for head in headers:
+            h.putheader(*head)
         h.endheaders()
         h.send(data)
 
