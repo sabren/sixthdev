@@ -30,5 +30,3 @@
 #### ALL log -m notify@sabren.com -f $CVSROOT/CVSROOT/commitlog %s
 ALL $CVSROOT/CVSROOT/cvsmail.py notify@sabren.com %s
 
-
-##
