@@ -13,6 +13,8 @@ CREATE TABLE times (
   day date,
   hours decimal(4,2),
   note text,
+  user enum('michal','mario'),
+  project varchar(30),
   PRIMARY KEY (ID)
 );
 
