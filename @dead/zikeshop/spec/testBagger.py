@@ -29,24 +29,23 @@ class BaggerTestCase(unittest.TestCase):
     def check_add(self):
         import zikeshop; zikeshop.siteID = 1
         self.cur.execute("DELETE FROM shop_product")
-        self.cur.execute("DELETE FROM shop_style")
         self.cur.execute("INSERT INTO shop_product (name, code, price,siteID) "
                          "VALUES ('apple', 'APPL', 4.25, 1)")
-        self.cur.execute("INSERT INTO shop_style (productID, style) "
+        self.cur.execute("INSERT INTO shop_product (parentID, name) "
                          "VALUES (1, 'green')")
-        self.cur.execute("INSERT INTO shop_style (productID, style) "
+        self.cur.execute("INSERT INTO shop_product (parentID, name) "
                          "VALUES (1, 'red')")
         
-        bagr = zikeshop.Bagger(zikeshop.Cart({}), {"styleID":1})
+        bagr = zikeshop.Bagger(zikeshop.Cart({}), {"productID":1})
         bagr.act("add")
 
         contents = bagr.cart.q_contents()
 
         assert len(contents) == 1,\
                "bagger.cart.q_contents() has wrong length"
-
+        #@TODO: bring back tests for styles
         item = contents[0]
-        assert item["label"] == "apple [green]",\
+        assert item["label"] == "apple",\
                "bagger set wrong label (%s)" % item["label"]
         assert item["quantity"] == 1,\
                "bagger set wrong quantity (%s)" % item["quantity"]
@@ -54,7 +53,7 @@ class BaggerTestCase(unittest.TestCase):
                "bagger set wrong price (%s)"  % item["price"]
         assert item["link"] == "product/APPL",\
                "bagger set wrong link (%s)" % item["link"]
-        assert item["extra"]["styleID"]==1,\
+        assert item["extra"]["ID"]==1,\
                "bagger set wrong extra (%s)" % item["extra"]
         
     

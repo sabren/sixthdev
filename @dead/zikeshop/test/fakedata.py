@@ -12,22 +12,23 @@ def load():
     from sqlTest import dbc
 
     ## clear out old data..
+    dbc.cursor().execute("DELETE FROM base_contact")
     dbc.cursor().execute("DELETE FROM base_user")
     dbc.cursor().execute("DELETE FROM web_sess")
     dbc.cursor().execute("DELETE FROM base_node")
     dbc.cursor().execute("DELETE FROM shop_product")
     dbc.cursor().execute("DELETE FROM shop_card")
     dbc.cursor().execute("DELETE FROM shop_sale")
-    dbc.cursor().execute("DELETE FROM shop_sale_item")
-    dbc.cursor().execute("DELETE FROM shop_address")
+    dbc.cursor().execute("DELETE FROM shop_detail")
+    #dbc.cursor().execute("DELETE FROM shop_sale_item")
     dbc.cursor().execute("DELETE FROM shop_product_node")
-    dbc.cursor().execute("DELETE FROM shop_style")
-    dbc.cursor().execute("DELETE FROM shop_location")
-    dbc.cursor().execute("DELETE FROM shop_inventory")
+    #dbc.cursor().execute("DELETE FROM shop_style")
+    #dbc.cursor().execute("DELETE FROM shop_location")
+    #dbc.cursor().execute("DELETE FROM shop_inventory")
 
     ## set up a location
-    dbc.cursor().execute("INSERT INTO shop_location (name, siteID) "
-                         "VALUES ('main location', %i)" % zikeshop.siteID)
+    #dbc.cursor().execute("INSERT INTO shop_location (name, siteID) "
+    #                     "VALUES ('main location', %i)" % zikeshop.siteID)
 
     user = zikebase.User()
     user.username=user.uid=user.email="username"
@@ -91,29 +92,42 @@ def load():
 
         ## set up 10 of each product in inventory..
         if prod.name == "dictionary":
-            # dictionary has two styles:
-            style = zikeshop.Style(productID=prod.ID)
-            style.style = "Webster"
-            style.save()
-            dbc.cursor().execute("INSERT INTO shop_inventory "
-                                 "(locationID, styleID, amount) "
-                                 "VALUES (1, %i, 5)" % style.ID)
-            # and add another:
-            style = zikeshop.Style()
-            style.productID=prod.ID
-            style.style = "Oxford"
-            style.save()
-            dbc.cursor().execute("INSERT INTO shop_inventory "
-                                 "(locationID, styleID, amount) "
-                                 "VALUES (1, %i, 5)" % style.ID)
+            pass
+##             # dictionary has two styles:
+##             style = zikeshop.Style(productID=prod.ID)
+##             style.style = "Webster"
+##             style.save()
+##             dbc.cursor().execute("INSERT INTO shop_inventory "
+##                                  "(locationID, styleID, amount) "
+##                                  "VALUES (1, %i, 5)" % style.ID)
+##             # and add another:
+##             style = zikeshop.Style()
+##             style.productID=prod.ID
+##             style.style = "Oxford"
+##             style.save()
+##             dbc.cursor().execute("INSERT INTO shop_inventory "
+##                                  "(locationID, styleID, amount) "
+##                                  "VALUES (1, %i, 5)" % style.ID)
             
         else:
+            pass
             # everything else has only one style:
-            style = zikeshop.Style(productID=prod.ID)
-            dbc.cursor().execute("INSERT INTO shop_inventory "
-                                 "(locationID, styleID, amount) "
-                                 "VALUES (1, %i, 10)" % style.ID)
-            
+##             style = zikeshop.Style(productID=prod.ID)
+##             dbc.cursor().execute("INSERT INTO shop_inventory "
+##                                  "(locationID, styleID, amount) "
+##                                  "VALUES (1, %i, 10)" % style.ID)
+
+
+    ## SALES #######################
+    sale = zikeshop.Sale()
+    det = zikeshop.Detail()
+    det.productID = 1
+    sale.siteID = 1
+    sale.statusID = 1 #@TODO: fix this
+    sale.details << det
+    sale.save()
 
 if __name__=="__main__":
     load()
+
+

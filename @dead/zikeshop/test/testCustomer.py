@@ -4,7 +4,6 @@ import zikeshop
 
 class CustomerTestCase(unittest.TestCase):
 
-
     def check_uid(self):
         cust = zikeshop.Customer()
         assert len(cust.uid) == 32, \
