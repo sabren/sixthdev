@@ -11,6 +11,7 @@ from testTable import *
 from testLinkSet import *
 from testJunction import *
 from testConnection import *
+from testDBAPI2Driver import *
 
 suites = {
     "Connection" : unittest.makeSuite(ConnectionTestCase, "check_"),
@@ -21,6 +22,7 @@ suites = {
     "Object": unittest.makeSuite(ObjectTestCase, "check_"),
     "RecordObject" : unittest.makeSuite(RecordObjectTestCase, "check_"),
     "Table": unittest.makeSuite(TableTestCase, "check_"),
+    "DBAPI2Driver": unittest.makeSuite(DBAPI2DriverTestCase, "check_"),
     }
 
 import zikebase.test

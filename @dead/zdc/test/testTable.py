@@ -1,8 +1,7 @@
 """
 testTable.py - test cases for zdc.Table
-
-$Id$
 """
+__ver__="$Id$"
 
 import unittest
 import zdc.test
@@ -20,17 +19,6 @@ class TableTestCase(unittest.TestCase):
         assert (self.table.fields[0].name,
                 self.table.fields[1].name) == ('ID', 'fish'), \
                "Table object doesn't get correct fields."
-
-    def check_quotes(self):
-        table = zdc.Table(zdc.test.dbc, "test_fish")
-        assert table._sqlQuote(table.fields["fish"], "foo'fish") \
-               == "'foo\\'fish'", \
-               "quoting failed for STRING"
-        assert table._sqlQuote(table.fields["ID"], 0) == "0",\
-               "quotes failed for NUMBER"
-        # @TODO: test BINARY .. but what should it do?
-
-
 
     def check_fetch(self):
         self.cur.execute("INSERT INTO test_fish (fish) VALUES ('squid')")
@@ -67,6 +55,13 @@ class TableTestCase(unittest.TestCase):
         assert len(recs) == 1, \
                "wrong records returned after keywords: %s" % len(recs)
 
+
+    def check_delete(self):
+        self.cur.execute("insert into test_fish (fish) values ('piranha')")
+        self.table.delete(1)
+        recs = self.table.select()
+        assert len(recs) == 0, \
+               "didn't delete record..."
 
     def tearDown(self):
         del self.cur
