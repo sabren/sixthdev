@@ -1,5 +1,5 @@
 import zikebase
-from zikebase.config import dbc
+from zikebase import dbc
 
 #@TODO: lazy module loading..
 from Product import Product
