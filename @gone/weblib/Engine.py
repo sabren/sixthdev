@@ -19,10 +19,12 @@ class Engine(object):
     REDIRECT  = "* redirect *"
     EXIT      = "* exit *"
 
-    def __init__(self, script, request=None,
-                 SITE_NAME=None, SITE_MAIL=None):
+
+
+    def __init__(self, script=None,  request=None,
+                 SITE_NAME=None, SITE_MAIL=None, scriptFile=None):
         """
-        script can be a string with actual code or a file object.
+        script should be a string with actual code. :)
         """
         self.script = script
         self.request = request or weblib.RequestBuilder().build()
@@ -62,13 +64,17 @@ class Engine(object):
                 self.request.environ["PATH_INFO"] = "UNKNOWN_SCRIPT.py"
             else:
                 self.request.environ["PATH_INFO"] = self.script.name
-        
 
+
+    def makeResponse(self):
+        return weblib.Response()
+    
     def start(self):
         """
         Start the Engine
+
         """
-        self.response = weblib.Response()
+        self.response = self.makeResponse()
         self.injectParts()
         self.setPathInfo()
 
@@ -125,8 +131,9 @@ class Engine(object):
                     self.response.redirect(where)
             except Finished:
                 pass
-        except:
-            self.result = self.EXCEPTION            
+        except Exception, e:
+            self.result = self.EXCEPTION
+            self.exception = e
             self.error = string.join(traceback.format_exception(
                 sys.exc_type,
                 sys.exc_value,
@@ -157,17 +164,20 @@ class Engine(object):
             if os.path.exists(self.getScriptName()):
                 self.execute(open(self.getScriptName()))
             else:
-                self.stop()
-                print "Status: 404"
-                sys.exit()
+                self.scriptNotFound()
+                
+    def scriptNotFound(self):
+        self.stop()
+        print "Status: 404"
+        sys.exit()
 
 
-    def run(self): # @TODO: is this ever actually used?
-        self.start()
-        try:
-            self.execute(self.script)
-        finally:
-            self.stop()
+##     def run(self): # @TODO: this is used by twisted, runscript by cgi. resolve!
+##         self.start()
+##         try:
+##             self.execute(self.script)
+##         finally:
+##             self.stop()
 
     def printResponse(self):
         print self.response.getHeaders() + self.response.buffer
