@@ -291,3 +291,4 @@ class CheckoutApp(zikeshop.PublicApp):
         
 if __name__=="__main__":
     CheckoutApp(zikeshop.Cart(sess)).act()
+    sess.stop()

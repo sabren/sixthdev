@@ -70,3 +70,4 @@ class CartApp(zikeshop.PublicApp):
 
 if __name__=="__main__":
     CartApp(zikeshop.Cart(sess)).act()
+    sess.stop()
