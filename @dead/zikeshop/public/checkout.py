@@ -25,8 +25,11 @@ class CheckoutApp(zikeshop.PublicApp):
         self.__super.enter(self)
 
         # @TODO: clean this up:
-        assert not self.cart.isEmpty(), \
-               "Can't check out because cart is empty."
+        # once they checkout (or before they go shopping,
+        # all they can do is view their latest receipt..
+        if self.input.get("action") != "show_receipt":
+            assert not self.cart.isEmpty(), \
+                   "Can't check out because cart is empty."
 
     def exit(self):
         self.__super.exit(self)
@@ -52,9 +55,9 @@ class CheckoutApp(zikeshop.PublicApp):
         self.data['bill_addressID']=self.input['addressID']
         self.checkShipToBilling()
         if self.data.get('ship_addressID'):
-            self.next='get_card'
+            self.redirect(action='get_card')
         else:
-            self.next='get_shipping'
+            self.redirect(action='get_shipping')
 
     def act_get_shipping(self, refresh=1):
         import zebra, zdc, zikebase
@@ -64,7 +67,7 @@ class CheckoutApp(zikeshop.PublicApp):
 
     def act_set_shipping(self):
         self.checkShipToBilling()
-        self.next='get_card'
+        self.redirect(action='get_card')
 
     def act_add_address(self):
         #@TODO: this is a lot like userapp..
@@ -103,12 +106,12 @@ class CheckoutApp(zikeshop.PublicApp):
                 self.data['bill_addressID']=ed.object.ID
                 if self.input.get('shipToBilling'):
                     self.data['ship_addressID']=self.data['bill_addressID']
-                    self.next='get_card'
+                    self.redirect(action='get_card')
                 else:
-                    self.next='get_shipping'
+                    self.redirect(action='get_shipping')
             elif context=='ship':
                 self.data['ship_addressID']=ed.object.ID
-                self.next='get_card'
+                self.redirect(action='get_card')
 
     def act_add_card(self):
         # Add a new card to the database:
@@ -119,14 +122,14 @@ class CheckoutApp(zikeshop.PublicApp):
             # use the card for the transaction:
             self.data['cardID'] = ed.object.ID
             #@TODO: resolve - cards with secondary billing addresses?
-            self.next = "checkout"
+            self.redirect(action="checkout")
         except ValueError, e:
             self.model["error"] = e[0][0] # e is a LoL 
-            self.next = "get_card"
+            self.redirect(action = "get_card")
 
     def act_set_card(self):
         self.data['cardID'] = int(self.input['cardID'])
-        self.next = "checkout"
+        self.redirect(action = "checkout")
 
     def act_get_card(self):
         import zebra, zdc
@@ -134,7 +137,10 @@ class CheckoutApp(zikeshop.PublicApp):
 
 
     def act_show_receipt(self):
-        import zebra, zdc        
+        assert self.data.get("saleID"), \
+               "No receipt to show."
+
+        import zebra, zdc
         sale = zikeshop.Sale(ID=self.data['saleID'])
         self.consult(zdc.ObjectView(sale))
         zebra.show("dsp_receipt", self.model)
@@ -188,8 +194,7 @@ class CheckoutApp(zikeshop.PublicApp):
             zikebase.sendmail(zebra.fetch("eml_receipt", model))
             zikebase.sendmail(zebra.fetch("eml_notify",  model))
 
-        self.where = {"receipt":"checkout.py?action=show_receipt"}
-        self.next  = ("jump", {"where":"receipt"})
+        self.redirect("checkout.py?action=show_receipt")
         
         
 if __name__=="__main__":
