@@ -60,3 +60,12 @@ class RequestTestCase(unittest.TestCase):
         eng = weblib.Engine(request=weblib.Request(environ=myenv))
         assert eng.request["A"] == "B", "request has wrong passed-in environ"
 
+
+
+
+
+    def check_encoding(self):
+        request = weblib.Request(content="a=<>")
+
+        assert request.form["a"] == "<>", "doesn't handle <> correctly"
+
