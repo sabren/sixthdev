@@ -5,14 +5,20 @@ __ver__="$Id$"
 
 import zdc
 import sixthday
+from strongbox import attr
 
 class Node(zdc.RecordObject):
+
+    ID = attr(long)
+    name = attr(str)
+    descript = attr(str)
+    
     _tablename = "base_node"
     _tuples = ["crumbs", "children"] # @TODO: clean this up!
 
     def _init(self):
         super(Node,self)._init()
-        self._kids = None
+        self.private.kids = None
 
     def _new(self):
         super(Node,self)._new()
@@ -27,9 +33,9 @@ class Node(zdc.RecordObject):
                 [n["ID"] for n in self.q_crumbs() ]]
 
     def get_children(self):
-        if self._kids is None:
-            self._kids = zdc.LinkSet(self, sixthday.Node, "parentID")
-        return self._kids
+        if self.private.kids is None:
+            self.private.kids = zdc.LinkSet(self, sixthday.Node, "parentID")
+        return self.private.kids
 
     def q_crumbs(self):
         """Returns a list of dicts containing the data for the nodes leading
@@ -85,8 +91,8 @@ class Node(zdc.RecordObject):
     def save(self):
         # _updatePaths saves ourselves AND the children:
         self._updatePaths(self.parent)
-        if self._kids is not None:
-            self._kids.save()
+        if self.private.kids is not None:
+            self.private.kids.save()
 
     def _updatePaths(self, parent=None):
         # this is a recursive version.. It's probably really slow.

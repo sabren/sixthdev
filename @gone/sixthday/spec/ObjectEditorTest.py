@@ -9,25 +9,24 @@ import zdc
 import sixthday.spec
 from sixthday import ObjectEditor
 from sixthday import Node
+from strongbox import attr
 
 class TestObjectClass(zdc.RecordObject):
     _tablename = "test_fish"
+    isTrue = attr(int, okay=[0,1], default=1)
+    isAlsoTrue = attr(int, okay=[0,1], default=1)
 
-    def _init(self):
-        self.isTrue=1
-        self.isAlsoTrue=1
-
-    def _new(self):
-        pass
-
+    def _init(self): pass
+    def _new(self): pass
+    def save(self): pass
+    
     #@TODO: shouldn't the base Object class be more useful?
     def getEditableAttrs(self):
-        return self._data.keys()
+        return self.__attrs__
     def getEditableTuples(self):
         return []
 
-    def save(self):
-        pass
+
 
 
 class ObjectEditorTest(unittest.TestCase):
@@ -155,17 +154,16 @@ class ObjectEditorTest(unittest.TestCase):
         assert ed.object.isTrue, \
                "foo should be true by default!"
 
-        #@TODO: type checking for formacceptor?
-        #@TODO: rename objectEditor to FormAcceptor?
         ed.input = {"isTrue":"0"}
         ed.act("save")
-        assert ed.object.isTrue == '0', \
+        # note that we pass in a string, but strongbox casts it to an int:
+        assert not ed.object.isTrue, \
                "that shoulda turned foo's isTrue field off."
         
         ed = ObjectEditor(TestObjectClass, self.clerk, {})
         ed.input = {"__expect__":"isTrue:0"}
         ed.act("save")
-        assert ed.object.isTrue == '0', \
+        assert not ed.object.isTrue, \
                "isTrue should be 0 because of __expect__."
 
         
@@ -173,9 +171,9 @@ class ObjectEditorTest(unittest.TestCase):
         ed = ObjectEditor(TestObjectClass, self.clerk, {})
         ed.input = {"__expect__":("isTrue:0", "isAlsoTrue:0")}
         ed.act("save")
-        assert ed.object.isTrue == '0', \
+        assert not ed.object.isTrue, \
                "isTrue should be 0 because of __expect__."
-        assert ed.object.isAlsoTrue == '0', \
+        assert not ed.object.isAlsoTrue, \
                "isAlsoTrue should be 0 because of __expect__."
 
 
