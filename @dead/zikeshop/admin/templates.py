@@ -34,8 +34,6 @@ print '</select>'
 print '<input type="submit" value="go">'
 print '</form>'
 
-
-
 def tpldir():
     import zikeshop
     if hasattr(zikeshop, "tpldir"):
@@ -45,11 +43,11 @@ def tpldir():
         #@TODO: unhardcode base directory for templates
 
 if weblib.request.get("action") == "save":
-
-    contents = weblib.request.get("contents") + "\n"
+    contents = weblib.request.get("contents")
 
     ## save the template...
-    f = open(tpldir() + "/" + which + ".zb", "w")
+    f = open(tpldir() + "/" + which + ".zb",
+             "wb") # binary more so as not to add extra ^M's on win32
     f.write(contents)
     f.close()
 
@@ -64,7 +62,6 @@ elif which:
 
     contents = weblib.htmlEncode(
         open(tpldir() + "/" + which + ".zb").read())
-
 
     print '<h3>editing %s</h3>' % which
     print '<form action="templates.py" method="post">'
