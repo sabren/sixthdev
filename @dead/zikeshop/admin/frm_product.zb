@@ -38,11 +38,11 @@ categories:<br>
 
 <tr><td colspan="2">
 brief description:<br>
-<textarea cols="30" rows="2" name="brief">{:brief:}</textarea><br>
+<textarea cols="30" rows="2" name="brief">{:weblib.htmlEncode(brief):}</textarea><br>
 </td></tr>
 <tr><td colspan="2">
 long description:<br>
-<textarea cols="30" rows="5" name="descript">{:descript:}</textarea><br>
+<textarea cols="30" rows="5" name="descript">{:weblib.htmlEncode(descript):}</textarea><br>
 </td></tr>
 
 <tr><td colspan="2">
