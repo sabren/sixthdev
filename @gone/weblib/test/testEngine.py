@@ -154,3 +154,38 @@ class EngineTestCase(unittest.TestCase):
             ).run()
 
         del __builtin__.good
+
+
+
+    def check_print(self):
+        eng = weblib.Engine(script='import weblib; print "hello"')
+        eng.run()
+        assert eng.response.buffer == "hello\n", \
+               "doesn't grab prints after import weblib!"
+
+
+
+    def check_runtwice(self):
+        eng = weblib.Engine(script='print "hello"')
+        eng.run()
+        eng.run()
+
+        assert eng.response.buffer == "hello\n", \
+               "engine doesn't let you run twice!"
+
+
+
+    def check_cgi(self):
+        import os
+        actual = os.popen('python -c"import weblib; print \'hello\'"').read()
+        target = trim(
+            """
+            Content-type: text/html
+
+            hello
+            
+            """)
+        assert actual==target, "didn't get headers in CGI-mode!"
+
+
+
