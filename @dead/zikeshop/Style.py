@@ -9,17 +9,9 @@ import zikeshop
 class Style(zikeshop.Product):
     __super = zikeshop.Product
 
-    #@TODO: inherit defaults, but still override?
-    _defaults = {
-        "class":"style",
-        "price": 0,
-        "retail": 0,
-        "weight": 0,
-        "parentID": 0,
-        "inStock": 0,
-        "onHold" : 0,
-        }
-
+    def _new(self):
+        self.__super._new(self)
+        self._data['class'] = "style"
     
     def get_product(self):
         if self.parentID:
