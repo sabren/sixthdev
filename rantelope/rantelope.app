@@ -10,130 +10,10 @@ from Node import Node
 from strongbox import *
 import sixthday
 import zebra
+from schema import *                
 
 
-### default template ################################
-
-plainXSLT =\
-'''\
-<xsl:stylesheet version="1.0"
-   xmlns:rss="http://backend.userland.com/rss2"
-   xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-   
-   <xsl:template match="rss:channel">
-     <html>
-       <head>
-         <title><xsl:value-of select="rss:title"/></title>
-         <style type="text/css">
-         body {
-            font-family: arial, helvetica;
-            font-size: 10pt;
-            background: white;
-         }
-         h1 {
-            color: red;
-         }
-         h2 {
-            background: black;
-            color: white;
-            font-size: 12pt;
-         }
-         div.post {
-            border-bottom: solid gray 1px;
-            margin-bottom: 10px;
-            width: 500px;
-         }
-         </style>
-       </head>
-       <body>
-         <h1><xsl:value-of select="rss:title"/></h1>
-         <p><i><xsl:value-of select="rss:description"/></i></p>
-
-         <xsl:for-each select="rss:item">
-            <div class="post">
-              <h2><xsl:value-of select="rss:title"/></h2>
-              <xsl:value-of select="rss:description"/>
-            </div>
-         </xsl:for-each>
-       </body>
-     </html>
-   </xsl:template>
-   
-</xsl:stylesheet>
-'''
-
-def transform(xml, xsl):
-    """
-    A simple wrapper for 4XSLT.
-    """
-    from Ft.Xml.Xslt.Processor import Processor
-    from Ft.Xml.InputSource import DefaultFactory
-    proc = Processor()
-    xslObj = DefaultFactory.fromString(xsl, "http://rantelope.com/")
-    proc.appendStylesheet(xslObj)
-    xmlObj = DefaultFactory.fromString(xml)
-    return proc.run(xmlObj)
-
-
-### object model ####################################
-
-# NOTE: all ID attributes must default
-# to "None" for SQLite's autonumbering
-# this doesn't effect MySQL's auto_increment 
-auto = None
-
-class Comment(Strongbox):
-    ID = attr(long, default=auto)
-    storyID = attr(long)
-    name = attr(str)
-    mail = attr(str)
-    link = attr(str)
-    note = attr(str)
-
-class Story(Strongbox):
-    ID = attr(long, default=auto)
-    channelID = attr(long)
-    categoryID = attr(long, default=0)
-    title = attr(str)
-    link = attr(str)
-    description = attr(str)
-    comments = linkset(Comment)
-
-class Category(Strongbox):
-    ID = attr(long, default=auto)
-    channelID = attr(long)
-    name = attr(str)
-    
-class Channel(Strongbox):
-    ID = attr(long, default=auto)
-    title = attr(str)
-    link = attr(str)
-    description = attr(str)
-    rssfile = attr(str, okay="([^/]+.rss|^$)" )
-    htmlfile = attr(str, okay="([^/]+.html|^$)" )
-    template = attr(str, default=plainXSLT)
-    stories = linkset(Story)
-    categories = linkset(Category)
-    path = attr(str, default="./out/")
-
-    def toRSS(self):
-        return zebra.fetch("rss", BoxView(self))
-
-    def toHTML(self, input=None):
-        rss = input or self.toRSS()
-        return transform(rss, self.template)
-
-    def writeFiles(self):
-        rss = self.toRSS()
-        if self.rssfile:
-            print >> open(self.path + self.rssfile, "w"), rss
-        if self.htmlfile and self.template:
-            print >> open(self.path + self.htmlfile, "w"), self.toHTML(rss)
-                
-
-### interface #######################################
-
-class RantelApp(sixthday.AdminApp):
+class RantelopeApp(sixthday.AdminApp):
 
     def act_(self):
         self.list_channel()
@@ -174,20 +54,20 @@ class RantelApp(sixthday.AdminApp):
 
     ## stories #########################
 
-    def buildCategories(self, channelID):
+    def studyChannel(self, channelID):
         assert channelID, "must supply valid channelID"
         chan = self.clerk.fetch(Channel, channelID)
         self.model["categories"] = [(c.ID, c.name) for c in chan.categories]
-        
+        # @TODO: will need to limit number of past stories soon.
+        self.model["stories"] = [BoxView(s) for s in chan.stories]
 
-    def create_story(self):        
-        self.buildCategories(self.input.get("channelID"))
+    def create_story(self):
+        self.studyChannel(self.input.get("channelID"))
         self.generic_create(Story, "frm_story")
         
     def edit_story(self):
         s = self.clerk.fetch(Story, self.input["ID"])
-        self.buildCategories(s.channelID)
-        # @TODO: would be nice to have generic_show_instance()
+        self.studyChannel(s.channelID)
         self.generic_show(Story, "frm_story")
 
     def save_story(self):
@@ -199,8 +79,8 @@ class RantelApp(sixthday.AdminApp):
         chan.writeFiles()
 
         ## go back to the channel:
-        self.redirect(action='show&what=channel&ID='
-                            + str(story.channelID))
+        self.redirect(action='create&what=story&channelID='
+                            + str(chan.ID))
         
     def show_story(self):
         self.generic_show(Story, "sho_story")
@@ -216,18 +96,6 @@ class RantelApp(sixthday.AdminApp):
 ### main code #######################################
 
 if __name__=="__main__":
-
-    import arlo, storage, sqlRantelope
-    store = sqlRantelope.sto
-    dbmap = {Channel: "rnt_channel",
-             Channel.__attrs__["stories"]: (Story, "channelID"),
-             Channel.__attrs__["categories"]: (Category, "channelID"),
-             Category: "rnt_category",
-             Story: "rnt_story",
-             Story.__attrs__["comments"]: (Comment, "storyID"),
-             Comment: "rnt_comment"}
-    CLERK = arlo.Clerk(store, dbmap)
-    
-    ## now just run the app!
-    print >> RES, RantelApp(CLERK, REQ).act()
+    from sqlRantelope import clerk   
+    print >> RES, RantelopeApp(clerk, REQ).act()
 

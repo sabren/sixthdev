@@ -12,17 +12,19 @@
       <td>{:title:}</td></tr>
   <tr><th>link:</th>
       <td>{:link:}</td></tr>
+<!--
   <tr><th>RSS output file:</th>
       <td><a href="{:path:}{:rssfile:}">{:rssfile:}</a></td></tr>
   <tr><th>HTML output file:</th>
       <td><a href="{:path:}{:htmlfile:}">{:htmlfile:}</a></td></tr>
+-->
+
   <tr><th colspan="2">description:</th></tr>
   <tr><td colspan="2">{:description:}</td></tr>
 </table>
 
 
-
-[<a href="rantelope.app?action=edit&what=channel&ID={:ID:}">edit</a>]
+[<a href="rantelope.app?action=edit&what=channel&ID={:ID:}">edit configuration</a>]
 &nbsp;&nbsp;
 [<a href="rantelope.app?action=create&what=story&channelID={:ID:}">add story</a>]
 

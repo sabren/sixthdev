@@ -16,8 +16,10 @@
 * if ID:
     <b>edit this story:</b>
     <input type="hidden" name="ID" value="{:ID:}">
+    <!--
     &nbsp;&nbsp;
     [<a href="rantelope.app?action=show&what=story&ID={:ID:}">comments</a>]
+    -->
 * el:
     <b>add a new story:</b>
 
@@ -34,3 +36,16 @@
   <br/>
   <input name="action" value="save" type="submit">
 </form>
+
+
+* for stories:
+    * head:
+        <b>other stories in this channel:</b>
+        <table width="100%">
+    * body:
+        <tr><td style="border-top: solid silver 1px">
+            <a href="rantelope.app?action=edit&what=story&ID={:ID:}"
+                   >{:title:}</a></td></tr>
+        <tr><td>{:description:}</td></tr>
+    * foot:
+        </table>

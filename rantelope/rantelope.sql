@@ -1,5 +1,6 @@
 /*/
  * MySQL code for Rantelope tables.
+ * @TODO: generate this from schema.py
  * 
  * $Id$
 /*/

@@ -12,18 +12,21 @@
     * head:
         <ul>
     * body:
-        <li>[<a href="rantelope.app?action=edit&what=channel&ID={:ID:}"
-               >edit</a>]&nbsp;
-            [<a href="{:path+rssfile:}">xml</a>]&nbsp;
-            [<a href="{:path+htmlfile:}">html</a>]&nbsp;
-            <a href="rantelope.app?action=show&what=channel&ID={:ID:}"
+        <li><small>
+            [<a href="rantelope.app?action=show&what=channel&ID={:ID:}"
+               >config</a>]&nbsp;
+            [<a href="blog.app?channel={:ID:}">html</a>]&nbsp;
+            [<a href="blog.app?channel={:ID:}&as=xml">xml</a>]&nbsp;
+            </small>
+            <b>
+            <a href="rantelope.app?action=create&what=story&channelID={:ID:}"
                >{:title:}</a>&nbsp;
-            
+            </b>
         </li>
     * foot:
         </ul>
-    * none:
-        <p><i>No channels defined.</i></p>
+* none:
+    <p><i>No channels defined.</i></p>
 
 <p>[<a href="rantelope.app?action=create&what=channel"
       >add channel</a>]</p>
