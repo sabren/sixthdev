@@ -85,7 +85,7 @@ class Object:
 
 
     def _lock(self):
-        self._isLocked = 1
+        self.__dict__["_isLocked"] = 1
 
 
     ### Abstract Public Methods ############################
@@ -118,9 +118,9 @@ class Object:
         and therefore, before __init__..
         """
         
-        if not self.__dict__.has_key("isLocked"):
-            self.__dict__["isLocked"] = 0
-        return self.__dict__["isLocked"]
+        if not self.__dict__.has_key("_isLocked"):
+            self.__dict__["_isLocked"] = 0
+        return self.__dict__["_isLocked"]
 
 
     def _findmember(self, member):

@@ -16,18 +16,24 @@ class TestObj(zdc.Object):
 
 class ObjectTestCase(unittest.TestCase):
 
-    def check_lockDefault(self):
+    def check_lock(self):
+        """
+        Objects should be locked as soon as they're initialized.
+        If you want to do stuff to locked fields, do it in
+        _init(), _fetch(), or _new().
+        """
         tobj = TestObj()
-        assert tobj._isLocked == 0, \
-               "oh no! zdc.Object isn't unlocked by default!"
+        assert tobj._isLocked, \
+               "oh no! zdc.Object instances aren't locked!"
 
     def check_locks(self):
         "Locked attributes should be readonly"
         class TestObj2(TestObj):
             _locks = ["ABC"]
+            def _new(self):
+                self.ABC = 5
+
         tobj = TestObj2()
-        tobj._lock()
-        tobj.ABC = 5
         try:
             gotError = 0
             tobj.ABC = 6
@@ -59,7 +65,7 @@ class ObjectTestCase(unittest.TestCase):
     def check_setMethod(self):
         class SetClass(TestObj):
             def set_xxx(self, value):
-                self.xyz = value
+                self._data['xyz'] = value
 
         obj = SetClass()
         obj.xxx = "testme!"
