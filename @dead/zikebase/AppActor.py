@@ -6,7 +6,11 @@ __ver__="$Id$"
 import weblib, zebra
 
 class AppActor(weblib.Actor):
-
+    
+    def enter(self):
+        if not getattr(self, "model"):
+            self.model={}
+    
     def complain(self, problem):
         print "[error: %s]" % problem
 
