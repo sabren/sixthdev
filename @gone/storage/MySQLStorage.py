@@ -32,7 +32,7 @@ class MySQLStorage(Storage):
         vals = vals[:-1]
 
         sql = "INSERT INTO %s (%s) VALUES (%s)" % (table, cols, vals)
-        self.cur.execute(sql)
+        self._execute(sql)
 
         # we read from DB in case of timestamps, etc:
         ID = self.cur._insert_id
@@ -49,7 +49,7 @@ class MySQLStorage(Storage):
         # whoops! thanks to Andy Todd for this line:
         sql += " WHERE ID = %d" % row["ID"]
 
-        self.cur.execute(sql)
+        self._execute(sql)
         return self.fetch(table, row["ID"])
         
 
@@ -62,9 +62,15 @@ class MySQLStorage(Storage):
         if criteria:
             sql += " WHERE " + " AND ".join(criteria)
             
-        self.cur.execute(sql)
+        self._execute(sql)
         return self._dictify(self.cur)
         
 
     def delete(self, table, ID):
-        self.cur.execute("DELETE FROM %s WHERE ID=%s" % (table, ID))
+        self._execute("DELETE FROM %s WHERE ID=%s" % (table, ID))
+
+    def _execute(self, sql):
+        try:
+            self.cur.execute(sql)
+        except Exception, e:
+            raise sql
