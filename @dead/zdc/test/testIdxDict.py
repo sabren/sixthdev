@@ -44,7 +44,6 @@ class IdxDictTestCase(unittest.TestCase):
                "values are wrong: %s" % str(idx.values())
 
 
-
     def check_looping(self):
         idx = zdc.IdxDict()
         for item in idx:
@@ -57,7 +56,22 @@ class IdxDictTestCase(unittest.TestCase):
         idx.clear()
         for item in idx:
             assert 0, "there shouldn't be anything in idx after .clear()"
+
+
+    def check_negative(self):
+        idx = zdc.IdxDict()
+        idx << "abc"
+        idx << "xyz"
+        assert idx[-1] == "xyz", "-1 broke"
+        assert idx[-2] == "abc", "-2 broke"
+        try:
+            bad = idx[-3]
+            gotError = 0
+        except IndexError:
+            gotError = 1
+        assert gotError, "-3 worked but should not have!"
         
+
     def check_repr(self):
         """
         really, this just exposes a bug if the keys are numbers...

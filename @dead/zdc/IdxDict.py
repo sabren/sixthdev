@@ -14,8 +14,8 @@ class IdxDict(UserDict.UserDict):
     def _toStringKey(self, key):
         """Convert numeric keys into string keys. Leaves string keys as is"""
         # handle numeric keys:
-        if type(key)==type(0):
-            if not (0 <= key < len(self.idx)):
+        if type(key)==type(0):            
+            if not (-len(self.idx) <= key < len(self.idx)):
                 ## oddly enough, it is this IndexError here
                 ## that allows you to do "for x in myIdxDict:"
                 raise IndexError, `key` + " is out of bounds."
