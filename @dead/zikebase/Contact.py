@@ -12,18 +12,18 @@ class Contact(zdc.RecordObject):
 
     def _new(self):
         self.__super._new(self)
-        self.userID=0
-        self.fname=""
-        self.lname=""
-        self.email=""
-        self.address1=""
-        self.address2=""
-        self.address3=""
-        self.city =""
-        self.stateCD=""
-        self.postal=""
-        self.country="US"
-        self.phone=""
+        self._data["userID"]=0
+        self._data["fname"]=""
+        self._data["lname"]=""
+        self._data["email"]=""
+        self._data["address1"]=""
+        self._data["address2"]=""
+        self._data["address3"]=""
+        self._data["city"]=""
+        self._data["stateCD"]=""
+        self._data["postal"]=""
+        self._data["country"]="US"
+        self._data["phone"]=""
     
     def set_email(self, value):
         #@TODO: test set_email!
