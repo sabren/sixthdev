@@ -23,7 +23,9 @@ class IdxDict(UserDict.UserDict):
         # handle numeric keys:
         if _isNum(key):
             if not (0 <= key < len(self.idx)):
-                raise KeyError, `key` + " is out of bounds."
+                ## oddly enough, it is this IndexError here
+                ## that allows you to do "for x in myIdxDict:"
+                raise IndexError, `key` + " is out of bounds."
             # convert it to a string key
             key = self.idx[key]
 
@@ -43,7 +45,7 @@ class IdxDict(UserDict.UserDict):
     def __getitem__(self, key):
         key = self._toStringKey(key)
         return self.data[key]
-        
+
     def __repr__(self):
         res = "{"
         for key in self.idx:
@@ -56,6 +58,15 @@ class IdxDict(UserDict.UserDict):
         res = res + "}"
         return res
 
+    #### these are so we can loop through like its a list ######
+    def __len__(self):
+        return len(self.idx)
+    
+    def __getslice__(self, i, j):
+        i = max(i, 0); j = max(j, 0)
+        return self.idx[i:j]
+    
+    ### .. or likea dictionary: #########
     def keys(self):
         return self.idx
     
