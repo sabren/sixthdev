@@ -1,7 +1,12 @@
 """
 Misc handy routines
 """
-import whrandom, string
+import os
+import sys
+import whrandom
+import string
+import tempfile
+
 
 def randpass(length=5):    
     okay = "abcdefghijkmnopqrstuvwxyz2345678923456789"
@@ -98,3 +103,19 @@ def uid():
     return uid
 
 
+def edit(s):
+    """
+    launch an editor...
+    """
+    ed = os.environ.get("EDITOR", "vi")
+    fn = tempfile.mktemp()
+    tf = open(fn,"w")
+    tf.write(s)
+    tf.close()
+    os.system("%s %s" % (ed, fn))
+    return open(fn).read()
+
+
+if __name__=="__main__":
+    print edit("testing...")
+    
