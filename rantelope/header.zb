@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>rantelope</title>
+<title>rantelope 0.1 alpha</title>
 
 <style type="text/css">
 body, p, table { 
@@ -15,7 +15,7 @@ th {
 </head>
 <body>
 
-<h1>Rantelope</h1>
+<h1>Rantelope 0.1 alpha</h1>
 
 <a href="rantelope.app">home</a>
 
