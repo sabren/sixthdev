@@ -29,11 +29,17 @@ class BoxView:
         else:
             return res
 
+    def __getattr__(self, name):
+        if name=="object":
+            return getattr(super(BoxView, self), name)
+        else:
+            return getattr(self.object, name)
+
     def get(self, name, default=None):
         return getattr(self.object, name, default)
 
     def keys(self):
-        return self.object.__attrs__.keys()
+        return self.object.__slots__
         #@TODO: ObjectView.keys() only works with RecordObjects
         #map(lambda fld: fld.name, self.object._table.fields) \
         #return self.object.__values__.keys() \
