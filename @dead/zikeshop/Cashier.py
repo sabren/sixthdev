@@ -66,7 +66,7 @@ def chargeCard(theCard, amount):
     import payment, zikeshop
     
     ## bill the card
-    if getattr(zikeshop, "authorizenetmerchant"):
+    if getattr(zikeshop, "authorizenetmerchant", None):
         import payment
         pmt = payment.create("AuthorizeNet",
                              merchant=zikeshop.authorizenetmerchant,
