@@ -12,13 +12,14 @@ class MkIndex(object):
     def __init__(self, name=None):
         if name:
             self.db = metakit.storage(name+".rki",1)
+            self.db.autocommit()
             self.words = ransacker.IdMap(anydbm.open(name+".rkw", "cf"))
             self.pages = ransacker.IdMap(anydbm.open(name+".rkp", "cf"))
         else:
             self.db = metakit.storage()
             self.words = ransacker.IdMap()
             self.pages = ransacker.IdMap()
-        self.index = self.db.getas("index[word:I,page:I,count:I]")
+        self.index = self.db.getas("index[word:I,page:I,count:I]")        
         
     def add(self, page, text):
         """
