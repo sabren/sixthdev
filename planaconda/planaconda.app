@@ -1,8 +1,8 @@
 
 import os
 import sys
-sys.path.append("/home/sabren/lib")
-sys.path.append("/web/script/sabren/sabren.net/work")
+sys.path.insert(0, "/web/script/sabren/sabren.net/work")
+sys.path.insert(0, "/home/sabren/lib")
 
 from planaconda import config
 from planaconda import PlanApp
@@ -23,17 +23,18 @@ app = PlanApp(clerk, REQ)
 page = REQ.get("action", "viewListProject")
 meth = getattr(app, page, None)
 
-try:
-    model = meth() # possible Redirect here
-finally:
-    shelf["store"] = store
-    shelf.close()
 
-if meth:
+if meth is None:
+    print >> RES, "unknown action: %s" % page
+else:
+    try:
+        model = meth() # possible Redirect here
+    finally:
+        shelf["store"] = store
+        shelf.close()
+
     template = "html/%s.zb" % page
     if os.path.exists(template):
         print >> RES, zebra.fetch(template, model)
     else:
         print >> RES, "no template for %s" % page
-else:
-    print >> RES, "unknown action: %s" % page

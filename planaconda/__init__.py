@@ -1,6 +1,6 @@
 
 from strongbox import *
-from pytypes import FixedPoint
+from pytypes import FixedPoint, DateTime
 import sixthday
 
 class Node(sixthday.Node):
@@ -15,9 +15,29 @@ class Node(sixthday.Node):
     status = attr(str, default="unclear",
                   okay=["unclear", "to do", "in progress",
                         "complete", "rejected"])
+    
+    comments = linkset(forward("planaconda.Comment"), "node")
+
+
+    def set_path(self, value):
+        self.__values__["path"] = value
+    def get_path(self):
+        p = self.__values__["path"]
+        if p.startswith("/"):
+            return p
+        else:
+            return "/" + p
+
+
+class Comment(Strongbox):
+    ID = attr(int, default=0)
+    node = link(Node)
+    posted = attr(DateTime, default="now")
+    content = attr(str)
 
 Node.__attrs__["parent"].type = Node
 Node.__attrs__["children"].type = Node
+Node.__attrs__["comments"].type = Comment
     
 
 class PlanApp(sixthday.AdminApp):
@@ -28,11 +48,21 @@ class PlanApp(sixthday.AdminApp):
 
     def formEditNode(self):
         model = {}
+        
+        parentID = self.input.get("parent", "0")
+        if int(parentID):
+            parent = self.clerk.fetch(Node, ID=parentID)
+        else:
+            parent = Node(ID=0)
+            parent.private.isDirty = False
+        self.input["parent"] = parent
+            
         node = self._getInstance(Node)
         if node.parent is None:
             node.parent = Node()
         model.update(BoxView(node))
-        nodes = [(n.ID, n.path) for n in self.clerk.match(Node)]
+        nodes = [(n.ID, n.path) for n in self.clerk.match(Node)
+                 if n.ntype != "task"]
         model["nodes"] = [(0, "/")] + nodes
         return model
 
@@ -59,10 +89,20 @@ class PlanApp(sixthday.AdminApp):
             node = self._getInstance(Node)
         model.update(BoxView(node))
         model["crumbs"] = [BoxView(c) for c in node.crumbs]
+        model["comments"] = [BoxView(c) for c in node.comments]
+        model["comments"].sort(lambda a,b: -cmp(a["posted"], b["posted"]))
         return model
     
     def viewPlate(self):
         nodes = self.clerk.match(Node, isOnPlate=True)
         nodes.sort(lambda a,b: cmp(a.importance, b.importance))
         return {"nodes": [BoxView(n) for n in nodes]} # @TODO: =~ listProject
+
+    def postComment(self):
+        self.input["ID"] = self.input.get("node")
+        assert self.input["ID"], "give me a node"
+        n = self._getInstance(Node)
+        n.comments << Comment(content=self.input.get("content"))
+        self.clerk.store(n)
+        self.redirect("?action=viewNode&ID=%s" % n.ID)
 

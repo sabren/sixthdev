@@ -7,7 +7,7 @@
     * head:
         <ul>
     * body:
-        <li>{:name:}</li>
+        <li><a href="planaconda.app?action=viewNode&ID={:ID:}">{:name:}</a></li>
     * foot:
         </ul>
 * none:

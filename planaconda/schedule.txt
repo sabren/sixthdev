@@ -22,3 +22,11 @@ ACTUAL
 08:00 - list node page and add node form in progress,
         no working form posts yet...
 09:00 - basic forms and node lists working
+11:45 - stopped coding:
+            - minimal user interface
+            - implemented 4 of the original 6 pages
+            - implemented basic plate and comments
+            - validation errors go uncaught
+            - no clear idea how much is left to go
+            - quality has begun to decay (duplicate code, workarounds)
+            - no testing

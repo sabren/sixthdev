@@ -13,7 +13,10 @@
 
 
 <div class="node">
-<p>name: <b>{:name:}</b></p>
+<p>{:ntype:}: <b>{:name:}</b>
+* if isOnPlate:
+    (on plate)
+</p>
 </div>
 
 
@@ -22,11 +25,32 @@
         children:
         <ul>
     * body:
-        <li>{:name:}</li>
+        <li><a href="planaconda.app?action=viewNode&ID={:ID:}">{:name:}</a></li>
     * foot:
         </ul>
 * none:
-    <i>no children</i>
+    <p><i>no children</i></p>
+
+* if ntype != 'task':
+    [<a href="planaconda.app?action=formEditNode&parent={:ID:}">add child</a>]
+
+
+<form action="planaconda.app">
+<input type="hidden" name="action" value="postComment">
+<input type="hidden" name="node" value="{:ID:}">
+<textarea name="content"></textarea>
+<input type="submit" value="add comment">
+</form>
 
 
 
+* for comments:
+    * head:
+        comments:
+        <div>
+    * body:
+            <div class="comment"><b>{:posted:}</b><br/>{:content:}</div>
+    * foot:
+        </div>
+* none:
+    <p><i>no comments</i></p>

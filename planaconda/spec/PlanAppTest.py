@@ -1,6 +1,7 @@
 
-from planaconda import PlanApp, Node
+from planaconda import PlanApp, Node, Comment
 from planaconda.config import DBMAP
+from pytypes import Date
 import weblib
 import unittest
 import arlo
@@ -23,6 +24,15 @@ class PlanAppTest(unittest.TestCase):
     def test_formEditNode(self):
         m = self.p.formEditNode()
         assert m["nodes"] == [(0, "/")]
+        assert m["ntype"] == "task"
+
+    def test_formEditNode_child(self):
+        t = self.c.store(Node(ntype="task", name="a task"))
+        p = Node(ntype="project", name="project")
+        p.name = "project" ; self.c.store(p) # :/ ... see NodeTest
+        self.p.input["parent"] = p.ID
+        m = self.p.formEditNode()
+        self.assertEquals(m["nodes"], [(0, "/"), (p.ID, "/project")])
         assert m["ntype"] == "task"
 
     def test_postSaveNode(self):
@@ -54,6 +64,19 @@ class PlanAppTest(unittest.TestCase):
         m = self.p.viewNode()
         assert m["name"] == "abc"
         self.assertEquals([], m["crumbs"])
+        self.assertEquals(0, len(m["comments"]))
+
+    def test_viewNode_comment(self):
+        n = Node(name="abc")
+        n.comments << Comment(content="a", posted=Date("today")-1)
+        n.comments << Comment(content="c", posted=Date("today")-3)
+        n.comments << Comment(content="b", posted=Date("today")-2)
+        self.c.store(n)
+        self.p.input["ID"] = n.ID
+        m = self.p.viewNode()
+        self.assertEquals(3, len(m["comments"]))
+        # and we want newest first:
+        self.assertEquals(["a","b","c"], [c["content"] for c in m["comments"]])
 
     def test_viewPlate(self):
         # mmm... vowels...
@@ -71,7 +94,19 @@ class PlanAppTest(unittest.TestCase):
         assert len(m["nodes"]) == 3
         self.assertEquals(["e","a","i"],
                           [n["name"] for n in m["nodes"]])
-        
+
+    def test_postComment(self):
+        n = self.c.store(Node(name="adsf"))
+        self.p.input["node"] = n.ID
+        self.p.input["content"] = "your ad here"
+        self.assertRaises(weblib.Redirect, self.p.postComment)
+
+        n = self.c.fetch(Node, ID=n.ID)
+        assert len( n.comments ) == 1
+        assert n.comments[0].content == "your ad here"
+        assert Date(n.comments[0].posted.toSQL()) == Date("today")
+
+
         
 if __name__=="__main__":
     unittest.main()

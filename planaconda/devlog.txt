@@ -351,21 +351,116 @@ be the split node form and tree page... those two things are
 the highest risk anyway. i can do split node manually if I
 need to for a while, and the tree page is just a convenience
 view for what I'm already providing through several pages.
-It's a "here's everything, say how many you want" order form,
-but I already have a shopping cart in the form of the "plate".
+It's a "here's everything, say how many you want" order
+form, but I already have a shopping cart in the form of the
+"plate".
 
 Okay, so let's implement plate.
 
-[0425.2004 09:36PM] huh. logic for the sorted plate was easy.. 
-now to just make the html...
+[0425.2004 09:36PM] huh. logic for the sorted plate was
+easy..  now to just make the html...
 
-[0425.2004 10:03PM] well that sucked. huge snag with the 
-root node. Clerk doesn't cope with "None" very well, and
-I had to code around it. I didn't fix Clerk though. I just
+[0425.2004 10:03PM] well that sucked. huge snag with the
+root node. Clerk doesn't cope with "None" very well, and I
+had to code around it. I didn't fix Clerk though. I just
 added it to my grievances file. So now it's 10pm and the
-plate works (but there's no batch update) and you can 
-kind of move around in the tree, but it really needs work.
+plate works (but there's no batch update) and you can kind
+of move around in the tree, but it really needs work.
 
 I'm going to add comments now. Might stop and see if it's
-worth stealing them from Rantelope, but they're so simple
-it might not be worth the effort.
+worth stealing them from Rantelope, but they're so simple it
+might not be worth the effort.
+
+
+[0425.2004 10:22PM] hrm. just found myself stalled here.
+what's up? first the whole interface is clunky. lot of
+duplication in the html at the moment. it might be nice to
+have a default model view that included links in some kind
+of model explorer... i mean this navigation could all be
+generated.
+
+okay. I noted that in the grievances... but i'm still not
+sure what's next... ah. okay. that's how it got started. i
+needed a viewNode page and needed to put comments and a
+comment form on it. no problem. here we go.
+
+
+[0425.2004 11:48PM] well. that's the deadline. forget about
+midnight. there's no end in sight here. 
+
+So what happened? I cut the project down to size. I 
+stayed focused. I took only a small amount of technical
+risk...
+
+I implemented a new 32-line .app file that is entirely
+without tests. I'm not really sure how much effort went
+into that over the course of the night. Half an hour? An
+hour? 
+
+I failed to include setup time in my estimate. Until I have
+some kind of canned app-maker that can generate the basic
+stuff for me, I should expect to lose an hour at the start.
+
+I neglected testing. I'm not really sure when I started
+fixing bugs, but it definitely took over the project the
+past hour or two. Where were the bugs? Mostly in my 
+libraries. Node didn't call updatePath at the start, but
+when I tried to force it, Clerk died. I overrode sixthday.Node 
+methods in planaconda.Node without incorporating the unit 
+tests from sixthday.Node :/
+
+I didn't stop to refactor. There's already a bunch of
+duplicate handling for getting a Node from an ID in 
+the PlanApp. Aw fuck. You gotta be kidding me. I coded
+the same damn thing four different times. They're all
+slightly different, but there's definitely a common
+thread between all of them.
+
+I can't honestly say that I couldn't have moved faster then.
+Say it took 15 minutes for each one of those cases. I could
+have shaved half an hour off development right there, if 
+instead I'd spent 15 minutes on the first one and 15 minutes
+factoring out a untility the second time around.
+
+One thing I DO like is that I got rid of the ouput and can
+test directly on the model that my app returns. AND... I
+worked out the design for the app in advance. I wasn't 
+thinking about object modelling once I started coding. Yes,
+I have a really ugly App class, but the data model worked
+without a hitch.
+
+I pushed the limits on what my framework could do here,
+with the recursive data structures and the phantom root
+nodes. That cost me, and it wasn't something I really
+thought about at design time.
+
+Was this a success or a failure? I'd have to say the 
+project failed. I missed the deadline and went WAY over 
+budget - even after I revised the budget. 
+
+The app as it stands has does have the major feature set
+I wanted, but the user interface is attrocious. I couldn't
+actually use it.
+
+Oh and there's no actual database - just a python shelve. :/
+
+Anyway. I'd have to say I learned quite a bit about project
+management today. I moved fast, but I underestimated, and
+I didn't stop to see if I could refactor. I have a bunch of
+unit tests, but no system/acceptance tests. 
+
+The wild thing is that this was a several-hour project.
+I applied a full development methodology, worked like hell
+and it still failed!!! I think the real, core problem was
+that I bit off more than I could chew, and then I got
+reckless from the pressure, and the quality degraded. 
+
+So I think the next step is to refactor the code, design a
+real user interface, and test the current feature set
+thouroughly. I might also pick a few choice grievances to
+address in the libraries, if they'd simplify the codebase.
+The next iteration should deliver something I'd actually be
+comfortable using. 
+
+Ballpark timeframe? Another whole day. Man...
+

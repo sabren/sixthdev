@@ -44,3 +44,44 @@
   in with arlo. Clerk should let me get a Ghost instance
   like that, specifically for querying on None.
 
+
+- the between-object navigation could all be generated 
+  to begin with.. simple bullet lists of links for each
+  object and whatnot... that would have saved a bunch of
+  time because I wouldn't have to stop and code just a 
+  little more html here and there...
+
+
+- this test failed. it works if you uncomment the lines
+  (and break it into two tests)... I think it's a bug in
+  AdminApp._getInstance()... no big deal but I wasted
+  at least 10 minutes trying to figure it out. :/
+
+    def test_viewNode_node(self):
+        n = self.c.store(Node(name="abc"))
+        self.p.input["ID"] = n.ID
+        m = self.p.viewNode()
+        assert m["name"] == "abc"
+        self.assertEquals([], m["crumbs"])
+        self.assertEquals(0, len(m["comments"]))
+
+#    def test_viewNode_comment(self):
+        c = Comment()
+#        n = self.c.store(Node(name="abc"))        
+        n.comments << c
+        self.c.store(n)
+        self.p.input["ID"] = n.ID
+        m = self.p.viewNode()
+        self.assertEquals(1, len(m["comments"]))
+
+
+- pytypes.DateTime.toDate() appears not to exist!!!
+  a cyclic dependency problem?
+
+
+- this failed (bug in sixthday.Node):
+
+    def test_path(self):
+        t = Node(name="top")
+        n = Node(name="asdf", parent=t)
+        assert n.path=="top/asdf", n.path        
