@@ -1,4 +1,5 @@
 import urllib
+import httplib
 
 class AbstractPayment:
     """
@@ -31,18 +32,43 @@ class AbstractPayment:
             setattr(self, key, kwargs[key])
             
 
-    def _submit(self, dict, page=None):
+    def _submit(self, dict, page=None, headers=[]):
         """
         Given a dict of form variables, make the HTTPS POST.
         """
+        data = urllib.urlencode(dict)
+
+        #NOTE: we use headers[] for BankOfAmerica
+        #because we have to fake the referer.
+
         if page:
             relurl = page
         else:
             relurl = self._securePage
 
-        res = urllib.urlopen("https://%s/%s" % (self._secureServer, relurl),
-                             urllib.urlencode(dict))
-        return res.read()
+        h = httplib.HTTPS(self._secureServer)
+        h.putrequest('POST', "/" + relurl)
+        h.putheader('Content-type', 'application/x-www-form-urlencoded')
+        h.putheader('Content-length', '%d' % len(data))
+        for head in headers:
+            h.putheader(*head)
+        h.endheaders()
+        h.send(data)
+
+        errcode, errmsg, headers = h.getreply()
+        assert errcode==200, \
+               "problem reading from %s: %s, %s" \
+               % (self._secureServer, errcode, errmsg)
+        fp = h.getfile()
+
+        content = ""
+        chunk = "start"
+        while len(chunk) != 0:
+            chunk = fp.read()
+            content += chunk
+        fp.close()
+
+        return content
 
 
     def charge(self, amount, description=""):
