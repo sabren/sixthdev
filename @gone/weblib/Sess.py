@@ -4,7 +4,7 @@ Sess.py : emulates PHPLIB's session support in python
 @TODO: python-style license lingo
 """
 
-from Request import request
+from weblib import request, response
 
 try:
     from cPickle import loads, dumps
@@ -19,7 +19,7 @@ class Sess:
 
     def __init__(self, pool):
         self.sid = ""
-        self.name = "weblib"
+        self.name = "weblib.Sess"
         self.mode = "cookie"
         self.fallbackMode = "get"
         self.magic = "abracadabra"
@@ -35,7 +35,7 @@ class Sess:
     ## public methods ########################
 
     def start(self, sid=""):
-        """starts the session. call at the top of the page
+        """starts the session. call at the top of the page.
 
         Not really sure why you'd ever want to pass
         the sid variable in.. except possibly for testing..
@@ -45,8 +45,6 @@ class Sess:
             self.sid = self._getSid()
         else:
             self.sid = sid
-        if __debug__:
-            print "sid =" + self.sid
         self.thaw()
         self._gc()
 
@@ -68,7 +66,7 @@ class Sess:
 
     def freeze(self):
         """freezes sess and dumps it into the sesspool. call at end of page"""
-        self._pool.putSess(self.name, self.sid, dumps(self._bag))
+        self._pool.putSess(self.name, self.sid, dumps(self._bag, 1)) # 1 for binary
 
     def thaw(self):
         """gets a frozen sess out of the sesspool and thaws it out"""
@@ -106,7 +104,7 @@ class Sess:
     def _getSid(self):
         """figures out which session id to use"""
 
-        sid = ""
+        sid = None
         
         # first try to get the sid from the browser..
         try:
@@ -120,9 +118,12 @@ class Sess:
             pass
 
         # if that didn't work, just make one up..
-        if sid == "":
-            import unique
-            sid = unique.uid()
+        if sid is None:
+            import weblib
+            sid = weblib.uid()
+            #@TODO: add code for timeouts wrt setCookie
+            if self.mode == "cookie":
+                response.addCookie(self.name, sid)
                 
         return sid
 
@@ -132,34 +133,6 @@ class Sess:
         if (whrandom.random() * 100 <= self.gcProb):
             self._pool.drain(self.name, 0)
             
-
-## SessPool : for holding frozen Sesses :) ##########################
-
-class SessPool:
-
-    """The default, SessPool uses a flat text file,
-    so you should subclass it, or just build your own object with the
-    same interface (getSess(), setSess(), and drain())..."""
-    
-    def __init__(self, filename):
-        import dumbdbm
-        self.storage = dumbdbm.open(filename,"c")
-        
-    def getSess(self, name, sid):
-        """returns the sess with the specified name and id, or None"""
-        if self.storage.has_key(`name`+`sid`):
-            return self.storage[`name` + `sid`]
-        else:
-            return None
-
-    def putSess(self, name, sid, frozensess):
-        """stores a frozen sess with the specified name and id"""
-        self.storage[`name` + `sid`] = frozensess
-
-    def drain(self, name, sincewhen):
-        """(should) performs garbage collection to kill off old sesses"""
-        # 'cept this is just a dummy version, and it don't do nuttin. :)
-        pass
 
 
 if __name__ == "__main__":
