@@ -2,7 +2,7 @@
 Stealthbox: a strongbox that is not Observable
 """
 
-from strongbox import attr, link, StrongboxError
+from strongbox import attr, link, StrongboxError, linkset
 
 class Accessorize(type):
     """
@@ -76,6 +76,15 @@ class Stealthbox(object):
                 in klass.__attrs__.items()
                 if isinstance(v,link)]
     __get_links__ = classmethod(__get_links__)
+
+
+    #@TODO: make these two into "__slots_of_type__(klass, type)"
+    
+    def __get_linksets__(klass):
+        return [(k,v) for (k,v)
+                in klass.__attrs__.items()
+                if isinstance(v,linkset)]
+    __get_linksets__ = classmethod(__get_linksets__)
 
 
     def __init__(self, **args):
