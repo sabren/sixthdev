@@ -11,10 +11,10 @@ class Engine:
 
     """Engine - a wrapper class that runs a script in a custom environment.
 
-    You should be able to run a weblib script as a regular cgi just by putting
-    a "#/python" line up top, and making it executable.. But, as an alternative,
-    you can run it inside an Engine class. this is especially useful for testing
-    or for restricted execution, etc..
+    You should be able to run a weblib script as a regular cgi just by
+    putting a #!/python line up top, and making it executable.. But,
+    as an alternative, you can run it inside an Engine class. this is
+    especially useful for testing or for restricted execution, etc..
     
     """
 
@@ -77,7 +77,8 @@ class Engine:
 
             else:
                 # use a new copy of the default (eg, self.perm=weblib.Perm())
-                setattr(self, item, weblib.__dict__[string.capitalize(item)](engine=self))
+                setattr(self, item,
+                        weblib.__dict__[string.capitalize(item)](engine=self))
 
 
 
@@ -151,9 +152,8 @@ class Engine:
 
 
     def execute(self, script):
-        """This is here so you can do restricted execution in a subclass if you like."""
+        """This is so you can restrict execution in a subclass if you like."""
         exec(script, self.globals, self.locals)
-
 
 
     def run(self):
@@ -177,4 +177,3 @@ class Engine:
                 
         finally:
             self.tearDown()
-
