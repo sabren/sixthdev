@@ -33,3 +33,5 @@ class StoryIndexTest(unittest.TestCase):
         assert dogs[0].title=="twodog"
         assert dogs[1].title=="onedog"
 
+        blank = c.store(Story(title="", description=""))
+        idx.addStory(blank)

@@ -9,7 +9,15 @@ class StoryIndex(ransacker.SQLiteIndex):
         super(StoryIndex, self).__init__(filename)
 
     def addStory(self, story):
-        self.addDocument(story, story.title + " " + story.description)
+        if story.title or story.description:
+            self.addDocument(story, story.title + " " + story.description)
+        else:
+            # @TODO: this store a blank code is a kludge
+            # I'm doing it because by removing the REPLACE INTO
+            # for registerPage, _doIndexing  calls commit()
+            # even though nothing has been done yet, which
+            # causes a crash.
+            self.addDocument(story, "_")
 
     def _registerPage(self, story):
         assert story.ID, "must have an ID"                
