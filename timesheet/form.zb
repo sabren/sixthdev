@@ -1,0 +1,24 @@
+
+<!-- timesheet entry editing form -->
+
+<form action="timesheet.app" method="POST">
+  <input type="hidden" name="ID" value="{:ID:}">
+  <table border="0">
+    <tr>
+      <td>day:</td>
+      <td><input type="text" name="day" value="{:day:}"></td>
+      <td>hours:</td>
+      <td><input type="text" name="hours" value="{:hours:}"></td>
+    </tr>
+    <tr><td colspan="4">note:</td></tr>
+    <tr>
+      <td colspan="4">
+        <textarea cols="40" name="note">{:note:}</textarea>
+      </td>
+    </tr>
+  </table>
+  <input type="submit" name="action" value="save">
+  * if ID:
+      <input type="submit" name="action" value="delete">
+</form>
+	

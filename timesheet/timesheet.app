@@ -4,6 +4,22 @@ A timesheet app in 'brute force' style.
 __ver__="$Id$"
 from sixthday import App
 from pytypes import Date
+import zebra
+
+
+def toListOfDicts(cur):
+    """
+    converts cursor.fetchall() results into a list of IdxDicts
+    """
+    from pytypes import IdxDict
+    res = []
+    for row in cur.fetchall():
+        dict = IdxDict()
+        for i in range(len(cur.description)):
+            dict[cur.description[i][0]] = row[i]
+        res.append(dict)
+    return res
+
 
 class TimesheetApp(App):
     def __init__(self, input, dbc):
@@ -11,30 +27,8 @@ class TimesheetApp(App):
         self.dbc = dbc
 
     def showForm(self, ID, day, hours, note):
-        self.write(
-            '''
-            <form action="timesheet.app" method="POST">
-            <input type="hidden" name="ID" value="%s">
-            <table border="0">
-              <tr>
-                <td>day:</td>
-                <td><input type="text" name="day" value="%s"></td>
-                <td>hours:</td>
-                <td><input type="text" name="hours" value="%s"></td>
-              </tr>
-              <tr><td colspan="4">note:</td></tr>
-              <tr>
-                <td colspan="4">
-                  <textarea cols="40" name="note">%s</textarea>
-                </td>
-              </tr>
-            </table>
-            <input type="submit" name="action" value="save">
-            ''' % (ID, day, hours, note))
-        if ID:
-            self.write('<input type="submit" name="action" value="delete">')
-        self.write('</form>')
-
+        self.write(zebra.fetch("form", locals()))
+        
     def query(self, sql):
         cur = self.dbc.cursor()
         cur.execute(sql)
@@ -79,20 +73,7 @@ class TimesheetApp(App):
     def act_list(self):
         cur = self.query("SELECT ID, day, hours, note FROM times")
         self.showForm(ID="", day=Date("today"), hours=0, note="")
-        self.write('<table>')
-        for row in cur.fetchall():
-            ID, day, hours, note = row
-            self.write(
-                '''
-                <tr>
-                  <td><a href="timesheet.app?action=edit&ID=%(ID)s"
-                         >%(ID)s</a></td>
-                  <td>%(day)s</td>
-                  <td>%(hours)s</td>
-                  <td>%(note)s</td>
-                </tr>
-                ''' % locals())
-        self.write('</table>')
+        self.write(zebra.fetch("timesheet", {"rows":toListOfDicts(cur)}))
 
 if __name__=="__main__":
     import sqlTimesheet

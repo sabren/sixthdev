@@ -1,0 +1,15 @@
+
+<!-- the actual timesheet entries -->
+
+* for rows:
+    * head:
+        <table>
+    * body:
+        <tr>
+          <td><a href="timesheet.app?action=edit&ID={:ID:}">{:ID:}</a></td>
+          <td>{:day:}</td>
+          <td>{:hours:}</td>
+          <td>{:note:}</td>
+        </tr>
+    * foot:
+        </table>

@@ -8,4 +8,15 @@ see what is working and what is not.
 * [0527.2002 04:52] got it.
 A little less than an hour later, I've got a 100-line timesheet
 app, that lets you add, edit, and delete rows in a single table.
-I'll check this in to CVS now.
+I'll check this in to CVS now. [timesheet.app 1.1.1.1]
+
+* [0527.2002 05:46] refactoring
+Okay, I'm back. The original version covers the basics, but there's
+still a lot of grunt work to be done and situations that it doesn't
+handle. And the code is just plain ugly.
+
+* [0527.2002 05:50] step 1: outsource the HTML
+We can replace the code of showForm(...) with a zebra template.
+...
+Done. It brought us down to 80 lines, and broke the app into
+three files.
