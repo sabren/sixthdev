@@ -1,6 +1,7 @@
 *# zikeshop product administration form
 *# $Id$
-
+* exec:
+    import weblib
 * if ID:
     <b>edit this product:</b>
 * el:
@@ -49,16 +50,36 @@ long description:<br>
 * if isHidden:
      CHECKED
 > hide this product<br>
-
-<br>upload a new picture:<br>
-<input name="picture" type="file"><br>
-
-<input value="save" type="submit">
-
 </td></tr></table>
 
+*## stock ...
+*#@TODO: there ought to be two types or products: styled, unstyled
+<table border="1" width="275" style="background:silver">
+<tr><td>amount in stock:</td>
+    <td><input type="text" size="5" name="stock" value="{:weblib.deNone(stock):}"></td></tr>
+<tr><td>on hold for customers:</td>
+    <td><input type="text" size="5" name="hold" value="{:weblib.deNone(hold):}"></td></tr>
+<tr><td>warn when available stock drops to:</td>
+    <td><input type="text" size="5" name="warn" value="{:weblib.deNone(warn):}"></td></tr>
+</table>
+<br/>
+
+*## picture
+<table border="1" width="275" style="background:silver">
+<tr><td>
 * if pictureID:
     Image:<br>
-    <img src="picture.py?ID={:pictureID:}">
+    <img src="picture.py?ID={:pictureID:}&size=270">
+* el:
+    <b>No picture.</b>
+</td></tr>
+<tr><td>
+upload a new picture:<br>
+<input name="picture" type="file"><br/>
+</td></tr>
+</table>
+
+<br clear="all"/>
+<input value="save" type="submit">
 
 </form>

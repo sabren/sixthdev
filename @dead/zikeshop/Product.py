@@ -42,6 +42,10 @@ class Product(zdc.RecordObject):
         self.weight = 0
         self.parentID = 0
 
+        self.hold = 0
+        self.stock = 0
+        self.warn = 0
+
 
     def _fetch(self, **where):
         apply(self.__super._fetch, (self,), where)
@@ -50,7 +54,9 @@ class Product(zdc.RecordObject):
     ## Normal RecordObject Methods #######################################
 
     def getEditableAttrs(self):
-        return self.__super.getEditableAttrs(self) + ['picture']
+        #@TODO: this model is really straining: available isn't editable..
+        #(but I need it here for now so ObjectView can find available..)
+        return self.__super.getEditableAttrs(self) + ['picture','available']
 
     def delete(self):
         self.categories.delete()
@@ -88,6 +94,14 @@ class Product(zdc.RecordObject):
         return zdc.FixedPoint(self._data.get('retail', '0.00'))
 
 
+    def get_available(self):
+        #@TODO: this is where styled/unstyled distinction
+        # would come in handy
+        res = (self.stock or 0) - self.hold
+        for item in self.styles:
+            res = res + item.stock - item.hold
+        return res
+
     def set_picture(self, blob):
         # on a multipart/form-data form,
         # if you don't upload a file, it still gives you
@@ -107,9 +121,14 @@ class Product(zdc.RecordObject):
 
 
     def get_styles(self):
-        return zdc.LinkSet(self, zikeshop.Style, "parentID")
+        if not self._data.has_key("_styles"):
+            self._data["_styles"] = zdc.LinkSet(self,
+                                                zikeshop.Style,
+                                                "parentID")
+        return self._data["_styles"]
 
     ## category junction stuff #########################################
+
 
     def get_categories(self):
         if not self._data.has_key("cats"):

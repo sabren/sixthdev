@@ -42,9 +42,30 @@ show products in... &nbsp;
 
 *# show the products:
 <table border="0" cellspacing="0" cellpadding="2">
+<tr><th width="75">code</th>
+    <th width="200">name</th>
+    <th width="75">in stock</th>
+    <th width="75">on hold</th>
+    <th width="75">available</th></tr>
+* exec:
+    import weblib
+    toggle = 1
 * for products:
+    * exec:
+        toggle = not toggle
+        tdclass = ("even", "odd")[toggle]
     <tr>
-    <td><A HREF="index.py?action=show&what=product&ID={:ID:}">{:code:}</a></td>
-    <td>{:name:}</td></tr>
+    <td class="{:tdclass:}">
+       <A href="index.py?action=show&what=product&ID={:ID:}">{:code:}</a></td>
+    <td class="{:tdclass:}">{:name:}</td>
+    * exec:
+        if weblib.deNone(available,0) <= weblib.deNone(warn,0):
+            style = "color:red; font-weight:bold;"
+        else:
+            style = "color:black"
+    <td class="{:tdclass:}" style="{:style:}">{:weblib.deNone(stock):}</td>
+    <td class="{:tdclass:}" style="{:style:}">{:weblib.deNone(hold):}</td>
+    <td class="{:tdclass:}" style="{:style:}">{:weblib.deNone(available):}</td>
+    </tr>
 </table>
 </form>

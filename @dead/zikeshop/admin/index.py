@@ -39,6 +39,12 @@ class ZikeShopAdminApp(zikebase.AdminApp):
         self.consult("mdl_category")
         zebra.show("lst_product", self.model)
 
+    def save_product(self):
+        # hold must not be null..
+        if not self.input["hold"]:
+            self.input["hold"] = 0
+        self.generic_save("style")
+
     ## style stuff ######################################
     def create_style(self):
         try:

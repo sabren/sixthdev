@@ -25,8 +25,8 @@ class CheckoutApp(zikeshop.PublicApp):
         self.__super.enter(self)
 
         # @TODO: clean this up:
-        if self.cart.isEmpty():
-            raise Error, "Can't check out because cart is empty."
+        assert not self.cart.isEmpty(), \
+               "Can't check out because cart is empty."
 
     def exit(self):
         self.__super.exit(self)
@@ -67,6 +67,7 @@ class CheckoutApp(zikeshop.PublicApp):
         self.next='get_card'
 
     def act_add_address(self):
+        #@TODO: this is a lot like userapp..
         import zikebase
         zikebase.load("Contact")
         context = self.input.get('context','bill')
@@ -133,10 +134,16 @@ class CheckoutApp(zikeshop.PublicApp):
 
 
     def act_show_receipt(self):
-        import zebra, zdc
+        import zebra, zdc        
         sale = zikeshop.Sale(ID=self.data['saleID'])
         self.consult(zdc.ObjectView(sale))
         zebra.show("dsp_receipt", self.model)
+
+        # clear the session info:
+        self.cart.empty()
+        # but remember the last sale in case they refresh..
+        self.data={"saleID":self.data["saleID"]}
+
 
     def act_checkout(self):
         sale = zikeshop.Sale()
@@ -151,6 +158,14 @@ class CheckoutApp(zikeshop.PublicApp):
             det = sale.details.new()
             det.productID = item["extra"]["ID"]
             det.quantity = item["quantity"]
+
+            # @TODO: make updating .hold a transaction AND put in Sale..
+            # @TODO: in fact, need to cleanly separate ordering + fufulliment
+            # @TODO: some products don't need .hold (eg, downloads)
+            prod = det.product
+            prod.hold = prod.hold + det.quantity
+            prod.save()              
+
             sale.details << det
             
         import zdc

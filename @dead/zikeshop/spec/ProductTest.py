@@ -40,6 +40,51 @@ class ProductTestCase(unittest.TestCase):
         assert isinstance(zikeshop.Product().retail, zdc.FixedPoint), \
                "retail is wrong type!"
 
+    ## inventory checking ############################################
+
+    def check_available(self):
+        prod = zikeshop.Product()
+        assert prod.available == 0, \
+               "products shouldn't be available by default."
+
+        prod.stock = 10
+        assert prod.available == 10, \
+               "available should be stock when nothing on hold"
+
+        prod.hold = 5
+        assert prod.available == 5, \
+               "available should be stock - hold"
+
+        style = prod.styles.new()
+        style.stock = 10
+        style.hold = 5
+        prod.styles << style
+        actual = prod.available
+        assert actual == 10, \
+               "available should take styles into account.. (got %s)" % actual
+        
+    ## styles collection #############################################
+    def check_styles(self):
+
+        prod = zikeshop.Product()
+        assert len(prod.styles) == 0, \
+               "shouldn't be any styles by default."
+        style = prod.styles.new()
+        style.code = "ABC"
+        prod.styles << style
+        assert len(prod.styles) == 1, \
+               "didn't add style in memory.."
+
+
+        prod = zikeshop.Product()
+        prod.name = prod.code ="abc"
+        prod.save()
+        style = prod.styles.new()
+        style.code = "xyz"
+        prod.styles << style
+        assert len(prod.styles)==1, \
+               "didn't save style to db.."
+        
 
     ## categories collection #########################################
 
@@ -131,5 +176,3 @@ class ProductTestCase(unittest.TestCase):
 
         assert e, \
                "Didn't get ValueError on duplicate code"
-        
-
