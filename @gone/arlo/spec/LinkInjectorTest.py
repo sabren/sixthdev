@@ -24,10 +24,10 @@ class LinkInjectorTest(TestCase):
         assert obj.ref is None
 
         self.clerk.store(Foreign(data="Here I come to save the day!"))
-        inj = LinkInjector(obj, "ref", self.clerk, Foreign, 1)
+
+        obj.ref = Foreign(ID=1)
+        obj.ref.attach(LinkInjector(self.clerk, Foreign, 1), onget="inject")
         assert len(obj.ref.private.observers) == 1
-        
-        assert obj.ref is not None, "failed to lazy load."
 
         # should be able to fetch the ID without triggering load
         assert obj.ref.ID == 1
@@ -59,7 +59,9 @@ class LinkInjectorTest(TestCase):
         self.clerk.store(dad)
         
         unc = Uncle()
-        inj = LinkInjector(unc, "brother", self.clerk, Parent, 1)
+        unc.brother = Parent(ID=1)
+        unc.brother.attach(LinkInjector(self.clerk, Parent, 1),
+                           onget="inject")
 
         ## this next line threw an AttributeError because the
         ## injector tried to include "kids" in the .update() call

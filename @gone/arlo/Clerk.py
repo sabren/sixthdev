@@ -22,6 +22,9 @@ class Clerk:
     ## public interface ##############################################
         
     def store(self, obj, _others={}):
+        # we do this the first time to prevent recursion
+        obj.private.isDirty = 0
+                
         d = self._object_attrs_as_dict(obj)
         d.update(_others)
         klass = obj.__class__
@@ -42,6 +45,13 @@ class Clerk:
         relevant_columns = self._attr_columns(klass, data_from_db)
         obj.update(**relevant_columns)
 
+        # we've got the clean data, but we called update
+        # with the new primary key,  so we need to reset
+        # isDirty. We have to do it before linkset stuff
+        # to prevent infinite recursion on cyclic data
+        # structures.
+        obj.private.isDirty = 0
+
         # linkSETS, on the other hand, depend on us, so they go last:
         for name, link in klass.__get_linksets__():
             refs = getattr(obj, name)
@@ -50,7 +60,7 @@ class Clerk:
                 for item in refs:
                     if item.private.isDirty:
                         self.store(item, _others={column:obj.ID})
-        obj.private.isDirty = 0
+
         return obj
 
     def match(self, klass, **where):
@@ -64,9 +74,7 @@ class Clerk:
         return res
    
     def fetch(self, klass, ID):
-        obj = self.match(klass, ID=ID)[0]
-        obj.private.isDirty = 0
-        return obj
+        return self.match(klass, ID=ID)[0]
 
     def fetch_or_new(self, klass, ID):
         if ID:
@@ -97,7 +105,11 @@ class Clerk:
             fclass, column = self._unmap_link(klass, link, name)
             fID = othercols.get(column)
             if fID:
-                inj = LinkInjector(obj, name, self, fclass, fID)
+                stub = fclass(ID = fID)
+                stub.private.isDirty = 0
+                setattr(obj, name, stub)
+                stub.attach(LinkInjector(self, fclass, fID),
+                            onget="inject")
         ## linksetinjectors:
         for name,link in klass.__get_linksets__():
             fclass, column = self._unmap_link(klass, link, name)

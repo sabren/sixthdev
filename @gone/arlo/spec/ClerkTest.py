@@ -155,14 +155,44 @@ class ClerkTest(unittest.TestCase):
         # or a match:
         r = self.clerk.match(Record)[0]
         assert not r.private.isDirty
+
+
+    def check_recursion(self):
+        r = Record()
+        r.next = Record()
+        r.next.next = r
+        assert r.private.isDirty
+        assert r.next.private.isDirty
+        r = self.clerk.store(r)
+        assert r.ID == 2
+        assert r.next.ID == 1
+
+        r = self.clerk.fetch(Record, 2)
+        assert not r.private.isDirty
+        assert not r.next.private.isDirty
+
+
+        ## and the same thing for linksets:
+        n = Node()
+        n.kids << Node()
+        n.kids[0].kids << n
+        assert n.private.isDirty
+        assert n.kids[0].private.isDirty
+        n = self.clerk.store(n)
         
         
 
-
-    def check_user(self):
+    def check_complex_recursion(self):
         """
-        test case from cornerhost that exposed a bug
+        test case from cornerhost that exposed a bug.
+        this is probably redundant given check_recursion
+        but it doesn't hurt to keep it around. :)
 
+        This test is complicated. Basically it sets up
+        several classes that refer to each other in a loop
+        and makes sure it's possible to save them without
+        infinite recursion.
+        
         @TODO: isInstance(LinkSetInjector) in Clerk.py need tests
         It ought to do some kind of polymorphism magic anyway.
         (huh??)
@@ -172,20 +202,23 @@ class ClerkTest(unittest.TestCase):
             ID = attr(long)
             username = attr(str)
             domains = linkset(forward)
+            sites = linkset(forward)
         class Domain(Strongbox):
             ID = attr(long)
-            domain = attr(str)
             user = link(User)
-            site = link(forward)
+            name = attr(str)
+            site = link(forward)            
         class Site(Strongbox):
             ID = attr(long)
-            domain = link(Domain)
             user = link(User)
+            domain = link(Domain)
         User.__attrs__["domains"].type = Domain
+        User.__attrs__["sites"].type = Site
         Domain.__attrs__["site"].type = Site
         dbMap = {
             User:"user",
             User.__attrs__["domains"]: (Domain, "userID"),
+            User.__attrs__["sites"]: (Site, "userID"),
             Domain:"domain",
             Domain.__attrs__["user"]: (User, "userID"),
             Domain.__attrs__["site"]: (Site, "siteID"),
@@ -197,9 +230,9 @@ class ClerkTest(unittest.TestCase):
         clerk = Clerk(MockStorage(), dbMap)
         u = clerk.store(User(username="ftempy"))
         u = clerk.match(User,username="ftempy")[0]
-        d = clerk.store(Domain(domain="ftempy.com", user=u))
+        d = clerk.store(Domain(name="ftempy.com", user=u))
         assert d.user, "didn't follow link before fetch"
-        d = clerk.match(Domain, domain="ftempy.com")[0]
+        d = clerk.match(Domain, name="ftempy.com")[0]
 
         # the bug was here: it only happened if User had .domains
         # I think because it was a linkset, and the linkset had
@@ -212,4 +245,11 @@ class ClerkTest(unittest.TestCase):
         # ah, but then we had an infinite recursion problem
         # with site, but I fixed that with private.isDirty:
         d.site = clerk.store(Site(domain=d))
-        clerk.store(d)
+        d = clerk.store(d)
+        assert d.site.domain.name == "ftempy.com"
+
+        # and again here:
+        d = clerk.fetch(Domain, 1)
+        assert not d.private.isDirty
+        assert not d.site.private.isDirty # this failed.
+        clerk.store(d)                    # so this would recurse forever

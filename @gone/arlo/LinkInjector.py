@@ -4,7 +4,7 @@ __ver__="$Id$"
 import strongbox
 
 class LinkInjector:
-    def __init__(self, box, atr, clerk, fclass, fID):
+    def __init__(self, clerk, fclass, fID):
         """
         Registers a callback so that when getattr(box, atr)
         is called, the object of box.atr's type with given ID
@@ -13,15 +13,9 @@ class LinkInjector:
         In other words, this provides lazy loading for
         strongboxen.
         """
-
         self.clerk = clerk
         self.fID = fID
         self.fclass = fclass
-
-        stub = fclass(ID=fID)
-        setattr(box, atr, stub)
-        stub.attach(self, onget="inject")
-
 
     def inject(self, stub, name):
         if name != "ID":
