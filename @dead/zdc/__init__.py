@@ -11,6 +11,7 @@ from Object import Object
 from RecordObject import RecordObject
 from ObjectView import ObjectView
 from LinkSet import LinkSet
+from FixedPoint import FixedPoint
 
 def sqlEscape(s):
     #@TODO: get the real version of this out of Record
