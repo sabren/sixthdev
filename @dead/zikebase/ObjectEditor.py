@@ -1,6 +1,11 @@
+"""
+A class for editing zdc.Objects
 
+$Id$
+"""
+import weblib
 
-class ObjectEditor:
+class ObjectEditor(weblib.Actor):
     """A class for editing descendents of zdc.Object"""
 
     ## attributes ########################################
@@ -31,24 +36,7 @@ class ObjectEditor:
         
         return apply(self.what, (), which)
 
-
-    def act(self, input):
-        """objed.act(input) #input=a dict with a key called 'action'."""
-
-        self.input = input
-        if input.has_key("action"):
-            method = "act_" + input["action"]
-
-            ## more python magic to call the method:
-            if hasattr(self, method):
-                apply(getattr(self, method), ())
-            else:
-                raise "Don't know how to %s!" % action
-
-        else:
-            pass # do nothing - no action given
-
-
+    
     def tuplize(self, input):
         if type(input) != type(()):
             return (input)
