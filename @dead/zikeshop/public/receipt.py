@@ -1,77 +1,162 @@
-#print "(STILL IN PHP3... convert..)"
+"""
+manage single sales for zikeshop
+"""
+import string
+import weblib
+import zikebase
+import zikeshop
+
+#weblib.auth.check()
+saleID = weblib.request.get("saleID")
+
+assert saleID is not None, \
+       "Please specify a saleID."
+
+try:
+    sale = zikeshop.Sale(ID=saleID)
+except:
+    assert 0, "invalid saleID"
+
+assert sale.siteID == weblib.auth.user.siteID, \
+       "this is not your sale to view."
+
+
+cur = zikeshop.dbc.cursor()
+
+import header
+
+
+# @TODO: move comments off into the content table. (??)
+# @TODO: explicitly track partially filled orders.
+
+if weblib.request.has_key("action"):
+    ed = zikebase.ObjectEditor(zikeshop.Sale, ID=saleID)
+    ed.act()
+    sale = ed.object
+
+print '<a href="sales.py">back to sales list</a>'
+print '<h2>Sale #%(ID)s</h2>' % sale._record
+
+if sale.customerID != 0:
+
+    print """
+    <p><b>customer: <A href="mailto:%(email)s">%(email)s</a></b></p>
+    """ % sale.customer._record
+
+    #@TODO: store organization? or should that be address line 1?
+    #@TODO: logic for hiding state if not in US
+
+    ## BILLING INFO
+    rec = sale.billAddress._record
+    print """
+    <pre><b>Billing Info</b>
+    %(fname)s %(lname)s""" % rec
+
+    ## hide empty address lines
+    for line in range(3):
+        if string.strip(rec["address%i" % (line+1)]) != "":
+            print (line+1), rec["address%i" % (line+1)]
+
+    print """%(city)s, %(stateCD)s, %(postal)s
+    %(countryCD)s
+    phone: %(phone)s
+    </pre>
+    """ % rec
+
+    ## SHIPPING INFO (cut and pasted from above)
+    rec = sale.billAddress._record
+    print """
+    <pre><b>Shipping Info</b>
+    %(fname)s %(lname)s""" % rec
+
+    ## hide empty address lines
+    for line in range(3):
+        if string.strip(rec["address%i" % (line+1)]) != "":
+            print (line+1), rec["address%i" % (line+1)]
+
+    print """%(city)s, %(stateCD)s, %(postal)s
+    %(countryCD)s
+    phone: %(phone)s
+    </pre>
+    """ % rec
+
+
+    #@TODO: handle non-credit card sales
+
+    print """
+    <pre><b>Credit Card:</b>
+    name on card: %(name)s
+    number: %(number)s
+    expiration: %(expMonth)02i/%(expYear)04i</pre>
+    """ % sale.card._record
+
+else:
+    print '<h3>manual sale: %s EST</h3>' % sale.tsSold
+
+    
+cur.execute(
+    """
+    SELECT item, quantity, price, price * quantity AS subtotal
+    FROM shop_sale_item
+    WHERE saleID = %s
+    """ \
+    % saleID)
+
+
+
+## @TODO: abstract this into a "view" class
+print '<table border="1"><tr>'
+for item in cur.description:
+    print '<th>%s</th>' % item[0]
+print '</tr>'
+for row in cur.fetchall():
+    print '<tr>'
+    for item in row:
+        print '<td>%s</td>' % item
+    print '</tr>'
+print '</table>'
+
+
+
+print "<b>subtotal:</b> %s<br>" % sale.subtotal
+print "<b>salestax:</b> %s<br>" % sale.salestax
+print "<b>shipping:</b> %s<br>" % sale.shipping
+print "<b>adjustment:</b> %s<br>" % sale.adjustment
+print "<b>total:</b> %s<br>" % sale.total
+
 
 """
-        ### and show the receipt
+  print "TAX: "; 
+  if ($db->f("useTax")) { print "yes"; } else { print "no"; } 
+  print "<br>\n";
+  print "shipping: " . $db->f("shipmeth") . "<br>\n";
+  print "after taxes/shipping: " . $db->f("amount") . "<br>\n";
+
+?>
+"""
+
+print """
+<hr>
+<form action="sale.py?saleID=%i" method="post">
+comments:<br>
+<textarea cols="40" name="comments" rows="10">%s</textarea><br>
+<input type="hidden" name="isFilled" value="0">
+change <b>%s</b> status to:
+<select name="statusID">
+""" % (sale.ID, weblib.deNone(sale.comments), sale.status)
+
+cur.execute("SELECT ID, status FROM shop_status")
+for row in cur.fetchall():
+    if row[0] == sale.statusID:
+        selected = " SELECTED"
+    else:
+        selected = ""
         
-        print "<html><head><title>Thanks for your Order!</title></head>\n";
-        print '<BODY BGCOLOR="#FEFEEF" LINK="#800000" VLINK="#808040" '
-            . 'TEXT="#000000">';
-        print '<img src="images/welogo4.gif" width="200" height="88">';
-        print "<h2>Thanks for your Order!</h2>\n";
+    print '<OPTION VALUE="%i"%s>%s</OPTION>' \
+          % (row[0], selected, row[1])
     
-        print "<table width=600 border=0><tr><td>\n";
-    
-        print "Order #WE-" . date("Ymd") . "-" . $r->ID . "<br>\n";
-    
-        $cart->readonly = 1;
-        $cart->show_all();
-    
-        print "<pre>";
-		     
-        print "Billing Information\n";
-        print "-----------------------\n";
-        print "$b_lname, $b_fname $b_mname\n";
-        if (! $s_name) {
-            if ($b_org) { print "$b_org\n"; }
-            print "$b_addr1\n";
-            if ($b_addr2) { print "$b_addr2\n"; }
-            print "$b_city, $b_state $b_zip\n";
-            print "$b_country\n";
-        }
-    
-        print "\n";
-    
-        print "Payment Information\n";
-        print "-------------------\n";
-        print "Payment Type: <b>$payType</b>\n";
-        if ($payType == "credit") {
-            print "Card Type: <b>$cardType</b>\n";
-            print "Name on Card: <b>$cardName</b>\n";
-            print "Expires: <b>$cardExp</b>\n";
-        }
-    
-        print "\n";
-    
-        if ($s_name) { 
-            print "Shipping Information\n";
-            print "-----------------------\n";
-            print "$s_name\n";
-            if ($s_org) { print "$s_org\n"; }
-            print "$s_phone\n";
-            print "$s_addr1\n";
-            if ($s_addr2) { print "$s_addr2\n"; }
-            print "$s_city, $s_state $s_zip\n";
-            print "$s_country\n";
-            print "$s_email\n";
-        }
-    
-        print "\n";
-    
-        print "</pre>\n";
-    
-        if ($comments) {
-            print "Your Comments:<br>\n";
-            print "<p>$comments</p>\n";
-        }
-    
-        print "<p><i>Please save or print this page for your records.</i></p>\n";
-        print "<p><a href=\"http://www.wholesome-essentials.com/index.php3\">Back to Home Page.</a></p>\n";
-        print "</td></tr></table></body></html>\n";
-        
-        # empty the cart... this also prevents against refresh
-        # causing duplicate orders.
-    
-        $cart->remove_all();
-    
-    }
+print """
+</select>
+<input type="submit" name="action" value="save">
+</form>
 """

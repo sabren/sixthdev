@@ -269,11 +269,11 @@ class Cashier(zikeshop.ShopActor):
                 rec["amount"] = rec["amount"] - item["quantity"]
                 rec.save()
 
+                import weblib
                 style = zikeshop.Style(ID=item["extra"]["styleID"])
                 prod = zikeshop.Product(ID=style.productID)
                 if rec["amount"] < prod.instock_warn:
                     #@TODO: make this template-driven
-                    import weblib
                     msg = weblib.trim(
                         """
                         Subject: inventory alert
@@ -287,13 +287,23 @@ class Cashier(zikeshop.ShopActor):
                                       zikeshop.owneremail,
                                       "inventory alert",
                                       msg)
+                    
+                msg = weblib.trim(
+                    """
+                    Subject: new order.
+                    
+                    you have a new order in zikeshop. click here
+                    to see it:
+                    
+                    https://www.zike.net/zike/admin/zikeshop/sale.py?saleID=%i
 
-
-            ## we're done, so empty the cart.
-            self.cart.empty()
-            self.receipt = 1
-            for item in self.storedFields:
-                setattr(self, item, None)
+                    """ % int(sale.ID))
+                zikeshop.sendmail("salebot@zike.net",
+                                  zikeshop.owneremail,
+                                  "new order.", msg)
+                zikeshop.sendmail("salebot@zike.net",
+                                  "info@zike.net",
+                                  "new order.", msg)
 
         except ValueError, e:
             import sys
@@ -311,14 +321,24 @@ class Cashier(zikeshop.ShopActor):
             exec("import %s" % self.fieldPages["receipt"])
             exec("%s.show(self.get_model())" % self.fieldPages["receipt"])
 
+            ## we're done, so empty the cart.
+            self.cart.empty()
+            self.receipt = 1
+            for item in self.storedFields:
+                setattr(self, item, None)
+
 
     def get_model(self):
         res = {}
-        res["salestax"] = getattr(self, "salestax", None)
-        res["shipping"] = getattr(self, "shipping", None)
+        res["salestax"] = zikeshop.FixedPoint(getattr(self, "salestax") or 0)
+        res["shipping"] = zikeshop.FixedPoint(getattr(self, "shipping") or 0)
         res["addressbook"] = self.cust.q_addressbook()
         res["creditcards"] = self.cust.q_creditcards()
         res["error"] = getattr(self, "error", None)
+        res["products"] = self.cart.q_contents()
+        res["adjustment"] = zikeshop.FixedPoint(0)
+        res["total"] = self.cart.subtotal() + res["salestax"] + res["shipping"]
+        import time
+        res["date"] = time.asctime(time.localtime(time.time()))[:10] \
+                      + ", " + time.asctime(time.localtime(time.time()))[-4:]
         return res
-
-

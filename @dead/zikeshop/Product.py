@@ -133,23 +133,29 @@ class Product(zdc.RecordObject):
     ## Queries ###############################################
 
     def q_nodes(self):
-        import zikebase
+        import zikebase, weblib
         res = []
         for nodeID in self.nodeIDs:
             node = zikebase.Node(ID=nodeID)
-            res.append({"ID": nodeID, "name":node.name, "path":node.path })
+            res.append({"ID": nodeID, "name":node.name, "path":node.path,
+                        "encpath":weblib.urlEncode(node.path) })
         return res
 
 
     def q_styles(self):
-        """Returns a list of dicts with ID & style for the product's styles"""
+        """Returns a list of dicts with ID, style, and instock amount
+        for the product's styles"""
 
         cur = self._table.dbc.cursor()
-        cur.execute("SELECT ID, style from shop_style WHERE productID=%s" \
-                    % self.ID)
+        cur.execute(
+            """
+            SELECT s.ID, style, amount from shop_style s
+            LEFT JOIN shop_inventory i ON s.ID=i.styleID
+            WHERE s.productID=%s
+            """ % self.ID)
         res = []
         for row in cur.fetchall():
-            res.append({"ID":row[0], "style":row[1]})
+            res.append({"ID":row[0], "style":row[1], "instock":row[2]})
         return res
         
         

@@ -10,12 +10,17 @@ try:
 except:
     assert 0, "Invalid product."
 
+
+
 model ={
     "basehref" : zikeshop.basehref,
+    
+    "code" : prod.code,
     "name" : prod.name,
+    "price": prod.price,
+    "retail": prod.retail,
     "descript" : prod.descript,
     "pictureID": prod.pictureID,
-    "code" : prod.code,
     "nodes" : prod.q_nodes(),
     "styles" : prod.q_styles(),
     }

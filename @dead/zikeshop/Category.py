@@ -14,7 +14,7 @@ class Category(zikebase.Node):
         cur = self._table.dbc.cursor()
         cur.execute(
             """
-            SELECT ID, code, name, productID FROM shop_product p
+            SELECT ID, code, name, price, productID FROM shop_product p
             LEFT JOIN shop_product_node pn on p.ID=pn.productID
             WHERE nodeID=%s and siteID=%s
             ORDER BY code
@@ -25,13 +25,14 @@ class Category(zikebase.Node):
         for row in cur.fetchall():
             #@TODO: fetchall to recordset should be automatic
             res.append({"ID": row[0], "code": row[1], "name":row[2],
-                        "productID": row[3]})
+                        "price":row[3], "productID": row[4]})
         return res
 
 
 
     ### FIX THIS LATER (siteID reference) #######################
     def q_children(self):
+        import weblib
         res = []
         cur = self._table.dbc.cursor()
         if self.ID is not None:
@@ -39,6 +40,9 @@ class Category(zikebase.Node):
                         % (self.ID, zikeshop.siteID))
             for row in cur.fetchall():
                 node = Category(ID=row[0])
-                res.append( {"ID": node.ID, "name": node.name, "path": node.path } )
+                res.append( {"ID": node.ID, "name": node.name,
+                             "path": node.path,
+                             "encpath":weblib.urlEncode(node.path) } )
         return res
+
 

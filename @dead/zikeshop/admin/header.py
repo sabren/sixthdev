@@ -7,6 +7,7 @@ zikeshop.siteID = weblib.auth.user.siteID
 
 print weblib.trim(
     """
+    <body bgcolor="#ccffcc">
     <table align="center" border="0" cellspacing="5"><tr>
     <td>[<a href="l_category.py">categories</a>]</td>
     <td>[<a href="l_product.py">products</a>]</td>
