@@ -80,6 +80,11 @@ class NodeTestCase(unittest.TestCase):
 
         
 
+    def check_parent(self):
+        node = zikebase.Node(ID=2)
+        assert isinstance(node.parent, zikebase.Node), \
+               ".parent doesn't return a Node"    
+
 
     def check_recusionCheck(self):
 
