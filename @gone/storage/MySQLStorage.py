@@ -56,7 +56,14 @@ class MySQLStorage(Storage):
         return self.fetch(table, id)
 
     def _getInsertID(self):
-        return self.cur._insert_id
+        # new way:
+        if hasattr(self.cur, "insert_id"):
+            return self.cur.insert_id()
+        elif hasattr(self.cur, "_insert_id"):
+            return self.cur._insert_id
+        else:
+            raise Exception("insert_id not found!") 
+
 
     def _update(self, table, **row):
 
