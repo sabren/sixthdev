@@ -9,49 +9,6 @@
 </groups>
 
 <tags>
-<tag name="body">
-<desc>
-The innermost part of a <a>report</a> or <a>group</a>.  The body
-stripe is repeated for each record in the results.
-</desc>
-<example>
-* report
-** query source="myDB"
-select item from table
-** body
-&amp;lt;li&amp;gt;{item}
-</example>
-</tag>
-
-<tag name="content">
-<desc>
-This is a prenamed stripe for use by content authors.
-It simply marks its children as being the actual content
-of a page.
-</desc>
-<example>
-* title
-A story.
-* content
-Once upon a time, something happened. The end.
-</example>
-</tag>
-
-<tag name="description">
-<desc>
-A prenamed stripe that marks its children as being
-the description of a page (to be inserted into an HTML META
-tag, for example)
-</desc>
-<example>
-* title
-A story
-* description
-A humorous tale of love, adventure, and danger.
-* content
-Once upon a time, something happened. The end.
-</example>
-</tag>
 
 <tag name="ef">
 <desc>
@@ -79,7 +36,7 @@ See <a>ef</a> for example.
 <attr name="test" desc="A test in ZebraScript. Will be translated to the native language. (not yet implemented)"></attr>
 </tag>
 
-<tag name="eval">
+<tag name="build">
 <desc>
 Indicates that the enclosed data is to be treated as 
 (python) code to be evaluated at compile time by zebra. 
@@ -107,7 +64,7 @@ STRIPE = "Four plus four is " + `4+4`
 </example>
 </tag>
 
-<tag name="exec">
+<tag name="do">
 <desc>
 Indicates that the enclosed stripes are to be treated as executable
 code to be run by the web server. For example, when making a 
@@ -119,19 +76,6 @@ This gets shown.
 ** exec
 print "And so does this"; # assuming PHP3, perl, etc..
 </example>
-</tag>
-
-<tag name="group">
-<desc>
-Group implements headers and footers in a <a>report</a>.
-May be nested inside another group.
-Its "head" is shown whenever the content of the current record's
-grouping field is different from that of the previous
-record. Its "tail" is shown whenever the content of the current record's
-grouping field is different from that of the next record.
-See <a>report</a> for an example.
-</desc>
-<attr name="field" desc="The field on which to group."></attr>
 </tag>
 
 <tag name="head">
@@ -184,20 +128,6 @@ Here's fred again: {!fred}
 <attr name="stripe" desc="the name of the stripe"></attr>
 </tag>
 
-<tag name="keywords">
-<desc>
-A prenamed stripe to contain keywords for describing a document. Used, for example,
-to populate the "description" META tag in HTML.
-</desc>
-<example>
-* title
-A story.
-* keywords
-adventure, story, stories, plot
-* content
-Once upon a time, something happened. The end.
-</example>
-</tag>
 
 <tag name="none">
 <desc>
@@ -285,26 +215,11 @@ Here's fred: {!fred}
 <attr name="name" desc="the name of the stripe"></attr>
 </tag>
 
-<tag name="tail">
+<tag name="foot">
 <desc>
 A footer. The part of a <a>skin</a>, <a>report</a>, or <a>group</a> tag that
 gets shown after the contents of the stripe.
 </desc>
-</tag>
-
-<tag name="title">
-<desc>
-A prenamed stripe to contain title of a document. Used, for example,
-to populate the TITLE tag in HTML.
-</desc>
-<example>
-* title
-A story.
-* keywords
-adventure, story, stories, plot
-* content
-Once upon a time, something happened. The end.
-</example>
 </tag>
 
 <tag name="wrap">
