@@ -15,6 +15,7 @@ class Object:
     see RecordObject and ModelObject (?) for examples..
     """
 
+    __key__="ID" # field that uniquely identifies this object
     _locks = []
     _isNew = 0
     
@@ -161,8 +162,4 @@ class Object:
         ## case C: it does not have the attribute
         else:
             raise AttributeError, "no such attribute [" + name + "]"
-
-
-
-
 

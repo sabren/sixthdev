@@ -15,9 +15,10 @@ class RecordObject(zdc.Object):
     ## attributes ###################################################
 
     _table = None
-    _defaults = {} # perhaps just check whether __class__.attr is defined?
+    _defaults = {} # @TODO: just check whether __class__.attr is defined?
     _record = None
     _tuples = []
+    __key__ = "ID"
 
 
     ## constructor ##################################################
@@ -103,7 +104,4 @@ class RecordObject(zdc.Object):
         for f in self._record.table.fields:
             # use __dict__ to avoid overhead/errors with setattr
             self.__dict__[f.name] = self._record[f.name]
-
-
-
 
