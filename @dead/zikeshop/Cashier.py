@@ -10,57 +10,16 @@ __ver__="$Id$"
 # 0923.2000 refactorings:
 
 def calcSalesTax(addressID, subtotal):
-    import zikeshop    
-
-    #@TODO: decouple this from addressID, use State/Country or Address(??)
-    #@TODO: put this somewhere else.. probably in the Sale object?
-    #@TODO: Sale should have a reference to a "Store" object, and
-    #@TODO: "Store" should have a .hasNexus(state) for sales tax..
-    
-    ## see if the store has nexus in the customer's state
-    cur = zikeshop.dbc.cursor()
-    cur.execute(
-        """
-        SELECT rate FROM shop_state
-        WHERE stateCD='%s' AND storeID=%i
-        """ \
-        % (zikeshop.Address(ID=addressID).stateCD,
-           zikeshop.siteID)
-        )
-    
-    ## if so, calculate taxes based on the data in shop_state
-    if cur.rowcount:
-        return subtotal * \
-               (zikeshop.FixedPoint(cur.fetchone()[0])/100)
-        
-    ## otherwise, we don't charge tax..
-    else:
-        return 0
-
+    import zikeshop
+    s = zikeshop.Store(ID=zikeshop.siteID)
+    a = zikeshop.Address(ID=addressID)
+    return s.calcSalesTax(a, subtotal)
 
 
 def calcShipping(addr, weight):
     import zikeshop
-    res = 0
-    ## find out what the merchant's address is
-    fromZip = zikeshop.Store(siteID=zikeshop.siteID).address.postal
-
-    ## find out what the shipping address is
-    toZip = addr.postal
-    toCountryCD = addr.countryCD
-    
-    ## UPS charges 6 grand for packages with 0 weight. :)
-    if weight > 0:
-        ## ask ups for the price
-        import zikeshop.UPS
-        res = zikeshop.UPS.getRate(fromZip, toZip, toCountryCD, weight)
-
-        ## it also occasionally charges 6 grand for invalid
-        ## shipping options..
-        if res >= 6000:
-            res = 0
-        
-    return res
+    s = zikeshop.Store(ID=zikeshop.siteID)
+    return s.calcShipping(addr, weight)
 
 
 def chargeCard(theCard, amount):
@@ -240,10 +199,6 @@ class Cashier(zikeshop.Wizard):
             sale.statusID = zikeshop.Status(status="new").ID # mark it 'new'
             sale.siteID = zikeshop.siteID
             sale.save()
-
-            #@TODO: better initial-timestamp support
-            zikeshop.dbc.cursor().execute(
-                "UPDATE shop_sale set tsSold=now() where ID=%i" % sale.ID)
 
             ## Now save each item in the detail table
             ## This is NOT normalized, because we don't want the history
