@@ -1,7 +1,5 @@
 *# dsp_category: template to display a category
 *# $Id$
-
-*# @TODO: cleanup zebra's include syntax.. (no : needed!)
 * include dsp_head;
 * if name:
     <a href="{:link_category('/'):}">top</a> :
@@ -12,28 +10,34 @@
     * for children:
         * head:
             <h3>subcategories</h3>
-        <a href="{:link_category(path):}">{:name:}</a><br>
+        * body:
+            <a href="{:link_category(path):}">{:name:}</a><br>
 
     * for products:
         * head:
             <h3>Products in this Category:</h3>
-            <ul>
-        <li><!-- img src="{:link_picture(pictureID, size=100):}" -->
-            <a href="{:link_product(code):}">{:name:} - ${:price:}</a></li>
+            <table border="0">
+        * body:
+            <tr><td valign="top"><img
+                    src="{:link_picture(pictureID, size=100):}"></td>
+                <td valign="top"><a
+                    href="{:link_product(code):}">
+                    {:name:} - ${:price:}</a>
+                    <br>{:brief:}
+                    </td>
+            </tr>
         * foot:
-            </ul>
+            </table>
     * none:
         (No products in this category)
 
 * el:
-    <b>top</b><br><br>
     * for children:
         * head:
             <font font="verdana" size="3">Categories</font><br>
-        
-        <a href="{:link_category(path):}">{:name:}</A><br>
+        * body:
+            <a href="{:link_category(path):}">{:name:}</A><br>
 
 <hr>
 <a href="{:link_cart('view'):}">view cart</a>
-* include dsp_foot:
-
+* include dsp_foot;
