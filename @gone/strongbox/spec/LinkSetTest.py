@@ -7,7 +7,7 @@ class Child(Strongbox):
     name = attr(str)
 class Parent(Strongbox):
     kids = linkset(Child, "mama")
-Child.__attrs__["mama"].type=Parent
+Child.mama.type=Parent
 
 class Node(Strongbox):
     kids = linkset(forward, None)
@@ -29,7 +29,7 @@ class LinkSetTest(TestCase):
 
         # should not be able to instantiate until we change the "forward" 
         self.assertRaises(ReferenceError, Node)
-        Node.__attrs__["kids"].type = Node
+        Node.kids.type = Node
         
         # now it should work:
         top = Node()

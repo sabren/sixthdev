@@ -5,8 +5,6 @@ This package provides observable classes with static typing.
 """
 import warnings
 
-class StrongboxError(Exception): pass
-
 class forward:
     """
     dummy class for defining recursive structures)
@@ -19,10 +17,17 @@ class forward:
         if type(typename) != str:
             warnings.warn("forward() should be forward('module.ClassName')")
 
-from Observable import Observable
+
 from Attribute import Attribute as attr
 from Link import Link as link
 from LinkSet import LinkSet as linkset
-from Stealthbox import *
-from Strongbox import *
+
+from Private import Private
+from BoxMaker import BoxMaker
+from MetaBox import MetaBox
+from BlackBox import BlackBox
+from WhiteBox import WhiteBox
 from BoxView import *
+
+# for backwards compatability:
+Strongbox = WhiteBox

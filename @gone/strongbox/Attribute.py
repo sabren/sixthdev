@@ -7,7 +7,7 @@ from types import StringType, LambdaType, ListType, NoneType
 class Notgiven:
     "I'm a placeholder type distinct from None"
 
-class Attribute(object):
+class Attribute(property):
     """
     A small class representing a static attribute.
     """
@@ -15,7 +15,9 @@ class Attribute(object):
         self.type = typ
         self.allowNone = allowNone
         self._determineDefault(typ, default)
-            
+        self._setOkay(okay)
+        
+    def _setOkay(self, okay):
         if type(okay) == str:
             self.okay = sre.compile(okay)
         elif type(okay) in (LambdaType, ListType, NoneType):

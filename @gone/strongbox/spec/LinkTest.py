@@ -4,7 +4,7 @@ from unittest import TestCase
 
 class LinkedListMember(Strongbox):
     next = link(forward)
-LinkedListMember.__attrs__["next"].type=LinkedListMember
+LinkedListMember.next.type=LinkedListMember
 
 class NonMember(Strongbox):
     pass
