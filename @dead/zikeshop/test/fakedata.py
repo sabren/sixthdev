@@ -73,29 +73,26 @@ def load():
         prod.name=p[1]
         prod.price=5.00 # everything's five bucks!
         prod.descript=p[2]
-        if len(p)>4:
-            prod.pictureID = p[4]
+        #if len(p)>4:
+        #    prod.pictureID = p[4]
         prod.nodeIDs=p[3]
         prod.save()
 
         ## set up 10 of each product in inventory..
         if prod.name == "dictionary":
-            pass
-##             # dictionary has two styles:
-##             style = zikeshop.Style(productID=prod.ID)
-##             style.style = "Webster"
-##             style.save()
-##             dbc.cursor().execute("INSERT INTO shop_inventory "
-##                                  "(locationID, styleID, amount) "
-##                                  "VALUES (1, %i, 5)" % style.ID)
-##             # and add another:
-##             style = zikeshop.Style()
-##             style.productID=prod.ID
-##             style.style = "Oxford"
-##             style.save()
-##             dbc.cursor().execute("INSERT INTO shop_inventory "
-##                                  "(locationID, styleID, amount) "
-##                                  "VALUES (1, %i, 5)" % style.ID)
+            # dictionary has two styles:
+            style = zikeshop.Style()
+            #@TODO: clean up this linking bit (use prod.styles << )
+            style.parentID = prod.ID
+            style.code = "DICTWEB"
+            style.name = "Websters"
+            style.save()
+
+            style = zikeshop.Style()
+            style.code = "DICTOXF"
+            style.name = "Oxford"
+            style.parentID=prod.ID
+            style.save()
             
         else:
             pass
