@@ -5,7 +5,7 @@
 #
 # USAGE:
 #
-# Either do #!/your_path/pyweb at the top of your CGI script,
+# Either do #!/your_path/weblib.cgi at the top of your CGI script,
 # or save this in your cgi-bin, and do this in your Apache .htaccess file:
 #
 # Action application/python-script /cgi-bin/weblib.cgi
@@ -57,7 +57,12 @@ if os.path.exists(whichfile):
 # eng.result is None if nothing's been run yet
 if (eng.result is None) or (eng.result == eng.SUCCESS):
     whichfile = os.environ["PATH_TRANSLATED"]
-    eng.execute(open(whichfile))
+    if os.path.exists(whichfile):
+        eng.execute(open(whichfile))
+    else:
+        eng.stop()
+        print "Status: 404"
+        sys.exit()
 
 ## close down shop and show the results  ########################
 eng.stop()
@@ -72,7 +77,7 @@ else:
     print weblib.trim("""
           <html>
           <head>
-          <title>pyweb error</title>
+          <title>weblib error</title>
           <style type="text/css">
               body, p {
                   background: #cccccc;
@@ -91,7 +96,7 @@ else:
 
     elif eng.result == eng.EXCEPTION:
     
-        print "<b>pyweb error while running %s</b><br>" \
+        print "<b>weblib error while running %s</b><br>" \
               % whichfile
         print '<pre class="traceback">' \
               + weblib.htmlEncode(eng.error) + "</pre>"
