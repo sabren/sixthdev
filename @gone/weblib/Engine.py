@@ -128,7 +128,8 @@ class Engine(object):
         if (self.result is None) or (self.result == self.SUCCESS):
             self.execute(self.script)
         else:
-            print self.result
+            # treat as normal error, assertion failure, or SystemExit
+            pass 
 
     def run(self):
         assert not self.result, "can't use an Engine more than once"
