@@ -32,6 +32,13 @@ sys.path.append(dir)
 import os
 os.chdir(dir)
 
+## handle binary mode issues for stdio on win32:
+import os, sys
+if sys.platform=="win32":
+    import msvcrt
+    msvcrt.setmode(sys.__stdin__.fileno(), os.O_BINARY)
+    msvcrt.setmode(sys.__stdout__.fileno(), os.O_BINARY)
+
 ## build the engine ##############################################
 eng = weblib.Engine()
 eng.start()
