@@ -39,6 +39,7 @@ def calcSalesTax(addressID):
 
 
 def calcShipping(addr, weight):
+    import zikeshop
     res = 0
     ## find out what the merchant's address is
     fromZip = zikeshop.Store(siteID=zikeshop.siteID).address.postal
