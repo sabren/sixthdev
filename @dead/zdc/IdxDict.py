@@ -61,7 +61,7 @@ class IdxDict(UserDict.UserDict):
     def __repr__(self):
         res = "{"
         for key in self.idx:
-            res = res + "'" + key + "': " + repr(self.data[key]) + ", "
+            res = res + repr(key) + ": " + repr(self.data[key]) + ", "
 
         # strip that last comma and space:
         if len(res) > 1:
