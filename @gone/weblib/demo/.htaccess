@@ -1,0 +1,5 @@
+## remember: the action path is relative 
+## to the site's base directory.
+## change this to whatever ../adapters would be
+Action weblib "/work/weblib/adapters/weblib.cgi"
+AddType weblib .py
