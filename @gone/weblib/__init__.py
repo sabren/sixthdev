@@ -11,7 +11,7 @@ $Id$
 
 
 def selectBox(name, rows, blank=None, extra=''):
-    """rows should be a sequence of (real value, displayed value, isSelected)"""
+    "rows should be a sequence of (real value, displayed value, isSelected)"
     res = '<select name="%s" %s>\n' % (name, extra)
     if blank is not None:
         res = res + '<OPTION value="%s">&nbsp;</OPTION>\n' % blank
@@ -112,13 +112,14 @@ del i
 
 def htmlEncode(s):
     res = ""
-    for ch in s:
-        if _entitymap.has_key(ch):
-            res = res + "&" + _entitymap[ch] + ";"
-        else:
-            res = res + ch
+    if s is not None:
+        for ch in s:
+            if _entitymap.has_key(ch):
+                res = res + "&" + _entitymap[ch] + ";"
+            else:
+                res = res + ch
     return res
-
+        
 #### URL encoding ########################################
 
 def urlEncode(what):
