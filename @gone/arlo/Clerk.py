@@ -1,6 +1,6 @@
 from arlo import LinkInjector, LinkSetInjector
 from pytypes import IdxDict
-from strongbox import attr
+from strongbox import *
 
 class ClerkError(Exception): pass
 
@@ -32,12 +32,12 @@ class Clerk(object):
         tablename = self._unmap_class(klass)
 
         # we need to save links first, because we depend on them:
-        for name, link in klass.__get_links__():
+        for name, lnk in klass.__get_slots_of_type__(link):
             ref = getattr(obj, name)
             if (ref):
                 if ref.private.isDirty:
                     ref = self.store(ref)
-                fclass, column = self._unmap_link(klass, link, name)
+                fclass, column = self._unmap_link(klass, lnk, name)
                 d[column] = ref.ID
 
         # now we update obj because of db-generated values
@@ -54,10 +54,10 @@ class Clerk(object):
         obj.private.isDirty = 0
 
         # linkSETS, on the other hand, depend on us, so they go last:
-        for name, link in klass.__get_linksets__():
+        for name, lnk in klass.__get_slots_of_type__(linkset):
             refs = getattr(obj, name)
             if not self._hasInjectors(refs):
-                fclass, column = self._unmap_link(klass, link, name)
+                fclass, column = self._unmap_link(klass, lnk, name)
                 for item in refs:
                     if item.private.isDirty:
                         self.store(item, _others={column:obj.ID})
@@ -108,8 +108,8 @@ class Clerk(object):
     def _add_injectors(self, obj, othercols):
         klass = obj.__class__
         ## linkinjectors:
-        for name,link in klass.__get_links__():
-            fclass, column = self._unmap_link(klass, link, name)
+        for name,lnk in klass.__get_slots_of_type__(link):
+            fclass, column = self._unmap_link(klass, lnk, name)
             fID = othercols.get(column)
             if fID:
                 stub = fclass(ID = fID)
@@ -118,8 +118,8 @@ class Clerk(object):
                 stub.attach(LinkInjector(self, fclass, fID),
                             onget="inject")
         ## linksetinjectors:
-        for name,link in klass.__get_linksets__():
-            fclass, column = self._unmap_link(klass, link, name)
+        for name,lnk in klass.__get_slots_of_type__(linkset):
+            fclass, column = self._unmap_link(klass, lnk, name)
             inj = LinkSetInjector(obj, name, self, fclass, column)
 
 
@@ -138,9 +138,9 @@ class Clerk(object):
                 d[attrName] = getattr(obj, attrName)
         return d
         
-    def _unmap_link(self, klass, link, name):
+    def _unmap_link(self, klass, lnk, name):
         try:
-            return self.dbmap[link]
+            return self.dbmap[lnk]
         except KeyError:
             raise ClerkError, "no mapping found for %s.%s" \
                   % (klass.__name__, name)

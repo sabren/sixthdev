@@ -75,20 +75,11 @@ class Stealthbox(object):
             instance.private.dbc = dbc
         return instance
 
-    def __get_links__(klass):
+    def __get_slots_of_type__(klass, t):
         return [(k,v) for (k,v)
                 in klass.__attrs__.items()
-                if isinstance(v,link)]
-    __get_links__ = classmethod(__get_links__)
-
-
-    #@TODO: make these two into "__slots_of_type__(klass, type)"
-    
-    def __get_linksets__(klass):
-        return [(k,v) for (k,v)
-                in klass.__attrs__.items()
-                if isinstance(v,linkset)]
-    __get_linksets__ = classmethod(__get_linksets__)
+                if isinstance(v,t)]
+    __get_slots_of_type__ = classmethod(__get_slots_of_type__)
 
 
     def __init__(self, **args):
