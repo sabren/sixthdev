@@ -19,6 +19,7 @@ class Connection:
     def open(self, driver, **params):
         self.source = driver
 
+
     # delegate everything else to the source...
 
     def select(self, tableOrClass , where=None, **wdict):
@@ -32,6 +33,8 @@ class Connection:
             res = self.source.select(tablename, where, **wdict)
         return res
 
+    # @TODO: "eliminate middleman" refactoring?
+
     def fields(self, tablename):
         return self.source.fields(tablename)
 
@@ -43,3 +46,5 @@ class Connection:
 
     def delete(self, tablename, where=None, **wdict):
         return self.source.delete(tablename, where, **wdict)
+
+    

@@ -5,7 +5,7 @@ __ver__ = "$Id$"
 
 import Record
 
-class Object:
+class Object(object):
     """
     A base class for building business objects.
 
@@ -16,11 +16,10 @@ class Object:
     see RecordObject and ModelObject (?) for examples..
     """
 
-    __key__="ID" # field that uniquely identifies this object
     _links = {}
     _locks = []
     
-    def __init__(self, key=None, **where):
+    def __init__(self, **where):
         """
         Don't override this! override _init(), _new() or _fetch() instead.
         """
@@ -35,13 +34,10 @@ class Object:
         self._link()
         self._init()
 
-        if key is None:
-            if where:
-                apply(self._fetch, (), where)
-            else:
-                self._new()
+        if where:
+            self._fetch(**where)
         else:
-            self._fetch(key)
+            self._new()
         self._lock()
 
 

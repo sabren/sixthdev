@@ -32,7 +32,9 @@ from MySQLdb import NUMBER #, TIMESTAMP
 
 class TIMESTAMP:
     "Just a class used as a value for timestamps"
-    
+
+
+
 ###############
 
 def sqlEscape(s):

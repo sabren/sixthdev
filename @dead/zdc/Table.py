@@ -6,12 +6,11 @@ __ver__="$Id$"
 import zdc
 
 class Table(zdc.Object):
-    __super = zdc.Object
 
     ## constructor ##############################################
                        
     def __init__(self, dbc, name, rowid="ID"):
-        self.__super.__init__(self)       
+        super(Table,self).__init__()       
         self._data["dbc"] = dbc
         self._data["name"] = name
         self._data["fields"] = self.dbc.fields(self.name)

@@ -59,6 +59,7 @@ class JunctionTestCase(unittest.TestCase):
         self.cur.execute("INSERT INTO test_left_right VALUES (2,2,2)")
 
     def check_fetch(self):
+
         # case a: nothing in the join
         assert len(Left(self.ds, ID=1).rights) == 0, \
                "got Rights in empty junction.."

@@ -1,6 +1,6 @@
 import unittest
-
-import sqlTest, zdc
+import zdc
+import sqlTest # note: this has to come after zdc, or tests break. (WHY?!?!)
 import zdc.drivers.DBAPI2Driver
 dbc = zdc.Connection(zdc.drivers.DBAPI2Driver.DBAPI2Driver(sqlTest.dbc))
 

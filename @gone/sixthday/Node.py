@@ -7,16 +7,15 @@ import zdc
 import sixthday
 
 class Node(zdc.RecordObject):
-    __super = zdc.RecordObject
     _tablename = "base_node"
     _tuples = ["crumbs", "children"] # @TODO: clean this up!
 
     def _init(self):
-        self.__super._init(self)
+        super(Node,self)._init()
         self._kids = None
 
     def _new(self):
-        self.__super._new(self)
+        super(Node,self)._new()
         self.name = ''
         self.descript = ''
         self._data['parentID'] = 0
@@ -80,7 +79,7 @@ class Node(zdc.RecordObject):
     def delete(self):
         assert len(self.children)==0, \
                "Cannot delete a Node that has children."
-        self.__super.delete(self)
+        super(Node,self).delete()
 
 
     def save(self):
@@ -97,7 +96,7 @@ class Node(zdc.RecordObject):
         else:
             self._data["path"] = self.name
 
-        self.__super.save(self)
+        super(Node,self).save()
         
         for kid in self.q_children():
             child = Node(self._ds, "ok", ID=kid["ID"])

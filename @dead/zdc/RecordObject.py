@@ -10,7 +10,6 @@ class RecordObject(zdc.Object):
 
     ## static attributes ############################################
 
-    __super = zdc.Object
     _tablename = None
     
     _record = None
@@ -20,28 +19,33 @@ class RecordObject(zdc.Object):
 
     ## constructor ##################################################
 
-    def __init__(self, ds, _tablename=None, **where):
-        # you can do:
-        # >>> obj = RecordObject(ds, tablename)
-        #
-        # OR you can define a class:
-        #
-        # >>> class Person(zdc.RecordObject):
-        # >>>   _tablename = "mas_person"
-        # >>>
-        # >>> Person(ds)
-
-        self.__dict__['_ds'] = ds
+    def __init__(self, ds, forceclerk=None,  **where):
         
-        if _tablename:
-            self.__dict__['_tablename'] = _tablename
-        if type(self._tablename) is not types.StringType:
-            raise TypeError, "RecordObject._tablename must be a string"
+        # make isclerk non-optional and you'll get
+        # an error if it's not clerk (only for smoketest
+        # while I'm refactoring this class out of existence)
+        
 
-        self.__dict__['_table'] = zdc.Table(self._ds, self._tablename)
+        # ds turned out to be a bad idea.
+        if ds:
+            # you can do:
+            # >>> obj = RecordObject(ds, tablename)
+            #
+            # OR you can define a class:
+            #
+            # >>> class Person(zdc.RecordObject):
+            # >>>   _tablename = "mas_person"
+            # >>>
+            # >>> Person(ds)
+            import warnings
+            #raise "record objects should no longer use ds"
+            #warnings.warn("record objects should no longer use ds")
+            self.__dict__['_ds'] = ds
+            self.__dict__['_table'] = zdc.Table(self._ds, self._tablename)
+
 
         # if all's well, go ahead with the init:
-        self.__super.__init__(self, **where)
+        super(RecordObject, self).__init__(**where)
 
 
     ## public methods ################################################

@@ -1,5 +1,7 @@
 # zdc.Field
 
+# this class should go away when strongbox hits..
+
 class Field:
 
     def __init__(self, name, type, displaySize=None, internalSize=None,
