@@ -16,6 +16,13 @@ def randpass(length=5):
     return res
 
 
+def reconcile(seriesA, seriesB):
+    extraA = [x for x in seriesA if x not in seriesB]
+    extraB = [x for x in seriesB if x not in seriesA]
+    return (extraA, extraB)
+
+
+
 def readable(bytes):
     """
     convert a bytecount into human-readable text
@@ -124,6 +131,22 @@ class Everything:
     def __contains__(self, thing):
         return True
 Everything=Everything()
+
+def xmlEncode(s):
+    """
+    xmlEncode(s) ->  s with >, <, and & escaped as &gt;, &lt; and &amp;
+    """
+    res = ""
+    for ch in s:
+        if ch == ">":
+            res = res + "&gt;"
+        elif ch=="<":
+            res = res + "&lt;"
+        elif ch=="&":
+            res=res + "&amp;"
+        else:
+            res = res + ch
+    return res
 
 
 if __name__=="__main__":
