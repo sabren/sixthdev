@@ -88,4 +88,4 @@ class MySQLStorage(Storage):
         try:
             self.cur.execute(sql)
         except Exception, e:
-            raise sql
+            raise Exception, str(e) + ":" + sql
