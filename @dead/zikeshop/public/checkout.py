@@ -65,21 +65,31 @@ class CheckoutApp(zikeshop.PublicApp):
     def act_add_address(self):
         import zikebase
         zikebase.load("Contact")
-        ed = zikebase.ObjectEditor(zikebase.Contact)
-        ed.do("update")
-        ed.object.save()
-
         context = self.input.get('context','bill')
-        if context=='bill':
-            self.data['bill_addressID']=ed.object.ID
-            if self.input.get('shipToBilling'):
-                self.data['ship_addressID']=self.data['bill_addressID']
-                self.next='get_card'
+        try:
+            ed = zikebase.ObjectEditor(zikebase.Contact)
+            ed.do("update")
+            ed.object.save()
+        except ValueError, err:
+            errorMsg = ""
+            for item in err[0]:
+                errorMsg = errorMsg + item + "\n"
+            self.model["error"] = errorMsg
+            if context=='bill':
+                self.act_get_billing()
             else:
-                self.next='get_shipping'
-        elif context=='ship':
-            self.data['ship_addressID']=ed.object.ID
-            self.next='get_card'
+                self.act_get_shipping()
+        else:
+            if context=='bill':
+                self.data['bill_addressID']=ed.object.ID
+                if self.input.get('shipToBilling'):
+                    self.data['ship_addressID']=self.data['bill_addressID']
+                    self.next='get_card'
+                else:
+                    self.next='get_shipping'
+            elif context=='ship':
+                self.data['ship_addressID']=ed.object.ID
+                self.next='get_card'
 
     def act_add_card(self):
         # Add a new card to the database:
