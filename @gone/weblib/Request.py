@@ -137,7 +137,8 @@ class Request:
         # perhaps content should be a file-like pointer anyway?
 
         if type(stream)==type(""):
-            storage = cgi.FieldStorage(StringIO.StringIO(stream), environ=self.environ)
+            storage = cgi.FieldStorage(StringIO.StringIO(stream),
+                                       environ=self.environ)
             #@TODO: this isn't working in test!
         else:
             storage = cgi.FieldStorage(stream, environ=self.environ)
