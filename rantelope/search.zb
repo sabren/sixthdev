@@ -1,0 +1,19 @@
+*# this is the search engine screen
+
+* include header;
+
+<form action="search.app" method="POST">
+<input type="text" name="query" value="{:query:}">
+<input type="submit" value="search">
+</form>
+
+<hr>
+
+* for results:
+    * body:
+        <p><a href="rantelope.app?action=show&what=story&ID={:ID:}">
+           {:title:}</p>
+* none:
+    * if query:
+        no matches.
+
