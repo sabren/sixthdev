@@ -1,0 +1,260 @@
+
+- michal: get durran access to cvs
+- michal: set up db access
+
+- durran: install all this crap
+
+how to install:
+
+  http://webappworkshop.com/wiki/wiki.cgi/SettingUpShop
+
+- bookmark these docs:
+
+  http://sixthdev.versionhost.com/viewcvs.cgi/ # the code
+  http://webappworkshop.com/wiki/    # docs I wrote by hand
+  http://webappworkshop.com/pydoc/   # kinda like javadoc
+
+
+- get workshop.py to generate "dbmap"s
+  - see prototype.py as an example
+
+
+- set up a .weblib.py 
+  - define CLERK
+  import arlog
+  import sqlWhatever
+  from planaconda import dbmap
+  CLERK = arlo.Clerk(MySQLStorage(sqlWhatever.dbc), dbmap)
+
+- get plan.app to list goals
+  print >> RES,  SomethingApp(PlanSession(CLERK), REQ).act()
+
+
+  - now you need PlanSession.list_goal(), PlanApp.list_goal() 
+    (we made those by hand but they could be generated)
+
+  - and PlanApp.render_list_goal()...
+    (by default, the generated code should call something similar to generic_list
+     in the prototype.py file... but in our case we'd override to 
+     zebra.fetch("goals.html", model) and put {:fields:} in your html file
+
+  - for generating this, it might be nice if there were a ProtoApp 
+    and ProtoAction, but feel free (for any of this) to just code 
+    it by hand directly until you get comfortable with it... 
+
+      class ProtoApp(Strongbox):
+          name = attr(str)
+          file = attr(str)
+          actions = linkset(ProtoAction)
+
+      class ProtoAction(Strongbox):
+          action = attr(str, okay=["list","edit","show","delete"]) # create == show
+          what = attr(str)  # name from html point of view
+          type = link(ProtoClass) # actual class
+          code = attr(str)
+
+          def asCode(self):
+              res = []
+              res.append("def %s_%s(self, model):"  % (self.action, self.what))
+              if code:
+                  res.append(indent(code))
+              else:
+                  # something like... ???
+                  res.append(indent("workshop.generic_%s(self.session, %s)" % self.what))
+
+      _app = ProtoApp(name="PlanApp")
+      list_goal = ProtoAction(action="list", what="goal", type=_goal)
+      list_goal.code = 'return zebra.fetch("goals.html", model)'
+      _app.actions << list_goal
+      
+
+
+
+=============
+
+- goals should have subgoals
+
+  so you want to generate code like this:
+
+  class Goal(Stronbox):
+     kids = linkset(forward, "parent")
+     parent = link(forward)
+
+  Goal.__attrs__["kids"].type = Goal
+  Goal.__attrs__["parent"].type = Goal
+
+
+- limit main goal page to goals with no parent
+  PlanSession.list_goal() should return
+  [thing for things where thing.parent is None]
+  
+
+- click on a goal to see its subgoals
+
+- edit goal page should have a dropdown for the parent:
+
+   - there should be something... some object that takes a strongbox
+     and works lik elike strongbox.BoxView, but instead of showing
+     the VALUE in the attribute ( view["name"] == "name" ) it should
+     return an HTML field ( view["name"] == zebra.html.something() )
+
+   - dropdown for parent should be called parent or parent.ID
+     and somehow you need to figure out how to map that number
+     to the appropriate instance... this will probably (??) involve
+     arlo.Clerk().fetch(Goal, ID=something)
+
+
+===========
+
+add/edit/delete tasks
+
+  - this should be easy... just add a new ProtoClass in genplanaconda.py 
+    and then set up the proper links/linksets...
+
+===========
+
+let user order tasks / subgoals
+
+  - i'd like to be able to mix them on the list
+
+  - probably makes sense to add a custom method to Goal for this, 
+    i was thinking something like:
+
+    def get_steps(self):
+       byOrder = lambda a,b: cmp(a.order,b.order)
+       steps = self.subgoals + self.tasks
+       steps.sort(byOrder) # in place
+       return steps
+    
+  The strongbox module will recognize this method and call 
+  it when you say "goal.steps"
+
+  I don't want to be editing these custom methods from a browser.
+  So the generated Goal class should not have this method. Rather,
+  I was thinking we'd mark the "_goal" ProtoClass as a "base" class
+  (maybe in ProtoClass: isBase = attr(int, okay=[True,False]) ???)
+
+  And then instead of generating Goal, it would generate BaseGoal
+  Then there'd be a file called Goal.py, created by hand, that says:
+
+      def Goal(BaseGoal):
+          pass
+
+  (or you could generate it if it isn't there - see os.path.exists())
+
+
+  This makes a new problem: 
+  so the dbmap probably needs to go into another file, and 
+  __init__.py will probably have to change to something like:
+
+       
+      from _planaconda import *  
+         # (it's okay to have BaseGoal.__attrs__["kids"].type=BaseGoal, etc
+         # because Goal is a subclass of BaseGoal)
+
+      from Goal import Goal 
+         # (define Goal by hand in that file)
+
+      from _dbmap import * 
+         # (we want to tell arlo.Clerk to use Goal, not BaseGoal, 
+         # so it has to come after Goal is defined)
+
+
+
+  - next, you want to handle a form with multiple objects on it.
+    beats me how to do this, but it probably involves coding the 
+    child object IDs into the various fieldnames on the form... 
+    like maybe "Goal.15.ord" and "Task.5.ord" or something. 
+  
+    I did something like this for my shopping cart system but the
+    code is way ugly and uses an older version of the modules, but
+    it might give you some ideas:
+
+    http://sixthdev.versionhost.com/viewcvs.cgi/sixthday/Attic/ObjectEditor.py
+    (see the parseCollections method)
+
+
+    Also the current magic is handled by _getInstance in sixthday.AdminApp:
+    http://sixthdev.versionhost.com/viewcvs.cgi/sixthday/AdminApp.py
+
+    (but this probably needs to be in PlanSession)    
+
+
+===========
+
+the front page (goals) should show all top-level goals and the corresponding next task
+
+    something like:
+
+    class Goal(GoalBase):
+       def get_task(self):
+           return self.steps[0].task
+
+    [not what i planned to write, but it's kinda sweet : if Task's main field is "task" 
+     instead of "name", and you implemented steps from the previous story, then that 
+     one line above automatically handles recursion for you...]
+
+
+============
+
+task list page
+
+   show tasks sorted by goal
+
+   it would be nice if the subgoals had their tasks indented a bit:
+
+   goal 1
+   task 1-1
+   task 1-1
+   goal 2
+   task 2-1
+   goal 2a
+      task 2a-1
+      task 2a-2
+   goal 2b
+      task 2a-1
+      task 2-1
+   task 2-2
+ 
+
+   i don't think zebra can handle recursion... so either add some kind of "depth"
+   field in there to know how far to indent... or generate the html with a custom
+   recursive render_list_task()
+
+   also show current estimate field and a total button at the bottom with a sum.
+
+
+============
+
+plans
+
+   - should be a list of plans... maybe one called main and other plans as well.
+
+   - plan should have linkset of Tasks (never goals)... probably no backlink 
+     needed since it's a many-to-many thing...
+
+   - "show_plan" should use same template as list_task but the model would be
+      session.show_plan(planID) rather than session.list_tasks()
+
+   - "edit_plan" should have a similar template but also show checkboxes
+     and let you name the plan. 
+
+   - "save_plan" would follow logic that's similar to the logic for ordering the 
+     subgoals/tasks (save_goal).... but since it's editing a junction table, 
+     you might need to empty out the linkset and then re-add each ID individually.... 
+     beats me, figure it out... :)
+
+     oh. there IS no support for junction tables in arlo.Clerk... The easiest 
+     thing to do might be to just make an explicit junction object:
+
+         class PlanTask(Strongbox):
+              ID = attr(long)
+              task = link(Task)
+
+         class Plan(Strongbox):
+              ID = attr(long)
+              Tasks = linkset(PlanTask, None) # no backlink needed
+
+
+============
+

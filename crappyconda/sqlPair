@@ -1,0 +1,1 @@
+mysql -h db.sabren.com -u pair -pe76hrn pair_db

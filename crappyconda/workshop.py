@@ -79,9 +79,13 @@ class Model:
                 res.append("%s.__attrs__['%s'].type=%s" \
                            % (klass.name, each.name, each.type.name ))
         return "\n".join(res)
+
+    def imports(self):
+        return "from strongbox import *"
                 
     def asCode(self):
         res = []
+        res.append(self.imports())
         res.append(self.classDefs())
         res.append(self.finishForwards())
         return "\n".join(res)
@@ -131,6 +135,29 @@ ProtoJoin.__attrs__["type"].type = ProtoClass
 ProtoJoin.__attrs__["owner"].type = ProtoClass
 ProtoClass.__attrs__["attrs"].type = ProtoAttr
 ProtoClass.__attrs__["links"].type = ProtoLink
+
+
+
+
+from sixthday import App
+class WorkshopApp(App):
+
+    def __init__(self, session, input):
+        super(WorkshopApp, self).__init__(input)
+        self.session = session
+        
+    def act_list(self):
+        # get the list of whatever from the session
+        what = self.input.get("what", "")
+        meth = getattr(self.session, "list_%s" % what)
+        assert meth, "don't know how to list %s" % what
+        self.model["each"] = [BoxView(x) for x in meth()]
+
+        # and show it with whatever template system we're using
+        meth = getattr(self, "render_list_%s" % what)
+        print >> self, meth(self.model)
+
+
 
 
 if __name__=="__main__":
