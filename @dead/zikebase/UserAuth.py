@@ -6,9 +6,9 @@ __ver__="$Id$"
 
 
 import zikebase
-import weblib
+import sixthday
 
-class UserAuth(weblib.Auth):
+class UserAuth(sixthday.Auth):
 
     zikebase.load("User")
     userClass = zikebase.User

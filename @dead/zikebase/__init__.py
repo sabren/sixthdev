@@ -37,10 +37,6 @@ __objs=(
     'UserAuth',
     'Password',
     'Rot13Password',
-    'ObjectEditor',
-    'Node',
-    'UserApp',
-    'AdminApp',
     )
 
 for __item in __objs:
