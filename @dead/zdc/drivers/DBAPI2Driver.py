@@ -158,6 +158,8 @@ class DBAPI2Driver:
             res = "NULL"
         
         #@TODO: handle DATE types explicitly
+        elif value is zdc.TIMESTAMP:
+            res = "now()"
         elif field.type == zdc.NUMBER:
             res = `value`
             
