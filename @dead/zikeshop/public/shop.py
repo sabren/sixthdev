@@ -35,5 +35,4 @@ class ShopApp(zikeshop.PublicApp):
 
 
 if __name__=="__main__":
-    ShopApp().act()
-
+    ShopApp(zikeshop.Cart(sess)).act()
