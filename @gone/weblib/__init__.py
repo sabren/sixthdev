@@ -1,5 +1,5 @@
 """
-weblib : a library for web stuff
+Classes for easy server-side web scripting in Python.
 
 $Id$
 """
