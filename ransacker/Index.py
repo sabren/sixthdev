@@ -33,7 +33,9 @@ class Index(object):
         """
         if self.contains(name):
             self.remove(name)
-            
+        self._doIndexing(name, text)
+
+    def _doIndexing(self, name, text):
         # fetch pageID only once for speed
         pageID = self._getPageID(name)
         for chunk, count in ransacker.wordFreqs(text).items():

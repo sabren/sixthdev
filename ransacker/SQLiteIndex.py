@@ -22,12 +22,12 @@ class SQLiteIndex(ransacker.Index):
         if new:
             self._makeTables()
 
-    def addDocument(self, name, text):
+    def _doIndexing(self, name, text):
         self.cur.execute(
             """
             INSERT OR IGNORE INTO idx_page (page) VALUES ('%s')
             """ % esc(name))
-        super(SQLiteIndex, self).addDocument(name, text)
+        super(SQLiteIndex, self)._doIndexing(name, text)
         self.dbc.commit()
 
     def _makeTables(self):
@@ -56,6 +56,7 @@ class SQLiteIndex(ransacker.Index):
         self.dbc.commit()
         
     def _storeFreq(self, pageID, word, count):
+        if pageID is None: raise hell
         self.cur.execute(
             """
             INSERT OR IGNORE INTO idx_word (word) VALUES ('%s')
@@ -79,8 +80,10 @@ class SQLiteIndex(ransacker.Index):
         
         
     def remove(self, name):
-        self.cur.execute("DELETE FROM idx_freq where pageID=%s"
-                         % self._getPageID(name))
+        id = self._getPageID(name)
+        self.cur.execute("DELETE FROM idx_freq where pageID=%s" % id)
+        self.cur.execute("DELETE FROM idx_page where ID=%s" % id)
+        self.dbc.commit()
 
     def score(self, word):        
         sql =(
