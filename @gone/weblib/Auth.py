@@ -69,6 +69,7 @@ class Auth:
     def login(self, key):
         """Force a login with the specified key."""
         self.key = key
+        self.fetch(key)
         self.onLogin()
 
 
