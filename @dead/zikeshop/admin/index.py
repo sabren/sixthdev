@@ -72,13 +72,6 @@ class ZikeShopAdminApp(zikebase.AdminApp):
         self.model["isSearch"]=0
         zebra.show("lst_sale", self.model)
 
-    ## inventory stuff #################################
-
-    def act_inventory(self):
-        self.consult("mdl_product")
-        zebra.show("dsp_inventory", self.model)
-
-
     ######### THIS SHOULD BE IN A SUPERCLASS ############
 
     def map_what(self, what):
