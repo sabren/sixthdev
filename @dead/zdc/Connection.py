@@ -5,14 +5,13 @@ __ver__="$Id$"
 import zdc
 
 class Connection:
-    from MySQLdb import * # for NUMBER, etc..
 
     def __init__(self, driver=None, **params):
         """
         driver should be a class or a string.
         """
         if driver:
-            apply(self.open, (driver,), params)
+            self.open(driver, **params)
 
     def cursor(self):
         return self.source.dbc.cursor()
@@ -20,18 +19,17 @@ class Connection:
     def open(self, driver, **params):
         self.source = driver
 
-    # delegate everything to the source...
+    # delegate everything else to the source...
 
     def select(self, table, where=None, **wdict):
-        #@TODO: clean this up and test it!
         import types
         if type(table) == types.ClassType:
             tablename = table._table.name
-            res =  map(lambda row, klass=table: klass(ID=row["ID"]),
-                       apply(self.source.select, (tablename, where), wdict))
+            res =  [table(ID=row["ID"])
+                    for row in self.source.select(tablename, where, **wdict)]
         else:
             tablename = table
-            res = apply(self.source.select, (tablename, where), wdict)
+            res = self.source.select(tablename, where, **wdict)
         return res
 
     def fields(self, tablename):
@@ -41,8 +39,7 @@ class Connection:
         return self.source.insert(tablename, data)
 
     def update(self, tablename, data, where=None, **wdict):
-        return apply(self.source.update, (tablename, data, where), wdict)
-
+        return self.source.update(tablename, data, where, **wdict)
 
     def delete(self, tablename, where=None, **wdict):
-        return apply(self.source.delete, (tablename, where), wdict)
+        return self.source.delete(tablename, where, **wdict)
