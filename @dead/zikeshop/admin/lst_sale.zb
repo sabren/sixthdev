@@ -1,9 +1,14 @@
 *# list zikeshop sales
 *# $Id$
+* exec:
+    import weblib.html
+
 
 <h2>Sales</h2>
 
-<form action="index.py?action=lst_sale" method="POST">
+<form action="index.py" method="POST">
+<input type="hidden" name="action" value="list">
+<input type="hidden" name="what" value="sale">
 <input type="hidden" name="is_search" value="1">
 <table border="0" cellspacing="0" cellpadding="2">
   <tr><th align="left" colspan="2" style="color:white; background:#666">
@@ -14,7 +19,7 @@
       <td bgcolor="#eeeeee">
       <input type="text" name="dmin" size="10" maxlength="10" 
              value="{:dmin:}">
-      <input type="text" name="dmax" size="10" maxlength="10"',
+      <input type="text" name="dmax" size="10" maxlength="10"
              value="{:dmax:}">
   </td></tr>
   <!-- name -->
@@ -49,13 +54,8 @@
   <!-- search -->
   <tr><td colspan="2" align="right">
       <table border="0" width="100%" cellpading="2" cellspacing="0">
-      <tr><td><input type="checkbox" name="includeFilled"
-
-*# @TODO: fix this!
-* if (includeFilled):
-    CHECKED
-
-> include filled orders </td>
+      <tr><td>{:weblib.html.checkbox("includeFilled", includeFilled):}
+          include filled orders </td>
           <td align="right">
               <input type="submit" value="search"></td></tr>
       </table></td></tr>
