@@ -4,6 +4,7 @@ Bootstrap compiler for Zebra.
 __ver__="$Id$"
 
 # @TODO: optional body tags in zebra for loops.. (or just "show?")
+# @TODO: how about a "* set" tag?
 
 import zebra
 import xml2mdl
@@ -157,8 +158,11 @@ class Bootstrap:
             """
             _ = 0
             _max_ = len(scope["%(series)s"])
-            scope_stack.append(copy.copy(scope))
             for _ in range(_max_):
+                # handle scope inside the loop in case we have
+                # recursive names (eg, children->children->children)
+                scope_stack.append(copy.copy(scope))
+                
                 # can't do .update if it's a UserDict:
                 mdl = scope["%(series)s"][_]
                 for item in mdl.keys():
@@ -167,8 +171,9 @@ class Bootstrap:
         res = res + zebra.indent(self.walk(model), 1)            
         res = res + zebra.trim(
             """
-            globals().update(scope_stack.pop())
-            """)
+            #   ## close for-%(series)s loop ##########
+                globals().update(scope_stack.pop())
+            """ % attrs)
         return res
 
 
