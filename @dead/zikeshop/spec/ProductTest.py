@@ -67,7 +67,7 @@ class ProductTestCase(unittest.TestCase):
                ".categories broke."
 
 
-    def check_categories(self):
+    def check_categories_some_more(self):
         prod = zikeshop.Product()
         prod.code = 'some02'
         prod.name = 'something else'
@@ -89,16 +89,19 @@ class ProductTestCase(unittest.TestCase):
 
         
         ## make sure it still works after an update:
-
+        assert prod == prod.categories.owner, "what the?"
+        assert prod.ID == 2, "???"
         prod.categories = (1, 2)
+        assert prod.categories.IDs() == (1, 2)
         prod.save()
         
         self.cur.execute("SELECT nodeID FROM shop_product_node "
                          "WHERE productID=2 "
                          "ORDER BY nodeID")
 
-        assert self.cur.fetchall() == [(1,),(2,)], \
-               "Product doesn't update nodeIDs properly"
+        actual = self.cur.fetchall()
+        assert actual == [(1,),(2,)], \
+               "Product doesn't update nodeIDs properly: %s" % actual
 
         assert prod.categories.IDs() == (1, 2), \
                "Product doesn't return nodeIDs properly after an update"
