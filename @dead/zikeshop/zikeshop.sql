@@ -266,14 +266,3 @@ CREATE TABLE zike_site (
   site varchar(30),
   PRIMARY KEY (ID)
 );
-
-#
-# Table structure for table 'zike_zuser'
-#
-
-CREATE TABLE zike_zuser (
-  ID int(11) NOT NULL auto_increment,
-  userID int(11) DEFAULT '0' NOT NULL,
-  PRIMARY KEY (ID)
-);
-
