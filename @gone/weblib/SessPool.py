@@ -111,6 +111,7 @@ class SqlSessPool:
         except Exception, e:
             raise Exception, "error storing session: %s \n SQL WAS:\n %s" \
                   % (e, sql)
+        self.dbc.commit()
     
 
     def drain(self, name, beforeWhen):
