@@ -9,10 +9,12 @@ $Id$
 import weblib
 import UserDict
 
+
 try:
     from cPickle import loads, dumps
 except ImportError:
     from pickle import loads, dumps
+
 
 ## Sess : a session handler ################
 
@@ -41,6 +43,8 @@ class Sess(UserDict.UserDict):
         self._pool = pool   # where to store the data
         self.data = {}      # all the stuff to remember
 
+
+
     ## public methods ########################
 
     def start(self, sid=None):
@@ -58,10 +62,14 @@ class Sess(UserDict.UserDict):
         self._gc()
 
 
+
+
     def abandon(self):
         """abandons the session"""
         self.sid = ""
         self.clear()
+
+
 
     def url(oldurl):
         """ returns oldurl, but referencing the current session.
@@ -73,9 +81,15 @@ class Sess(UserDict.UserDict):
         # @TODO: code url()
         return oldurl
 
+
+
+
     def freeze(self):
         """freezes sess and dumps it into the sesspool. call at end of page"""
         self._pool.putSess(self.name, self.sid, dumps(self.data, 1)) # 1 for binary
+
+
+
 
     def thaw(self):
         """gets a frozen sess out of the sesspool and thaws it out"""
@@ -85,7 +99,10 @@ class Sess(UserDict.UserDict):
         else:
             self.data = loads(frozen)
 
+
+
     ## internal methods ####################
+
 
     def _getSid(self):
         """figures out which session id to use"""
@@ -112,6 +129,8 @@ class Sess(UserDict.UserDict):
                 self.engine.response.addCookie(self.name, sid)
                 
         return sid
+
+
 
     def _gc(self):
         """occasionally drains the sesspool"""
