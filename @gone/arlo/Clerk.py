@@ -141,9 +141,9 @@ class Clerk:
         if thing is None: return 0
         if not hasattr(thing, "private"): return 0
         for item in thing.private.observers:
-            if isinstance(LinkInjector, item):
+            if isinstance(item, LinkInjector):
                 return 1
-            if isinstance(LinSetInjector, item):
+            if isinstance(item, LinkSetInjector):
                 return 1
         return 0
         
