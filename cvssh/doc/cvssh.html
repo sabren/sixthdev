@@ -148,24 +148,28 @@ the initial implementation took less than 200 lines of python
 code - most of it comments. Here's an step-by-step walkthrough
 of the system, following the above diagram from left to right:</p>
 
-<b>a 12-step program for outsmarting cvs</b>
 <ol>
+<li>The developer logs in: <code>cvssh&nbsp;user@remotesystem:/cvsroot&nbsp;login</code></li>
+<li><code>cvssh</code> prompts the developer for a password, tests it
+    against the server (by logging in and trying it), and either prints
+    an "ACCESS DENIED" message or saves the password to 
+    <code>~/.cvspass</code></li>
 <li>The developer sets his or her <code>CVS_RSH</code> 
-    environment variable to <code>cvssh</code> and runs
+    environment variable to <code>cvssh</code></li>
+<li>He or she then runs
     <code>cvs&nbsp;-d:ext:user@remotesystem:/cvsroot&nbsp;(command)</code>
 </li>
 <li><code>cvs</code> starts "<code>cvssh&nbsp;-l&nbsp;user&nbsp;remotesystem&nbsp;cvs&nbsp;server</code>" as a child process
 </li>
-<li><code>cvssh</code> pretends to be a remote shell, and
-    prompts the developer for a password.
+<li><code>cvssh</code> reads the password from <code>~/.cvspass</code>.
 </li>
 <li><code>cvs</code>, duped into thinking it has connected
     to a real <code>cvs server</code> instance, sends
     <code>cvssh</code> the command <code>Root /cvsroot</code>.
 </li>
 <li>At this point, <code>cvssh</code> has everything it needs
-    to connect to a <code>pserver</code>. It now opens an SSL connection to
-    <code>remotesystem</code> on a predetermined port.
+    to connect to the <code>pserver</code>. It opens an SSL connection to
+    <code>remotesystem</code> on the <code>cvssh</code> port.
 </li>
 <li>The remote machine has <code>stunnel</code> listening on that port.
 </li>
@@ -193,21 +197,20 @@ of the system, following the above diagram from left to right:</p>
 <a name="download"><br></a>
 <h2>download</h2>
 
-<p>The initial implementation is written in python and runs only
-   on win32. (The win32 dependency is only in the password prompt,
-   so it should be VERY easy to port - see the 
-   <a href="#helpwanted">help wanted</a> section, below)</p>
-
-<p>For whatever reason, <code>cvs -d:ext:</code> requires that
-   whatever you set <code>CVS_RSH</code> to be an <code>*.exe</code>.
-   At least, my version did... So the distribution includes a
-   precompiled <code>cvssh.exe</code> made with <code>py2exe</code>.
-   (It's in the <code>dist/cvssh/</code> directory, along with its 
-    required files... But don't try to run it yourself because
-    you're not <code>cvs</code>!)
+<p>Version 0.2 is written in python and should run on any 
+   platform that python supports.
 </p>
 
-<p><a href="cvssh_0.1.zip">download cvssh-0.1.zip</a></p>
+<p>For whatever reason, on win32, <code>cvs -d:ext:</code> requires 
+   that whatever you set <code>CVS_RSH</code>  be an 
+   <code>*.exe</code> file. At least, my version did... So the
+   distribution includes a precompiled <code>cvssh.exe</code> made
+   with <code>py2exe</code>. (It's in the <code>dist/cvssh/</code>
+   directory, along with its  required files... But don't try to run
+   it yourself because you're not <code>cvs</code>!)
+</p>
+
+<p><a href="cvssh-0.2.zip">download cvssh-0.2.zip</a></p>
 
 <p><b>Note: <span style="color:red; font-size:15pt;">This is alpha software!!!</span></b>
 I was able to do a simple "<code>co module</code>" command without
@@ -231,14 +234,9 @@ caution!</p>
   <code>cvssh</code>:</p>
 
 <ul>
-<li><b>Add support for <code>.cvspass</code> files.</b>
-     Using <code>:ext:</code>
-    prevents us from using the <code>login</code> command, but there's no
-    reason we can't optionally remember the password anyway.</li>
-<li><b>Get rid of the win32 dependency.</b> I used <code>msvcrt.getch()</code>
-    to read in the password because the parent <code>cvs</code>
-    process controlled <code>stdin</code>. There's probably a 
-    better, cross-platform way to do this.</li>
+<li><b>Add a 'logout' command</b>...</li>
+<li><b>Check the server's RSA fingerprint</b> the way <code>ssh</code> 
+    does.</li>
 <li><b>Port it to C.</b> I usually prefer to stay up in the clouds with 
     python, but in this case, I think small, fast, low-level C code might
     be more appropriate. I'm not much of a C programmer, though, so 
