@@ -14,7 +14,7 @@ from State import State
 
 ### PICTURE ROUTINE #######################
 
-def showPicture(ds, ID=None, size=None):
+def showPicture(DBC, RES, ID=None, size=0):
     """shows the specified picture.. Should be the only thing called
     on the page."""
 
@@ -22,19 +22,16 @@ def showPicture(ds, ID=None, size=None):
     import zikebase, zikeshop
     import Image, cStringIO
 
-    if ID is None:
-        ID=weblib.request["ID"]
-    if size is None:
-        size = int(weblib.request.get("size",0))
-        
-    picture = zikebase.Picture(ds, ID=ID)
-    weblib.response.contentType=picture.type
+    assert ID is not None
+
+    picture = zikebase.Picture(DBC, ID=ID)
+    RES.contentType=picture.type
     if size:
         im = Image.open(cStringIO.StringIO(picture.picture))
         im.thumbnail((size,size))
-        im.save(weblib.response, im.format)
+        im.save(RES, im.format)
     else:
-        weblib.response.write(picture.picture)
+        RES.write(picture.picture)
         
         
 ####### MAIL ROUTINE #######################

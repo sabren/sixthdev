@@ -44,7 +44,6 @@ class CheckoutApp(zikeshop.PublicApp):
         self.data["comments"] = self.comments
         self.sess["__checkout__"] = self.data
 
-
     def act_(self):
         self.next = 'get_billing'
 
@@ -301,3 +300,4 @@ class CheckoutApp(zikeshop.PublicApp):
         
 if __name__=="__main__":
     print >> RES, CheckoutApp(REQ, zikeshop.Cart(SESS), DBC, SESS).act()
+
