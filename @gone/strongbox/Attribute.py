@@ -52,14 +52,16 @@ class Attribute(property):
     def cast(self, value):
         if value is None:
             return None # str(None) returns 'None', so we need a special case.
-        else:
-            try:
-                return self.type(value)
-            except Exception, e:
-                if value=="":
-                    return None
-                else:
-                    raise TypeError(self.__name__,value,self.type,e)
+        elif isinstance(value, self.type):
+            return value
+        try:
+            return self.type(value)
+        except Exception, e:
+            if value=="":
+                #@TODO: see if this is really needed.
+                #If so, explain. :)
+                return None
+            raise TypeError(self.__name__,value,self.type,str(e))
 
     def validate(self, value):
         if (value is None):
