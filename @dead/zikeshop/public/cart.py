@@ -34,6 +34,7 @@ class CartApp(zikeshop.PublicApp):
     def act_view(self):
         import zebra
         self.model["contents"] = self.cart.q_contents()
+        self.model["total"] = self.cart.subtotal()
         if not self.silent:
             zebra.show("dsp_cart", self.model)
 
@@ -43,6 +44,7 @@ class CartApp(zikeshop.PublicApp):
         for i in range(self.cart.count()):
             if self.input.get("remove_%s" % i):
                 self.cart.update(i, 0)
+        self.cart.purge()
         self.do("view")
         
 
