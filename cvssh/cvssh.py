@@ -51,7 +51,7 @@ import getpass
 
 # instead of the normal pserver port, we use our own port
 # that wraps the pserver with stunnel ( http://www.stunnel.org/ )
-SCVS_PORT = 2402 # @TODO: get a port assignment from iana.org
+SCVS_PORT = 2405 # @TODO: get a port assignment from iana.org
 
 def get_connection(server):
     raw = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -185,20 +185,15 @@ def client_thread(lock, sock):
 
     This thread talks to the local parent cvs process.
     """
-    buffer = ""
     while not sys.stdin.closed:
         ch = sys.stdin.read(1)
-        #@TODO: hung on cvs diff here... maybe if ch is not None?
-        if not ch:
+	if not ch:
             # stdin is closed, so we're all done.
             lock.release()
             sys.exit()
-        buffer += ch
-        if ch == '\n':
-            sock.write(buffer)
-            ## debug(">> " + repr(buffer))
-            buffer = ""
-
+	while not sock.write(ch):
+	    pass
+	
 
 def server_thread(lock, sock, raw):
     """
@@ -206,12 +201,13 @@ def server_thread(lock, sock, raw):
     sock is a secure socket, raw is the raw tcp/ip socket.
     """
     while lock.locked():
-        r,w,e = select.select([raw], [raw], [raw])
+	# we sleep only for a while -- we must still check the lock, remember? :)
+        r,w,e = select.select([raw], [], [raw], 0.1)
         if raw in r:
-            data = sock.read(1024)
-            ## debug("<< " + repr(data))
+            data = sock.read(2048)
             sys.stdout.write(data)
             sys.stdout.flush()
+	assert(not raw in e)
 
 
 
@@ -261,6 +257,7 @@ if __name__=="__main__":
 
     # username and server come from the cvs client via sys.argv:
     # sys.argv == ['stub', 'cvs.sabren.com', '-l', 'ftempy', 'cvs server']
+    assert(len(sys.argv) >= 4);
     server   = sys.argv[1]
     username = sys.argv[3]    
 
