@@ -52,7 +52,7 @@ class AdminApp(App):
         self._dispatch("list")
 
     def generic_list(self, listOfDicts, template):
-        self.model["list"] = listOfDicts
+        self.model["each"] = listOfDicts
         self._runZebra(template)
         
 
