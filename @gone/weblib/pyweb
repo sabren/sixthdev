@@ -11,7 +11,18 @@
 # Action application/python-script /cgi-bin/pyweb
 # AddType application/python-script .py
 
-import os, weblib
+import os, weblib, sys, string
+
+
+## allow imports from script directory ###########################
+
+path = os.environ["PATH_TRANSLATED"]
+dir = string.join(string.split(path,"/")[:-1], "/")
+sys.path.append(dir)
+
+
+
+## run the script ################################################
 
 eng = weblib.Engine()
 eng.script=open(os.environ["PATH_TRANSLATED"])
