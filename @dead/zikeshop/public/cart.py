@@ -21,9 +21,18 @@ class CartApp(zikeshop.PublicApp):
         assert productID, "Don't know what to add."
 
         prod = zikeshop.Product(ID=productID)
-
-        label = prod.name
-        link  = "product/%s" % (prod.code)
+        #@TODO: FIX THIS HORRIBLE MESS:
+        if prod._data["class"] == "style":
+            style = zikeshop.Style(ID=productID)
+            label = str(style)
+        else:
+            label = str(prod)
+        
+        if prod._data["class"] == "product":
+            link = "shop.py?action=show_product&code=%s" % prod.code
+        else:
+            # it's a style:
+            link  = "shop.py?action=show_product&code=%s" % (style.product.code)
 
         extra={"ID":prod.ID, "weight": prod.weight}
         quantity = self.input.get("quantity")
