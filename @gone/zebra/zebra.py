@@ -9,91 +9,170 @@
 #   or copied under the terms of the GNU General
 #   Public License. See http://www.fsf.org/ for details
 #
-# v0.1a 1017.1999 sabren@manifestation.com
-#       initial version. (alpha release)
+# v0.2 1124.1999 sabren@manifestation.com
+#      added o2x for emacs outline mode
+#      seperated <zebra> and <report> tags
+#      added if/el/code/exec/ etc..
+#      (still alpha.. broke the compiler)
+#
+# v0.1 1017.1999 sabren@manifestation.com
+#      initial version. (alpha release)
 #
 ###################################################
 ##[ configuration ]################################
 ###################################################
 
 #@TODO: python 1.5.2 has a new version of xmllib
-import xmllib, re, string, types, o2x
+import xmllib, re, string, types, o2x, sys
 
 ## useMessy allows us to write ill-formed XML so we don't
 ## have to litter our html with &lt; and &gt; entities
-useMessy = 1
-
-zbr = open("test/striped.zbr", "r").read()
-#zbr = open("blogsearch.zbr", "r").read()
-spc = open("test/empty.spc", "r").read()
-#spc = open("viewpage.spc", "r").read()
-#zbo = open("test/example.zbo", "r").read()
-
-#zbr = open("test_report.zbr", "r").read()
-#spc = open("test_species.zbr", "r").read()
+## @TODO: this should be part of the engine
+useMessy = 0
 
 ###################################################
-##[ ZebraParser ]##################################
+##[ zebra.Engine ]#################################
 ###################################################
 
-class ZebraParser(xmllib.XMLParser):
+class Engine (xmllib.XMLParser):
+	reZVar = re.compile("{([$!]?\w+)}", re.I | re.S )
+
+	###############################################
 
 	def reset(self):
+
 		"""Resets internal variables.
 		called by XMLParser.__init__ and ZebraParser.parse"""
 		
 		xmllib.XMLParser.reset(self) # initiate base class
-		self.struct  = {
-			"named": {}, "groups": [], "grouph": [], "groupt": [],
-			"query": None, "head": None, "body": None, "tail": None }
-		self.aStripe = []
-		self.stripes = []
-		self.gdepth  = 0
 
+		# there's a .stack internal to XMLParser, but it's semi-protected,
+		# and it changed from python 1.5.1 to 1.5.2 ... so I'm implementing
+		# my own.. Start with None because "zebra" tag has no parent
+		self.tagstack = [None]
+
+		# datstack is a stack of various thingies (stripes/structures)
+		self.datstack = []
+	
+		self.named  = {} # named structures go in here
+		self.suits  = {} # suits go in here
+		
+		self.struct = {} # current structure (report, suit, etc)
+		self.stripe = [] # current stripe
+
+	###############################################
+
+	def interpolate(self, match):
+
+		"""replaces {fields}, {$vars} and {!slots}
+		in a flattened zebra stripeset..."""
+
+		#@TODO: this is all hard-coded for PHP3. make it generic.
+		# @TODO: interpolation needs to be table driven so that
+		# we can translate into different languages
+		# (or maybe an overridable function?)
+		# also, it ought to be per-stripe (and only used on stripe bodies and conditionals)
+		# .. that way, we can change interpolation as context changes.
+
+		token = match.group(1)
+		if token[0]=="!":
+			if self.zbr["named"].has_key(token[1:]):
+				#return self.flatten(self.zbr["named"][token[1:]])
+				return self.zbr["named"][token[1:]]
+			else:
+				return ""
+		elif token[0] == "$":
+			return token
+		else:
+			# fields.. there needs to be a standard
+			# way of doing this per language.
+			return '$__tr[' + token + ']';
+		
+	
+
+	###############################################
 
 	def handle_data(self, data):
+
 		"""this method always adds text to the current stripe,
 		because data can only occur within a stripe.."""
-		#data = string.strip(data)
+
 		if not string.strip(data):
 			return
-		elif (len(self.aStripe) == 0) \
-		or (type(self.aStripe[len(self.aStripe)-1])!=types.StringType):
+		elif (len(self.stripe) == 0) \
+		or (type(self.stripe[-1])!=types.StringType):
 			## time to add a new string to the list
-			self.aStripe.append(data)
+			self.stripe.append(data)
 		else:
 			## rather than append, just merge it
 			## with the existing string.
-			self.aStripe[len(self.aStripe)-1] = \
-			self.aStripe[len(self.aStripe)-1] + data
+			self.stripe[-1] = self.stripe[-1] + data
 
+	###############################################
 
 	def unknown_starttag(self, tag, attrs):
+
 		tag = string.replace (tag, "z:", "")
-		if tag in ["body", "head", "tail", "query"]:
+		self.tagstack.append(tag)
+
+		if tag == "zebra":
+			## @TODO: handle language attribute..
+			pass
+		elif tag == "report":
+			self.datstack.append(self.struct)
+			self.struct = {
+				"tag"  : tag,
+				"query": [],
+				"head" : [],
+				"body" : [],
+				"tail" : [],
+				"none" : [],
+				"grouph": [], # group heads
+				"groupt": [], # group tails
+				"groups": [], # groups (fields)
+				"gdepth": 0}  # group depth
+		elif tag in ["query", "head", "body", "tail", "none"]:
 			## then start a new stripe!
-			self.stripes.append(self.aStripe)
-			self.aStripe = []
+			self.datstack.append(self.stripe)
+			self.stripe = []
+			## @TODO: fix this:
 			if tag=="query":
-				self.struct["query_source"]=attrs["source"]
-		elif tag in ["stripe", "named"]:
-			## same as above, but account for attribs
-			newStripe = {
-				"content"     : [],
-				"context"     : "show",
-				"conditional" : "do",
-				"condition"   : ""}
-			for key in newStripe.keys():
-				if attrs.has_key(key):
-					newStripe[key] = attrs[key]
-			self.aStripe.append(newStripe)
-			self.stripes.append(self.aStripe)
-			self.aStripe = newStripe["content"]
-			if tag=="named":
-				#@TODO: named inside anything else should error
-				self.struct["named"][attrs["name"]] = [newStripe]
+				self.struct["source"]=attrs["source"]
+		elif tag in ["stripe", "show", "exec", "if", "el", "ef"]:
+			## these are all special stripes with predefined properties
+			if tag=="stripe" and attrs.has_key("name"):
+				## start a new stripe stored in the "named" hash
+				self.datstack.append(self.stripe)
+				self.stripe = []
+				self.named[attrs["name"]] = self.stripe
+			else:
+				## @TODO: there ought to be a stack for context..
+				## @TODO: maybe these should be handled seperately?
+				## @TODO: maybe this should all be generic code,
+				## and only fiddled with in compile().. :)
+				newStripe = {
+					"tag"         : "stripe",
+					"content"     : [],
+					"context"     : "show",
+					"conditional" : "do",
+					"test"        : ""}
+				## each type of stripe has defaults:
+				if tag == "exec" : newStripe["context"] = "exec"
+				if tag in ["if", "el", "ef"] : newStripe["conditional"] = tag
+				## stripes let you override those things..
+				for key in newStripe.keys():
+					if attrs.has_key(key):
+						newStripe[key] = attrs[key]
+				self.stripe.append(newStripe)
+				self.datstack.append(self.stripe)
+				self.stripe = newStripe["content"]
+		elif tag in ["title", "keywords", "description", "content"]:
+			## these are just "named" stripes with predefined names
+			self.datstack.append(self.stripe)
+			self.stripe = []
+			self.named[tag] = self.stripe
 		elif tag == "group":
-			self.gdepth = self.gdepth + 1
+			self.struct["gdepth"] = self.struct["gdepth"] + 1
 			if attrs.has_key("field"):
 				self.struct["groups"].append(attrs["field"])
 			else:
@@ -104,28 +183,34 @@ class ZebraParser(xmllib.XMLParser):
 			pass # <zebra>, or unknown tag
 
 
+	###############################################
+
 	def unknown_endtag(self, tag):
-		parent = self.stack[len(self.stack)-2]
-		parent = string.replace (parent, "z:", "")
+
 		tag = string.replace (tag, "z:", "")
-		if tag in ["head", "tail", "query"]:
-			if parent == "zebra":
-				self.struct[tag] = self.aStripe
-			elif parent == "group":
+		self.tagstack = self.tagstack[:-1]
+		parent = self.tagstack[-1]
+		
+		if tag in ["query", "head", "tail", "body", "none"]:
+			if parent == "group" and tag in ["head", "tail"]:
 				## grouph will look like: [outer, middle, inner]
 				## groupt will look like: [inner, middle, outer]
 				## It's just easier that way.
-				self.struct["group" + tag[0]].append( self.aStripe )
-			self.aStripe = []
-		elif tag == "body":
-			self.struct["body"] = self.aStripe
-			self.aStripe = []
-		elif tag in ["stripe", "named"]:
+				self.struct["group" + tag[0]].append( self.stripe )
+			else:
+				self.struct[tag] = self.stripe
+			self.stripe = self.datstack[-1]
+			self.datstack = self.datstack[:-1]
+		elif tag in ["report","suit"]:
+			## append the structure to the current stripe
+			self.stripe.append(self.struct)
+			self.struct = self.datstack[-1]
+		elif tag in ["stripe", "description", "content", "keywords", "show", "exec", "if", "el", "ef"]:
 			## all we have to do is shift our attention to the
 			## parent.. the current stripe is already a part of
 			## the parent..
-			self.aStripe = self.stripes[len(self.stripes)-1]
-			self.stripes = self.stripes[:-1]
+			self.stripe = self.datstack[-1]
+			self.datstack = self.datstack[:-1]
 		elif tag == "group":
 			## not all groups have heads or tails. If this one
 			## doesn't, even out the stack(s) with an empty value
@@ -135,69 +220,133 @@ class ZebraParser(xmllib.XMLParser):
 			## grouph. It sounds strange, but that actually is what I want,
 			## because that's the order in which I'll need them.
 			## so, grouph and groupt get processed the same here.
-			if len(self.struct["groupt"]) \
-			   < len(self.struct["groups"])-self.gdepth:
+			if len(self.struct["groupt"]) < len(self.struct["groups"]):
 				self.struct["groupt"].append(None)
 		else:
 			pass # </zebra>, or unknown tag
 
 
+	###############################################
+
 	def parse(self, zbr):
+
 		self.reset()
 		self.feed(zbr)
 		self.close
+		return {"stripe" : self.stripe,
+				"named"  : self.named,
+				"suits"  : self.suits,}
 
-		#@TODO: fix this. it's just a hack specific to PHP3
-		res = ", "
-		for g in self.struct["groups"]:
-			res = res + "'" + g + "'" + ', '
-		res=res[0:-2] # strip last comma & space
-		self.struct["group_list"] = res
-		return self.struct
+	###############################################
+
+	def flatten_report(self, report, depth=0):
+
+		# @TODO: this is one serious kludge.
+		# @TODO: code each variable name with depth so can have nested reports
+		res = ""
+		res = res + \
+			  "$__db = new " + report["source"] + ";\n" + \
+			  "$__db->query(\"" + self.flatten(report["query"]) + "\");\n"
+
+		## set up two arrays for handling groups
+		res = res + "$__groups=array('all'"
+		buf = "$__showtail=array(0"
+		for g in report["groups"]:
+			res = res + ", '" + g + "'"
+			buf = buf + ",0"
+		res = res + ");\n"
+		res = res + buf + ");\n"
+
+		## now do the test:
+		res = res + "if ($__db->next_record()) {\n";
+
+		## if there's records, show the head:
+		res = res + "   " + self.flatten(report["head"],depth,"show")
+
+		## nr is next record, tr = this one, pr = previous
+		## we need to look at 3 records at once in order to 
+		## know when to print the headers and footers..
+		res = res + \
+			  "   $__nr = $__db->Record;\n" + \
+			  "   while (($__more = $__db->next_record()) or (! $__nomore)){\n" + \
+			  "      $__tr = $__nr;\n" + \
+			  "      if ($__more) { $__nr = $__db->Record; }\n" + \
+			  "      else { $__nomore = 1; }\n"
+
+		## handle the grouping for the heads:
+		for i in range(len(report["groups"])):
+			if report["grouph"][i]:
+				res = res + \
+					  "      if ($__nr[\"" + report["groups"][i] + "\"] != $__pr[\"" + \
+					  report["groups"][i] + "\"]){\n" + \
+					  "         " + self.flatten(report["grouph"][i],depth,"show") + \
+					  "         unset($__pr);\n" + \
+					  "      }\n"
+				
+		## now the body:
+		res = res + "      " + self.flatten(report["body"],depth,"show")
+
+		## and the tails:
+		## .. use a while loop because they're faster than for loops in php3
+		res = res + \
+			  "      if ($__nomore) { $__showTail[0] = 1; }\n" + \
+			  "      $__g=1; while ($__g < sizeof($__showTail)){ \n" + \
+			  "         if (($__nr[$__groups[$__g]] != $__tr[$__groups[$__g]]) " + \
+			  "or ($__showTail[$__g-1])){\n" + \
+			  "            $__showTail[$__g] = 1;\n" + \
+			  "         } else {\n" + \
+			  "            $__showTail[$__g] = 0;\n" + \
+			  "         }\n" + \
+			  "         $__g++;\n" + \
+			  "      }\n"
+
+		for i in range(len(report["groups"])):
+			if report["groupt"][i]:
+				res = res + \
+					  "      if ($__showTail[" + `i+1` + "]){\n" + \
+					  "         " + self.flatten(report["groupt"][i],depth,"show") + \
+					  "      }\n"
+
+		## cap off the loop, show the tail...
+		res = res + \
+			  "      $__pr = $__tr;\n" + \
+			  "   }\n" + \
+			  "   " + self.flatten(report["tail"],depth,"show")
+
+		## handle "none"
+		if report["none"]:
+			res = res + \
+				  "} else {\n" + \
+				  self.flatten(report["none"],depth,"show")
+		res = res + "}\n"
+
+		## finally, encode variables with depth, so we can nest reports
+		reDepth = re.compile("(\$__\w+)", re.I | re.S )
+		res = reDepth.sub(r"\1_" + `depth`,res)
+
+		return res
 
 
-###################################################
-##[ ZebraCompiler ]################################
-###################################################
 
-class ZebraCompiler:
-	zbr = {}
-	spc = {}
-	reZVar = re.compile("{[$]?(z:|n:)?\w+}", re.I | re.S )
+	###############################################
 
-	def interpolate(self, match):
-		"""replaces {fields}, {$vars} and {$z:zebravars}
-		in a flattened zebra stripeset..."""
-
-		#@TODO: this is all hard-coded for PHP3. make it generic.
-		token = match.group(0)
-		if token[1:4]=="$z:":
-			return self.zbr[token[4:-1]]
-		if token[1:4]=="$n:":
-			if self.zbr["named"].has_key(token[4:-1]):
-				return self.zbr["named"][token[4:-1]]
-				#return self.flatten(self.zbr["named"][token[4:-1]])
-			else:
-				return ""
-		elif token[1] == "$":
-			return token[1:-1] # strip the "}"
-		else:
-			return '$zrec[' + token[1:-1] + ']';
-
-	
 	def flatten(self, stripeset, depth=0, context="exec"):
+
 		"""Converts a stripe or stripeset into a string"""
-		
+
 		res = ""
 		if type(stripeset)!=types.ListType:
 			stripeset = [stripeset]
-			
+
 		for stripe in stripeset:
-			stripehead  = ""
-			stripetail  = ""
-			condition   = ""
-			conditional = ""
+			stripehead  = stripebody  = stripetail  = ""
+			test = conditional = ""
 			if type(stripe)==types.StringType:
+				## strip leading and trailing newlines
+				if stripe[1] == "\n": 
+					stripe = stripe[1:]
+				if stripe[-1] == "\n":
+					stripe = stripe[:-1]
 				## deal with context (we only care when it's a string)
 				if (context == "show"):
 					stripehead = 'print "'
@@ -206,28 +355,36 @@ class ZebraCompiler:
 				elif context == "exec":
 					stripebody = stripe
 				else:
-					#@TODO: this should give an error
+					#@TODO: this should raise an error
 					pass
 			elif type(stripe)==types.ListType:
 				stripebody = self.flatten(stripe,depth+1)
 			elif type(stripe)==types.DictionaryType:
-				stripebody = self.flatten(stripe["content"],depth+1,
-										  stripe["context"])[:-1]
-				condition   = stripe["condition"]
-				conditional = stripe["conditional"]
+				# @TODO: this ought to all be stored in a
+				# dictionary mapping tags to functions
+				tag = stripe["tag"]
+				if tag == "stripe":
+					stripebody = self.flatten(stripe["content"],depth+1,
+											  stripe["context"])[:-1]
+					test   = stripe["test"]
+					conditional = stripe["conditional"]
+				elif tag == "report":
+					res = res + self.flatten_report(stripe, depth+1)
+				else:
+					print "*** don't know how to flatten " + tag
 			else:
 				raise("unknown structure in stripe")
 			
 			## finally, the conditional
-			if (condition) and not (conditional):
+			if (test) and not (conditional):
 				conditional = "if"
-			if (condition) or (conditional): # el has no condition
+			if (test) or (conditional): # el has no condition
 				conditionals = {"if":"if", "ef":"elseif", "el":"else"}
 				if conditional == "":
 					conditional = "if"
 				if conditional in ["if", "ef"]:
 					stripehead = conditionals[conditional] + " (" \
-								 + condition + "){\n" \
+								 + test + "){\n" \
 								 + "   " + stripehead
 					stripetail = stripetail + "\n}"
 				elif conditional == "el":
@@ -241,56 +398,12 @@ class ZebraCompiler:
 		res = self.reZVar.sub(self.interpolate, res)
 		return res
 
-	
-	def compile(self, zebra={}, species={} ):
-		""" flatten zebra and species, merge them together"""
-		
-		self.zbr = zebra
-		self.spc = species
-		res = ""
-		gtails = ""
+	###############################################
 
-		# first flatten the zebra
-		self.zbr["query"] = self.flatten(self.zbr["query"])
-		for part in ('head', 'body', 'tail'):
-			self.zbr[part] = self.flatten(self.zbr[part],0,"show")
-		for part in self.zbr["named"].keys():
-			self.zbr["named"][part] = \
-				 self.flatten(self.zbr["named"][part],0,"show")
-		for i in range(len(self.zbr["grouph"])):
-			self.zbr["grouph"][i] = \
-				 self.flatten(self.zbr["grouph"][i],0,"show")
-		for i in range(len(self.zbr["groupt"])):
-			self.zbr["groupt"][i]=self.flatten(self.zbr["groupt"][i],0,"show")
+	def compile(self, xml):
 
-		# now merge with the body
-		if self.spc.has_key("head"):
-			res = res + self.flatten(spc["head"],0)
+		return "<?\n" + self.flatten(self.parse(xml)) + "?>"
 
-		if self.spc.has_key("groups"):
-			self.zbr["temphead"] = self.zbr["head"]
-			self.zbr["temptail"] = self.zbr["tail"]
-			gcount = len(self.zbr["groups"])
-			for i in range(gcount):
-				self.zbr["head"] = self.zbr["grouph"][i]
-				self.zbr["tail"] = self.zbr["groupt"][gcount-i-1]
-				self.zbr["group_depth"] = `i+1` # convert to string
-				self.zbr["group_field"] = self.zbr["groups"][i]
-				res = res + self.flatten(self.spc["grouph"][0])
-				gtails = self.flatten(self.spc["groupt"][0]) + gtails
-			self.zbr["head"] = self.zbr["temphead"]
-			self.zbr["tail"] = self.zbr["temptail"]
-			
-		if self.spc.has_key("body"):
-			res = res + self.flatten(self.spc["body"])
-		else:
-			# this accounts for species with no <body> tag
-			res = res + "{$z:body}"
-		if self.spc.has_key("groups"):
-			res = res + gtails # defined above
-		if self.spc.has_key("tail"):
-			res = res + self.flatten(spc["tail"])
-		print res
 
 ###################################################
 ## cleanup striped tags if useMessy is turned on ##
@@ -315,13 +428,18 @@ if (useMessy):
 ##[ main code ]####################################
 ###################################################
 
-## convert .XML's into python structures:
-zParser = ZebraParser()
-zbr = zParser.parse(zbr)
-spc = zParser.parse(spc)
+if __name__ == "__main__":
 
-## now put the pieces together:
-zCompiler = ZebraCompiler()
-zCompiler.compile(zebra=zbr, species=spc)
+	if len (sys.argv) > 1:
+		zbo = open(sys.argv[1]).read()
+	else:
+		zbo = sys.stdin.read()
 
-##-end-##
+	## convert outline mode to XML:
+	xml = o2x.o2x(zbo)
+
+	## convert XML into python:
+	zEngine = Engine()
+
+	#print zEngine.compile(xml)
+	print zEngine.parse(xml)
