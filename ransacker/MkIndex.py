@@ -7,7 +7,7 @@ import anydbm
 import metakit
 import ransacker
 
-class MkIndex(object):
+class MkIndex(ransacker.Index):
 
     def __init__(self, name=None):
         if name:
@@ -21,12 +21,8 @@ class MkIndex(object):
             self.pages = ransacker.IdMap()
         self.index = self.db.getas("index[word:I,page:I,count:I]")        
         
-    def add(self, page, text):
-        """
-        add a page to the database and index its contents.
-        """
-        for word, count in ransacker.wordFreqs(text).items():
-            self.index.append([self.words[word], self.pages[page], count])
+    def _remember(self, name, chunk, count):
+        self.index.append([self.words[chunk], self.pages[name], count])
 
     def score(self, word):
         """
