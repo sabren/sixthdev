@@ -6,17 +6,16 @@
 # python prototype of a mind-mirror style biofeedback machine
 # Basically, this is just a spectral analysis program.
 #
-# This version graphs fake data, but doesn't seem to be
-# working right. The fakeSession() function explains what I
-# think the graph should show, but it doesn't work out right.
-# can anyone help?
+# This version still only graphs fake data, but adds windowing
+# to clean up some of the noise. The scale is still wrong, though. 
 #
 # $Id$
 
 ## dependencies: #####################################################
 
 try:
-    import Numeric, FFT, RandomArray    # http://www.pfdubois.com/numpy/
+    import Numeric                      # http://www.pfdubois.com/numpy/
+    import MLab, FFT, RandomArray       # (parts of numeric)
     import pygame                       # http://www.pygame.org/
     from pygame.locals import *
 except:
@@ -136,6 +135,10 @@ def main():
     black = pygame.Surface((160,10))
     black.fill((0,0,0))
 
+    # the windowing array quiets down the edges of the sample
+    # to prevent "clicking" at the edges:
+    windowing = MLab.blackman(64)
+    
     session = fakeSession()
     t = 0
 
@@ -143,8 +146,10 @@ def main():
 
         # simulate aquiring data for 1/4th of a second (64 samples):
         time.sleep(0.25) 
-        data = makeSpectrogram(session[t:t+64])
-        print data
+
+        data = session[t:t+64] * windowing
+        graph = makeSpectrogram(data)
+
         t += 64
         if t >= len(session):
             t = 0
@@ -152,7 +157,7 @@ def main():
         # draw the gradient, then cover part of it up:
         for i in range(32):
             screen.blit(grad, (20,         20+i*11))
-            screen.blit(black,(20+(data[i]*20), 20+i*11))
+            screen.blit(black,(20+(graph[i]*20), 20+i*11))
 
 
 if __name__=="__main__":
