@@ -46,9 +46,17 @@ class RecordObject(zdc.Object):
     ## public methods ################################################
             
     def save(self):
-        # save the data in our record:
+        # save the contents of ._data into our record:
+        # _data should always have the good stuff in it
+        #
+        # NOT __dict__!!!!
+        #
+        # (why? consistency is one reason... but more
+        # importantly, __dict__ bypasses get_XXXXX
+        # and set_XXXXX !!)
+        
         for f in self._table.fields:
-            data = getattr(self, f.name)
+            data = self._data[f.name] #getattr(self, f.name)
             import types
             if type(data) == types.InstanceType:
                 # this is mostly for FixedPoints
@@ -59,9 +67,9 @@ class RecordObject(zdc.Object):
         
 
         # some fields may be calculated, so update our attributes:
-        # use __dict__ to avoid overhead/errors with setattr
+        # use _data to avoid overhead/errors with setattr
         for f in self._table.fields:
-            self.__dict__[f.name] = self._record[f.name]
+            self._data[f.name] = self._record[f.name]
 
 
     #@TODO: test delete(), too...
