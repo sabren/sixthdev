@@ -1,4 +1,7 @@
 
+__ver__="$Id$"
+
+import strongbox
 
 class LinkInjector:
     def __init__(self, box, atr, clerk, fclass, fID):
@@ -23,5 +26,11 @@ class LinkInjector:
     def inject(self, stub, name):
         if name != "ID":
             data = self.clerk.fetch(self.fclass, self.fID)
-            stub.update(**data.__values__)
+            ## can't just call stub.update() because it
+            ## was trying to assign linksets, which raises
+            ## an AttributeError
+            for name,attr in stub.__attrs__.items():
+                ## @TODO: this doesn't seem very object-oriented. :/
+                if type(attr) != strongbox.linkset:
+                    setattr(stub, name, data.__values__[name])
             stub.detach(self)
