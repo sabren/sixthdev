@@ -1,4 +1,4 @@
-#!/usr/env python
+#!/usr/home/sabren/bin/python
 
 # pyweb : a wrapper script for weblib
 # inspired by http://www.webtechniques.com/archives/1998/02/kuchling/
@@ -11,16 +11,15 @@
 # Action application/python-script /cgi-bin/pyweb
 # AddType application/python-script .py
 
-import os, sys, StringIO
-import weblib
+import os, weblib
+
 
 eng = weblib.Engine()
 eng.script=open(os.environ["PATH_TRANSLATED"])
 eng.run()
 
 if eng.result == eng.SUCCESS:
-    print eng.response.getHeaders()
-    print eng.response.buffer
+    print eng.response.getHeaders() + eng.response.buffer
 else:
     print "Content-Type: text/plain"
     print
