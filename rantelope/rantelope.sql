@@ -14,7 +14,6 @@ CREATE TABLE rnt_story (
 
 CREATE TABLE rnt_channel (
     ID int not null auto_increment primary key,
-    parentID int not null,
     title varchar(255),
     link varchar(255),
     rssfile varchar(32),
