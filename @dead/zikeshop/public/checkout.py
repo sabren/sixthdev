@@ -132,7 +132,10 @@ class CheckoutApp(zikeshop.PublicApp):
         self.redirect(action = "checkout")
 
     def act_get_card(self):
-        import zebra, zdc
+        import zebra, zdc, zikebase
+        addr = zikebase.Contact(ID=self.data["bill_addressID"])
+        self.model["number"]=""
+        self.model["name"]=addr.fname + " " + addr.lname
         zebra.show("frm_card", self.model)
 
 

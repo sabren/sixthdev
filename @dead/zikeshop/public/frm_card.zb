@@ -10,9 +10,9 @@
 <table border="0">
 <tr>
 <td><b>name on card:</b></td>
-<td><input type="text" name="name" value=""></td></tr>
+<td><input type="text" name="name" value="{:name:}"></td></tr>
 <tr><td>card number</td>
-    <td><input type="text" value="41111111111111113" name="number"></td></tr>
+    <td><input type="text" value="{:number:}" name="number"></td></tr>
 <tr><td>expiration date</td>
 <td>
 <select name="expMonth">
