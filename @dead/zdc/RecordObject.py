@@ -106,11 +106,11 @@ class RecordObject(zdc.Object):
                 self._data[f.name] = None
 
 
-    #@TODO: TEST THIS - it was just an off-the-top-of-my-head thing
-
     def _fetch(self, **where):
-        key = where[self._table.rowid]
-        self.__dict__['_record'] = self._table.fetch(key)
+        """
+        used internally to fetch a record...
+        """
+        self.__dict__['_record'] = apply(self._table.fetch, (), where)
         for f in self._record.table.fields:
             # use __dict__ to avoid overhead/errors with setattr
             self._data[f.name] = self._record[f.name]

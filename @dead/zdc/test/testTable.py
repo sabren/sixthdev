@@ -38,12 +38,17 @@ class TableTestCase(unittest.TestCase):
         assert rec["fish"] == 'squid', \
                "table.getRecord doesn't return the correct record."
 
-        # don't do this for real, kids.. :)
-        self.table.rowid='fish'
-        rec = self.table.fetch('squid')
+        del rec
+        rec = self.table.fetch(ID=1)
         assert rec["fish"] == 'squid', \
                "didn't return correct record when using a string key.."
 
+        # don't do this for real, kids.. :)
+        self.table.rowid='fish'
+        del rec
+        rec = self.table.fetch('squid')
+        assert rec["fish"] == 'squid', \
+               "didn't return correct record when using a string key.."
        
     def check_select(self):       
         for item in ["haddock", "lamprey", "stingray", "trout"]:

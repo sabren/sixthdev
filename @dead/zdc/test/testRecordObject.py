@@ -67,7 +67,12 @@ class RecordObjectTestCase(unittest.TestCase):
         assert robj.ID == 1, "didn't fetch correct ID"
         assert robj.fish == 'guppy', "didn't fetch correct 'fish' field."
 
-
+        del robj
+        ## test search by non-key field..
+        ## (essential for, say, the zikeshop product/category pages)
+        robj = zdc.RecordObject(self.table, fish='guppy')       
+        assert robj.ID == 1, "didn't fetch correct ID after select by name"
+        assert robj.fish == 'guppy', "didn't fetch correct 'fish' field."
 
     def check_saveTwice(self):
 

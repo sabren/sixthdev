@@ -72,21 +72,30 @@ class Table(zdc.Object):
         return res
 
 
-    def fetch(self, key):
+    def fetch(self, key=None, **where):
         """
         fetch a single Record, given the key.
         """
-        if key is None:
-            raise TypeError, "argument to fetch() must be a primary key value"
-        recs = self.select("%s=%s" \
-                           % (self.rowid,
-                              self._sqlQuote(self.fields[self.rowid], key)))
+        ## make sure they supply key xor where:
+        if not ((key is None) ^ (where=={})):
+            raise TypeError, \
+                  "fetch() requires either a key or a set of field-value pairs"
+        ## either convert key into a where clause for select()..
+        if key:
+            recs = self.select("%s=%s" \
+                               % (self.rowid,
+                                  self._sqlQuote(self.fields[self.rowid], key)
+                                  ))
+        ## ... or just pass the dict on to select()
+        else:
+            recs = apply(self.select, (), where)
+
+        ## ensure exactly one record was returned:
         if recs == []:
             raise LookupError, "record not found for key %s" % key
         elif len(recs) > 1:
             raise LookupError, "mulitple records found for single key!!"
-        else:
-            return recs[0]
+        return recs[0]
 
     def delete(self, key):
         sql = "DELETE FROM %s WHERE %s=%s" % (self.name, self.rowid, key)
