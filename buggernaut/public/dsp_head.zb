@@ -12,10 +12,19 @@ th { background: black;
      border-right: solid black 1px;
 }
 
-tr th.critical {background: red}
-tr th.high {background: gold;}
-tr th.medium {background: #66cc33; }
-tr th.low {background: blue;}
+table.tasks td { border-top: solid #999 1px; }
+
+tr th.critical {background: red; color:black;}
+tr th.high {background: gold; color:black;}
+tr th.medium {background: #66cc33;  color:black;}
+tr th.low {background: #3399cc; color:black;}
+
+table.tasks td.detail { 
+    color: #333; 
+    padding-left: 20px; 
+    font-family: arial;  
+    border-top: 0px;
+}
 
 tr.closed td {background: #cccccc; }
 </style>
