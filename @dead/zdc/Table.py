@@ -4,7 +4,6 @@ zdc.Table - a module representing a single table in a database.
 __ver__="$Id$"
 
 import zdc
-#@TODO: handle keys, defaults, autonumbers, etc..
 
 class Table(zdc.Object):
     __super = zdc.Object
@@ -13,12 +12,13 @@ class Table(zdc.Object):
                        
     def __init__(self, dbc, name, rowid="ID"):
         self.__super.__init__(self)
-        self._data["dbc"] = dbc
-        self._data["name"] = name
-        self._data["fields"] = self._getFields()
-        self._data["rowid"] = rowid
+
         import zdc.drivers.DBAPI2Driver
         self._data["driver"] = zdc.drivers.DBAPI2Driver.DBAPI2Driver(dbc)
+
+        self._data["name"] = name
+        self._data["fields"] = self.driver.fields(self.name)
+        self._data["rowid"] = rowid
 
     ## public methods ###########################################
 
@@ -80,26 +80,3 @@ class Table(zdc.Object):
 
     def insert(self, data):
         self.driver.insert(self, data)
-
-
-    ## private methods ###########################################
-       
-    def _getFields(self):
-        """Called internally to create .fields"""
-
-        flds = zdc.IdxDict()
-        # select a blank record:
-        # @TODO: more sophisticated schema checking to get defaults, keys, etc?
-        cur = self.dbc.cursor()
-        cur.execute("SELECT * FROM " + self.name + " WHERE 1=0")
-        for f in cur.description:
-            flds[f[0]] = zdc.Field(f[0],               # name
-                                   f[1],  #@TODO: make typeCode a string
-                                   f[2],               # displaySize
-                                   f[3],               # internalSize
-                                   f[4],               # precision
-                                   f[5],               # scale
-                                   f[6],               # allowNull
-                                   None)               # default
-        return flds
-

@@ -166,3 +166,23 @@ class DBAPI2Driver:
         return res
 
 
+    def fields(self, tablename):
+        """
+        returns an IdxDict of fieldnames and types for a table name
+        """
+        flds = zdc.IdxDict()
+        # select a blank record:
+        # @TODO: more sophisticated schema checking to get defaults, keys, etc?
+        cur = self.dbc.cursor()
+        cur.execute("SELECT * FROM " + tablename + " WHERE 1=0")
+        for f in cur.description:
+            flds[f[0]] = zdc.Field(f[0],               # name
+                                   f[1],  #@TODO: make typeCode a string
+                                   f[2],               # displaySize
+                                   f[3],               # internalSize
+                                   f[4],               # precision
+                                   f[5],               # scale
+                                   f[6],               # allowNull
+                                   None)               # default
+        return flds
+
