@@ -23,10 +23,21 @@ class SQLiteIndex(ransacker.Index):
             self._makeTables()
 
     def addDocument(self, name, text):
+        self.cur.execute(
+            """
+            INSERT OR IGNORE INTO idx_page (page) VALUES ('%s')
+            """ % esc(name))
         super(SQLiteIndex, self).addDocument(name, text)
         self.dbc.commit()
 
     def _makeTables(self):
+        self.cur.execute(
+            """           
+            create table idx_page (
+               ID integer primary key,
+               page varchar(32) unique
+            )
+            """)
         self.cur.execute(
             """           
             create table idx_word (
@@ -37,9 +48,9 @@ class SQLiteIndex(ransacker.Index):
         self.cur.execute(
             """           
             create table idx_freq (
-               name  varchar(32),
+               pageID integer,
                wordID integer,
-               count integer
+               count  integer
             )
             """)
         self.dbc.commit()
@@ -51,15 +62,18 @@ class SQLiteIndex(ransacker.Index):
             """ % esc(word))
         self.cur.execute(
             """
-            INSERT INTO idx_freq (name, wordID, count)
-            VALUES ('%s', (SELECT ID FROM idx_word WHERE word='%s'), %s)
+            INSERT INTO idx_freq (pageID, wordID, count)
+            VALUES ((SELECT ID FROM idx_page WHERE page='%s'),
+                    (SELECT ID FROM idx_word WHERE word='%s'),
+                    %s)
             """ % (esc(name), esc(word), count))
 
     def score(self, word):        
         sql =(
             """
-            SELECT name, count from idx_freq f, idx_word w
-            WHERE f.wordID=w.ID and w.word='%s'
+            SELECT page, count
+            FROM idx_freq f, idx_word w, idx_page p
+            WHERE f.wordID=w.ID and f.pageID=p.ID and w.word='%s'
             ORDER BY count DESC
             """ % esc(word))
         self.cur.execute(sql)
@@ -71,9 +85,9 @@ class SQLiteIndex(ransacker.Index):
         return tuple(self.cur.fetchall())
    
 
-    def contains(self, name):
-        self.cur.execute("select name from idx_freq where name='%s'"
-                         % esc(name))
+    def contains(self, page):
+        self.cur.execute("select page from idx_page where page='%s'"
+                         % esc(page))
         return self.cur.fetchone() is not None
 
     def close(self):
