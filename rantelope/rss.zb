@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<rss version="2.0" xmlns="http://backend.userland.com/rss2">
+   <title>{:title:}</title>
+   <link>{:link:}</link>
+   <description>{:description:}</description>
+  
+   * for stories:
+       <item>
+          <title>{:title:}</title>
+          <link>{:link:}</link>
+          <description>{:description:}</description>
+       </item>
+</rss>
