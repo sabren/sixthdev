@@ -8,7 +8,7 @@
 # MANY THANKS TO
 #
 #  Carey Evans - http://home.clear.net.nz/pages/c.evans/
-#  Dennis Marti - dennis_marti@yahoo.com
+#  Dennis Marti - http://users.starpower.net/marti1/
 #
 #  For the patches that got this thing working!
 #
