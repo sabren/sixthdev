@@ -11,8 +11,9 @@ class UserApp(weblib.Actor):
     __super = weblib.Actor
     userClass = zikebase.User
     editorClass = zikebase.ObjectEditor
+    tplDir = "."
 
-    def __init__(self, ds, input=None):
+    def __init__(self, ds, input):
         self.ds = ds
         self.__super.__init__(self, input)
         
@@ -28,8 +29,8 @@ class UserApp(weblib.Actor):
 
     def act_signup(self):
         if self.input.get("action")!="save":
-            self.consult(zdc.ObjectView(self.userClass()))
-        zebra.show("frm_signup", self.model)
+            self.consult(zdc.ObjectView(self.userClass(self.ds)))
+        print >> self.out, zebra.fetch(self.tplDir + "/frm_signup", self.model)
 
     def act_save(self):
         try:
@@ -63,7 +64,7 @@ class UserApp(weblib.Actor):
     ## requestpass --> sendpass --> msg_sentpass
 
     def act_requestpass(self):
-        zebra.show("frm_requestpass")
+        print >> self.out, zebra.fetch(self.tplDir + "/frm_requestpass")
 
     def act_sendpass(self):
         try:
@@ -103,5 +104,8 @@ class UserApp(weblib.Actor):
     def act_update(self):
         weblib.auth.check()
         self.consult(zdc.ObjectView(weblib.auth.user))
-        zebra.show("frm_update", self.model)
+        print >> self.out, zebra.fetch(self.tplDir + "/frm_update", self.model)
+
+
+
 
