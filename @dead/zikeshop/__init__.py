@@ -8,10 +8,8 @@ from Style import Style
 Product._links["styles"][1] = Style
 
 from PublicApp import PublicApp
-#from Cashier import Cashier
 from Category import Category
 from Customer import Customer
-from Address import Address
 from FixedPoint import FixedPoint
 from CustomerAuth import CustomerAuth
 #from Status import Status
