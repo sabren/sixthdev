@@ -4,12 +4,19 @@ An index that uses MetaKit as the backend.
 __ver__="$Id$"
 
 import anydbm
-import metakit
 import ransacker
+try:
+    import metakit
+except ImportError:
+    metakit = None
+
 
 class MkIndex(ransacker.Index):
 
     def __init__(self, name=None):
+        if not metakit:
+            raise ImportError("couldn't load metakit")
+
         if name:
             self.db = metakit.storage(name+".rki",1)
             self.db.autocommit()

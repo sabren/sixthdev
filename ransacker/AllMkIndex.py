@@ -8,12 +8,18 @@ But don't use it.... It's about 36 times slower. :)
 __ver__="$Id$"
 
 import anydbm
-import metakit
 import ransacker
+try:
+    import metakit
+except ImportError:
+    metakit = None
 
 
 class MkIdMap:
     def __init__(self, mkdb, name):
+        if not metakit:
+            raise ImportError("couldn't load metakit")
+        
         self.db = mkdb
         self.name = name
         self.view = mkdb.getas("%s[key:S,val:I]" % name)

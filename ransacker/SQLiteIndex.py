@@ -2,7 +2,6 @@
 __ver__="$Id$"
 
 import anydbm
-import metakit
 import ransacker
 
 
