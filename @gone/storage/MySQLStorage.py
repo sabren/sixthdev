@@ -9,7 +9,9 @@ class MySQLStorage(Storage):
 
 
     def _dictify(self, cur):
-        """converts cursor.fetchall() results into a list of dicts"""
+        """
+        converts cursor.fetchall() results into a list of dicts
+        """
         res = []
         for row in cur.fetchall():
             d = {}
@@ -24,6 +26,8 @@ class MySQLStorage(Storage):
         Turns a value into a quoted string suitable for MySQL
         """
         if isinstance(val, Date) and str(val)=='0-0-0':                
+            return "NULL"
+        elif val is None:
             return "NULL"
         else:
             return "'" + "''".join(str(val).split("'")) + "'"
