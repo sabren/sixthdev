@@ -145,16 +145,30 @@ class ClerkTest(unittest.TestCase):
 
     def check_user(self):
         """
-        @TODO: test case from cornerhost that exposed a bug
-        also, the isInstance(LinkSetInjector) lines in Clerk.py
-        don't seem to have test cases. And ought to do some kind
-        of polymorphism magic anyway.
+        test case from cornerhost that exposed a bug
+
+        @TODO: isInstance(LinkSetInjector) in Clerk.py need tests
+        It ought to do some kind of polymorphism magic anyway.
+        (huh??)
         """
-        from cornerhost import *
-        import cornerhost.config #@TODO: decouple from cornerhost
-        clerk = Clerk(MockStorage(), cornerhost.config.dbMap)
+
+        class User(Strongbox):
+            ID = attr(long)
+            username = attr(str)
+        class Domain(Strongbox):
+            ID = attr(long)
+            domain = attr(str)
+            user = link(User)
+        dbMap = {
+            User:"user",
+            Domain:"domain",
+            Domain.__attrs__["user"]: (User, "userID"),
+            }
+
+        
+        clerk = Clerk(MockStorage(), dbMap)
         u = clerk.store(User(username="ftempy"))
         d = clerk.store(Domain(domain="ftempy.com", user=u))
         assert d.user, "didn't follow link before fetch"
         d = clerk.fetch(Domain, 1)
-        assert d.user, "didn't follow link broke after fetch"
+        assert d.user, "didn't follow link after fetch"
