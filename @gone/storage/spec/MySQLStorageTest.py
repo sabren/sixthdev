@@ -1,10 +1,14 @@
-import sqlTest
+
 from MockStorageTest import *
 from storage import MySQLStorage
 
 class MySQLStorageTest(MockStorageTest):
 
     def setUp(self):
+        try:
+            import sqlTest
+        except ImportError:
+            raise "skip"
         self.s = MySQLStorage(sqlTest.dbc)
         cur = sqlTest.dbc.cursor()
         try:
