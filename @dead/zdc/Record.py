@@ -89,7 +89,7 @@ class Record:
         row = cur.fetchone()
 
         if row is None:
-            raise "record not found where" + `where`
+            raise LookupError, "record not found where" + `where`
 
         for f in range(len(row)):
             # we do this to get rid of the L at the end of longs:
