@@ -16,7 +16,7 @@ USAGE (Apache):
 ## use this to add custom lib directories:
 
 import sys
-sys.path = ["/web/lib"] + sys.path
+sys.path = [".", "/web/lib"] + sys.path
 
 #############################################
 
