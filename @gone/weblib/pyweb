@@ -40,8 +40,8 @@ else:
 
     print "<b>script output:</b>"
     print '<pre class="output">' + \
-          eng.response.getHeaders() + \
-          eng.response.buffer + \
+          weblib.htmlEncode(eng.response.getHeaders()) + \
+          weblib.htmlEncode(eng.response.buffer) + \
           "</pre>"
     print "<hr>"
     print '<a href="http://weblib.sourceforge.net/">weblib</a> ' + \
