@@ -24,7 +24,7 @@ class RecordObjectTestCase(unittest.TestCase):
     def check_table(self):
         
         ## part1: table from the constructor
-        robj = zdc.RecordObject(test.dbc, "fish")
+        robj = zdc.RecordObject(test.dbc, table="fish")
         assert robj.table == "fish", "table passed to constructor didn't work."
         del robj
 
@@ -38,7 +38,7 @@ class RecordObjectTestCase(unittest.TestCase):
 
 
     def check_save(self):
-        robj = zdc.RecordObject(test.dbc, "fish")
+        robj = zdc.RecordObject(test.dbc, table="fish")
         robj.fish = 'trout'
         robj.save()
 

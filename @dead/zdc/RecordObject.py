@@ -7,7 +7,7 @@ class RecordObject(zdc.Object):
     table = None
     defaults = {}
 
-    def __init__(self, dbc, table=None, defaults=None):
+    def __init__(self, dbc, key=None, table=None, defaults=None):
 
         # you can do obj = RecordObject(dbc, sometable)
         #
@@ -32,9 +32,8 @@ class RecordObject(zdc.Object):
             self.defaults = self.__class__.defaults
 
 
-
         # if all's well, go ahead with the init:
-        zdc.Object.__init__(self, dbc)
+        zdc.Object.__init__(self, dbc, key)
 
 
     def _new(self):
