@@ -1,0 +1,21 @@
+# $Id$
+#
+# rantelope bugs and issues
+#
+
+* unicode problem
+
+Hans Verschooten pointed out that you can publish documents
+with unicode characters. The problem seems to be localized
+to the 4Xslt module.
+
+"""
+I looked at http://diveintopython.org/kgp_unicode.html. And
+there maybe a solution by setting
+sys.setdefaultencoding('iso-8859-1')
+"""
+
+
+* Need a higher-level SearchEngine object
+* Need to have SearchEngine index on save
+
