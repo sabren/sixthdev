@@ -38,21 +38,16 @@ class Attribute(object):
             
     def cast(self, value):
         if value is None:
-            return None
-        elif value == "":
-            # convert "" to None unless we can deal with it
-            # (so we can pass an empty string in from a form)
-            # see StealthboxTest.check_empty_string()
-            try:
-                return self.type(value)
-            except:
-                return None
+            return None # str(None) returns 'None', so we need a special case.
         else:
             try:
                 return self.type(value)
             except:
-                raise TypeError, "%s is wrong type (expecting %s)" \
-                      % (value, self.type)
+                if value=="":
+                    return None
+                else:
+                    raise TypeError, "%s is wrong type (expecting %s)" \
+                          % (value, self.type)
 
     def validate(self, value):
         if (value is None):
