@@ -9,6 +9,12 @@ from weblib import trim
 
 class EngineTestCase(unittest.TestCase):
 
+    def setUp(self):
+        parts = ["request", "perm", "sess", "auth", "response"]
+        for part in parts:
+            if hasattr(weblib, part):
+                delattr(weblib, part)
+
 
     def check_request(self):
         import os
@@ -78,7 +84,7 @@ class EngineTestCase(unittest.TestCase):
             name = eng.response.buffer
             for what in ("auth","sess","perm","request","response"):
                 assert getattr(eng, what).engine is eng, \
-                       ".eng screws up for " + name + "." + what
+                       ".engine screws up for " + name + "." + what
                 assert getattr(getattr(eng, what).engine, what) is getattr(eng, what), \
                        ".eng." + what + " screws up for " + name 
 
@@ -92,11 +98,11 @@ class EngineTestCase(unittest.TestCase):
         import weblib
         import __builtin__
         __builtin__.orig = {
-            "auth": weblib.auth,
-            "sess": weblib.sess,
-            "perm": weblib.perm,
-            "request": weblib.request,
-            "response": weblib.response }
+            "auth": getattr(weblib, "auth", None),
+            "sess": getattr(weblib, "sess", None),
+            "perm": getattr(weblib, "perm", None),
+            "request": getattr(weblib, "request", None), 
+            "response": getattr(weblib, "response", None)}
 
         eng = weblib.Engine(script=trim(
             """

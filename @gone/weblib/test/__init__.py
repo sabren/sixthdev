@@ -1,5 +1,5 @@
 """
-weblib.test - test framework for weblib
+test framework for weblib
 
 $Id$
 """

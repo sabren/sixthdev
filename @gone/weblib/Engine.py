@@ -1,5 +1,5 @@
 """
-weblib.Engine - a wrapper object for running weblib.scripts
+A wrapper object for running weblib scripts.
 
 $Id$
 """
@@ -65,6 +65,12 @@ class Engine:
                 # use the one they supplied
                 setattr(self, item, kw[item])
                 kw[item].engine = self
+
+            elif getattr(weblib, item, None):
+                # use one in weblib (perhaps set up by .weblib.py
+                _ = getattr(weblib, item)
+                _.engine = self
+                setattr(self, item, _)
                 
             elif item=="sess":
                 self.sess = weblib.Sess(pool, engine=self)
@@ -107,12 +113,18 @@ class Engine:
             setattr(weblib, part, getattr(self, part, None))
 
 
-
     def restoreParts(self):
         """Restore the old weblib parts.."""
 
         for part in Engine.parts:
-            setattr(weblib, part, self._oldParts[part])
+            if self._oldParts[part]:
+                setattr(weblib, part, self._oldParts[part])
+            else:
+                # There was nothing there to begin with...
+                # (This is usually the case.)
+                # We have to do this because we don't want the
+                # next engine that comes along to see our mess..
+                delattr(weblib, part)
 
 
     def setPathInfo(self):
