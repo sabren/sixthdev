@@ -28,3 +28,4 @@
 # "list notification"
 ALL $CVSROOT/CVSROOT/log -m notify@sabren.com -f $CVSROOT/CVSROOT/commitlog %s
 
+# test
