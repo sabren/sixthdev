@@ -43,11 +43,15 @@ class Request:
             for item in os.environ.keys():
                 self.environ[item] = os.environ[item]
             del os
+        del environ
         
+
         ## querystring:
         self.querystring = querystring
         if querystring is None:
             self.querystring = self.environ.get("QUERY_STRING", "")
+        del querystring
+        
 
         ## query, a hash of the querystring:
         self.query = self.parse(weblib.urlDecode(self.querystring))
@@ -58,7 +62,8 @@ class Request:
         self.cookie = cookie
         if cookie is None:
             self.cookie = self.parse(self.environ.get("HTTP_COOKIE", ""), splitter=";")
-
+        del cookie
+        
 
         ## content & contentLength:
         self.content = content
@@ -69,16 +74,18 @@ class Request:
                 self.content = sys.stdin.read(self.contentLength)
         else:
             self.contentLength = len(content)
+        del content
 
 
         ## contentType:
         self.contentType = contentType
-        if (content is not None) and (contentType is None):
+        if (self.content is not None) and (contentType is None):
             self.contentType=self.environ.get("CONTENT_TYPE")
             if self.contentType is None:
                 self.contentType = "application/x-www-form-urlencoded"
                 
         self.environ["CONTENT_TYPE"] = self.contentType
+        del contentType
 
             
         ## method
@@ -91,6 +98,8 @@ class Request:
                 else:
                     self.method = "GET"
                 self.environ["REQUEST_METHOD"] = self.method
+        del method
+        
 
         ## form:
         self.form = form
@@ -99,13 +108,14 @@ class Request:
                 self.form = self.parse(weblib.urlDecode(self.content))
             else:
                 self.form = {}
+        del form
 
 
         ## multipart/form-data (file upload forms):
         ## @TODO: lots of stuff! probably best to just rewrite this
         ## rather than try to yank stuff out of FieldStorage..
 
-        if (self.method=="POST") and (self.contentType[:10]=='multipart/'):
+        if (self.content) and (self.contentType[:10]=='multipart/'):
 
             import cgi, StringIO
 
