@@ -8,8 +8,9 @@ from AuthorizeNetPayment import *
 
 ## result codes (constants)
 
-SUCCESS = 1
-FAILURE = 0
+APPROVED = "approved"
+DENIED = "denied"
+ERROR = "error"
 
 
 
