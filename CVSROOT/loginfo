@@ -27,6 +27,7 @@
 
 
 ### "list notification" #####################################
-ALL log -m notify@sabren.com -f $CVSROOT/CVSROOT/commitlog %s
+#ALL log -m notify@sabren.com -f $CVSROOT/CVSROOT/commitlog %s
+ALL cvsmail.py -m notify@sabren.com -f $CVSROOT/CVSROOT/commitlog %s
 
 
