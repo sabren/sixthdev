@@ -1,0 +1,27 @@
+#!/usr/env python
+
+# pyweb : a wrapper script for weblib
+# inspired by http://www.webtechniques.com/archives/1998/02/kuchling/
+#
+# USAGE:
+#
+# Either do #!/your_path/pyweb at the top of your CGI script,
+# or save this in your cgi-bin, and do this in your Apache .htaccess file:
+#
+# Action application/python-script /cgi-bin/pyweb
+# AddType application/python-script .py
+
+import os, sys, StringIO
+import weblib
+
+eng = weblib.Engine()
+eng.script=open(os.environ["PATH_TRANSLATED"])
+eng.run()
+
+if eng.result == eng.SUCCESS:
+    print eng.response.getHeaders()
+    print eng.response.buffer
+else:
+    print "Content-Type: text/plain"
+    print
+    print eng.error

@@ -20,6 +20,17 @@ class Engine:
 
     parts=("request", "response", "sess", "auth", "perm")
 
+    script = None
+    result = None
+    
+    traceback = None
+    error     = None
+
+    SUCCESS  = "* success *"
+    FAILURE  = "* failure *"
+    ERROR    = "* error *"
+      
+
     def __init__(self, script=None, pool=None, **kw):
 
         ### NOTE:
@@ -58,6 +69,7 @@ class Engine:
             else:
                 # use a new copy of the default (eg, self.perm=weblib.Perm())
                 setattr(self, item, weblib.__dict__[string.capitalize(item)](engine=self))
+
 
 
     def interceptPrint(self):
@@ -114,13 +126,24 @@ class Engine:
 
 
     def run(self):
-        #@TODO: capture error messages; expose a result flag...
+
         self.setUp()
         try:
+            self.result = self.SUCCESS
             try:
                 self.execute(self.script)
             except SystemExit:
-                pass # don't really quit on response.end()                
+                pass # don't really quit on response.end()
+            except AssertionError, e:
+                self.result = self.FAILURE
+            except:
+                self.result = self.ERROR
+                import traceback, sys, string
+                self.error = string.join(traceback.format_exception(
+                    sys.exc_type,
+                    sys.exc_value,
+                    sys.exc_traceback), "\n")
+                
         finally:
             self.tearDown()
 
