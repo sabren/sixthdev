@@ -1,4 +1,4 @@
-# multipart crap:
+# multipart crap: (not working anymore!!!)
 
     def _doContentJunk(self, content, form):
         if self.contentType[:10]=="multipart/":
