@@ -41,3 +41,7 @@ class DateTestCase(unittest.TestCase):
             assert Date("today") == Date("10/19/2001"), "wrong date"
         finally:
             time.time = _time
+
+    def check_repr(self):
+        d = Date('1/1/2001')
+        assert repr(d) == "Date('1/1/2001')", "wrong __repr__"

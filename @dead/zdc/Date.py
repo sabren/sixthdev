@@ -37,11 +37,11 @@ class Date:
         """
         return calendar.monthrange(self.y, self.m)[1]
         
-    def __str__(self):
-        return self.toSQL()
-
     def toSQL(self):
         return "%i-%i-%i" % (self.y, self.m, self.d)
+
+    def toUS(self):
+        return "%i/%i/%i" % (self.m, self.d, self.y)        
 
     def __cmp__(self, other):
         if isinstance(other, Date):
@@ -77,4 +77,8 @@ class Date:
             res.d = res.daysInMonth()
         return res
 
+    def __str__(self):
+        return self.toUS()
 
+    def __repr__(self):
+        return "Date('%s')" % self.toUS()
