@@ -26,6 +26,14 @@ import ransacker
 
 class Index:
 
+    ## attributes ##################################################
+
+    rki = None
+    wordHash = None
+
+
+    ## constructor #################################################    
+
     def __init__(self, rki, rkw=None):
         """idx = ransacker.Index(rki, rkw=None)
 
@@ -47,67 +55,94 @@ class Index:
         self.rki = shelve.open(rki)
         self.wordHash = ransacker.WordHash(rkw)
 
-        if not self.rki.has_key(ransacker.NEXTNUM):
-            self.rki[ransacker.NEXTNUM] = 1
 
 
-    def delKey(self, key):
-        itemID, oldWordIDs = self.rki["k:"+key]
+    ## public methods ##############################################
 
-        # for each word in the index, remove the reference to this key.
-        # @TODO: check whether we NEED to delete (eg, word might be in new text)
-        for wordID in oldWordIDs:
-            self.rki[`wordID`]= filter(lambda i,bad=itemID:i!=bad, self.rki[`wordID`])
-
-        return self.rki["k:"+key][0]
+    def hasPage(self, label):
+        return self.rki.has_key("k:"+label)
 
 
-    def addKey(self, key):
-        """Adds a new key and returns the ItemID"""
-        itemID = self.rki[ransacker.NEXTNUM]
-        self.rki[ransacker.NEXTNUM] = itemID + 1
-        self.rki["i:"+`itemID`] = key
-        self.rki["k:"+key] = (itemID, ())
-        return itemID
+    def addPage(self, label, text):
+        """addPage(page, text) Add text to index under the given label"""
+        assert type(label) == type(""), "label must be a string!"            
 
+        self.forgetPage(label)
 
-
-    def freqs(self, text):
-        """Return a dict mapping words to frequencies"""
-        fd = {}
-        for word in string.split(text):
-            if fd.has_key(word):
-                fd[word] = fd[word] + 1
-            else:
-                fd[word] = 1
-        return fd
-
-
-    def index(self, key, text):
-        """index(key, text) Add text to index and label it with the given key"""
-        assert type(key) == type(""), "key must be a string!"            
-
-
-        if self.rki.has_key("k:"+key):
-            itemID = self.delKey(key)
-        else:
-            itemID = self.addKey(key)
-
-
-        # now index
         newWordIDs = []
-        for word in self.freqs(text).keys():
-            # now add the reference
-            wordID = self.wordHash.get(word)
-            if self.rki.has_key(`wordID`):
-                self.rki[`wordID`] = self.rki[`wordID`] + (itemID,)
-            else:
-                self.rki[`wordID`] = (itemID,)
-            newWordIDs.append(wordID)
+        for word in ransacker.uniqueWords(text):
+            self.linkPageToWord(label, word)
+            newWordIDs.append(self.wordHash.get(word))
 
-        self.rki["k:"+key] = tuple((self.rki["k:"+key][0], tuple(newWordIDs)))
+        pageData = [self.getPageID(label)] + newWordIDs
+        self.rki["k:"+label] = pageData
 
 
+    def forgetPage(self, label):
+        """If we know about a page, forget what we know about it."""
+        # @TODO: check whether we NEED to delete (eg, word might be in new text)
+
+        if self.hasPage(label):
+            for wordID in self.wordIDsOnPage(label):
+                pageIDs = list(self.pageIDsForWordID(wordID))
+                pageIDs.remove(self.getPageID(label))
+
+                self.rki[`wordID`]= pageIDs
+
+
+    def getPageID(self, label):
+        if self.hasPage(label):
+            return self.rki["k:"+label][0]
+        else:
+            pageID = self.nextPageID()
+            self.rki["i:"+`pageID`] = label
+            self.rki["k:"+label] = (pageID, ())
+            return pageID
+        
+
+    def nextPageID(self):
+        res = 1
+        if self.rki.has_key(ransacker.NEXTNUM):
+            res = int(self.rki[ransacker.NEXTNUM])
+        self.rki[ransacker.NEXTNUM] = str(res+1)
+        return res
+
+
+
+    def linkPageToWord(self, label, word):
+        wordID = self.wordHash.get(word)
+        if self.rki.has_key(`wordID`):
+            self.rki[`wordID`] = self.rki[`wordID`] + (self.getPageID(label),)
+        else:
+            self.rki[`wordID`] = (self.getPageID(label),)
+
+
+    def wordIDsOnPage(self, label):
+        return self.rki["k:"+label][1:]
+
+
+
+    def pageIDsForWordID(self, wordID):
+        return self.rki[str(wordID)]
+
+
+
+
+
+
+    ## magic methods ##############################################
+
+    def __del__(self):
+        self.rki.close()
+        self.wordHash.close()
+
+
+
+
+
+
+
+    ## this should be part of SearchEngine object ##########################
 
     def search(self, query):
         """Return a tuple of items that match query"""
@@ -142,8 +177,7 @@ class Index:
 
 
 
-    def __del__(self):
-        self.rki.close()
-        self.wordHash.close()
+    ## this should go away ##################################################
 
-
+    def index(self, key, text):
+        self.addPage(key, text)
