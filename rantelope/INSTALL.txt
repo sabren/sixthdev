@@ -1,0 +1,46 @@
+-----------------------------------
+RANTELOPE INSTALLATION INSTRUCTIONS
+-----------------------------------
+$Id$
+
+PREREQUISITES 
+(all of these are preinstalled at cornerhost)
+
+  - python 2.2 (maybe other versions)
+  - pysqlite (or MySQLdb)
+  - the sabren libraries:
+      - arlo      (object/relational mapping)
+      - pytypes   (various types)
+      - strongbox (static typing and other fun stuff)
+      - weblib    (web server abstraction layer)
+      - storage   (storage abstraction layer)
+      - handy     (misc routines)
+      - sixthday  (generic web applications)
+      - zebra     (template/reporting system)
+
+    You can get all of these in one tarball here:
+
+      http://rantelope.com/download/sabrenlibs.tgz
+
+  - a webserver configured to process *.app files
+    through weblib. This isn't terribly complicated
+    if your webserver supports CGI, but the docs are
+    pretty sketchy, so if you need help, ask.
+
+INSTALLATION
+
+  - unzip the rantelope files to a directory 
+    on your website. (eg: ~/web/domain.com/rantelope)
+ 
+  - Make the directory writable by the web server. 
+    [This will not be required for future versions]
+    (eg: chmod o+w rantelope)
+
+  - create the database. For now, that looks like this:
+
+    chdir rantelope
+    sed -e"s/not null auto_increment//" rantelope.sql | sqlite blog.rdb
+    chmod o+w blog.rdb
+
+  - load rantelope.app in your browser and try it out!
+
