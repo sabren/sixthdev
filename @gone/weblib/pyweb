@@ -11,15 +11,22 @@
 # Action application/python-script /cgi-bin/pyweb
 # AddType application/python-script .py
 
-import os, weblib, sys, string
 
+import os, sys, string, weblib, StringIO
 
+    
 ## allow imports from script directory ###########################
 
 path = os.environ["PATH_TRANSLATED"]
 dir = string.join(string.split(path,"/")[:-1], "/")
 sys.path.append(dir)
 
+## debugging help ##################################################
+## uncomment this only to help debugging Internal Server Errors..
+
+## print "content-type: text/plain"
+## print
+## sys.stderr = sys.stdout
 
 
 ## run the script ################################################
