@@ -72,10 +72,13 @@ class AuthorizeNetPayment(payment.Payment):
 
         if responseCode == "1":
             self.result = payment.APPROVED
+            self.error = None
         elif responseCode == "2":
             self.result = payment.DENIED
+            self.error = responseReasonText
         else:
             self.result = payment.ERROR
+            self.error = responseReasonText
             
          
         
