@@ -4,7 +4,7 @@ this module configures database mapping for rantelope
 __ver__="$Id$"
 import storage
 import arlo
-from schema import *
+from rantelope import *
 
 ## database connection ############################
 # ( you could also use MySQLdb and MySQLStorage here )
@@ -22,4 +22,11 @@ dbmap = {Channel: "rnt_channel",
          Story.__attrs__["author"]: (Author, "authorID"),
          Comment: "rnt_comment",
          Author: "rnt_author"}
-clerk = arlo.Clerk(sto, dbmap)
+clerk = arlo.CallbackClerk(sto, dbmap)
+
+## search engine stuff ############################
+import atexit
+from rantelope import StoryIndex
+index = StoryIndex(clerk, "index.rk")
+clerk.onStore(Story, index.addStory)
+atexit.register(index.close)
