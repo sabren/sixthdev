@@ -5,7 +5,6 @@ __ver__="$Id$"
 
 import unittest
 import weblib
-import weblib.test
 
 #@TODO: there ought to be test cases for each type of SessPool
 
