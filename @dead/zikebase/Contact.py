@@ -30,5 +30,5 @@ class Contact(zdc.RecordObject):
         if value:
             import zdc.isvalid
             if not zdc.isvalid.email(value):
-                raise ValueError, "value is not a valid email address"
+                raise ValueError, "'%s' is not a valid email address" % value
         self._data["email"]=value
