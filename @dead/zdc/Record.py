@@ -2,15 +2,20 @@
 #
 # makes it easy to edit records in a database.
 
+import IdxDict
+
 class Record:
 
-    def __init__(self, dbc, table, module=None, rowid='ID'):
+    def __init__(self, dbc, table, module=None, autoNum='ID'):
         self.dbc = dbc
         self.table = table
-        self.rowid = "ID"   # this is the 'autonumber' field, if any
-        self.key = None     # either a numeric value for an "ID" field, or a dict
+        self.autoNum = autoNum  # this is the 'autoNumber' field, if any (MYSQL ONLY!)
+        self.key = None     # either a numeric value for an "autoNum" field, or a dict
         self.fields = self._getFields()
-        self.values = {}
+        self.values = IdxDict.IdxDict()
+        for f in self.fields:
+            self.values[f.name] = None
+            
         self.quoteEscape = "'"
         if module:
             self.dbcModule = module
@@ -21,19 +26,27 @@ class Record:
                 self.dbcModule = eval(module)
             except:
                 raise "Couldn't guess DB-API module. Pass module as 3rd parameter to Record()"
+
  
     ##############################
     # PUBLIC METHODS             #
     ##############################
 
-    def fetch(self, key):
-        self.key = key
+    def fetch(self, keyID=None, **hash):
+        if keyID:
+            self.key = keyID
+        else:
+            self.key = hash
+
         sql = "SELECT * FROM " + self.table + \
-              "WHERE " + self._whereClause()
+              self._whereClause()
+
         cur = self.dbc.cursor()
         cur.execute(sql)
+        row = cur.fetchone()
 
-        #@TODO: fill in the values hash..
+        for f in range(len(row)):
+            self[self.fields[f].name]=row[f]
 
 
     def new(self):
@@ -52,7 +65,7 @@ class Record:
 
         # and delete it
         sql = "DELETE FROM  " + self.table + \
-              "WHERE " + self._whereClause()
+              self._whereClause()
         self.dbc.cursor().execute(sql)
 
 
@@ -82,34 +95,37 @@ class Record:
         if field.type == self.dbcModule.NUMBER:
             res = `value`
         else: # should be elif ... STRING
-            res = "'"
-            for c in value:
-                # escape quotes:
-                if c == "'":
-                    res = res + self.quoteEscape + c
-                else:
-                    res = res + c
-            res = res + "'"
+            if value is None:
+                res = "NULL"
+            else:
+                res = "'"
+                for c in value:
+                    # escape quotes:
+                    if c == "'":
+                        res = res + self.quoteEscape + c
+                    else:
+                        res = res + c
+                res = res + "'"
         
         return res
 
     def _whereClause(self):
         res = ""
         if type(self.key) == type(1):
-            res = "ID=" + self.key
+            res = self.autoNum + "=" + `self.key`
+        elif type(self.key) == type(1L):
+            res = self.autoNum + "=" + `self.key`[:-1]
         elif type(self.key) == type({}):
-            #@TODO: handle quotes for strings, etc..
             for f in self.key.keys():
-                print "#######F: ", f
-                res = res + "AND " + f + "=" + _sqlQuote(self.fields[f], self.keys[f])
-            res = "(" + res[4:] + ")"
+                res = res + "AND (" + f + "=" + self._sqlQuote(self.fields[f], self.key[f]) + ")"
+            res = res[4:] # strip first AND
         else:
-            raise "Invalid key."
+            raise "Invalid key: " + `self.key`
+        return " WHERE (" + res + ")"
 
 
     def _getFields(self):
         """Called internally to create .fields"""
-        import IdxDict
         import Field
         flds = IdxDict.IdxDict()
         # select a blank record:
@@ -128,7 +144,14 @@ class Record:
         return flds
 
     def _update(self):
-        pass
+        sql = "UPDATE " + self.table + " SET "
+        for f in self.fields:
+            if f.name != self.autoNum:
+                sql = sql + f.name + "=" + self._sqlQuote(f) + ","
+        sql = sql[:-1] + self._whereClause()
+
+        cur = self.dbc.cursor()
+        cur.execute(sql)
 
 
     def _insert(self):
@@ -137,8 +160,8 @@ class Record:
         vals = ''
         # .. and the fieldnames :
         for f in self.fields:
-            # @TODO: fix this to handle non-"ID"-style schemas (see _whereClause)
-            if f.name != "ID":
+            # if autoNum is none, all columns show up:
+            if f.name != self.autoNum:
                 sql = sql + f.name + ","
                 # let's do fields and values at once
                 vals = vals + self._sqlQuote(f) + ","
@@ -147,8 +170,13 @@ class Record:
         sql = sql[:-1] + ") VALUES (" + vals[:-1] + ")"
 
         cur = self.dbc.cursor()
-        self.dbc.insert_id()
         cur.execute(sql)                    
+
+        # get the auto-generated ID, if any:
+        # NOTE: THIS ONLY WORKS WITH MYSQL!!!
+        if self.autoNum:
+            self.key = self.dbc.insert_id()
+            self[self.autoNum] = self.key
 
 
     ##############################
