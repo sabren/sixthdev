@@ -120,17 +120,15 @@ class CheckoutApp(zikeshop.PublicApp):
                 self.redirect(action='get_card')
 
     def act_add_card(self):
+        import zikebase, zikeshop, zebra
         self.do("set_comments")
-
-        # Add a new card to the database:
-        import zikebase, zebra
         errs = []
 
         for item in self.cardData.keys():
             self.cardData[item]=self.input.get(item)
 
         try:
-            #@TODO: REQUIRE input for objectEditor, model for zebra. (reduce errors!)
+            #@TODO: REQUIRE input for objectEditor, model for zebra.
             ed = zikebase.ObjectEditor(zikeshop.Card, input=self.input)
             ed.do("update")
             #@TODO: resolve - cards with secondary billing addresses?
@@ -142,12 +140,19 @@ class CheckoutApp(zikeshop.PublicApp):
 
         if ed.object.isExpired():
             errs.append("Expired card.")
+
+        if self.input.get("check_issuer", None):
+            if ed.object.issuer != self.input["check_issuer"]:
+                errs.append("Invalid %s number." \
+                            % self.input["check_issuer"])
             
         if errs:
             self.model["errors"] = map(lambda e: {"error":e}, errs)
             self.next = "get_card"
-        else:
+        elif getattr(zikeshop, "confirmOrders", 1):
             self.redirect(action = "confirm")
+        else:
+            self.redirect(action="checkout")
 
 
 ##     def act_set_card(self):

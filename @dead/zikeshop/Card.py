@@ -20,6 +20,8 @@ class Card(zdc.RecordObject):
         self.expYear  = nowYear
         self.expMonth = nowMonth
         self.customerID = 0
+        
+        self.issuer = "unknown" # semi-calculated field, not in db
 
     def get_masked(self):
         return ("x" * (len(self.number)-4)) + self.number[-4:]
@@ -48,13 +50,53 @@ class Card(zdc.RecordObject):
         for ch in str(value):
             if ch not in "- ":
                 num = num + ch
-        if self.checkdigits(num):
+
+        # figure out the issuer so we can check against that later.
+        self.issuer = issuer(num)
+
+        # validate the card:
+        if (self.issuer != "unknown") and checkLength(self.issuer, len(num)) \
+           and self.checkdigits(num):
             self._data['number']=num
         else:
             raise ValueError, "Invalid credit card number."
 
-
 ##### @TODO: THIS CAME FROM THE PAYMENT MODULE. PUT IT BACK THERE! #######
+
+def issuer(number):
+    """
+    issuer(number) -> who issued the card?
+    """
+    res = "unknown"
+    num = str(number)
+    if num[0]=="4":
+        res = "Visa"
+    elif num[:2] in ("34","37"):
+        res = "American Express"
+    elif num[:2] in ("51","55"):
+        res = "MasterCard"
+    elif num[:4]=="6011":
+        res = "Discover/Novus"
+    return res
+            
+
+def checkLength(ish, length):
+    """
+    checkLength(ish,length) -> is length okay for issuer 'ish'?
+    """
+    if ish == "Visa":
+        ok = (13,16)
+    elif ish == "American Express":
+        ok = (15,)
+    elif ish == "MasterCard":
+        ok = (16,)
+    elif ish == "Discover/Novus":
+        ok = (16,)
+    else:
+        raise TypeError, "unknown issuer"
+    return length in ok
+    
+
 def validate(number):
     """
     validate the format of a credit card number..
