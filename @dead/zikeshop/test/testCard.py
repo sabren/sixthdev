@@ -8,16 +8,18 @@ import zikeshop
 
 class CardTestCase(unittest.TestCase):
 
+    #@TODO: really test the validation stuff!
+
     def setUp(self):
         # a little game of good card, bad card...
         # this card is unlikely, but passes the mod10 check:
-        self.GOODCARD = '41111111111111113'
-        self.BADCARD  = '41111111111111111' 
+        self.GOODCARD = '4111111111111111'
+        self.BADCARD  = '4111111111111119' 
     
     def check_masked(self):
         card = zikeshop.Card() 
         card.number = self.GOODCARD
-        assert card.masked == 'xxxxxxxxxxxxx1113', \
+        assert card.masked == 'xxxxxxxxxxxx1111', \
                "masking doesn't work: %s" % card.masked
 
     def check_checkdigits(self):
