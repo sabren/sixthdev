@@ -1,21 +1,29 @@
 
-from strongbox import Strongbox, linkset, future
+from strongbox import attr, Strongbox, linkset, forward
 from unittest import TestCase
 
-class Node(Strongbox):
-    kids = linkset(future)
+class Child(Strongbox):
+    name = attr(str)
+class Parent(Strongbox):
+    kids = linkset(Child)
 
+class Node(Strongbox):
+    kids = linkset(forward)
 
 class NonNode:
     pass
 
 class LinkSetTest(TestCase):
 
+    def check_simple(self):
+        p = Parent()
+        p.kids << Child(name="freddie jr")
+
     def check_typing(self):
 
-        # should not be able to instantiate until we change the "future" 
+        # should not be able to instantiate until we change the "forward" 
         self.assertRaises(ReferenceError, Node)
-        Node.__attrs__["kids"].setType(Node)
+        Node.__attrs__["kids"].type = Node
 
         # now it should work:
         top = Node()

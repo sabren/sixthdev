@@ -2,16 +2,16 @@
 $Id$
 """
 
-from strongbox import attr, future
+from strongbox import attr, forward
 #from pytypes import Strict
 
 class TypedList(list):
     
-    def __init__(self, classname):
+    def __init__(self, klass):
         super(TypedList, self)
-        self.settype(classname)
+        self.setType(klass)
 
-    def settype(self, type):
+    def setType(self, type):
         self.type = type
 
     def append(self, value):
@@ -27,16 +27,13 @@ class TypedList(list):
 
 class LinkSet(attr):
 
-    def setType(self, type):
+    def __init__(self, type):
         self.type = type
 
-    def __init__(self, type):
-        self.setType(type)
-
     def initialValue(self):
-        if self.type == future:
+        if self.type == forward:
             raise ReferenceError, \
-                  "Can't instantiate -- broken linkset(future) promise."
+                  "Can't instantiate -- broken linkset(forward) promise."
         else:
             return TypedList(self.type)
 
