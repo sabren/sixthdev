@@ -1,4 +1,4 @@
-
+__ver__="$Id$"
 from LinkInjector import *
 from LinkSetInjector import *
 from Clerk import *
