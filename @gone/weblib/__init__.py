@@ -1,24 +1,9 @@
 #
 # weblib : a library for web stuff
 # 
+##########################################################
 
-
-### first, import the singletons ##########################
-
-from Engine import *
-
-from Request import *
-request = Request()
-
-from Response import *
-response = Response()
-
-from Sess import *
-from SessPool import *
-sess = {}
-
-from Auth import *
-from Perm import *
+# start with some utility functions... 
 
 
 ### unique identifier generator, for sessions, etc #######
@@ -62,7 +47,7 @@ def htmlEncode(s):
             res = res + ch
     return res
 
-#### URL encoder ########################################
+#### URL encoding ########################################
 
 def urlEncode(what):
     """This works the way ASP's urlEncode does, OR lets you do it
@@ -80,24 +65,38 @@ def urlEncode(what):
     return res
 
 
+def urlDecode(what):
+    res = None
+    import urllib
+
+    if type(what) == type(""):
+        res = urllib.unquote(what)
+        # is this right?!?!?!?
+        import string
+        res = string.replace(res, "+", " ")
+
+    elif type(what) == type({}):
+        res = urllib.urldecode(what)
+    else:
+        raise "urlDecode doesn't know how to deal with this kind of data"
+
+    return res
 
 
-##############3
 
+### and now, a herd of singletons ##########################
 
-def printNormal():
-    pass
+from Engine import *
 
-def printIntercept():
-    pass
+from Request import *
+request = Request()
 
-## import sys
-## stdout = sys.stdout
-## sys.stdout = response
+from Response import *
+response = Response()
 
-## ### but allow the old behavior, if needed ######
+from Sess import *
+from SessPool import *
+sess = {}
 
-## def normalPrint():
-##     sys.stdout = stdout
-
-
+from Auth import *
+from Perm import *
