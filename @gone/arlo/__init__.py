@@ -3,8 +3,8 @@ from LinkInjector import *
 from LinkSetInjector import *
 from Clerk import *
 
-def MockClerk():
+def MockClerk(dbmap={}):
     from storage import MockStorage
-    return Clerk(MockStorage())
+    return Clerk(MockStorage(),dbmap)
 
 
