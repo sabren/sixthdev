@@ -47,16 +47,24 @@ class RecordObject(zdc.Object):
             
     def save(self):
         # save the contents of ._data into our record:
-        # _data should always have the good stuff in it
+        # _data should always be the same data that's
+        # stored in the database. 
         #
-        # NOT __dict__!!!!
+        # we do NOT put stuff in  __dict__!!!! 
+        # __dict__ bypasses get_XXXXX and set_XXXXX !!)
         #
-        # (why? consistency is one reason... but more
-        # importantly, __dict__ bypasses get_XXXXX
-        # and set_XXXXX !!)
+        # also, we must use _data rather than getattr
+        # because getattr may by its very nature manipulate
+        # the data (for example, a date may be stored internally
+        # in one format, but set_thedate and get_thedate might
+        # use another format altogether.
+        #
+        # The idea is that _data is private : no one else
+        # messes with it, and therefore, it ENABLES rather
+        # than breaks encapsulation.
         
         for f in self._table.fields:
-            data = self._data[f.name] #getattr(self, f.name)
+            data = self._data[f.name] 
             import types
             if type(data) == types.InstanceType:
                 # this is mostly for FixedPoints
