@@ -77,11 +77,12 @@ class CheckoutApp(zikeshop.PublicApp):
             ('email','email'),
             ('address1','address'),
             ('city','city'),
-            ('stateCD','state'),
             ('postal','ZIP/postal code')]
         for item in required:
-            if self.input.get(item[0],"")=="":
+            if not self.input.get(item[0],""):
                 errs.append("The '%s' field is required." % item[1])
+        if (self.input.get("countryCD")=="US") and not self.input.get("stateCD"):
+            errs.append("A state is required for US orders")
         try:
             ed = zikebase.ObjectEditor(zikebase.Contact)
             ed.do("update")
