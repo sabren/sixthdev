@@ -39,6 +39,13 @@ def text(name, value, attrs=''):
     return '<input type="text" name="%s" %s value="%s">' \
            % (name, attrs, weblib.deNone(value))
 
+def password(name, value, attrs=''):
+    '''
+    Returns the HTML code for a text PASSWORD tag.
+    '''
+    return '<input type="password" name="%s" %s value="%s">' \
+           % (name, attrs, weblib.deNone(value))
+
 def hidden(name, value, attrs=''):
     '''
     Returns HTML code for a hidden input tag.
