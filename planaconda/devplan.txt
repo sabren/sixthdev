@@ -1,0 +1,44 @@
+
+                     ===========================
+                     PLANACONDA 1.0 PROJECT PLAN
+                     ===========================
+
+[0:00-2:00]: nodes
+    borrow old node class from zikeshop
+    implement front page 
+        # basically "view node" but special logic for root
+        # querying on status=project should be sufficient
+    view node
+        # same zebra template as front page (except title?) 
+        # show checkboxes for plate
+    add/edit node
+        # simple: just use current framework
+        # (sixthdev, not new platonic stuff - save that for later)
+        # show dropdown for parent
+        # change to parent needs to cascade down (zikeshop does this)
+    tree page
+        # show flattened tree with plate checkboxes and css depths
+    split node
+        # one form with copy of field for each side of
+        # the split, all in one zebra template
+        # redirect to view new original node, now with one child
+
+
+[2:00-3:00]: estimates and the plate
+    show plate:
+        # just give it its own template
+    estimates
+        # just more fields to fill in
+        # change in estimate cascades upward
+    alter plate: 
+        # take list of expected checkboxes
+        # grab all the corresponding objects 
+        # update each individually
+
+[3:00-4:00]: comments
+     comment list on node
+     sort comments by date
+     add comment to each side on split
+     add comment on update node
+     add comment directly from view node page
+
