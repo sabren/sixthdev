@@ -11,13 +11,10 @@ class Table(zdc.Object):
     ## constructor ##############################################
                        
     def __init__(self, dbc, name, rowid="ID"):
-        self.__super.__init__(self)
-
-        import zdc.drivers.DBAPI2Driver
-        self._data["driver"] = zdc.drivers.DBAPI2Driver.DBAPI2Driver(dbc)
-
+        self.__super.__init__(self)       
+        self._data["dbc"] = dbc
         self._data["name"] = name
-        self._data["fields"] = self.driver.fields(self.name)
+        self._data["fields"] = self.dbc.fields(self.name)
         self._data["rowid"] = rowid
 
     ## public methods ###########################################
@@ -25,13 +22,13 @@ class Table(zdc.Object):
     def new(self):
         return zdc.Record(self)
 
-    def select(self, wclause=None, **wdict):
+    def select(self, where=None, **wdict):
         """
         returns a list of record objects.. matching either a where
         clause (if supported) or dictionary
         """
-        ## get the matching records from the driver..
-        rows = apply (self.driver.select, (self, wclause), wdict)
+        ## get the matching records from the connection..
+        rows = apply(self.dbc.select, (self.name, where), wdict)
 
         ## loop through and build record objects
         res = []
@@ -72,11 +69,12 @@ class Table(zdc.Object):
         return recs[0]
 
     def delete(self, key):
-        self.driver.delete(self, {self.rowid:key})
+        self.dbc.delete(self.name, {self.rowid:key})
 
 
     def update(self, key, data):
-        self.driver.update(self, key, data)
+        self.dbc.update(self.name, key, data)
+
 
     def insert(self, data):
-        self.driver.insert(self, data)
+        self.dbc.insert(self.name, data)

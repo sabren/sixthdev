@@ -22,7 +22,7 @@ class DBAPI2Driver:
         self.dbc = dbc
 
 
-    def select(self, table, wclause=None, **wdict):
+    def select(self, tablename, wclause=None, **wdict):
         """
         returns a list of records for the given table..
         if a sql/prql where-clause or value dictionary is
@@ -35,24 +35,24 @@ class DBAPI2Driver:
         elif wdict:
             ## keywords specified: search for 'em
             for k in wdict.keys():
-                if not table.fields.has_key(k):
+                if not self.fields(tablename).has_key(k):
                     raise "no field called ", k
-            where = self._whereClause(table, wdict)
+            where = self._whereClause(tablename, wdict)
         else:
             ## sql where clause specified
             where = " WHERE " + wclause
         
         ## run the query..
-        sql = "SELECT * FROM " + table.name + where
+        sql = "SELECT * FROM " + tablename + where
         cur = self.dbc.cursor()
         cur.execute(sql)
         return cur.fetchall()
 
 
-    def update(self, table, key, data):
+    def update(self, tablename, key, data):
             
-        sql = "UPDATE " + table.name + " SET "
-        for f in table.fields:
+        sql = "UPDATE " + tablename + " SET "
+        for f in self.fields(tablename):
             #@TODO: allow support for datetimes!!!!
             # here's the issue: for some reason, MySQL gives me a
             # nasty warning... but I haven't been able to figure out
@@ -67,18 +67,19 @@ class DBAPI2Driver:
                 if not f.isGenerated:
                     if data.has_key(f.name):
                         sql = sql + f.name + "=" \
-                              + self._sqlQuote(table, f, data[f.name]) + ","
-        sql = sql[:-1] + " WHERE %s=%s" % (table.rowid, key)
+                              + self._sqlQuote(tablename, f.name, data[f.name]) + ","
+        #@TODO: unhardcode "ID" without coupling this to table..
+        sql = sql[:-1] + " WHERE ID=%s" % key
         cur = self.dbc.cursor()
         cur.execute(sql)
         
 
-    def insert(self, table, data):
-        sql = "INSERT INTO " + table.name + " ("
+    def insert(self, tablename, data):
+        sql = "INSERT INTO " + tablename + " ("
 
         vals = ''
         # .. and the fieldnames :
-        for f in table.fields:
+        for f in self.fields(tablename):
             # a hack to handle initialtimestamps:
             if f.name in data.insertStamps:  #<------ @TODO: fix!
                 sql = sql + f.name + ","
@@ -87,7 +88,7 @@ class DBAPI2Driver:
             elif not f.isGenerated:
                 sql = sql + f.name + ","
                 # let's do fields and values at once
-                vals = vals + self._sqlQuote(table, f, data[f.name]) + ","
+                vals = vals + self._sqlQuote(tablename, f.name, data[f.name]) + ","
 
         # chop off those last commas:
         sql = sql[:-1] + ") VALUES (" + vals[:-1] + ")"
@@ -104,48 +105,50 @@ class DBAPI2Driver:
         #
         # @TODO: generate our own autonumbers with max(ID)
        
-        if table.rowid is not None:
-            # first try the newer mysqldb scheme:
-            key = int(getattr(cur, "_insert_id", 0))
-            if not key:
-                try:
-                    # but if that didn't work, try the old way:
-                    key = int(self.dbc.insert_id())
-                except:
-                    # and if THAT didn't work, we're out of luck for now
-                    raise "don't yet know how to do autonumbers except MySQL"
+        #@TODO: UNHARDCODE "ID"
+        rowid="ID"
+        # first try the newer mysqldb scheme:
+        key = int(getattr(cur, "_insert_id", 0))
+        if not key:
+            try:
+                # but if that didn't work, try the old way:
+                key = int(self.dbc.insert_id())
+            except:
+                # and if THAT didn't work, we're out of luck for now
+                raise "don't yet know how to do autonumbers except MySQL"
 
-            # @TODO: this probably ought to just return the key?
-            data[table.rowid] = key
+        # @TODO: this probably ought to just return the key?
+        data[rowid] = key
 
 
 
         
 
-    def delete(self, table, wheredict):
+    def delete(self, tablename, wheredict):
         sql = "DELETE FROM %s %s" \
-              % (table.name, self._whereClause(table, wheredict))
+              % (tablename, self._whereClause(tablename, wheredict))
         cur = self.dbc.cursor()
         cur.execute(sql)
 
 
-    def _whereClause(self, table, where):
+    def _whereClause(self, tablename, where):
         """Given a dictionary of fieldname:value pairs,
         creates a SQL where clause"""
         res = ""      
         for f in where.keys():
             res = res + "AND (" + f + "=" + \
-                  self._sqlQuote(table, table.fields[f], where[f]) + ")"
+                  self._sqlQuote(tablename, f, where[f]) + ")"
 
         res = res[4:] # strip first AND
         return " WHERE (" + res + ")"
 
-    def _sqlQuote(self, table, field, value):
+    def _sqlQuote(self, tablename, fieldname, value):
         """Figures out whether to put '' around a value or not.
         field is an actual field object
         value is the value to quote, or None to quote the record's
         value for the field
         """
+        field = self.fields(tablename)[fieldname]
         if value is None:
             res = "NULL"
         

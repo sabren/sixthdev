@@ -1,7 +1,9 @@
 import unittest
 
 import sqlTestZdc, zdc
-dbc = zdc.Connection(sqlTestZdc.dbc)
+import zdc.drivers.DBAPI2Driver
+dbc = zdc.Connection(zdc.drivers.DBAPI2Driver.DBAPI2Driver(sqlTestZdc.dbc))
+
 
 from testIdxDict import *
 from testRecord import *
@@ -27,8 +29,8 @@ suites = {
 
 import zikebase.test
 import zikeshop.test
-#suites.update(zikebase.test.suites)
-#suites.update(zikeshop.test.suites)
+suites.update(zikebase.test.suites)
+suites.update(zikeshop.test.suites)
 
 
 #@TODO: why not have some sort of scheme where if suite=="ALL"

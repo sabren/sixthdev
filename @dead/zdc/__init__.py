@@ -94,7 +94,7 @@ def find(what, where=None, orderBy=None, _select=None):
         sql = sql + " WHERE %s " % where
     if orderBy:
         sql = sql + " ORDER BY %s " % orderBy
-    cur = what._table.dbc.cursor()
+    cur = what._table.driver.dbc.cursor()
     cur.execute(sql)
     res = []
     for row in cur.fetchall():
