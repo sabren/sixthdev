@@ -49,8 +49,11 @@ def runTest(name):
     # new style (literate)
     exec "from spec.%sTest import %sTest; TC=%sTest" \
          % (name, name, name)
-    print "%20s: " % name, 
-    SixthDayTestRunner().run(unittest.makeSuite(TC, "check_"))
+    print "%20s: " % name,
+    # testXYZ is python standard.. I was using check_...
+    suite = unittest.TestSuite([unittest.makeSuite(TC, "check"),
+                                unittest.makeSuite(TC, "test")])
+    SixthDayTestRunner().run(suite)
     
 def runSpecificTest():
     runTest(sys.argv[1])
