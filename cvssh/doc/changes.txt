@@ -1,0 +1,2 @@
+0123.2002 0.2 - replaced win32-only password prompt with 'cvssh login'
+0123.2002 0.1 - initial release
