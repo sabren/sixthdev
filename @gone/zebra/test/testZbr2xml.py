@@ -85,7 +85,7 @@ class Zbr2xmlTestCase(unittest.TestCase):
         zbr = zebra.trim(
             """
             {
-            My name is {name}.
+            My name is {?name?}.
             }
             """)
 
@@ -100,7 +100,7 @@ class Zbr2xmlTestCase(unittest.TestCase):
             """)
         actual = zebra.Z2X().translate(zbr)
         assert actual==goal, \
-               "doesn't cope well with {vars}:\n%s" % actual
+               "doesn't cope well with {?vars?}:\n%s" % actual
 
 
     
@@ -119,7 +119,7 @@ class Zbr2xmlTestCase(unittest.TestCase):
             """)
         actual = zebra.Z2X().translate(zbr)
         assert actual==goal, \
-               "doesn't cope well with {exprs}:\n%s" % actual
+               "doesn't cope well with {:exprs:}:\n%s" % actual
 
     def check_exec(self):
         zbr = zebra.trim(
@@ -139,7 +139,7 @@ class Zbr2xmlTestCase(unittest.TestCase):
             """)
         actual = zebra.Z2X().translate(zbr)
         assert actual==goal, \
-               "doesn't cope well with {exprs}:\n%s" % actual
+               "doesn't cope well with exec:\n%s" % actual
 
 
 
@@ -184,7 +184,7 @@ class Zbr2xmlTestCase(unittest.TestCase):
         zbr = zebra.trim(
             """
             * for people:
-                {name} is a nice person.
+                {?name?} is a nice person.
             * none:
                 No people here!
             """)

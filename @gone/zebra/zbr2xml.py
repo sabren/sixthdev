@@ -176,7 +176,7 @@ def deCurl(s):
     # that's because vars/exprs are single lines only!
     # which is helpful if you've got {'s in your template
     # eg, with javascript on an html page..
-    reVar = re.compile(r'(?!\\){(.*?)}')
+    reVar = re.compile(r'(?!\\){\?(.*?)\?}')
     reExpr = re.compile(r'(?!\\){:(.*?)(?!\\):}')
     res = s
     # do xpr first so we don't have to complicate reVar to look for :'s
