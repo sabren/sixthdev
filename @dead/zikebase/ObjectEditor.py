@@ -6,7 +6,7 @@ $Id$
 import weblib
 
 class ObjectEditor(weblib.Actor):
-    """A class for editing descendents of zdc.Object"""
+    """A class for editing descendents of zdc.Object"""  
 
     ## attributes ########################################
 
@@ -75,17 +75,24 @@ class ObjectEditor(weblib.Actor):
             for item in __expect__:
                 field, value = string.split(item, ";")
                 expected[field] = value
-                
+
+        errs = []
         for field in self.object.getEditableAttrs():
-            if self.input.has_key(field):
-                setattr(self.object, field, self.input[field])
-            elif expected.has_key(field):
-                setattr(self.object, field, expected[field])
+            try:
+                if self.input.has_key(field):
+                    setattr(self.object, field, self.input[field])
+                elif expected.has_key(field):
+                    setattr(self.object, field, expected[field])
+            except (ValueError, TypeError), err:
+                errs.append(str(err))
 
         #@TODO: get rid of editable tuples, or add __expect__
         for field in self.object.getEditableTuples():
             if self.input.has_key(field):
                 setattr(self.object, field, self.tuplize(self.input[field]))
+
+        if errs:
+            raise ValueError, errs
 
     def act_save(self):
         '''
@@ -93,4 +100,3 @@ class ObjectEditor(weblib.Actor):
         '''
         self.act_update()
         self.object.save()
-
