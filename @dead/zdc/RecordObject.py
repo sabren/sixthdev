@@ -1,8 +1,7 @@
 """
 zdc.RecordObject - a simple Object that uses only one record for its data
-
-$Id$
 """
+__ver__="$Id$"
 
 import zdc.Object
 
