@@ -45,6 +45,7 @@ def trim(s):
     return string.join(lines, "\n")
 
 
+
 #### indent() for the opposite of trim ##########################
 
 def indent(s, depth=1, indenter="    "):
@@ -63,6 +64,17 @@ def indent(s, depth=1, indenter="    "):
         
     return string.join(lines, "\n") + trailer
    
+
+#### deNone() replaces None with the replacement string ##########
+
+def deNone(s, replacement=''):
+    # if s won't be zero, you might as well use:
+    # "s or ''" instead of "deNone(s)"
+    if s is None:
+        return replacement
+    else:
+        return s
+    
 
 
 ### unique identifier generator, for sessions, etc #######
@@ -170,6 +182,6 @@ from Perm import Perm
 # we put it in a seperate module so that it would be easy to
 # customize.
 
-from config import pool
+from config import *
 
 
