@@ -9,7 +9,7 @@ There's no need to fill out this form a second time!<br>
 
 Enter your <b>billing</b> information in the area below.
 
-<form action="user.py?action=create" method="post">
+<form action="user.py" method="post">
 <table border="0">
 * include frm_contact:
 
@@ -36,5 +36,6 @@ Enter your <b>billing</b> information in the area below.
 </table>
 
 <tr><td colspan="2">&nbsp;</td></tr>
+<input type="hidden" name="action" value="create">
 <input type="submit" value="submit">
 </form>
