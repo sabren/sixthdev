@@ -3,24 +3,52 @@
 #
 
 import unittest
-from weblib.Auth import Auth
+import weblib
+import string
+from ziketools import trim                                                         
 
 class AuthTestCase(unittest.TestCase):
 
     def setUp(self):
         pass
-        #self.auth = Auth()
+
+
+    def check_engine(self):
+        auth = weblib.Auth()
+        assert auth.engine==weblib, "auth.engine doesn't default to weblib. :/"
+        assert weblib.auth is auth, "auth doesn't register itself with weblib"
+
+
+    def check_check(self):
+        myauth = weblib.Auth()
+        engine = weblib.Engine(request=weblib.Request(environ={"PATH_INFO":"xxx"}),
+                            auth=myauth, script="import weblib; weblib.auth.check()" )
+        engine.run()
+
+        assert string.find(engine.response.buffer, weblib.Auth.PLEASELOGIN), \
+               "check doesn't show login screen"
         
-    def nocheck_Check(self):
-        pass
+
+    def check_prompt(self):
+        engine = weblib.Engine(script=trim(
+            """
+            from weblib import auth
+            auth.check()
+            print "hello"
+            """))
+        engine.run()
+
+        print "XXXXXXXXXXXXXXXX\n", engine.response.buffer
+        assert string.find(engine.response.buffer, engine.auth.PLEASELOGIN) > -1, \
+               "doesn't show prompt!"
+
+
+
 
     def nocheck_Login(self):
         pass
 
     def nocheck_Logout(self):
-        pass
-
-    def nocheck_Prompt(self):
         pass
 
     def nocheck_Fetch(self):

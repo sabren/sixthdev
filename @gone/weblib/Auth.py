@@ -7,21 +7,21 @@ Auth.py - generic authentication framework for python cgi.
 
 import weblib
 
-## messages ###################################
-
-LOGINFAILED = 'Login failed.'
-PLEASELOGIN = 'Please log in.'
-
 
 ## Auth class #################################
 
 class Auth:
+
+    LOGINFAILED = 'Login failed.'
+    PLEASELOGIN = 'Please log in.'
 
     ## constructor #############################
     
     def __init__(self, authKey=None, engine=weblib):
 
         self.engine = engine
+        if engine is weblib:
+            weblib.auth = self
         
         if authKey:
             self.isLoggedIn = 1
@@ -36,19 +36,19 @@ class Auth:
     def check(self):
         """Makes sure the user is authenticated. If not, prompts for credentials."""
         
-        if request.querystring.has_key('auth_logout_flag'):
+        if self.engine.request.query.has_key('auth_logout_flag'):
             self.logout()
 
         if not self.isLoggedIn:
-            if request.querystring.has_key('auth_check_flag'):
+            if self.engine.request.query.has_key('auth_check_flag'):
                 if self._attemptLogin():
                     self.onLogin() # they're in!
                 else:
-                    self.prompt(LOGINFAILED, self._getAction(), self._getHidden())
-                    response.end()
+                    self.prompt(Auth.LOGINFAILED, self._getAction(), self._getHidden())
+                    self.engine.response.end()
             else:
-                self.prompt(PLEASELOGIN, self._getAction(), self._getHidden())
-                response.end()
+                self.prompt(Auth.PLEASELOGIN, self._getAction(), self._getHidden())
+                self.engine.response.end()
 
         else:
             self.fetch(self.key)
@@ -93,7 +93,7 @@ class Auth:
         """This should show an HTML prompt and call response.end().
         You should overwrite this!"""
 
-        response.write("""
+        self.engine.response.write("""
         <h1>%s</h1>
         <form action="%s" method="post">
         username: <input type="text" name="auth_name"><br>
@@ -103,7 +103,7 @@ class Auth:
         </form>
         """ % (message, action, hidden))
         
-        response.end()
+        self.engine.response.end()
 
 
     def transform(self, field, value):
@@ -158,17 +158,21 @@ class Auth:
         import weblib
 
         # start with a basic url (no query string)
-        res = request.environ["PATH_INFO"]
+        # PATH_INFO MUST be here. if it's not, you need to build it
+        # into the environ for the current Engine.
+        # can't even use a blank as default, because it'll
+        # screw up in some browsers.. (eg, lynx)
+        res = self.engine.request.environ["PATH_INFO"]
 
         # add in a query string of our own:
         res = res + "?auth_check_flag=1"
 
-        for item in request.querystring.keys():
+        for item in self.engine.request.query.keys():
             if item[:5] == "auth_":
                 pass # IGNORE old auth stuff
             else:
                 res = res + "&" + weblib.urlEncode(item) + \
-                      "=" + weblib.urlEncode(request.querystring[item])
+                      "=" + weblib.urlEncode(self.engine.request.query[item])
         
         return res
 
@@ -183,13 +187,13 @@ class Auth:
         """
         res = ""
 
-        for item in request.form.keys():  # form really ought to be an IdxDict..
+        for item in self.engine.request.form.keys():  # form really ought to be an IdxDict..
             if item[:5] == "auth_":
                 pass # Ignore auth stuff here, too
             else:
                 res = res + '<input type="hidden" name="' + \
                       weblib.htmlEncode(item) + '" value="' + \
-                      weblib.htmlEncode(request.form[item]) + \
+                      weblib.htmlEncode(self.engine.request.form[item]) + \
                       '">\n'
 
         return res
