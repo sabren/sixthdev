@@ -67,11 +67,11 @@ class PublicPagesTestCase(unittest.TestCase):
         assert eng.result == eng.SUCCESS, \
                "the category script broke: \n%s" % eng.error
 
-        assert len(eng.locals["model"].products) == 2, \
+        assert len(eng.locals["model"]["products"]) == 2, \
                "wrong number of products (%s) shown on category page" \
                % eng.locals["model"].products
 
-        assert len(eng.locals["model"].children) == 1, \
+        assert len(eng.locals["model"]["children"]) == 1, \
                "wrong number of children (%s) shown on category page" \
                % eng.locals["model"].children
 
