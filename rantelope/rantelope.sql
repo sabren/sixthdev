@@ -17,5 +17,8 @@ CREATE TABLE rnt_channel (
     title varchar(255),
     link varchar(255),
     rssfile varchar(32),
+    htmlfile varchar(32),
     description text
+    template text,
+    path enum('./out/')
 );

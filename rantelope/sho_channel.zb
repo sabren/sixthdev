@@ -13,7 +13,9 @@
   <tr><th>link:</th>
       <td>{:link:}</td></tr>
   <tr><th>RSS output file:</th>
-      <td><a href="{:rssfile:}">{:rssfile:}</a></td></tr>
+      <td><a href="{:path:}{:rssfile:}">{:rssfile:}</a></td></tr>
+  <tr><th>HTML output file:</th>
+      <td><a href="{:path:}{:htmlfile:}">{:htmlfile:}</a></td></tr>
   <tr><th colspan="2">description:</th></tr>
   <tr><td colspan="2">{:description:}</td></tr>
 </table>

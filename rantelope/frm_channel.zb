@@ -29,9 +29,16 @@
   <tr><td>RSS output file (must end in .rss):</td>
       <td>{:html.text("rssfile",rssfile):}</td></tr>
 
+  <tr><td>HTML output file (must end in .html):</td>
+      <td>{:html.text("htmlfile",htmlfile):}</td></tr>
+
   <tr><td colspan="2">description:</td></tr>
   <tr><td colspan="2"><textarea name="description" 
-          rows="10" cols="60">{:description:}</textarea></td></tr>
+          rows="4" cols="70">{:description:}</textarea></td></tr>
+
+  <tr><td colspan="2">XLST template:</td></tr>
+  <tr><td colspan="2"><textarea name="template" 
+          rows="10" cols="70">{:template:}</textarea></td></tr>
 
 </table>
 
