@@ -56,7 +56,7 @@ class MySQLStorage(Storage):
         return self.fetch(table, id)
 
     def _getInsertID(self):
-        return self.cur.row_id
+        return self.cur._insert_id
 
     def _update(self, table, **row):
 
