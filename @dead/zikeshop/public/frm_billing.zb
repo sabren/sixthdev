@@ -10,7 +10,10 @@
 * include frm_contact;
 
 <tr><td colspan="2">
-    <input type="checkbox" name="shipToBilling" value="1" checked="checked">
+    * if shipToBilling:
+        <input type="checkbox" name="shipToBilling" value="1" checked="checked">
+    * el:
+        <input type="checkbox" name="shipToBilling" value="1">
     Use this as your <b>shipping</b> address, too.</td></tr>
 
 </table>
