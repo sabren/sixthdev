@@ -79,7 +79,11 @@ class ProductTestCase(unittest.TestCase):
         nodes = prod.q_nodes()
         assert nodes[0]["name"] == "abc" and nodes[1]["name"] == "xyz", \
                "getNodes broke."
-        
+
+
+    def check_price(self):
+        assert isinstance(zikeshop.Product().price, zikeshop.FixedPoint), \
+               "price is wrong type!"
        
 
     def check_validation(self):
