@@ -48,8 +48,14 @@ class StrongboxTest(unittest.TestCase):
                 self.value = value
         class Subject(Strongbox):
             name = attr(str)
-        obs = Observer()
+
+        # first, try with no observers:
         sub = Subject()
+        sub.name='wilbur'
+        assert sub.name=='wilbur'
+
+        # now add an observer:
+        obs = Observer()
         sub.attach(obs, onset="update")
         sub.name = "fred"
         assert obs.updated, "observer should have been updated on setattr"
