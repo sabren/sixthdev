@@ -17,7 +17,7 @@ class DateTime:
         Construct a DateTime from a string representation.
         """
         s = datestr
-        if type(s) != type(""):
+        if type(s) != str:
             raise TypeError, "usage: DateTime(string)"
         if s == "now":
             s = "%04i-%02i-%02i %02i:%02i:%02i" \

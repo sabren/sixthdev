@@ -20,7 +20,11 @@ class Date(DateTime):
         self.hh = self.mm = self.ss = 0
 
     def toSQL(self):
-        return "%i-%i-%i" % (self.y, self.m, self.d)
+        res = "%i-%i-%i" % (self.y, self.m, self.d)
+        if res =="0-0-0":
+            return ''
+        else:
+            return res
 
     def toUS(self):
         return "%02i/%02i/%04i" % (self.m, self.d, self.y)        
