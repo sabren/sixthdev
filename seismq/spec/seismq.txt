@@ -1,0 +1,41 @@
+
+h1. seismq: sei's messaging queue
+
+p. This module provides a simple message queue based on SQLite.
+
+h2. opening the queue
+
+p. The open() method opens the queue database, 
+   creating it if necessary:
+
+bc[python]. 
+    >>> import seismq
+    >>> mq = seismq.open('test/mqlite.mq')
+
+
+h2. sending a message
+
+p. Messages are simple strings for now.
+   @TODO: pickle arbitrary arguments for messages.
+
+bc[python].
+    >>> mq.send('genhttpconf')
+
+
+h2. taking messages
+
+p. The take() method returns a list of all matching 
+   messages and removes them from the queue.
+
+bc[python].
+    >>> mq.take('genhttpconf')
+    ['genhttpconf']
+    >>> mq.take('genhttpconf')
+    []
+
+
+h2. closing the queue
+
+bc[python].
+    >>> mq.close()
+
