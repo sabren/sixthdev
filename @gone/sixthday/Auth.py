@@ -249,11 +249,13 @@ class Auth:
                               weblib.htmlEncode(item) + '" value="' + \
                               weblib.htmlEncode(subitem) + \
                               '">\n'
-                else:
+                elif item != 'weblib.Sess': #@TODO: is this right?
                     # only one value:
-                    res = res + '<input type="hidden" name="' + \
-                          weblib.htmlEncode(item) + '" value="' + \
-                          weblib.htmlEncode(self._sess._request[item]) + \
-                          '">\n'
+                    res += '<input type="hidden" name="'
+                    res += weblib.htmlEncode(item) + '" value="'
+                    res += weblib.htmlEncode(str(self._sess._request[item]))
+                    res += '">\n'
+                else:
+                    pass
 
         return res
