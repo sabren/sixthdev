@@ -155,20 +155,30 @@ class ClerkTest(unittest.TestCase):
         class User(Strongbox):
             ID = attr(long)
             username = attr(str)
+            domains = linkset(forward)
         class Domain(Strongbox):
             ID = attr(long)
             domain = attr(str)
             user = link(User)
+        User.__attrs__["domains"].type = Domain
         dbMap = {
             User:"user",
+            User.__attrs__["domains"]: (Domain, "userID"),
             Domain:"domain",
             Domain.__attrs__["user"]: (User, "userID"),
             }
-
-        
+       
         clerk = Clerk(MockStorage(), dbMap)
         u = clerk.store(User(username="ftempy"))
+        u = clerk.match(User,username="ftempy")[0]
         d = clerk.store(Domain(domain="ftempy.com", user=u))
         assert d.user, "didn't follow link before fetch"
-        d = clerk.fetch(Domain, 1)
+        d = clerk.match(Domain, domain="ftempy.com")[0]
+
+        # the bug was here: it only happened if User had .domains
+        # I think because it was a linkset, and the linkset had
+        # an injector. Fixed by breaking the test for
+        # hasInjectors out of an "and" and into the body of the
+        # if block, in Clerk.store()
         assert d.user, "didn't follow link after fetch"
+        assert d.user.ID == u.ID

@@ -29,10 +29,13 @@ class Clerk:
         # we need to save links first, because we depend on them:
         for name, link in klass.__get_links__():
             ref = getattr(obj, name)
-            if (ref) and (not self._hasInjectors(ref)):
-                robj = self.store(ref)
+            if (ref):
+                if (not self._hasInjectors(ref)):
+                    # no injectors, so live data.
+                    # @TODO: set up some kind of "isDirty" flag
+                    ref = self.store(ref)
                 fclass, column = self._unmap_link(klass, link, name)
-                d[column] = robj.ID
+                d[column] = ref.ID
 
         # now we update obj because of db-generated values
         # (such as autonumbers or timestamps)
