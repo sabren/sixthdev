@@ -22,7 +22,17 @@ class Auth:
 
     ## constructor #############################
     
-    def __init__(self, engine=weblib):
+    def __init__(self, users=None, engine=weblib):
+        """
+        usage:
+           auth=Auth()
+        or:
+           auth=Auth({"user1":"password1","user2":"password2"...})
+        """
+        if users:
+            self.users = users
+        else:
+            self.users = {"username":"password"}
         self.engine = engine
         self.engine.auth = self  #@TODO: ???????
 
@@ -114,9 +124,9 @@ class Auth:
         # example implementation for testing, based on form below:
 
         authKey = None
-        if (dict.get("username") == "username") \
-           and (dict.get("password") == "password"):
-            authKey = 1 # user's key = 1
+        if (dict.get("username") in self.users.keys()) \
+           and (dict.get("password") == self.users[dict["username"]]):
+            authKey = dict["username"]
         return authKey
 
 
