@@ -2,6 +2,13 @@
 Misc handy routines
 """
 
+def randpass(length=5):
+    okay = "abcdefghijkmnopqrstuvwxyz2345678923456789"
+    res = ""
+    for i in range(length+1):
+        res += okay[whrandom.randrange(0, len(okay))]
+        return res
+
 
 def sendmail(mail):
     import os
