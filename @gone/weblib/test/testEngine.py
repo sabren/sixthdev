@@ -177,7 +177,7 @@ class EngineTestCase(unittest.TestCase):
 
     def check_cgi(self):
         import os
-        actual = os.popen('python -c"import weblib; print \'hello\'"').read()
+        actual = os.popen('python -c"import weblib.script; print \'hello\'"').read()
         target = trim(
             """
             Content-type: text/html

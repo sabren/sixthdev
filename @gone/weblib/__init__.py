@@ -36,6 +36,7 @@ import htmlentitydefs
 _entitymap = {}
 for i in htmlentitydefs.entitydefs.keys():
     _entitymap[htmlentitydefs.entitydefs[i]] = i
+del i
 
 
 def htmlEncode(s):
@@ -83,20 +84,25 @@ def urlDecode(what):
     return res
 
 
+## sub-modules ################################################
 
-### and now, the herd of singletons ##########################
-
-# In all of these cases, importing * imports a class with the
+# In all of these cases, we importsa class with the
 # same name as the module. This means the module basically
 # disappears, and all the user sees is that weblib has
 # a bunch of classes defined.
 
-from Engine import *
-from Request import *
-from Response import *
-from Sess import *
-from Auth import *
-from Perm import *
+from Engine import Engine
+from Request import Request
+from Response import Response
+from Sess import Sess
+from Auth import Auth
+from Perm import Perm
+
+
+# note that the actual singletons (request, response, etc)
+# are not created unless you do "import weblib.script", or
+# create an Engine.
+
 
 # the config module is different. It defines a SessPool
 # object called pool... This is why we don't import SessPool
@@ -107,37 +113,4 @@ from Perm import *
 
 from config import pool
 
-# We don't want to define the singletons more than once, though.
-# Otherwise, we'd lose session data and waste time everytime some
-# subfuction somewhere said "import weblib"... So, we check for
-# __weblib__ in the global namespace first.
 
-import __builtin__
-
-if not __builtin__.__dict__.get("__weblib__"):
-
-    class CgiResponse(Response):
-        """In CGI-mode, we want to insert headers automatically..."""
-        
-        def __init__(self):
-            import sys
-            Response.__init__(self, out=sys.stdout)
-            sys.stdout = self
-
-
-        def __del__(self):
-            self.flush()
-            import sys
-            sys.stdout = self.out
-
-    import sys
-    stdout = sys.stdout
-
-    request = Request()
-    response = CgiResponse()
-
-    sess = Sess(pool)
-    auth = Auth()
-    perm = Perm()
-
-    __builtin__.__weblib__ = 1
