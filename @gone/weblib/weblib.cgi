@@ -51,13 +51,13 @@ if os.path.exists(whichfile):
     # to run the setup once.
     eng.execute(open(whichfile))
 
+
 ## run the script ################################################
 
 # eng.result is None if nothing's been run yet
 if (eng.result is None) or (eng.result == eng.SUCCESS):
     whichfile = os.environ["PATH_TRANSLATED"]
     eng.execute(open(whichfile))
-
 
 ## close down shop and show the results  ########################
 eng.stop()
@@ -104,7 +104,17 @@ else:
         print '<li>cookie: %s</li>' % eng.request.cookie
         print '</ul>'
 
-
+	print '<b>session data:</b><br>'
+        print '<ul>'
+	for item in eng.sess.keys():
+            print '<li>', item, ': '
+            try:
+               print eng.sess[item]
+            except:
+               print '(can\'t unpickle)'
+	    print '</li>'
+        print '</ul>'
+	
         print "<b>script output:</b>"
         print '<pre class="output">' + \
               weblib.htmlEncode(eng.response.getHeaders()) + \
