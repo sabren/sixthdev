@@ -10,6 +10,10 @@ class CheckoutApp(zikeshop.PublicApp):
 
     ## Actor methods ############################
 
+    def __init__(self, cart, ds, sess, input=None):
+        self.__super.__init__(self, cart, ds, input)
+        self.sess = sess
+
     def enter(self):
         self.__super.enter(self)
 
@@ -21,7 +25,7 @@ class CheckoutApp(zikeshop.PublicApp):
                    "Can't check out because cart is empty."
             
         # internal data (basically a bunch of dicts until checkout)
-        self.data = weblib.sess.get("__checkout__",{})
+        self.data = self.sess.get("__checkout__",{})
         self.billData = self.data.get("billData",
                                       zikebase.Contact(self.ds)._data.copy())
         self.shipData = self.data.get("shipData",
@@ -38,7 +42,7 @@ class CheckoutApp(zikeshop.PublicApp):
         self.data["shipData"] = self.shipData
         self.data["cardData"] = self.cardData
         self.data["comments"] = self.comments
-        weblib.sess["__checkout__"] = self.data
+        self.sess["__checkout__"] = self.data
 
 
     def act_(self):
@@ -216,9 +220,9 @@ class CheckoutApp(zikeshop.PublicApp):
         zebra.show("dsp_receipt", self.model)
 
         # clear the session info: @TODO - this is duplicated above.
-        self.billData = zikebase.Contact()._data.copy()
-        self.shipData = zikebase.Contact()._data.copy()
-        self.cardData = zikeshop.Card()._data.copy()
+        self.billData = zikebase.Contact(self.ds)._data.copy()
+        self.shipData = zikebase.Contact(self.ds)._data.copy()
+        self.cardData = zikeshop.Card(self.ds)._data.copy()
         self.comments = ""
         self.cart.empty()
 
@@ -243,9 +247,12 @@ class CheckoutApp(zikeshop.PublicApp):
 
         #@TODO: update test suite to ensure cardID <> 0 if it shouldn't be.
         #@TODO: this was just yanked from confirm area..
-        bill = zikebase.Contact(); bill._data = self.billData; bill.userID = 0; bill.save()
-        ship = zikebase.Contact(); ship._data = self.shipData; ship.userID = 0; ship.save()
-        card = zikeshop.Card(); card._data = self.cardData; card.customerID= 0; card.save()
+        bill = zikebase.Contact(self.ds);
+        bill._data = self.billData; bill.userID = 0; bill.save()
+        ship = zikebase.Contact(self.ds);
+        ship._data = self.shipData; ship.userID = 0; ship.save()
+        card = zikeshop.Card(self.ds);
+        card._data = self.cardData; card.customerID= 0; card.save()
 
         sale.cardID = card.ID
         sale.bill_addressID = bill.ID
@@ -293,5 +300,5 @@ class CheckoutApp(zikeshop.PublicApp):
         
         
 if __name__=="__main__":
-    CheckoutApp(zikeshop.Cart(sess), ds).act()
+    CheckoutApp(zikeshop.Cart(sess), ds, sess).act()
     sess.stop()

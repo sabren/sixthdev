@@ -7,8 +7,8 @@ import zikeshop
 class CartApp(zikeshop.PublicApp):
     __super = zikeshop.PublicApp
 
-    def __init__(self, cart):
-        self.__super.__init__(self, cart)
+    def __init__(self, cart, ds, input=None):
+        self.__super.__init__(self, cart, ds, input)
         self.silent = 0
         self.consult("lib_link")
 
@@ -20,19 +20,21 @@ class CartApp(zikeshop.PublicApp):
         productID = self.input.get("productID")
         assert productID, "Don't know what to add."
 
-        prod = zikeshop.Product(ID=productID)
+        prod = zikeshop.Product(self.ds, ID=productID)
         #@TODO: FIX THIS HORRIBLE MESS:
         if prod._data["class"] == "style":
-            style = zikeshop.Style(ID=productID)
+            style = zikeshop.Style(self.ds, ID=productID)
             label = str(style)
         else:
             label = str(prod)
         
         if prod._data["class"] == "product":
-            link = "shop.py?action=show_product&code=%s" % prod.code
+            link = "shop.py?action=show_product&code=%s" \
+                   % prod.code
         else:
             # it's a style:
-            link  = "shop.py?action=show_product&code=%s" % (style.product.code)
+            link  = "shop.py?action=show_product&code=%s" \
+                    % (style.product.code)
 
         extra={"ID":prod.ID, "weight": prod.weight}
         quantity = self.input.get("quantity")
@@ -69,5 +71,5 @@ class CartApp(zikeshop.PublicApp):
 
 
 if __name__=="__main__":
-    CartApp(zikeshop.Cart(sess)).act()
+    CartApp(zikeshop.Cart(sess), ds).act()
     sess.stop()

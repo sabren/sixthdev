@@ -35,5 +35,5 @@ class ShopApp(zikeshop.PublicApp):
 
 
 if __name__=="__main__":
-    ShopApp(zikeshop.Cart(sess), self.ds).act()
+    ShopApp(zikeshop.Cart(sess), ds).act()
     sess.stop()
