@@ -22,12 +22,12 @@ class CategoryTestCase(unittest.TestCase):
         self.cur.execute("DELETE FROM shop_product")
         self.cur.execute("DELETE FROM shop_product_node")
         self.cur.execute("INSERT INTO base_node (name) values ('whatever')")
-        self.cur.execute("INSERT INTO shop_product (code, name, siteID) "
-                         "VALUES ('a', 'ant', 1)")
-        self.cur.execute("INSERT INTO shop_product (code, name, siteID) "
-                         "VALUES ('b', 'box', 1)")
-        self.cur.execute("INSERT INTO shop_product (code, name, siteID) "
-                         "VALUES ('c', 'car', 2)")
+        self.cur.execute("INSERT INTO shop_product (code, name) "
+                         "VALUES ('a', 'ant')")
+        self.cur.execute("INSERT INTO shop_product (code, name) "
+                         "VALUES ('b', 'box')")
+        self.cur.execute("INSERT INTO shop_product (code, name) "
+                         "VALUES ('c', 'car')")
         self.cur.execute("INSERT INTO shop_product_node (productID, nodeID) "
                          "VALUES (1, 1)")
         self.cur.execute("INSERT INTO shop_product_node (productID, nodeID) "
@@ -35,17 +35,8 @@ class CategoryTestCase(unittest.TestCase):
         self.cur.execute("INSERT INTO shop_product_node (productID, nodeID) "
                          "VALUES (3, 1)")
 
-        zikeshop.siteID = 1
         prods = zikeshop.Category(ID=1).products
-        assert len(prods) == 2, \
+        assert len(prods) == 3, \
                "wrong number of categories (%s) shown on category page" \
                % len(prods)
-
-
-        zikeshop.siteID = 2
-        prods = zikeshop.Category(ID=1).products
-        assert len(prods) == 1, \
-               "wrong number of categories (%s) shown on category page" \
-               % len(prods)
-
 

@@ -5,8 +5,7 @@
 import zdc, zikeshop, weblib
 
 cur = zikeshop.dbc.cursor()
-sql ="SELECT ID, path FROM base_node where siteID=%s order by path" \
-      % weblib.auth.user.siteID
+sql ="SELECT ID, path FROM base_node order by path"
 cur.execute(sql)
 
 model = {

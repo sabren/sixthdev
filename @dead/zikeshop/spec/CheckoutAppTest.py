@@ -34,7 +34,6 @@ class CheckoutAppTestCase(unittest.TestCase):
         prod = zikeshop.Product()
         prod.name='coconut'
         prod.code='coco'
-        prod.siteID = zikeshop.siteID
         prod.save()
 
         # make a cart

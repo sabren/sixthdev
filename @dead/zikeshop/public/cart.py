@@ -21,8 +21,6 @@ class CartApp(zikeshop.PublicApp):
         assert productID, "Don't know what to add."
 
         prod = zikeshop.Product(ID=productID)
-        assert prod.siteID == zikeshop.siteID, \
-               "Invalid product"
 
         label = prod.name
         link  = "product/%s" % (prod.code)

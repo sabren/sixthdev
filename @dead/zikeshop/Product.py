@@ -36,6 +36,10 @@ class Product(zdc.RecordObject):
     def _new(self):
         self.__super._new(self)
         self._data['class'] = "product"
+        self.code = ""
+        self.name = ""
+        self.descript = ""
+        self.warn = 0
         self.price = 0
         self.cost = 0
         self.retail = 0
@@ -98,8 +102,8 @@ class Product(zdc.RecordObject):
 
         # validation logic:
         sql = "SELECT name FROM shop_product " \
-              "WHERE code='%s' AND siteID=%i " \
-              % (self.code, zikeshop.siteID)
+              "WHERE code='%s' " \
+              % (self.code)
         if self.ID:
             sql = sql + "AND ID != %i" % int(self.ID)
 
@@ -144,7 +148,6 @@ class Product(zdc.RecordObject):
             self.get_picture()
             self._pic.picture = blob.value
             import zikeshop
-            self._pic.siteID = zikeshop.siteID
             self._pic.type = blob.type
 
     def get_picture(self):

@@ -6,25 +6,7 @@ zikebase.load("AdminApp")
 
 class ZikeShopAdminApp(zikebase.AdminApp):
     __super = zikebase.AdminApp
-
-    def enter(self):
-        self.__super.enter(self)
-        #@TODO: this is a big mistake:
-        weblib.auth.user.siteID=1
-        
-
-    def objectEdit(self):
-        #@TODO: clean this siteID junk up
-        self.input["siteID"] = weblib.auth.user.siteID
-        self.__super.objectEdit(self)
-
-    def act_save(self):
-        #@TODO: get rid of siteID crap
-        import zikeshop
-        zikeshop.siteID = weblib.auth.user.siteID
-        self.__super.save(self)
-
-
+       
     ## home page ########################################
 
     def act_(self):
@@ -63,6 +45,8 @@ class ZikeShopAdminApp(zikebase.AdminApp):
     def list_sale(self):
         self.model = self.input
         self.consult("mdl_sale")
+        self.model["includeFilled"]=0
+        self.model["isSearch"]=0
         zebra.show("lst_sale", self.model)
 
     ## inventory stuff #################################
@@ -83,8 +67,7 @@ class ZikeShopAdminApp(zikebase.AdminApp):
         res = None
         import zikeshop
         if what == "category":
-            import zikebase
-            res = zikebase.Node
+            res = zikeshop.Category
         elif what=="product":
             res = zikeshop.Product
         elif what=="sale":

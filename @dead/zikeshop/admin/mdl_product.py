@@ -1,11 +1,10 @@
 import zikeshop, weblib, zdc
-store = zikeshop.Store(ID=weblib.auth.user.siteID)
+store = zikeshop.Store()
 
 model={}
 
 #@TODO: fix this while nodeID stuff..
 if locals().get("nodeID"):
-    zikeshop.siteID = weblib.auth.user.siteID #@TODO: fix this!
 
     # @TODO: better way to handle products in no category
     nodeID = int(nodeID)

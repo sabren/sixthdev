@@ -35,9 +35,12 @@ class Store(zdc.RecordObject):
 
     def get_products(self):
         cur = zikeshop.dbc.cursor()
-        sql = "SELECT ID FROM shop_product " \
-              "WHERE siteID=%i and class='product' ORDER BY code" \
-              % self.siteID
+        sql =\
+            """
+            SELECT ID
+            FROM shop_product
+            WHERE class='product' ORDER BY code
+            """
         cur.execute(sql)
 
         # @TODO: this is horribly inefficient!

@@ -21,10 +21,6 @@ sale = zikeshop.Sale(ID=saleID)
 #except:
 #    assert 0, "invalid saleID"
 
-assert sale.siteID == weblib.auth.user.siteID, \
-       "this is not your sale to view."
-
-
 cur = zikeshop.dbc.cursor()
 
 

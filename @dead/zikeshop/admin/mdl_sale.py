@@ -17,20 +17,20 @@ name = weblib.request.get("name", "")
 isSearch = weblib.request.get("is_search")
 
 
-sql = """
-   SELECT s.ID, s.tsSold, bc.fname, bc.lname, s.subtotal, s.total 
-   FROM shop_sale s
+sql =\
+    """
+    SELECT s.ID, s.tsSold, bc.fname, bc.lname, s.subtotal, s.total 
+    FROM shop_sale s
         LEFT JOIN base_contact bc on s.bill_addressID=bc.ID
         LEFT JOIN base_contact sc on s.ship_addressID=sc.ID
-   WHERE s.siteID=%i AND 
-     """ % weblib.auth.user.siteID
-
+    WHERE 
+    """ 
 
 ## build the where clause
 
-if (dmin): sql = sql + "s.tsSold >= '%s' AND " % dmin
-if (dmax): sql = sql + "s.tsSold <= '%s' AND " % dmax
-if (name): sql = sql + "(bc.fname LIKE '%%%s%%' OR " \
+if (dmin): sql = sql + " s.tsSold >= '%s' AND " % dmin
+if (dmax): sql = sql + " s.tsSold <= '%s' AND " % dmax
+if (name): sql = sql + " (bc.fname LIKE '%%%s%%' OR " \
                  " bc.lname LIKE '%%%s%%' OR " \
                  " sc.fname LIKE '%%%s%%' OR " \
                  " sc.lname LIKE '%%%s%%') AND " \

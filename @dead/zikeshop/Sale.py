@@ -29,9 +29,6 @@ class Sale(zdc.RecordObject):
         self.adjustment = 0
         self.total = 0
 
-        self.siteID = 0 #@TODO: remove this!
-        
-
 
     #@TODO: replace all this crap with generic stuff from ZDC...
     def get_shipAddress(self):

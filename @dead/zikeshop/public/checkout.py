@@ -4,9 +4,6 @@ checkout process for the cart (records the sale)
 __ver__="$Id$"
 
 import zikeshop
-zikeshop.siteID = 1 #@TODO: fix this!!!!!!!
-
-
 
 class CheckoutApp(zikeshop.PublicApp):
     __super = zikeshop.PublicApp
@@ -133,7 +130,7 @@ class CheckoutApp(zikeshop.PublicApp):
 
     def act_checkout(self):
         sale = zikeshop.Sale()
-        shop = zikeshop.Store(ID=zikeshop.siteID)
+        shop = zikeshop.Store()
 
         #@TODO: update test suite to ensure cardID <> 0 if it shouldn't be.
         sale.cardID = self.data.get('cardID', 0)

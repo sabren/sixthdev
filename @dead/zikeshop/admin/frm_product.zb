@@ -24,8 +24,7 @@ categories:<br>
 * exec:
     #@TODO: fix dis!
     from selectnode import selectnode
-    #@TODO: evil zebra bracket thing..
-    values = map(lambda node: node.get("ID"), scope.get("nodes"))
+    values = map(lambda node: node.get("ID"), scope.get("nodes",[]))
     zres = zres + selectnode("nodeIDs", values, attrs="multiple")
 <br>
 
@@ -33,7 +32,7 @@ description:<br>
 <textarea cols="30" rows="5" name="descript">{:descript:}</textarea><br>
 
 email you when inventory drops to:
-<input type="text" name="instock_warn" value="{:instock_warn:}" size="5"><br>
+<input type="text" name="warn" value="{:warn:}" size="5"><br>
 <i>(leave blank if you don't want email)</i><br>
 
 

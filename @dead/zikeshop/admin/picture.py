@@ -5,5 +5,4 @@ import zikeshop
 
 import weblib, zikeshop
 weblib.auth.check()
-zikeshop.siteID = weblib.auth.user.siteID
 zikeshop.showPicture()

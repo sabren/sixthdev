@@ -2,7 +2,6 @@
 #import sys; sys.stderr = sys.stdout
 
 import zikeshop, weblib
-zikeshop.siteID = 1
 zikeshop.basehref = "/zikeshop/public"
 zikeshop.checkouturl = "checkout.py?auth_logout_flag=1"
 zikeshop.authorizenetmerchant = None #"aggressive"

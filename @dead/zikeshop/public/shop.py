@@ -4,8 +4,6 @@ zikeshop!
 __ver__="$Id$"
 
 import zikeshop
-zikeshop.siteID = 1 # @TODO: get rid of this
-
 class ShopApp(zikeshop.PublicApp):
     __super = zikeshop.PublicApp
 

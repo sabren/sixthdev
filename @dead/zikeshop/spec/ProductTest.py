@@ -17,9 +17,8 @@ class ProductTestCase(unittest.TestCase):
         self.cur.execute("delete from shop_product")
         self.cur.execute("delete from shop_product_node")
         
-        zikeshop.siteID = -1
-        self.cur.execute("INSERT INTO shop_product (code, name, siteID) "
-                         "VALUES ('some01', 'something', -1)")
+        self.cur.execute("INSERT INTO shop_product (code, name) "
+                         "VALUES ('some01', 'something')")
 
 
     ## price, cost, and retail should all be FixedPoints ###############

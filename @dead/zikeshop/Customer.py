@@ -18,7 +18,6 @@ class Customer(zikebase.User):
         import weblib
         zikebase.User._new(self)
         self.uid = weblib.uid()
-        self.siteID = getattr(zikeshop, "siteID", 0)
         self.username = ""
 
 
