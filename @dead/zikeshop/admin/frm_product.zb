@@ -6,20 +6,26 @@
 * el:
     <b>add a new product:</b>
 
-<table width="90%"><tr><td width="50%" style="background:silver">
-<form action="index.py?action=save&what=product"
-      method="POST" enctype="multipart/form-data">
+<form action="index.py?action=save&what=product" 
+      enctype="multipart/form-data" method="POST">
+<table border="1" width="50%" style="background:silver">
 
 * if ID:
     <input type="hidden" name="ID" value="{:ID:}">
 
-code: <input type="text" name="code" value="{:code:}"><br>
-name: <input type="text" name="name" value="{:name:}"><br>
-price: $<input type="text" name="price" size="7" value="{:price:}">
-retail: $<input type="text" name="retail" size="7" value="{:retail:}"><br>
-weight (lbs): <input type="text" name="weight"
-                     size="7" value="{:weight:}"><br>
+<tr><td>code:</td>
+    <td><input type="text" name="code" value="{:code:}"></td></tr>
+<tr><td>name:</td>
+    <td><input type="text" name="name" value="{:name:}"></td></tr>
+<tr><td>price ($):</td>
+    <td><input type="text" name="price" size="7" value="{:price:}">
+        &nbsp;retail: 
+        <input type="text" name="retail" size="7" value="{:retail:}">
+        </td></tr>
+<tr><td>weight (lbs):</td>
+    <td><input type="text" name="weight" size="7" value="{:weight:}"></td></tr>
 
+<tr><td colspan="2">
 categories:<br>
 * exec:
     #@TODO: fix dis!
@@ -27,16 +33,14 @@ categories:<br>
     values = map(lambda node: node.get("ID"), scope.get("categories",[]))
     catbox = selectnode("categories", values, attrs="multiple")
 {:catbox:}
-<br>
+</td></tr>
 
+<tr><td colspan="2">
 description:<br>
 <textarea cols="30" rows="5" name="descript">{:descript:}</textarea><br>
+</td></tr>
 
-email you when inventory drops to:
-<input type="text" name="warn" value="{:warn:}" size="5"><br>
-<i>(leave blank if you don't want email)</i><br>
-
-
+<tr><td colspan="2">
 <input type="checkbox" name="isHidden"
 * if isHidden:
      CHECKED
@@ -46,8 +50,6 @@ email you when inventory drops to:
 <input name="picture" type="file"><br>
 
 <input value="save" type="submit">
-</form>
-
 
 * if pictureID:
     <td valign="top">Image:<br>
@@ -56,4 +58,4 @@ email you when inventory drops to:
     <td valign="top">
 
 </td></tr></table>
-
+</form>

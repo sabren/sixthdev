@@ -31,7 +31,7 @@ td.odd { background-color: #ccffcc }
 <body bgcolor="#666666">
 <table width="600" border="0" align="center" cellspacing="0" cellpadding="2">
   <tr bgcolor="#000000"> 
-    <td colspan="4">
+    <td style="padding-left: 5px" colspan="4">
       <font color="#FFFFFF" face="Impact" size="6">Zike<font color="#00FF00">$</font>hop</font></td>
     <td valign="top" colspan="4" align="right">
       <font size="3" face="arial black">
