@@ -1,0 +1,49 @@
+"""
+"""
+__ver__="$Id$"
+
+import zdc, zikebase
+
+class {:classname:}(zdc.RecordObject):
+    __super = zdc.RecordObject
+    _tablename = "{:tablename:}"
+    _links = {
+## eg:
+##        "details": [zdc.LinkSet, zikeshop.Detail, "saleID"],
+        }
+
+    ## RecordObject constructors ###########################
+    
+    def _init(self):
+        #@TODO: override this for things that should ALWAYS happen.
+        pass
+
+    def _new(self):
+        self.__super._new(self)
+        * for fields:
+            self._data['{:fieldname:}'] = {:default:}
+        #@TODO: set default values for attributes here.
+## eg:
+##         self._data['class'] = 'asdfsadf'
+##         self._data['asdfs'] = 'asdfsadf'
+## Use _data so as not to conflict with set_XXXX,
+## unless that's what you REALLY want.
+
+    def _fetch(self, **where):
+        apply(self.__super._fetch, (self,), where)
+        #@TODO: fetch any extra data here.. [linksets, etc..]
+
+    ## other RecordObject methods ###########################
+        
+##     def getEditableAttrs(self):
+##          return self.__super.getEditableAttrs(self) + ['picture']
+
+##     def delete(self):
+##         self.linkset.delete()
+##         self.__super.delete(self)
+
+
+##     def save(self):
+##         self.__super.save(self)
+##         self.categories.save()
+
