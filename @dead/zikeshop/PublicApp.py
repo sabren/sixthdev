@@ -10,8 +10,9 @@ import weblib, zikeshop
 class PublicApp(weblib.Actor):
     __super = weblib.Actor
 
-    def __init__(self, cart, input=None):
+    def __init__(self, cart, ds, input=None):
         self.__super.__init__(self, input)
+        self.ds = ds
         self.cart = cart
 
     def enter(self):

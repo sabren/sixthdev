@@ -19,21 +19,21 @@ class ShopApp(zikeshop.PublicApp):
     def act_show_category(self):
         import zikeshop, zdc, zebra
         if self.input.get("path","/")== "/":
-            cat = zikeshop.Category()
+            cat = zikeshop.Category(self.ds)
             cat.ID = 0
         else:
-            cat = zikeshop.Category(path=self.input["path"])
+            cat = zikeshop.Category(self.ds, path=self.input["path"])
 
         self.consult(zdc.ObjectView(cat))
         zebra.show("dsp_category", self.model)
 
     def act_show_product(self):
         import zikeshop, zdc, zebra
-        prod = zikeshop.Product(code=self.input["code"])
+        prod = zikeshop.Product(self.ds, code=self.input["code"])
         self.consult(zdc.ObjectView(prod))
         zebra.show("dsp_product", self.model)
 
 
 if __name__=="__main__":
-    ShopApp(zikeshop.Cart(sess)).act()
+    ShopApp(zikeshop.Cart(sess), self.ds).act()
     sess.stop()

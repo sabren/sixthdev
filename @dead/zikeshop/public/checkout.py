@@ -10,10 +10,6 @@ class CheckoutApp(zikeshop.PublicApp):
 
     ## Actor methods ############################
 
-    def __init__(self, cart, ds, input=None):
-        self.__super.__init__(self, cart, input)
-        self.ds = ds
-
     def enter(self):
         self.__super.enter(self)
 

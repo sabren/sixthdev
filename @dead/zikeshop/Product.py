@@ -94,7 +94,6 @@ class Product(zdc.RecordObject):
     def get_retail(self):
         return zdc.FixedPoint(self._data.get('retail', '0.00'))
 
-
     def get_available(self):
         #@TODO: this is where styled/unstyled distinction
         # would come in handy
@@ -102,7 +101,7 @@ class Product(zdc.RecordObject):
         for item in self.styles:
             res = res + (item.stock or 0) - item.hold
         return res
-
+    
     def set_picture(self, blob):
         # on a multipart/form-data form,
         # if you don't upload a file, it still gives you
@@ -115,9 +114,9 @@ class Product(zdc.RecordObject):
     def get_picture(self):
         if not self._pic:
             if self.pictureID:
-                self._pic = zikebase.Picture(ID=self.pictureID)
+                self._pic = zikebase.Picture(self._ds, ID=self.pictureID)
             else:
-                self._pic = zikebase.Picture()
+                self._pic = zikebase.Picture(self._ds)
         return self._pic
 
 

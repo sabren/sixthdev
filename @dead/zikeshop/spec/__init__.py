@@ -7,6 +7,7 @@ from testCard import *
 from testCart import *
 from testCategory import *
 from testCheckoutApp import * 
+from testShopApp import * 
 from testDetail import *
 from testProduct import *
 from testSale import *
@@ -20,12 +21,13 @@ suites = {}
 ## for item in zikebase.test.suites.keys():
 ##     suites[item] = zikebase.test.suites[item]
 
-suites['card'] = unittest.makeSuite(CardTestCase, "check_")
-suites['cart'] = unittest.makeSuite(CartTestCase, "check_")
-suites['category'] = unittest.makeSuite(CategoryTestCase, "check_")
-suites['checkoutApp'] = unittest.makeSuite(CheckoutAppTestCase, "check_")
-suites['detail'] = unittest.makeSuite(DetailTestCase, "check_")
-suites['product'] = unittest.makeSuite(ProductTestCase, "check_")
-suites['sale'] = unittest.makeSuite(SaleTestCase, "check_")
-suites['saleeditor'] = unittest.makeSuite(SaleEditorTestCase, "check_")
-suites['store'] = unittest.makeSuite(StoreTestCase, "check_")
+suites['Card'] = unittest.makeSuite(CardTestCase, "check_")
+suites['Cart'] = unittest.makeSuite(CartTestCase, "check_")
+suites['Category'] = unittest.makeSuite(CategoryTestCase, "check_")
+suites['CheckoutApp'] = unittest.makeSuite(CheckoutAppTestCase, "check_")
+suites['ShopApp'] = unittest.makeSuite(ShopAppTestCase, "check_")
+suites['Detail'] = unittest.makeSuite(DetailTestCase, "check_")
+suites['Product'] = unittest.makeSuite(ProductTestCase, "check_")
+suites['Sale'] = unittest.makeSuite(SaleTestCase, "check_")
+suites['Saleeditor'] = unittest.makeSuite(SaleEditorTestCase, "check_")
+suites['Store'] = unittest.makeSuite(StoreTestCase, "check_")

@@ -9,6 +9,8 @@ import zikeshop.test
 import zikebase
 import zdc
 
+#@TODO: test picture attribute
+
 class ProductTestCase(unittest.TestCase):
 
     def setUp(self):
