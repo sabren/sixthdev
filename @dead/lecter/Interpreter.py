@@ -49,7 +49,7 @@ class Interpreter:
                 pattern = []
                 ismatch = 0
                 for arg in args:
-                    if arg[-1]=="?": # variables
+                    if arg[0]=="$": # variables
                         ismatch = 1
                         pattern.append(WILDCARD)
                     else:

@@ -27,8 +27,8 @@ class InterpreterTestCase(unittest.TestCase):
         assert i.eval("hot(fire)?")==TRUE,\
                "asserting hot(fire) didn't work."
 
-        actual = i.eval("hot(x?)?")
-        assert actual==({"x?":"fire"},), \
+        actual = i.eval("hot($x)?")
+        assert actual==({"$x":"fire"},), \
                "can't query about what's hot. (got %s) " % str(actual)
 
     def check_parse(self):
