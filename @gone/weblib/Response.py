@@ -12,22 +12,16 @@ class Response:
         if engine is weblib:
             weblib.response = self
 
-        self.header = ""
-        self.buffer = ""
-        self._headerSent = 0
-
-        import StringIO
-        self._webout = StringIO.StringIO()
+        self.clear()
 
 
     def __getattr__(self, name):
         res = None
+
+        import sys
+        sys.stdout.write("*******************" +  name +" *************")
         
-        if name == "buffer":
-            if not self._headerSent:
-                self._sendHeader()
-            res = self._webout.getvalue()
-        elif name in self.__dict__.keys():
+        if name in self.__dict__.keys():
             res = self.__dict__[name]
         else:
             raise AttributeError
@@ -35,14 +29,14 @@ class Response:
         return res
         
 
-    #### PRIVATE METHODS ###################
-    
-    def _sendHeader(self):
-        #@TODO: allow changing the content-type..
-        self._webout.write("content-Type: text/html\n")
-        self._webout.write(self.header)
-        self._webout.write("\n")
-        self._headerSent = 1
+    #### I/O Methods (needed for print redirection) ########
+
+    def softspace(self):
+        pass
+
+
+    def flush(self):
+        pass
     
 
     #### PUBLIC METHODS ####################
@@ -66,7 +60,13 @@ class Response:
     def redirect(self, url):
         self.addHeader("Location", url)
         self.end()
-    
+
+
+    def clear(self):
+        """Clear the output buffer..."""
+        self.header = ""
+        self.buffer = ""
+        
 
     #### NOT IMPLEMENTED YET #####################
     #
@@ -75,7 +75,6 @@ class Response:
     #
     # appendToLog() - doesn't really apply to apache
     # binaryWrite() - do we need this?
-    # clear() - clears output buffer.. might do someday
     # flush() - also for buffering.. could do someday
     #
     # buffer - if true, buffer the output
