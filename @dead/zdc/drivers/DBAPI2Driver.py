@@ -20,30 +20,20 @@ class DBAPI2Driver:
 
     def __init__(self, dbc):
         self.dbc = dbc
+        self._fieldcache = {}
 
 
-    def select(self, tablename, wclause=None, **wdict):
+    def select(self, tablename, wclause=None, orderBy=None, **wdict):
         """
         returns a list of records for the given table..
         if a sql/prql where-clause or value dictionary is
         given, only records that match it will be returned.
         """
-        ## build a where clause
-        if not ((wclause is None) ^ (wdict=={})): # xor
-            ## no criteria specified: get it all..
-            where = ""
-        elif wdict:
-            ## keywords specified: search for 'em
-            for k in wdict.keys():
-                if not self.fields(tablename).has_key(k):
-                    raise "no field called ", k
-            where = self._whereClause(tablename, wdict)
-        else:
-            ## sql where clause specified
-            where = " WHERE " + wclause
-        
         ## run the query..
-        sql = "SELECT * FROM " + tablename + where
+        sql = "SELECT * FROM " + tablename + " " \
+              + self._whereClause(tablename, wclause, wdict)
+        if orderBy:
+            sql = sql + " ORDER BY " + orderBy
         cur = self.dbc.cursor()
         cur.execute(sql)
         return cur.fetchall()
@@ -69,7 +59,7 @@ class DBAPI2Driver:
                         sql = sql + f.name + "=" \
                               + self._sqlQuote(tablename, f.name, data[f.name]) + ","
         #@TODO: unhardcode "ID" without coupling this to table..
-        sql = sql[:-1] + " WHERE ID=%s" % key
+        sql = sql[:-1] + self._whereClause(tablename, None, {"ID":key})
         cur = self.dbc.cursor()
         cur.execute(sql)
         
@@ -126,22 +116,31 @@ class DBAPI2Driver:
 
     def delete(self, tablename, wheredict):
         sql = "DELETE FROM %s %s" \
-              % (tablename, self._whereClause(tablename, wheredict))
+              % (tablename, self._whereClause(tablename, None, wheredict))
         cur = self.dbc.cursor()
         cur.execute(sql)
 
 
-    def _whereClause(self, tablename, where):
-        """Given a dictionary of fieldname:value pairs,
-        creates a SQL where clause"""
+    def _whereClause(self, tablename, wclause, wdict):
+        """
+        Given a dictionary of fieldname:value pairs,
+        creates a SQL where clause
+        """
         res = ""      
-        for f in where.keys():
-            res = res + "AND (" + f + "=" + \
-                  self._sqlQuote(tablename, f, where[f]) + ")"
+        if wclause:
+            res = " WHERE " + wclause
+        if wdict:
+            ## build a where clause from the specified keywords: 
+            for f in wdict.keys():
+                if not self.fields(tablename).has_key(f):
+                    raise "no field called ", f
+                res = res + "AND (" + f + "=" + \
+                      self._sqlQuote(tablename, f, wdict[f]) + ")"
 
-        res = res[4:] # strip first AND
-        return " WHERE (" + res + ")"
-
+            res = res[4:] # strip first AND
+            res = " WHERE (" + res + ")"
+        return res
+    
     def _sqlQuote(self, tablename, fieldname, value):
         """Figures out whether to put '' around a value or not.
         field is an actual field object
@@ -173,19 +172,23 @@ class DBAPI2Driver:
         """
         returns an IdxDict of fieldnames and types for a table name
         """
-        flds = zdc.IdxDict()
-        # select a blank record:
-        # @TODO: more sophisticated schema checking to get defaults, keys, etc?
-        cur = self.dbc.cursor()
-        cur.execute("SELECT * FROM " + tablename + " WHERE 1=0")
-        for f in cur.description:
-            flds[f[0]] = zdc.Field(f[0],               # name
-                                   f[1],  #@TODO: make typeCode a string
-                                   f[2],               # displaySize
-                                   f[3],               # internalSize
-                                   f[4],               # precision
-                                   f[5],               # scale
-                                   f[6],               # allowNull
-                                   None)               # default
-        return flds
+        if self._fieldcache.has_key(tablename):
+            res = self._fieldcache[tablename]
+        else:
+            res = zdc.IdxDict()
+            # @TODO: get defaults, keys, etc?
+            # select a blank record:
+            cur = self.dbc.cursor()
+            cur.execute("SELECT * FROM " + tablename + " WHERE 1=0")
+            for f in cur.description:
+                res[f[0]] = zdc.Field(f[0],               # name
+                                      f[1],  #@TODO: make typeCode a string
+                                      f[2],               # displaySize
+                                      f[3],               # internalSize
+                                      f[4],               # precision
+                                      f[5],               # scale
+                                      f[6],               # allowNull
+                                      None)               # default
+            self._fieldcache[tablename] = res
+        return res
 
