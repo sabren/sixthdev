@@ -1,0 +1,15 @@
+
+* exec:
+    from zebra import html
+
+<b>rename category:</b> {:name:}
+
+<form method="post" action="rantelope.app">
+<input type="hidden" name="what" value="category">
+{:html.hidden("ID", ID):}
+{:html.hidden("channelID", channelID):}
+
+{:html.text("name", name):}
+<input type="submit" name="action" value="save">
+
+</form>

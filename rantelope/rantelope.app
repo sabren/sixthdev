@@ -93,10 +93,16 @@ class Comment(Strongbox):
 class Story(Strongbox):
     ID = attr(long, default=auto)
     channelID = attr(long)
+    categoryID = attr(long, default=0)
     title = attr(str)
     link = attr(str)
     description = attr(str)
     comments = linkset(Comment)
+
+class Category(Strongbox):
+    ID = attr(long, default=auto)
+    channelID = attr(long)
+    name = attr(str)
     
 class Channel(Strongbox):
     ID = attr(long, default=auto)
@@ -107,6 +113,7 @@ class Channel(Strongbox):
     htmlfile = attr(str, okay="([^/]+.html|^$)" )
     template = attr(str, default=plainXSLT)
     stories = linkset(Story)
+    categories = linkset(Category)
     path = attr(str, default="./out/")
 
     def toRSS(self):
@@ -155,13 +162,32 @@ class RantelApp(sixthday.AdminApp):
         chan.writeFiles()
         self.redirect(action='show&what=channel&ID=%s' % chan.ID)
 
+    ## categories ######################
+
+    def save_category(self):
+        cat = self.generic_save(Category)
+        self.redirect(action='show&what=channel&ID=%s' % cat.channelID)
+
+    def edit_category(self):
+        self.generic_show(Category, "frm_category")
+    
+
     ## stories #########################
 
-    def create_story(self):
-        assert self.input["channelID"], "must supply channelID"
+    def buildCategories(self, channelID):
+        assert channelID, "must supply valid channelID"
+        chan = self.clerk.fetch(Channel, channelID)
+        self.model["categories"] = [(c.ID, c.name) for c in chan.categories]
+        
+
+    def create_story(self):        
+        self.buildCategories(self.input.get("channelID"))
         self.generic_create(Story, "frm_story")
         
     def edit_story(self):
+        s = self.clerk.fetch(Story, self.input["ID"])
+        self.buildCategories(s.channelID)
+        # @TODO: would be nice to have generic_show_instance()
         self.generic_show(Story, "frm_story")
 
     def save_story(self):
@@ -195,6 +221,8 @@ if __name__=="__main__":
     store = sqlRantelope.sto
     dbmap = {Channel: "rnt_channel",
              Channel.__attrs__["stories"]: (Story, "channelID"),
+             Channel.__attrs__["categories"]: (Category, "channelID"),
+             Category: "rnt_category",
              Story: "rnt_story",
              Story.__attrs__["comments"]: (Comment, "storyID"),
              Comment: "rnt_comment"}

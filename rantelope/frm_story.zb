@@ -24,8 +24,8 @@
   <table border="1">
     <tr><th>title:</th>
         <td>{:html.text("title",title):}</td></tr>
-    <tr><th>link:</th>
-        <td>{:html.text("link",link):}</td></tr>
+    <tr><th>category</th>
+        <td>{:html.select("categoryID", categories, categoryID):}</td></tr>
     <tr><th colspan="2">description:</th></tr>
     <tr><td colspan="2"><textarea name="description"
             rows="10" cols="60">{:description:}</textarea></td></tr>

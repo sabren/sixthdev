@@ -27,15 +27,22 @@
 [<a href="rantelope.app?action=create&what=story&channelID={:ID:}">add story</a>]
 
 <hr>
-<p><b>Stories in this channel:</b></p>
+<p><b>Categories in this channel:</b></p>
 
-* for stories:
+* for categories:
     * head:
         <ul>
     * body:
-        <li><a href="rantelope.app?action=edit&what=story&ID={:ID:}">{:title:}</a></li>
+        <li><a href="rantelope.app?action=edit&what=category&ID={:ID:}">{:name:}</a></li>
     * foot:
         </ul>
-    * none:
-        <p><i>No stories yet.</i></p>
+
+<b>add category:</b>
+<form method="post" action="rantelope.app">
+<input type="hidden" name="what" value="category">
+<input type="hidden" name="channelID" value="{:ID:}">
+<input type="text" name="name" value="">
+<input type="submit" name="action" value="save">
+</form>
+
 

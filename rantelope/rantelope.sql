@@ -7,6 +7,7 @@
 CREATE TABLE rnt_story (
     ID int not null auto_increment primary key,
     channelID int not null,
+    categoryID int,
     title varchar(255),
     link varchar(255),
     description text
@@ -21,6 +22,12 @@ CREATE TABLE rnt_channel (
     description text,
     template text,
     path varchar(255)
+);
+
+CREATE TABLE rnt_category (
+    ID int not null auto_increment primary key,
+    channelID int not null,
+    name varchar(50)
 );
 
 CREATE TABLE rnt_comment (
