@@ -48,6 +48,7 @@ class RecordObject(zdc.Object):
     #@TODO: TEST THIS - it was just an off-the-top-of-my-head thing
 
     def _fetch(self, key):
+        self.key = key
         rec = zdc.Record(self.dbc, self.table)
         rec.fetch(key)
         for f in rec.fields:
@@ -61,3 +62,18 @@ class RecordObject(zdc.Object):
         rec.save()
         for f in rec.fields:
             setattr(self, f.name, rec[f.name])
+
+
+    #@TODO: test this, too...
+    
+    def delete(self):
+        if self.key:
+            rec = zdc.Record(self.dbc, self.table)
+            rec.fetch(self.key)
+            rec.delete()
+        else:
+            pass # nothing to delete
+
+
+
+
