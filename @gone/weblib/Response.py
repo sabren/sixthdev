@@ -8,7 +8,7 @@ import string
 import sys
 import os
 
-class Response:
+class Response(object):
     """
     Response object similar to the one from ASP
     """

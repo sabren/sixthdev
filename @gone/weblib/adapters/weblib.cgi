@@ -1,4 +1,4 @@
-#!c:\python20\python
+#!c:\python22\python
 #
 # weblib.cgi : a wrapper script for weblib
 # inspired by http://www.webtechniques.com/archives/1998/02/kuchling/
@@ -62,16 +62,15 @@ if doProfile:
         '''
         an engine that profiles your script (and .weblib.py)
         '''
-        __super=weblib.Engine
         def __init__(self, script=None, pool=None, **kw):
-            apply(self.__super.__init__, (self, script, pool), kw)
+            super(ProfileEngine,self).__init__(script, pool, **kw)
             import profile
             self.prof = profile.Profile()
         def _execute(self, script):
             self.prof.runctx("exec(script, self.globals, self.locals)",
                              globals(), locals())
         def stop(self):
-            self.__super.stop(self)
+            super(ProfileEngine,self).stop()
             import sys, cStringIO, pstats
             stats = cStringIO.StringIO()
             oldout, sys.stdout = sys.stdout, stats

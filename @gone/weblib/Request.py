@@ -17,7 +17,7 @@ import string
 import weblib
 
 
-class Request:
+class Request(object):
 
     ## constructor ###################################################
     

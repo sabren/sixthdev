@@ -22,6 +22,7 @@ except ImportError:
 ## Sess : a session handler ################
 
 class Sess(UserDict.UserDict):
+    # can't get rid of this __super until b/c UserDict is old-style class
     __super = UserDict.UserDict
 
     ## constructor ############################

@@ -13,51 +13,26 @@ class Redirect(Exception):
     """
     pass
 
+from handy import trim
+from handy import uid
 
-def trim(s):
+def htmlEncode(s):
     """
-    strips leading indentation from a multi-line string.
-    for saving bandwith while making code look nice
-    @TODO: this should be in handy
+    htmlEncode(s) ->  s with >, <, and & escaped as &gt;, &lt; and &amp;
     """
-
-    import string
-    lines = string.split(s, "\n")
-
-    # strip leading blank line
-    if lines[0] == "":
-        lines = lines[1:]
-        
-    # strip indentation
-    indent = len(lines[0]) - len(string.lstrip(lines[0]))
-    for i in range(len(lines)):
-        lines[i] = lines[i][indent:]
-
-    return string.join(lines, "\n")
-
-
-def uid():
-    """
-    unique identifier generator, for sessions, etc
-    Returns a 32 character, printable, unique string
-    @TODO: should be in handy
-    """
-    import md5, whrandom, string
-    tmp, uid = "", ""
+    res = ""
+    for ch in s:
+        if ch == ">":
+            res = res + "&gt;"
+        elif ch=="<":
+            res = res + "&lt;"
+        elif ch=="&":
+            res=res + "&amp;"
+        else:
+            res = res + ch
+    return res
     
-    # first, just get some random numbers
-    for i in range(64):
-        tmp = tmp + chr(whrandom.randint(0,255))
 
-    # then make a 16-byte md5 digest...
-    tmp = md5.new(tmp).digest()
-
-    # and, since md5 is unprintable,
-    # reformat it in hexidecimal:
-    for i in tmp:
-        uid = uid + string.zfill(hex(ord(i))[2:],2)        
-
-    return uid
 
 
 
@@ -106,5 +81,4 @@ from Engine import Engine
 from Request import Request
 from Response import Response
 from Sess import Sess
-
-
+import SessPool

@@ -6,7 +6,7 @@ __ver__ = "$Id$"
 import weblib
 import string
 
-class Engine:
+class Engine(object):
     """
     Engine - a wrapper class that runs a script in a custom environment.
 
