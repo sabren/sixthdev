@@ -1,43 +1,49 @@
+#!/usr/bin/python
+"""
+This tool generates a zebra form template from a strongbox.
+"""
+_USAGE_ ="formgen.py module classname"
+__ver__="$Id$"
+
 import sys
-import weblib
-from duckbill.test import dbc #@TODO: get rid of this
+from handy import trim
 
-theModule, theClass = sys.argv[1:3]
-exec "from %s import %s" % (theModule, theClass)
-instance = locals()[theClass](dbc)
+if __name__=="__main__":
+    try:
+        theModule, theClass = sys.argv[1:3]
+    except:
+        print "usage:", _USAGE_
+        sys.exit()
 
-#@TODO: generic zebra wizard..
+    exec "from %s import %s" % (theModule, theClass)
+    instance = locals()[theClass]()
 
-print weblib.trim(
-      '''
-      remember to search for and update ####### tags in this generated file!
-      
-      * exec:
-          from weblib import html
-          
-      <form action="########index.py" method="POST">
-      {:html.hidden("what", "#######%(theClass)s"):}
-      * if ID:
-          edit %(theClass)s
-          {:html.hidden("ID", ID):}
-      * el:
-          add new %(theClass)s
+    print trim(
+          '''
+          *# remember to update ####### tags in this generated file!
+          * exec:
+              from zebra import html
 
-      <table>
-      ''' % locals())
-print
+          <form action="########index.py" method="POST">
+          {:html.hidden("what", "#######%(theClass)s"):}
+          * if ID:
+              edit %(theClass)s
+              {:html.hidden("ID", ID):}
+          * el:
+              add new %(theClass)s
 
-for field in instance.getEditableAttrs():
-    if field != 'ID':
-        print weblib.trim(
-            '''
-            <tr>
-              <td>%(field)s</td>
-              <td>{:html.text("%(field)s", %(field)s):}</td>
-            </tr>       
-            ''' % locals())
+          <table>
+          ''' % locals())
 
-print '</table>'
-print '<input type="submit" name="action" value="save">'
-print '</form>'
+    for field in instance.__attrs__:
+        if field != 'ID':
+            print trim(
+                '''
+                <tr><td>%(field)s</td>
+                    <td>{:html.text("%(field)s", %(field)s):}</td></tr>
+                ''' % locals())
+
+    print '</table>'
+    print '<input type="submit" name="action" value="save">'
+    print '</form>'
 
