@@ -34,22 +34,8 @@ class Store(zdc.RecordObject):
     ## collections ########################################
 
     def get_products(self):
-        # @TODO: this is only used in one place...
-        # really ought to be replaced with an objectset..
-        cur = zikeshop.dbc.cursor()
-        sql =\
-            """
-            SELECT ID
-            FROM shop_product
-            WHERE class='product' ORDER BY code
-            """
-        cur.execute(sql)
-
-        # @TODO: this is horribly inefficient!
-        res = []
-        for row in cur.fetchall():
-            res.append(zikeshop.Product(ID=row[0]))
-        return tuple(res)
+        #@TODO: get rid of this?
+        return zdc.find(zikeshop.Product, "class='product'", orderby="code")
 
     ## calculations #######################################
 
