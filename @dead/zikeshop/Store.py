@@ -5,9 +5,9 @@ __ver__="$Id$"
 
 import zdc, zikeshop, zikebase
 
-class Store(zdc.RecordObject):
-    __super = zdc.RecordObject
-    _table = zdc.Table(zikeshop.dbc, "shop_store")
+class Store(zdc.Object): #(zdc.RecordObject):
+    __super = zdc.Object
+    #_table = zdc.Table(zikeshop.dbc, "shop_store")
 
     ## zdc init  ##########################################
 
@@ -18,17 +18,17 @@ class Store(zdc.RecordObject):
 
     ## magic zdc properties ###############################
 
-    def set_address(self, value):
-        self._address = value
-        
-    def get_address(self):
-        # @TODO: allow getting the address without saving first
-        if self._address:
-            return self._address
-        elif self.addressID:
-            return zikebase.Contact(ID=self.addressID)
-        else:
-            return zikebase.Contact()
+##     def set_address(self, value):
+##         self._address = value
+##        
+##     def get_address(self):
+##         # @TODO: allow getting the address without saving first
+##         if self._address:
+##             return self._address
+##         elif self.addressID:
+##             return zikebase.Contact(ID=self.addressID)
+##         else:
+##             return zikebase.Contact()
 
 
     ## collections ########################################
@@ -42,27 +42,30 @@ class Store(zdc.RecordObject):
     ## calculations #######################################
 
     def calcShipping(self, addr, weight):
-        import zikeshop
-        res = 0
-        ## find out what the merchant's address is
-        fromZip = self.address.postal
+        return 0
 
-        ## find out what the shipping address is
-        toZip = addr.postal
-        toCountryCD = addr.countryCD
+##     def calcShipping(self, addr, weight):
+##         import zikeshop
+##         res = 0
+##         ## find out what the merchant's address is
+##         fromZip = self.address.postal
 
-        ## UPS charges 6 grand for packages with 0 weight. :)
-        if weight > 0:
-            ## ask ups for the price
-            import zikeshop.UPS
-            res = zdc.FixedPoint(
-                zikeshop.UPS.getRate(fromZip, toZip, toCountryCD, weight))
+##         ## find out what the shipping address is
+##         toZip = addr.postal
+##         toCountryCD = addr.countryCD
 
-            ## it also occasionally charges 6 grand for invalid
-            ## shipping options..
-            if res >= 6000:
-                res = 0
-        return res
+##         ## UPS charges 6 grand for packages with 0 weight. :)
+##         if weight > 0:
+##             ## ask ups for the price
+##             import zikeshop.UPS
+##             res = zdc.FixedPoint(
+##                 zikeshop.UPS.getRate(fromZip, toZip, toCountryCD, weight))
+
+##             ## it also occasionally charges 6 grand for invalid
+##             ## shipping options..
+##             if res >= 6000:
+##                 res = 0
+##         return res
 
 
     def calcSalesTax(self, addr, amount):
@@ -79,6 +82,11 @@ class Store(zdc.RecordObject):
         #for item in self._locations:
         #    if item.stateCD == stateCD:
         #        return 1
-        if stateCD and (self.address.stateCD == stateCD):
-            return 1
+        #@TODO: this is a really crappy function, since it's duplicated above.
+        try:
+            s = zikeshop.State(CD=stateCD)
+            foundIt = 1
+        except:
+            foundIt = 0
+        return foundIt
 

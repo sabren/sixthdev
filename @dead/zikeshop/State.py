@@ -6,7 +6,7 @@ import zdc
 import zikeshop
 
 class State(zdc.RecordObject):
-    _table = zdc.Table(zikeshop.dbc, "ref_state", rowid="CD")
+    _table = zdc.Table(zikeshop.dbc, "shop_state", rowid="CD")
 
 
     def get_salestax(self):
