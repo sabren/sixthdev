@@ -5,15 +5,20 @@
     * head:
         <h4>contents of cart:</h4>
         <form action="{: link_cart() :}" method="POST">
-        <ul>
+
+        <table border="1">
 
     *# @TODO: get rid of links inside the cart ??
-    <li><input name="remove_{:_:}" type="checkbox"/>
-    <a href="{:link:}">{:label:}</a>&nbsp;
-    <input name="quantity_{:_:}" size="3" value="{:quantity:}">
-
+    <tr><td><input name="remove_{:_:}" type="checkbox"/></td>
+        <td><a href="{:link:}">{:label:}</a></td>
+        <td><input name="quantity_{:_:}" size="3" value="{:quantity:}"></td>
+        <td align="right">x ${:price:}</td>
+        <td align="right">= ${:subtotal:}</td>
+    </tr>
     * foot:
-        </ul>
+        <tr><td align="right" colspan="5">subtotal: <b>${:total:}</b></td></tr>
+        </table>
+        <br>
         <input type="submit" name="action" value="update"> amounts, or
         <input type="submit" name="action" value="remove"> checked items.
         </form>
