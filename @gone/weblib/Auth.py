@@ -44,7 +44,10 @@ class Auth:
 
 
     def check(self):
-        """Makes sure the user is authenticated. If not, prompts for credentials."""
+        """
+        Make sure the user is authenticated.
+        If not, prompt for credentials.
+        """
 
         if not self._isStarted:
             self.start()
@@ -57,17 +60,21 @@ class Auth:
                 if self._attemptLogin():
                     self.onLogin() # they're in!
                 else:
-                    self.prompt(Auth.LOGINFAILED, self._getAction(), self._getHidden())
+                    self.prompt(Auth.LOGINFAILED, self._getAction(),
+                                self._getHidden())
                     self.engine.response.end()
             else:
-                self.prompt(Auth.PLEASELOGIN, self._getAction(), self._getHidden())
+                self.prompt(Auth.PLEASELOGIN, self._getAction(),
+                            self._getHidden())
                 self.engine.response.end()
         else:
             self.login(self.key) 
     
 
     def login(self, key):
-        """Force a login with the specified key."""
+        """
+        Force a login with the specified key.
+        """
         self.key = key
         self.fetch(self.key)
         self.engine.sess['__auth_key'] = self.key
@@ -78,7 +85,9 @@ class Auth:
 
 
     def logout(self):
-        """Logs out the current user."""
+        """
+        Logs out the current user.
+        """
         self.onLogout()
         self.isLoggedIn = 0
         self.key = None
@@ -94,20 +103,25 @@ class Auth:
 
 
     def validate(self, dict):
-        """This should test whether the credentials in dict are valid,
-        and if so, return a key, else return None"""
+        """
+        This should test whether the credentials in dict are valid,
+        and if so, return a key, else return None
+        """
 
         # example implementation for testing, based on form below:
 
         authKey = None
-        if (dict.get("username") == "username") and (dict.get("password") == "password"):
+        if (dict.get("username") == "username") \
+           and (dict.get("password") == "password"):
             authKey = 1 # user's key = 1
         return authKey
 
 
     def prompt(self, message, action, hidden):
-        """This should show an HTML prompt and call response.end().
-        You should overwrite this!"""
+        """
+        This should show an HTML prompt and call response.end().
+        You should overwrite this!
+        """
 
         self.engine.response.write("""
         <h1>%s: %s</h1>
@@ -122,8 +136,10 @@ class Auth:
 
 
     def transform(self, field, value):
-        """Overwrite this if you want to eg, encode/encrypt credentials
-        before passing to validate()"""
+        """
+        Overwrite this if you want to eg, encode/encrypt credentials
+        before passing to validate()
+        """
 
         return value
 
@@ -140,7 +156,9 @@ class Auth:
     ## internal methods #######################
     
     def _attemptLogin(self):
-        """Gets stuff from the login form and passes it to validate.."""
+        """
+        Gets stuff from the login form and passes it to validate..
+        """
 
         dict = {}
         res = 0
@@ -162,8 +180,8 @@ class Auth:
 
 
     def _getAction(self):
-        """Returns a string with the current URL and coded querystring.
-
+        """
+        Returns a string with the current URL and coded querystring.
         This is used for the ACTION property of the login form.
         """
 
@@ -184,7 +202,7 @@ class Auth:
             self.engine.request.environ.get("SCRIPT_NAME", None))
 
         assert res is not None, \
-               "You must set SCRIPT_NAME or PATH_INFO in the environment to use Auth."
+               "You must set SCRIPT_NAME or PATH_INFO to use Auth."
         
 
         # add in a query string of our own:
@@ -202,21 +220,34 @@ class Auth:
     
 
     def _getHidden(self):
-        """This function builds a string containing hidden form fields.
+        """
+        This function builds a string containing hidden form fields.
         
         This is because the session could expire while someone is working
         on a form. If they post the form, they should get a login-box,
         but we want to remember their data while they're logging back in!
         """
         res = ""
-        for item in self.engine.request.form.keys():  # form should be an IdxDict..
+        for item in self.engine.request.form.keys():
+            # form should be an IdxDict..
             if item[:5] == "auth_":
                 pass # Ignore auth stuff here, too
             else:
-                res = res + '<input type="hidden" name="' + \
-                      weblib.htmlEncode(item) + '" value="' + \
-                      weblib.htmlEncode(self.engine.request.form[item]) + \
-                      '">\n'
+                # value should either be a string or a tuple
+                # of strings. (for multi-select boxes or whatever)
+                if type(self.engine.request.form[item]) == type(()):
+                    # for tuples, loop through all the values:
+                    for subitem in self.engine.request.form[item]:
+                        res = res + '<input type="hidden" name="' + \
+                              weblib.htmlEncode(item) + '" value="' + \
+                              weblib.htmlEncode(subitem) + \
+                              '">\n'
+                else:
+                    # only one value:
+                    res = res + '<input type="hidden" name="' + \
+                          weblib.htmlEncode(item) + '" value="' + \
+                          weblib.htmlEncode(self.engine.request.form[item]) + \
+                          '">\n'
 
         return res
 
