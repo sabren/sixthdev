@@ -16,6 +16,10 @@ body, td, th, p {
     font-size: 10pt;
   }
 
+body {
+  background: black; 
+}
+
 th { background: black; color: white; text-align: left }
 
 a.tool { text-decoration: none;  color:black }
@@ -28,7 +32,7 @@ td.odd { background-color: #ccffcc }
 -->
 </style>
 </head>
-<body bgcolor="#666666">
+<body>
 <table width="600" border="0" align="center" cellspacing="0" cellpadding="2">
   <tr bgcolor="#000000"> 
     <td style="padding-left: 5px" colspan="4">
