@@ -34,6 +34,8 @@ class Store(zdc.RecordObject):
     ## collections ########################################
 
     def get_products(self):
+        # @TODO: this is only used in one place...
+        # really ought to be replaced with an objectset..
         cur = zikeshop.dbc.cursor()
         sql =\
             """
@@ -92,29 +94,3 @@ class Store(zdc.RecordObject):
         if stateCD and (self.address.stateCD == stateCD):
             return 1
 
-
-    ## other routines #########################################
-
-    def hold(self, prod, amount):
-        """
-        Put a certain amount of inventory on hold.
-        Eg, when someone adds it to their cart.
-        """
-        #@TODO: check availability
-        if self._onHold.has_key(prod):
-            self._onHold[prod] = self._onHold[prod] + amount
-        else:
-            self._onHold[prod] = amount
-
-
-
-    def newSale(self):
-        """
-        this factory method returns a new sale
-        use it instead of just creating objects to make
-        sure that the links work correctly.
-        """
-        sale = zikeshop.Sale()
-        #@TODO: make this read "sale.store = self"
-        sale.saleID = self.ID
-        return sale
