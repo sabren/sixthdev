@@ -136,9 +136,13 @@ class Cart:
     ## queries #########################################################
 
     def q_contents(self):
-        """Returns a freely-editable copy of the cart's contents"""
-        import copy
-        return copy.deepcopy(self._contents)
+        """Returns an editable copy of the cart's contents, plus subtotals"""
+       import copy, zikeshop
+       res = copy.deepcopy(self._contents)
+       for row in res:
+           row["subtotal"] = str(zikeshop.FixedPoint(row["price"]) \
+                                 * row["quantity"])
+           return res
 
 
     ## private methods #################################################
