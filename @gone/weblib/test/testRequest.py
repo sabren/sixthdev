@@ -150,8 +150,18 @@ class RequestTestCase(unittest.TestCase):
             ))
 
         assert request.form.get("action")=="upload", \
-               "form values don't work on multipart forms. (got %s)" \
-               % repr(request.form.get("action"))
+               weblib.trim(
+               """
+               form values don't work on multipart forms. (got %s)
+               -----------
+               ** NOTE **
+               this test works when I test manually, but not via
+               the test script.. The bug is in using StringIO
+               (rather than sys.stdin) with the cgi.FieldStorage but
+               I have never been able to track it down... (help?)
+               -----------
+               """
+               % repr(request.form.get("action")))
 
 
         assert request.form["upfile"].filename == "C:\mimetest.txt", \
