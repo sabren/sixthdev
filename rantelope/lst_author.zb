@@ -1,0 +1,28 @@
+*#
+*# This file is the zebra template for listing
+*# all defined authors.
+*# 
+*# $Id$ 
+
+* include header;
+
+<h2>authors</h2>
+
+* for each:
+    * head:
+        <ul>
+    * body:
+        <li>
+          <a href="rantelope.app?action=edit&what=author&ID={:ID:}"
+             >{:username:}</a>
+          ({:fname:} {:lname:})
+        </li>
+    * foot:
+        </ul>
+* none:
+    <p><i>No authors defined.</i></p>
+    <p style="color:red">um. this is a huge error. 
+       how are you logged in if you don't exist?</p>
+
+<p>[<a href="rantelope.app?action=create&what=author"
+      >add author</a>]</p>

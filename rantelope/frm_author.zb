@@ -1,0 +1,39 @@
+*#
+*# This file displays a form for editing authors
+*#
+*# $Id$
+
+* include header;
+
+* exec:
+    from zebra import html
+
+
+<form action="rantelope.app" method="POST">
+  <input type="hidden" name="what" value="author">
+
+* if ID:
+    <b>edit this author:</b>
+    <input type="hidden" name="ID" value="{:ID:}">
+* el:
+    <b>add a new author:</b>
+
+  <table border="1">
+    <tr><th>fname:</th>
+        <td>{:html.text("fname",fname):}</td></tr>
+    <tr><th>lname:</th>
+        <td>{:html.text("lname",lname):}</td></tr>
+    <tr><th>email:</th>
+        <td>{:html.text("email",email):}</td></tr>
+    <tr><th>homepage:</th>
+        <td>{:html.text("homepage",homepage):}</td></tr>
+    <tr><th>username:</th>
+        <td>{:html.text("username",username):}</td></tr>
+    <tr><th>cryptpwd:</th>
+        <td>{:html.text("cryptpwd",cryptpwd):}</td></tr>
+  </table>
+
+  <p>new plaintext password: {:html.text("password",""):}</p>
+
+  <input name="action" value="save" type="submit">
+</form>
