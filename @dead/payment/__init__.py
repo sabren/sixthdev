@@ -3,7 +3,7 @@ python payment module
 """
 __ver__="$Id$"
 
-from Payment import *
+from AbstractPayment import *
 from AuthorizeNetPayment import *
 
 ## result codes (constants)
@@ -11,8 +11,6 @@ from AuthorizeNetPayment import *
 APPROVED = "approved"
 DENIED = "denied"
 ERROR = "error"
-
-
 
 ## utility functions
 

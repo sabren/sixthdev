@@ -24,17 +24,18 @@ except:
     pass
 
 
-from testPayment import *
+from testAbstractPayment import *
 from testAuthorizeNetPayment import *
 import unittest
 
 suites = {
-    "payment" : unittest.makeSuite(PaymentTestCase, "check_"),
+    "payment" : unittest.makeSuite(AbstractPaymentTestCase, "check_"),
     }
 
 for key in merchant.keys():
     if merchant[key]:
         suites[key] = \
-            unittest.makeSuite(locals()[key + "PaymentTestCase"], "check_")
+            unittest.makeSuite(locals()[key + "AbstractPaymentTestCase"],
+                               "check_")
     else:
         print "skipping %s since no test merchant defined." % key

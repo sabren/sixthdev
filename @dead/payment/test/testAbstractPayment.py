@@ -6,7 +6,7 @@ __ver__="$Id$"
 import unittest
 import payment
 
-class PaymentTestCase(unittest.TestCase):
+class AbstractPaymentTestCase(unittest.TestCase):
 
     def check_create(self):
         acct = payment.create("AuthorizeNet", card="4222222222222")
@@ -22,6 +22,3 @@ class PaymentTestCase(unittest.TestCase):
 
         assert gotError, \
                "Didn't get NameError when trying to create invalid class."
-
-        
-    

@@ -8,7 +8,7 @@ import urllib
 import string
 from M2Crypto import httpslib, SSL ## only until python 2 comes out 
 
-class AuthorizeNetPayment(payment.Payment):
+class AuthorizeNetPayment(payment.AbstractPayment):
 
     def _submit(self, dict):
         """Given a dict of form variables, makes the HTTP POST..."""
@@ -32,8 +32,6 @@ class AuthorizeNetPayment(payment.Payment):
 
         return content
 
-
-        
 
     def charge(self, amount, description=""):
         """Charge the card..."""
@@ -80,5 +78,3 @@ class AuthorizeNetPayment(payment.Payment):
             self.result = payment.ERROR
             self.error = responseReasonText
             
-         
-        

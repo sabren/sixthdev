@@ -4,7 +4,7 @@ base class / interface definition for payment objects
 __ver__="$Id$"
 
 
-class Payment:
+class AbstractPayment:
     """A base class for Payment objects.."""
 
     card = "" # card number
