@@ -14,4 +14,12 @@ class ToolsTestCase(unittest.TestCase):
         assert weblib.urlDecode("+") == " ", \
                "urlDecode screws up on + signs"
         assert weblib.urlDecode("%2b") == "+", \
-               "urlDecode scews up on %2b"
+               "urlDecode screws up on %2b"
+
+    def check_html(self):
+        #@TODO: make this its own test suite!
+        import weblib.html
+
+        # this shouldn't crash on empty options list:
+        weblib.html.select("box", [])
+    
