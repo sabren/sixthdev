@@ -3,7 +3,6 @@ Bootstrap compiler for Zebra.
 """
 __ver__="$Id$"
 
-# @TODO: optional body tags in zebra for loops.. (or just "show?")
 # @TODO: how about a "* set" tag?
 
 import zebra
@@ -236,6 +235,11 @@ class Bootstrap:
         res = "if _ == 0:\n"
         res = res + zebra.indent(self.walk(model), 1)
         return res
+
+    ## <body> ##
+    def handle_body(self, model, attrs):
+        "the body tag does nothing at all.. it's purely aesthetic"
+        return self.walk(model)
 
     ## <foot> ##
     def handle_foot(self, model, attrs):

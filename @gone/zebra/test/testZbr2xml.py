@@ -210,7 +210,7 @@ class Zbr2xmlTestCase(unittest.TestCase):
     
 
 
-    def check_for(self):
+    def check_forNone(self):
         zbr = zebra.trim(
             """
             * for people:
@@ -235,6 +235,45 @@ class Zbr2xmlTestCase(unittest.TestCase):
         actual = zebra.Z2X().translate(zbr)
         assert actual==goal, \
                "Doesn't do for..none right:\n%s" % actual
+
+
+    def check_forHeadBodyFoot(self):
+        zbr = zebra.trim(
+            """
+            * for people:
+                * head:
+                    PEOPLE
+                    -------
+                * body:
+                    {?name?} is a nice person.
+                * foot:
+                    -------
+                    THE END
+            """)
+        
+        goal = zebra.trim(
+            """
+            <?xml version="1.0"?>
+            <zebra>
+            <for series="people">
+            <head>
+            PEOPLE
+            -------
+            </head>
+            <body>
+            <var>name</var> is a nice person.
+            </body>
+            <foot>
+            -------
+            THE END
+            </foot>
+            </for>
+            </zebra>
+            """)
+
+        actual = zebra.Z2X().translate(zbr)
+        assert actual==goal, \
+               "Doesn't do for/head/body/foot right:\n%s" % actual
 
 
     def check_notBlocks(self):

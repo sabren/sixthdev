@@ -156,6 +156,9 @@ class Z2X:
     def parse_head(self, tokens):
         return '' # no options yet
 
+    def parse_body(self, tokens):
+        return '' # no options yet
+
     def parse_foot(self, tokens):
         return '' # no options yet
 

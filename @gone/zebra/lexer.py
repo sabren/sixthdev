@@ -13,6 +13,7 @@ def _walk(tree, res):
         TYP = type(node)
         if TYP==INT:
             try:
+                import token
                 res.append(token.tok_name[node])
             except KeyError:
                 pass
@@ -25,7 +26,7 @@ def _walk(tree, res):
 def lex(expression):
     "Tokenize the expression by flattening python's own parse tree."
     #@TODO: the tokenize module already does this..
-    import parser, token, symbol
+    import parser, symbol
     tree = parser.expr(expression).totuple()
     toks = []
     _walk(tree,toks)

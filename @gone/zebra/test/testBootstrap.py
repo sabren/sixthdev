@@ -220,3 +220,16 @@ class BootstrapTestCase(unittest.TestCase):
         assert actual == goal, \
                "brackets cause problems:\n%s" % actual
         
+    def check_body(self):
+        zbx = zebra.trim(
+            """
+            <zebra>            
+            <body>blah</body>
+            </zebra>
+            """)
+
+        goal = "blah"
+        actual = zebra.Bootstrap().toObject(zbx).fetch()
+        assert actual == goal, \
+               "<body> doesn't work:\n%s" % actual
+        
