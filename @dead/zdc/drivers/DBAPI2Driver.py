@@ -31,8 +31,7 @@ class DBAPI2Driver:
         try:
             cur.execute(sql)
         except Exception, e:
-            print 'ERROR: execSQL("%s")' % sql
-            raise e 
+            raise Exception, 'ERROR: %s \nexecSQL("%s")' % (str(e.args), sql)
         return cur
     
 
