@@ -4,6 +4,7 @@ A base class for web pages that act differently based on a parameter.
 __ver__ = "$Id$"
 
 #@TODO: subclass that uses Signature to pass values to act_XXX?
+import weblib
 
 class Actor:
     """
