@@ -143,10 +143,8 @@ def urlDecode(what):
     import urllib
 
     if type(what) == type(""):
-        res = urllib.unquote(what)
-        # is this right?!?!?!?
         import string
-        res = string.replace(res, "+", " ")
+        res = urllib.unquote(string.replace(what, "+", " "))
 
     elif type(what) == type({}):
         res = urllib.urldecode(what)
