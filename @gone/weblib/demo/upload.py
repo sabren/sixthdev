@@ -1,5 +1,7 @@
 import sys, weblib
 
+assert False, "Sorry -- this demo is old and broken."
+
 def showForm():
     print weblib.trim(
         """
