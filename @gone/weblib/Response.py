@@ -1,128 +1,48 @@
-"""
-Response.py - loosely emulates the ASP Response object for python CGI's
-"""
 __ver__="$Id$"
-
-import weblib
-import string
-import sys
-import os
+from weblib import Finished
 
 class Response(object):
     """
-    Response object similar to the one from ASP
+    Minimal HTTP Response object
     """
-
-    ## attributes ########################################
-
-    contentType = "text/html"
-    headers = []
-    cookies = []
-    buffer = ""
-    _sentHeaders = 0
-       
-
-    ## constructor #######################################
-
     def __init__(self, out=None):
         self.out = out
-       
+        self.contentType = "text/html"
+        self.headers = []
+        self.buffer = ""
+        self._sentHeaders = 0        
 
-    #### I/O Methods (needed for print redirection) ########
-
-    def softspace(self):
-        pass
-
-
+    def write(self, data):
+        self.buffer = self.buffer + data
+    
     def flush(self):
         if self.out:
             if not self._sentHeaders:
                 self.out.write(self.getHeaders())
                 self._sentHeaders = 1
-                
             self.out.write(self.buffer)
             self.buffer = ""
-    
+            
+    def end(self):
+        self.flush()
+        raise Finished
 
-    #### PUBLIC METHODS ####################
-
-    def start(self):
-        """start() ... from the Part interface.."""
-        self.clear()
+    ## header stuff #####################################
         
-
-    def write(self, data):
-        self.buffer = self.buffer + data
-
-
     def getHeaders(self):
         res = "Content-type: " + self.contentType + "\n"
-        for h in self.headers:
-            # each header is a (key, value) tuple
-            if h[1] is not None:
-                res = res + h[0] + ": " + h[1] + "\n"
-            #@TODO: should h[1]==None throw an error?
+        for k,v in self.headers:
+            res += "%s:%s\n" % (k,v)
         return res + "\n"
 
-
     def addHeader(self, key, value):
-        self.headers = self.headers + [(key, value)]
+        assert value is not None
+        self.headers.append((key, value))
 
-
-    # @TODO: actually populate the cookies list
     def addCookie(self, key, value):
         self.addHeader("Set-Cookie", key + "=" + value)
 
-
-    def end(self):
-        self.flush()
-        sys.exit()
-
-
     def redirect(self, url):
-        # http://ppewww.ph.gla.ac.uk/~flavell/www/post-redirect.html
-        # except it doesn't work with IIS, so:
-        server = os.environ.get('SERVER_SOFTWARE', '')
-        if string.find(server, 'Microsoft')<>-1:
-            self.clear()
-            self.write(weblib.trim(
-                '''
-                <SCRIPT language="Javascript">
-                document.location='%s';
-                </SCRIPT>
-                ''' % url))
-            self.end()
         self.addHeader("Status", "303")
         self.addHeader("Location", url)
         self.end()
-
-
-    def clear(self):
-        """Reset all attributes to their defaults.."""
-
-        for atr in ('contentType', 'headers', 'cookies', 'buffer'):
-            setattr(self, atr, getattr(self.__class__, atr))
-
-        self._sentHeaders = 0
-            
-
-    #### NOT IMPLEMENTED YET #####################
-    #
-    # these are part of the ASP Response object
-    # but not this one:
-    #
-    # appendToLog() - doesn't really apply to apache
-    # binaryWrite() - do we need this?
-    # flush() - also for buffering.. could do someday
-    #
-    # cacheControl - the cache-control header
-    # charSet - the charset header
-    # contentType - the content-type header
-    # expires - the expires header, in... minutes?
-    # expiresAbsolute - the expires header as a date
-    # isClientConnected - browser still connected?
-    # PICS - a PICS content-rating label
-    # Status - HTTP response code.. can i change this?!?
-    #
-    # Cookies - replaced by addCookie()
-

@@ -10,7 +10,8 @@ from twisted.web.resource import Resource
 class RantResource(Resource):
     isLeaf = 1
     def render(self, request):
-        return "RantResource"
+        import pdb; pdb.set_trace()
+        return "RantResource: " + str(dir(request)) 
 
 application = Application("rantserver")
 application.listenTCP(8109, Site(RantResource()),

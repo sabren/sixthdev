@@ -13,6 +13,13 @@ class Redirect(Exception):
     """
     pass
 
+class Finished(Exception):
+    """
+    Raise this when you're done with your page.
+    Or call RES.end()
+    """
+    pass
+
 from handy import trim
 from handy import uid
 

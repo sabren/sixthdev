@@ -45,8 +45,10 @@ class EngineTest(unittest.TestCase):
         try:
             eng = Engine(script="raise SystemExit")
             eng.run()
+            gotError = 0
         except SystemExit:
-            raise AssertionError, "Engine doesn't trap sys.exit()!"
+            gotError = 1
+        assert not gotError, "Engine doesn't trap sys.exit()!"
 
 
     def test_runtwice(self):

@@ -9,6 +9,7 @@ import traceback
 import sys
 import os
 import handy
+from weblib import Finished
 
 class Engine(object):
 
@@ -18,14 +19,14 @@ class Engine(object):
     REDIRECT  = "* redirect *"
     EXIT      = "* exit *"
 
-    def __init__(self, script=None, request=None, response=None,
+    def __init__(self, script=None, request=None,
                  SITE_NAME=None, SITE_MAIL=None, **kw):
         """
         script can be a string with actual code or a file object.
         """
         self.script = script
         self.request = request or weblib.Request()
-        self.response = response or weblib.Response()
+        self.response = None # until run()
         self.result = None
         self.error = None
 
@@ -67,7 +68,7 @@ class Engine(object):
         """
         Start the Engine
         """
-        self.response.start()
+        self.response = weblib.Response()
         self.injectParts()
         self.setPathInfo()
 
@@ -108,7 +109,7 @@ class Engine(object):
             self.script = script
             self.setPathInfo() 
             self._execute(script)
-        except SystemExit:
+        except Finished:
             self.result = self.EXIT
         except AssertionError, e:
             self.result = self.FAILURE
@@ -122,7 +123,7 @@ class Engine(object):
                         self.request.environ["PATH_INFO"] + where)
                 else:
                     self.response.redirect(where)
-            except SystemExit:
+            except Finished:
                 pass
         except:
             self.result = self.EXCEPTION            

@@ -38,6 +38,7 @@ class Request(object):
     ## private methods #################################################
 
     def _doEnvironJunk(self, environ=None):
+        # @TODO: move me to CgiEngine
         if environ is not None:
             self.environ = environ
         else:
@@ -80,6 +81,8 @@ class Request(object):
                 else:
                     self.method = "GET"
 
+
+    # @TODO: Request should not know anything at all about contentype
     def _doTypeJunk(self, contentType):
         ## contentType:
         if contentType is not None:
