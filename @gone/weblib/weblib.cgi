@@ -1,6 +1,6 @@
-#!/usr/home/sabren/bin/python
-
-# pyweb : a wrapper script for weblib
+#!c:\program files\python\python
+#
+# weblib.cgi : a wrapper script for weblib
 # inspired by http://www.webtechniques.com/archives/1998/02/kuchling/
 #
 # USAGE:
@@ -8,32 +8,33 @@
 # Either do #!/your_path/pyweb at the top of your CGI script,
 # or save this in your cgi-bin, and do this in your Apache .htaccess file:
 #
-# Action application/python-script /cgi-bin/pyweb
+# Action application/python-script /cgi-bin/weblib.cgi
 # AddType application/python-script .py
 
 
+## debugging help ################################################
+## you can uncomment this temporarily if you need help 
+## debugging Internal Server Errors..
+
+#import sys
+#print "content-type: text/plain"
+#print
+#sys.stderr = sys.stdout
+
+## import required modules #######################################
 import os.path, sys, string, weblib, StringIO
 
-    
 ## allow imports from script directory ###########################
 
 path = os.environ["PATH_TRANSLATED"]
-dir = string.join(string.split(path,"/")[:-1], "/")
+dir = string.join(string.split(path,os.sep)[:-1], os.sep)
 sys.path.append(dir)
-
-## debugging help ##################################################
-## uncomment this only to help debugging Internal Server Errors..
-
-## print "content-type: text/plain"
-## print
-## sys.stderr = sys.stdout
 
 
 ## run .weblib.py ################################################
 
-if os.path.exists(dir+"/.weblib.py"):
-    execfile(dir+"/.weblib.py")
-
+if os.path.exists(dir+os.sep+".weblib.py"):
+    execfile(dir+os.sep+".weblib.py")
 
 ## run the script ################################################
 
@@ -54,7 +55,11 @@ else:
           <head>
           <title>pyweb error</title>
           <style type="text/css">
-              body, p { background: #cccccc; font-family: verdana, arial; font-size: 75%; }
+              body, p {
+                  background: #cccccc;
+                  font-family: verdana, arial;
+                  font-size: 75%;
+              }
               pre { font-size: 120%; }
               pre.traceback { color: red; }
               pre.output{ color : green }
@@ -67,8 +72,10 @@ else:
 
     elif eng.result == eng.EXCEPTION:
     
-        print "<b>pyweb error while running %s</b><br>" % os.environ["PATH_TRANSLATED"]
-        print '<pre class="traceback">' + weblib.htmlEncode(eng.error) + "</pre>"
+        print "<b>pyweb error while running %s</b><br>" \
+              % os.environ["PATH_TRANSLATED"]
+        print '<pre class="traceback">' \
+              + weblib.htmlEncode(eng.error) + "</pre>"
 
         print "<b>script input:</b>"
 
@@ -87,11 +94,7 @@ else:
         
     print "<hr>"
     print '<a href="http://weblib.sourceforge.net/">weblib</a> ' + \
-          '(c) copyright 2000 <a href="http://www.zike.net/">Zike Interactive</a>. ' + \
+          '(c) copyright 2000 ' + \
+          '<a href="http://www.zike.net/">Zike Interactive</a>. ' + \
           'All rights reserved.'    
     print "</html>"
-
-
-
-
-
