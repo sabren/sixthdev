@@ -1,0 +1,207 @@
+7:04 PM 2/16/01 we're off! check existing zikeplan sources into cvs
+7:10 PM 2/16/01 finally checked out latest versions (after figuring out where it was)
+		setting off to create new database schema, based on old schema
+7:13 PM 2/16/01 debating whether project/area ought to really be a hierarchy.
+7:15 PM 2/16/01 decided to ditch bug_target table, since this is redundant with dates..
+7:17 PM 2/16/01 realize buggernaut, zikeplan, and msdc are one and same!!!
+		will call tables bug_ so as not to conflict with old tables : FOR NOW!
+7:18 PM 2/16/01 changed my mind..
+7:20 PM 2/16/01 add risk/reward on scale of 1..10
+7:21 PM 2/16/01 plan_goal_task, so goals and tasks are *:*
+7:23 PM 2/16/01 high winds coming through.. check TV in case I'm about to wind up in kansas.
+7:26 PM 2/16/01 big storm has passed.. this one is just minor. no worries.
+7:26 PM 2/16/01 crap! almost a half hour has gone by!
+7:29 PM 2/16/01 came up with task_history idea to track changes.. decided to veto for now.
+7:31 PM 2/16/01 grab base_user, base_contact table from zikebase (sixthday)
+7:32 PM 2/16/01 wondering why i even have user.UID, since it's never used..
+7:33 PM 2/16/01 base plan_task_note on base_content 
+                (could..should? inhert, but 1:1 is-a relationships suck in zdc right now)
+7:36 PM 2/16/01 looking over db schema. I'm happy. let's go.
+7:38 PM 2/16/01 posted update to sabren.net.. installing DB.
+7:41 PM 2/16/01 fixed bugs in sql, imported tables.
+7:43 PM 2/16/01 checked in to cvs.. NOW! to create the app.
+7:44 PM 2/16/01 grabbed generic module.zb (sixthday) - not much in it, but oh well
+7:44 PM 2/16/01 wrote sqlPlan (based on sqlTest.py) to connect to db.
+7:45 PM 2/16/01 decided to make generic script to generate my recordsets
+7:48 PM 2/16/01 realized generator would take a little more work than I want to do.. 
+7:51 PM 2/16/01 save copies of sixthday template for Goal, Task, Status, Note, Type
+7:52 PM 2/16/01 fill in templates, add to __init__ (wish I had classfile working)
+7:54 PM 2/16/01 making Goal a subclass of zikebase.Node (and griping about zikebase.load)
+7:55 PM 2/16/01 some asshole is outside honking his horn.. debating killing him.
+7:55 PM 2/16/01 looking at zikebase.Node... realizing I need to extend plan_goal to
+                include the Node-like fields for hierarchy.
+7:58 PM 2/16/01 note to self: base_node has useless fields.. (or my sql dump is old)
+8:00 PM 2/16/01 debating whether to rename goal.name to .label -> I'll worry about it later.
+8:02 PM 2/16/01 checked in new sql... updating blog.
+8:05 PM 2/16/01 goal turns out to be just straight copy of node for now: so.. no test
+8:06 PM 2/16/01 Note: subclass Content .. default taskID to 0...
+                thought about adding accessor for task, 
+                but not sure i need it... so again, no tests.
+8:10 PM 2/16/01 thinking there ought to be a generic Label class for Status, Type..
+8:11 PM 2/16/01 considering renaming status, type to StatusLabel, TypeLabel
+                also maybe creating a naming scheme.. eg, plan_ref_status.. not sure.
+                decided not to for now.
+8:13 PM 2/16/01 saved Status.py as Type.py and did search/replace (only 17 lines..)
+8:14 PM 2/16/01 start working on Task.
+8:16 PM 2/16/01 task has CreateStamp.. setting self._data['createDate'] = zdc.TIMESTAMP
+                .. but not really sure if it's right.
+8:18 PM 2/16/01 added @TODO: should goals also have target and create dates? I think so.
+8:19 PM 2/16/01 renamed hrsElapsed to hrsElap for consistency.. 
+                status => statusID .. 
+                made typeID, statusID ints (were varchars accidentally)
+8:23 PM 2/16/01 putting off handling notes until I get a basic app running.
+8:23 PM 2/16/01 updatin cvs
+8:29 PM 2/16/01 updated blog.
+8:29 PM 2/16/01 thinking about how to present this data:
+                - Type and Status are the same for all projects at the moment, 
+                  so they should be edited in a systemwide admin area, if at all.
+                - Users should have access to add, edit, and comment on tasks.
+                - some bug lists (goals) should be public (read only)
+                - others public with add permissions for nonusers
+                - others password protected 
+                - can always do fancier permission stuff later.
+
+                SO:
+		   - submit task (bug/challenge/request/whatever) screen [for public]
+                   - add/edit task [for users]
+                   - show tasks for a goal
+                   - show all tasks for user, grouped by goal
+                   - advanced query/reporting (??)
+
+8:38 PM 2/16/01 updating blog..
+8:41 PM 2/16/01 taking a break. I'm starving.
+9:10 PM 2/16/01 back. updating blog with ideas.
+9:14 PM 2/16/01 thinking about how to lay out admin side...
+                had idea for Auth that could authenticate against .htpasswd files..
+9:21 PM 2/16/01 planning admin app for users, types, goals.
+                wondering whether goals should be in public area. 
+                I think they should be, and that each user should have own goals.
+                But that's out of scope. For now, goals are set by admin.
+9:23 PM 2/16/01 setting out to create admin app.
+9:23 PM 2/16/01 copy generic adminapp.py as admin/index.py .. wishing there were
+                example templates, but not really seeing how this would work just
+                yet.. maybe just have a generic lst_xxxx.zb, etc for reference?
+9:26 PM 2/16/01 thinking again about creating *.act files.. 
+                meanwhile adding __name__=="__main__" line...
+                (act would create an anonymous class FOR you, but how to extend?)
+9:28 PM 2/16/01 setting act_ to list goals, since it's probably most common..
+9:29 PM 2/16/01 running it. [first time I'm actually executing code]
+9:31 PM 2/16/01 internal server error.. copying generic .weblib.py to debug
+9:33 PM 2/16/01 still getting internal server error..
+9:35 PM 2/16/01 uncommenting catchall lines in weblib.cgi.. 
+                it blanks out screen. 
+                recomment, and I get 500 error.. 
+9:36 PM 2/16/01 really wishing I had a debugger!
+9:37 PM 2/16/01 make test.py .. one line: 'print "hello"'
+9:39 PM 2/16/01 ok.. even zikeshop is dead on that machine.
+                it gives: 
+                _mysql.OperationalError: (1030, 'Got error 127 from table handler')
+9:41 PM 2/16/01 still get it after shutting down MySQL.. this isn't good.
+9:43 PM 2/16/01 bizarre.. web_sess ran out of space or got corrupted or something.
+                "DELETE FROM web_sess" fixed it though....
+                delete test.py, back to admin/index.py
+9:45 PM 2/16/01 successfully shows contents of lst_goal.zb!! (a single word)
+                restroom break
+9:48 PM 2/16/01 populating ZikePlanAdminApp.what..
+                package is called buggernaut, but I want it to be called zikeplan.
+                i know that'll screw things up for now so I make a fake module called 
+                zikeplan.py that just does import * from buggernaut
+9:50 PM 2/16/01 ran index.py - broke because no db set up.. updating .weblib.py
+9:51 PM 2/16/01 wishing zdc.drivers.DBAPI2Driver.DBAPI2Driver  was simpler
+9:53 PM 2/16/01 ICK! Can't do zikebase.load("Node") without defining base_node.
+                That really sucks.
+                For now, will add table (base_content, too). 
+                Later, clean this up!!
+9:58 PM 2/16/01 had to fix a template problem in all the zdcRecordObject classes.
+                fixed the template.
+                REALLY need to make RecordObject._table just a string.
+9:59 PM 2/16/01 updating blog
+10:04 PM 2/16/01 editing lst_goal... tried * for list, but list isn't defined.
+10:07 PM 2/16/01 list isn't defined because .qry_goal not defined. 
+                 @TODO: pprint.pprint(scope) reveals this:
+ 'errors': [{'error': 's'},
+            {'error': 'e'},
+            {'error': 'l'},
+            {'error': 'f'},
+            {'error': '.'},
+            {'error': 'q'},
+            {'error': 'r'},
+            {'error': 'y'},
+            {'error': '_'},
+            {'error': 'g'},
+            {'error': 'o'},
+            {'error': 'a'},
+            {'error': 'l'},
+            {'error': '('},
+            {'error': ')'},
+            {'error': ' '},
+            {'error': 'n'},
+            {'error': 'o'},
+            {'error': 't'},
+            {'error': ' '},
+            {'error': 'd'},
+            {'error': 'e'},
+            {'error': 'f'},
+            {'error': 'i'},
+            {'error': 'n'},
+            {'error': 'e'},
+            {'error': 'd'}], 
+10:08 PM 2/16/01 defining qry_goal
+10:10 PM 2/16/01 where did zdc.ObjectView.py go???!?!?! 
+                 somehow got deleted. 
+		 cvs update fixed it.
+10:13 PM 2/16/01 this is WAY UNINTUITIVE ... ObjectView should be automatic,
+                 or should at least be possible without map():
+
+    def qry_goal(self):
+        return map(zdc.ObjectView, zikebase.dbc.select(zikeplan.Goal))
+
+10:14 PM 2/16/01 adding "add new" button..
+10:15 PM 2/16/01 not showing error messages (because of, I know..)
+10:17 PM 2/16/01 added exit routine to print errors:
+      ['f', 'r', 'm', '_', 'g', 'o', 'a', 'l', ' ', 't', 'e', 'm', 'p', 'l', 'a', 't', 'e', ' ', 'n', 'o', 't', ' ', 'f', 'o', 'u', 'n', 'd'] 
+10:17 PM 2/16/01 really wish I had a generic frm_new page..
+10:18 PM 2/16/01 zebra ought to have for @fields or something, where @ is special group..
+10:20 PM 2/16/01 times are off between my two machines, 
+                 so I have to delete *.zb every time I update.. argh..
+10:21 PM 2/16/01 added simple goal editor (name only - ignoring hierarchy stuff for now)
+10:21 PM 2/16/01 adding navigation.. put call to dsp_head in .enter()
+                 shouldn't that be OnEnter() ??
+10:25 PM 2/16/01 wishing zebra didn't chomp up whitespace inside stripes...
+10:28 PM 2/16/01 generic label pages..
+10:28 PM 2/16/01 actually, now that I think about it, qry_XXX should be generic..
+                 it should just select ALL objects of that type.
+10:32 PM 2/16/01 bit confused why status/type wouldn't edit until I realized i needed to add to .what
+10:34 PM 2/16/01 updating blog.
+10:37 PM 2/16/01 updating cvs
+10:41 PM 2/16/01 now what?  
+   [daydreaming...]
+10:54 PM 2/16/01 added generic useradmin pages..
+10:55 PM 2/16/01 added user m/m - got pyweb error about validation.
+                 isn't it about time to stop talking about pyweb errors 
+                 and call 'em weblib errors instead?
+10:56 PM 2/16/01 adding call to dsp_head in Enter
+10:57 PM 2/16/01 cool idea:
+                 could actors be composites? maybe call 'em Ensembles?
+                 then you could just add actors to the ensemble... interesting..
+11:00 PM 2/16/01 updating blog
+11:03 PM 2/16/01 public goal page..
+                 thinking it would be great to break the list and add/edit/delete actors 
+                 off from adminactor..
+                 also, I always think "add" when really it's "create"... interesting..
+11:06 PM 2/16/01 deciding to cheat, and break the old app down into pages..
+11:09 PM 2/16/01 making TaskAdmin..
+11:13 PM 2/16/01 for some odd reason, had trouble copying .weblib.py
+                 why do i actually have to copy .weblib.py ??
+11:15 PM 2/16/01 internal server error on attempting to create task.. why?
+11:15 PM 2/16/01 editing .weblib.py doesn't help..
+11:16 PM 2/16/01 uncommenting weblib.cgi gives blank screen.
+11:22 PM 2/16/01 aha.. the internal server error was on submitting to index.py
+                 which doesn't exist.. maybe:
+                      a) forms just shouldn't have an ACTION, so they self-submit
+                      b) weblib.cgi should give a 404 error, not a 500!
+11:25 PM 2/16/01 task.summary ought to be => .label or .name
+11:27 PM 2/16/01 updating blog - time's up.
+==================================================================
+
+
