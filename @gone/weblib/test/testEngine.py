@@ -63,12 +63,14 @@ class EngineTestCase(unittest.TestCase):
 
     def check_context(self):
         eng1 = weblib.Engine(script="print 'eng1'")   # default case
-        eng2 = weblib.Engine(script="print 'eng2'",   # explicit 
-                             auth=weblib.Auth(),
-                             sess=weblib.Sess(),
-                             perm=weblib.Perm(),
-                             request=weblib.Request(),
-                             response=weblib.Response())
+
+        eng2 = weblib.Engine(script="print 'eng2'")   # explicit 
+        eng2.sess=weblib.Sess(engine=eng2)
+        eng2.auth=weblib.Auth(engine=eng2)
+        eng2.perm=weblib.Perm(engine=eng2)
+        eng2.request=weblib.Request(engine=eng2)
+        eng2.response=weblib.Response(engine=eng2)
+                             
         eng3 = weblib.Engine(script="print 'eng3'", ) # default after explicit pass
 
         for eng in (eng1, eng2, eng3):
@@ -119,13 +121,21 @@ class EngineTestCase(unittest.TestCase):
 
         import weblib
         import __builtin__
+
+
+        self.sess = weblib.Sess(engine=self)
+        self.auth = weblib.Auth(engine=self)
+        self.perm = weblib.Perm(engine=self)
+        self.request = weblib.Request(engine=self)
+        self.response = weblib.Response(engine=self)
+
         
         __builtin__.good = {
-            "auth" : weblib.Auth(),
-            "sess" : weblib.Sess(),
-            "perm" : weblib.Perm(),
-            "request" : weblib.Request(),
-            "response" : weblib.Response()
+            "sess" : self.sess,
+            "auth" : self.auth,
+            "perm" : self.perm,
+            "request" : self.request,
+            "response" : self.response
             }
         
         weblib.Engine(

@@ -16,7 +16,7 @@ class Response:
             weblib.response = self
 
         self.out = out
-        self.clear()
+        self.start()
 
 
 ##     def __getattr__(self, name):
@@ -47,6 +47,11 @@ class Response:
     
 
     #### PUBLIC METHODS ####################
+
+    def start(self):
+        """start() ... from the Part interface.."""
+        self.clear()
+        
 
     def write(self, data):
         self.buffer = self.buffer + data

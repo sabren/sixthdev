@@ -18,30 +18,32 @@ except ImportError:
 
 ## Sess : a session handler ################
 
-class Sess(UserDict.UserDict):
+class Sess:
 
     ## attributes ##########################
+
+    sid = ""
+    name = "weblib.Sess"
+    mode = "cookie"
+    fallbackMode = "get"
+    magic = "abracadabra"
+    lifetime = 0
+    gcTime = 1440   # purge sessions older than 24 hrs (1440 mins)
+    gcProb = 1      # probability of garbage collection as a %
+
+
+    ## constructor ############################
 
     def __init__(self, pool=None, engine=weblib):
 
         self.engine = engine
-        # if we don't have an engine, store a pointer to us in weblib:
-        if self.engine is weblib:
-            weblib.sess = self
-        
-        self.sid = ""
-        self.name = "weblib.Sess"
-        self.mode = "cookie"
-        self.fallbackMode = "get"
-        self.magic = "abracadabra"
-        self.lifetime = 0
-        self.gcTime = 1440 # purge sessions older than 24 hrs (1440 mins)
-        self.gcProb = 1    # probability of garbage collection as a %
-        
-        # naturally, you keep your Sess in a SessPool.. :)
-        
-        self._pool = pool   # where to store the data
-        self.data = {}      # all the stuff to remember
+
+        if pool is None:
+            from weblib.config import pool
+            
+        self._pool = pool     # where to store the data
+        self._warmData = {}   # unpickled, live data
+        self._coldData = {}   # still-pickled data
 
 
 
@@ -86,7 +88,15 @@ class Sess(UserDict.UserDict):
 
     def freeze(self):
         """freezes sess and dumps it into the sesspool. call at end of page"""
-        self._pool.putSess(self.name, self.sid, dumps(self.data, 1)) # 1 for binary
+
+        # first, merge warm and cool data:
+
+        for key in self._warmData.keys():
+            self._coldData[key] = dumps(self._warmData[key], 1)
+
+        # now, freeze the cold stuff
+        
+        self._pool.putSess(self.name, self.sid, dumps(self._coldData, 1)) # 1 for binary
 
 
 
@@ -95,11 +105,71 @@ class Sess(UserDict.UserDict):
         """gets a frozen sess out of the sesspool and thaws it out"""
         frozen = self._pool.getSess(self.name, self.sid)
         if frozen is None:
-            self.data = {}
+            self._coldData = {}
         else:
-            self.data = loads(frozen)
+            self._coldData = loads(frozen)
+
+        # nothing is actually warm until you use it:
+        self._warmData = {}
 
 
+    ## dictionary methods ####################
+    
+    # note that we can't subclass UserDict anymore because we're
+    # dealing with two internal dictionaries..
+    #
+    # We use two dictionaries so that things are only unpickled when
+    # you ask for them. This may or may not speed things up, but it
+    # lets us pickle objects without forcing the engine to declare
+    # them first.
+    #
+    # ie: To unpickle an instance of class X, class X must be defined
+    # in the current namespace. So, if you pickle an X instance on one
+    # page, every other page would have to import X. That's a pain,
+    # because you can easily break unrelated pages. The two-dictionary
+    # setup prevents this situation. With two dictionaries, you only
+    # have to import X on pages that actually use the instance.
+    #
+    # The "warm" dictionary is the live data. The "cold" dictionary
+    # is the pickled data we're not using right now.
+    
+
+    def has_key(self, name):
+        return self._warmData.has_key(name) or self._coldData.has_key(name)
+
+
+    def __setitem__(self, key, value):
+        self._warmData[key] = value
+
+
+    def __getitem__(self, key):
+        if self._warmData.has_key(key):
+            return self._warmData[key]
+        
+        elif self._coldData.has_key(key):
+            self._warmData[key] = loads(self._coldData[key])
+            return self._warmData[key]
+        
+        else:
+            raise KeyError, key + " not found in session."
+
+
+    def keys(self):
+        allKeys = self._coldData.keys()
+        for key in self._warmData.keys():
+            if not key in allKeys:
+                allKeys.append(key)
+        return allKeys
+        
+    
+
+    def get(self, name, failObj = None):
+        try:
+            return self[key]
+        except KeyError:
+            return failObj
+
+            
 
     ## internal methods ####################
 

@@ -17,20 +17,28 @@ class Auth:
     LOGINFAILED = 'Login failed.'
     PLEASELOGIN = 'Please log in.'
 
+    _isStarted = 0
+
     ## constructor #############################
     
-    def __init__(self, authKey=None, engine=weblib):
+    def __init__(self, engine=weblib):
 
         self.engine = engine
-        if engine is weblib:
-            weblib.auth = self
+        self.engine.auth = self  #@TODO: ???????
 
+
+    ## public methods #########################
+
+    def start(self, key=None):
+        """Must be called after the engine's session has started"""
+
+        self._isStarted = 1
         self.isLoggedIn = 1 # assume the best
         
-        if authKey:
-            self.key = authKey
+        if key:
+            self.key = key
             
-        elif engine.sess.has_key('__auth_key'):
+        elif self.engine.sess.has_key('__auth_key'):
             self.key = self.engine.sess['__auth_key']
             
         else:
@@ -38,11 +46,11 @@ class Auth:
 
 
 
-    ## public methods #########################
-
     def check(self):
-
         """Makes sure the user is authenticated. If not, prompts for credentials."""
+
+        if not self._isStarted:
+            self.start()
         
         if self.engine.request.query.has_key('auth_logout_flag'):
             self.logout()

@@ -22,6 +22,17 @@ class Engine:
 
     def __init__(self, script=None, pool=None, **kw):
 
+        ### NOTE:
+        ### I'm beginning to think that passing these things
+        ### in as a parameter doesn't make much sense..
+        ### especially, since auth checks in the session
+        ### to find a session key (and thus requires an engine      
+        ### just in the __init__)
+        ###
+        ### but maybe that's just a stupid way to do things,
+        ### and I ought to give Auth a start() method just
+        ### like sess... ? Probably same for Perm(), too.. (?)
+
         self.script = script       
 
         # first make sure they haven't passed us any bogus
@@ -61,6 +72,11 @@ class Engine:
         sys.stdout = self.stdout
 
 
+    def startParts(self):
+        self.sess.start()
+        self.auth.start()
+        self.response.start()
+
 
     def injectParts(self):
         """Injects our parts into the weblib namespace"""
@@ -80,12 +96,10 @@ class Engine:
             setattr(weblib, part, self._oldParts[part])
 
 
-
     def setUp(self):
+        self.startParts()
         self.injectParts()
         self.interceptPrint()
-        self.response.clear()
-
 
 
     def tearDown(self):
@@ -109,4 +123,5 @@ class Engine:
                 pass # don't really quit on response.end()                
         finally:
             self.tearDown()
+
 
