@@ -94,7 +94,17 @@ class MySQLStorage(Storage):
             self._execute("DELETE FROM %s WHERE ID=%s" % (table, where))
 
     def _execute(self, sql):
-        try:
-            self.cur.execute(sql)
-        except Exception, e:
-            raise Exception, str(e) + ":" + sql
+        import MySQLdb
+        self.maxAttempts = 3
+        attempt = 0
+        while attempt < self.maxAttempts:
+            # trap for OperationalError: usually means the db is down.
+            try:
+                self.cur.execute(sql)
+                break
+            except MySQLdb.OperationalError:
+                attempt += 1
+            except Exception, e:
+                raise Exception, str(e) + ":" + sql
+        else:
+            raise Exception, "couldn't connect after %s tries" % attempt
