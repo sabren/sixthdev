@@ -8,7 +8,7 @@ __ver__="$Id$"
 ## account, so you'll have to override this yourself:
 merchant = {
     "AuthorizeNet" : None,
-    "Verisign" : ("zikeinteract","accessbak"),
+    "Verisign" : None,
     }
 
 ## Here's a simple way to override it without
