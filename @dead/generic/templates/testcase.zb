@@ -1,0 +1,17 @@
+"""
+test cases for XXX
+"""
+__ver__="$Id$"
+
+import unittest
+
+class XXXTestCase(unittest.TestCase):
+
+    def setUp(self):
+        pass
+
+    def check_XXX(self):
+        pass
+    
+    def tearDown(self):
+        pass
