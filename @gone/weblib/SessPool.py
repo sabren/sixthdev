@@ -45,7 +45,14 @@ class SqlSessPool:
         cur = self.dbc.cursor()
         cur.execute("select sess from " + self.table + \
                     " where name='" + name + "' and sid='" + sid + "'")
-        row = cur.fetchone()
+
+        try:
+            ## GRR.. the win32 mysql has a problem with this..
+            #@TODO: find a way to isolate stuff like this..
+            row = cur.fetchone()
+        except:
+            row = None
+            
         if row is None:
             return row
         else:
