@@ -1,3 +1,10 @@
+"""
+adm_product.py - product administration for zikeshop
+
+$Id$
+"""
+
+
 
 import zikeshop
 import weblib
