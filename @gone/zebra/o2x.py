@@ -64,6 +64,12 @@ def o2x ( text ):
     res   = "" # results to return
     stack = [] # stack of xml tags
     lines = string.split(text, "\n")
+
+    # if there's a blank line at the end,
+    # ignore it (useful for zebra)
+    if lines[-1] == "":
+        lines = lines[:-1]
+    
     depth = lastdepth = 0
     lineno = 0
 
