@@ -203,10 +203,11 @@ class Cashier(zikeshop.ShopActor):
             pmt = payment.create("AuthorizeNet",
                                  merchant=zikeshop.authorizenetmerchant,
                                  card= theCard.number,
-                                 expires= theCard.expMonth+"/"+theCard.expYear,
+                                 expires= str(theCard.expMonth)+"/"+\
+                                          str(theCard.expYear),
                                  )
             pmt.charge(total) # fixedpoint
-            if acct.result != payment.APPROVED:
+            if pmt.result != payment.APPROVED:
                 raise ValueError, "charge not accepted."
         
 
@@ -283,6 +284,9 @@ class Cashier(zikeshop.ShopActor):
         res["addressbook"] = self.cust.q_addressbook()
         res["creditcards"] = self.cust.q_creditcards()
         return res
+
+
+
 
 
 
