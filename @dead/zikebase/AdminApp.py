@@ -5,7 +5,15 @@ __ver__="$Id$"
 
 import weblib, zebra
 
-class AppActor(weblib.Actor):
+class AdminApp(weblib.Actor):
+    __super = weblib.Actor
+
+    def __init__(self, input=None):
+        self.__super.__init__(self, input)
+        self.what = {}
+
+    def map_what(self, what):
+        return self.what.get("what")
 
     def enter(self):
         weblib.auth.check()
@@ -14,29 +22,6 @@ class AppActor(weblib.Actor):
     def exit(self):
         zebra.show("dsp_foot")
     
-    def complain(self, problem):
-        """
-        Prints a pretty error message.
-        """
-        print '<b>[</b><span style="color:red">error:</span> %s<b>]</b>' \
-              % problem
-
-    def consult(self, newModel):
-        """
-        updates the Actor's internal model based on newModel.
-        newModel can be either a module name or a dict.
-
-        if it's a module name, the module should contain
-        a dict called model.
-        """
-        # models and modules.... heh... :)
-        if type(newModel) == type(""):
-            self.model.update(__import__(newModel).model)
-        else:
-            # assume it's a dict of sorts:
-            for item in newModel.keys():
-                self.model[item] = newModel[item]
-
     def act_list(self):
         """
         generic list routine
@@ -47,9 +32,15 @@ class AppActor(weblib.Actor):
         else:
             import zebra
             try:
-                zebra.show("lst_%s" % what)
+                self.consult({
+                    "list": getattr(self, "qry_%s" % what)()
+                    })
+            except AttributeError:
+                self.complain("self.qry_%s() not defined" % what)
+            try:
+                zebra.show("lst_%s" % what, self.model)
             except IOError:
-                print "[error: unable to load lst_%s]" % what
+                self.complain("unable to load lst_%s" % what)
 
 
     def act_show(self):
@@ -66,9 +57,9 @@ class AppActor(weblib.Actor):
             #@TODO: this ID stuff is just a hack to get categories working.
             #@TODO: there needs to be a generic scheme for doing this..
             if self.input.get("ID"):
-                obj = self.fetch_class(what)(ID=self.input.get("ID"))
+                obj = self.map_what(what)(ID=self.input.get("ID"))
             else:
-                obj = self.fetch_class(what)()
+                obj = self.map_what(what)()
                 obj.ID = 0
             self.consult(zdc.ObjectView(obj))
             try:
@@ -84,7 +75,7 @@ class AppActor(weblib.Actor):
             what = self.input.get("what", "")
             import zdc
             zebra.show("frm_%s" % what, zdc.ObjectView(
-                self.fetch_class(what)(ID=self.input.get("ID"))))
+                self.map_what(what)(ID=self.input.get("ID"))))
         else:
             print "[error: no ID given]"
         
@@ -96,29 +87,26 @@ class AppActor(weblib.Actor):
         self.objectEdit("delete")
         next = self._whatnext()
         if not next:
-            self.perform("lst_%s" % what)
+            self.do("list", what=what)
         else:
             #@TODO: clean up / clarify this magic side effect.. (_next_)
             self.input = self._next_
-            self.perform(next)
+            self.do(next)
 
 
     def act_save(self):
         """
         Generic object-deletion mechanism.
         """
-        #@TODO: get rid of siteID crap
-        import zikeshop
-        zikeshop.siteID = weblib.auth.user.siteID
         what = self.input.get("what", "")
         self.objectEdit("save")
         next = self._whatnext()
         if not next:
-            self.perform("lst_%s" % what)
+            self.do("list", what=what)
         else:
             #@TODO: clean up / clarify this magic side effect.. (_next_)
             self.input = self._next_
-            self.perform(next)
+            self.do(next)
 
     def objectEdit(self, command):
         """
@@ -127,14 +115,12 @@ class AppActor(weblib.Actor):
         a 'what' in on the input string.
         """
         what = self.input.get("what", "")
-        klass = self.fetch_class(what)
+        klass = self.map_what(what)
         if klass:
             import zikebase
-            #@TODO: clean this siteID junk up
-            self.input["siteID"] = weblib.auth.user.siteID
             ed = zikebase.ObjectEditor(klass,
                      self.input.get("ID"), input=self.input)
-            ed.act(command)
+            ed.do(command)
         else:
             print "don't know how to %s a %s" % (command, what)
 
@@ -146,9 +132,9 @@ class AppActor(weblib.Actor):
         try:
             import zdc
             zebra.show("frm_%s" % what, zdc.ObjectView(
-                self.fetch_class(what)()))
+                self.map_what(what)()))
         except IOError:
-            print "[error: no form to edit %s]" % what
+            self.complain("frm_%s template not found" % what)
 
     def _whatnext(self):
         _next_ = weblib.request.parse(self.input.get("_next_", ""))

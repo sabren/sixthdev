@@ -12,11 +12,8 @@ import zdc
 #@TODO: refactor all this nonsense into MultiTableRecordObject!
 class User(zikebase.Contact):
     __super = zikebase.Contact
-    #_table = zdc.Table(zikebase.dbc, "base_user")
-    #_defaults = {}
-
     passwordClass = zikebase.Password
-
+        
     def _new(self):
         self.__super._new(self)
         self._userRec = zdc.Record(
