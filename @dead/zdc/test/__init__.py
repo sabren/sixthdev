@@ -5,10 +5,14 @@ from sqlTest import dbc
 
 from testIdxDict import *
 from testRecord import *
+from testObject import *
+from testRecordObject import *
 
 suites = {
     "IdxDict": unittest.makeSuite(IdxDictTestCase, "check_"),
     "Record": unittest.makeSuite(RecordTestCase, "check_"),
+    "Object": unittest.makeSuite(ObjectTestCase, "check_"),
+    "RecordObject" : unittest.makeSuite(RecordObjectTestCase, "check_")
     }
 
 
