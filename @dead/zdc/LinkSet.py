@@ -30,14 +30,11 @@ class LinkSet(zdc.IdxDict):
         try:
             lID = self.owner.ID
             if lID is not None:
-                table = self.rClass._table.name
-                cur = self.rClass._table.dbc.cursor()
-                sql = 'SELECT %s from %s where %s=%i' \
-                      % (self.rKey, table, self.lKey, int(lID))
-                cur.execute(sql)
-                for row in cur.fetchall():
+                rows = self.rClass._table.select("%s=%i"
+                                                 % (self.lKey, int(lID)))
+                for row in rows:
                     #@TODO: unhardcode primary key for right hand class
-                    exec "self << self.rClass(ID=row[0])"
+                    self << self.rClass(ID=row["ID"])
         except:
             pass # to make a check_constructor work.. for now..
         self._loaded = 1
