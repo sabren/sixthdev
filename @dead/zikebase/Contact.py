@@ -14,3 +14,10 @@ class Contact(zdc.RecordObject):
         self.__super._new(self)
         self.userID=0
     
+    def set_email(self, value):
+        #@TODO: test set_email!
+        if value:
+            import zdc.isvalid
+            if not zdc.isvalid.email(value):
+                raise ValueError, "value is not a valid email address"
+        self._data["email"]=value

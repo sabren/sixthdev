@@ -2,8 +2,8 @@
 # test framework for zikebase
 
 import MySQLdb
-import zikebase.config
-dbc = zikebase.config.test_dbc
+import zikebase, zikebase.config
+dbc = zikebase.dbc = zikebase.config.test_dbc
 
 from testContent import *
 from testNode import *
@@ -13,6 +13,7 @@ from testUserAuth import *
 from testPassword import *
 from testRot13Password import *
 from testUserApp import *
+from testContact import *
 
 suites = {
     "objectEditor" : unittest.makeSuite(ObjectEditorTestCase, "check_"),
@@ -23,5 +24,6 @@ suites = {
     "node" : unittest.makeSuite(NodeTestCase, "check_"),
     "password": unittest.makeSuite(PasswordTestCase, "check_"),
     "rot13pass": unittest.makeSuite(Rot13PasswordTestCase, "check_"),
+    "Contact": unittest.makeSuite(ContactTestCase, "check_"),
 }	
 
