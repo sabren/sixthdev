@@ -1,67 +1,34 @@
-* include ssl_head;
-* if scope.get('error'):
-    <h2><font color="gold">{:error:}</font></h2>
+*# credit card form
+*# $Id$
+* include dsp_head;
 
-<h1>Credit Card</h1>
-
-<h3>enter your credit card info below:</h3>
+<h2>Enter your credit card information.</h2>
 
 <form action="checkout.py" method="post">
 <table border="0">
 <tr>
-<td><b>name on card:</b></td>
+<td><b>Name on card:</b></td>
 <td><input type="text" name="name" value="{:name:}"></td></tr>
-<tr><td>card number</td>
+<tr><td>Card Number</td>
     <td><input type="text" value="{:number:}" name="number"></td></tr>
-<tr><td>expiration date</td>
+<tr><td>Expiration Date</td>
 <td>
-<select name="expMonth">
-    <option>01</option>
-    <option>02</option>
-    <option>03</option>
-    <option>04</option>
-    <option>05</option>
-    <option>06</option>
-    <option>07</option>
-    <option>08</option>
-    <option>09</option>
-    <option>10</option>
-    <option>11</option>
-    <option>12</option>
-</select>
+* exec:
+   from weblib import html
+   mField = html.select("expMonth", map(lambda m: "%02i" % m, range(1,12)),
+                        "%02i" % int(expMonth))
+   yField = html.select("expYear", map(lambda m: "%04i" % m, range(2000,2026)),
+                        "%04i" % int(expYear))
 
-/
-<select name="expYear">
-    <option>2001</option>
-    <option>2002</option>
-    <option>2003</option>
-    <option>2004</option>
-    <option>2005</option>
-    <option>2006</option>
-    <option>2007</option>
-</select>
+{:mField:}&nbsp;/&nbsp;{:yField:}
 </td></tr>
 </table>
 
-<br>
+<br/>
+
 <input type="hidden" name="action" value="add_card">
-<input type="submit" value="submit">
+<input type="submit" value="process order">
 </form>
 
-*#<h2>Your Order</h2>
-*#<table border="1">
-*#* for products:
-*#     <tr><td>{:label:}
-*#     * if quantity > 1:
-*#         <b>(* {:quantity:})</b>
-*#     </td><td align="right">${:subtotal:}</td></tr>
-*#<tr><td bgcolor="#666666">SalesTax</td><td align="right">${:salestax:}</td></tr>
-*#<tr><td bgcolor="#666666">Shipping</td><td align="right">${:shipping:}</td></tr>
-*#* if adjustment:
-*#    <tr><td bgcolor="#666666">Adjustment</td><td align="right">{:adjustment:}</td></tr>
-*#<tr><td bgcolor="#000000">Total</td><td align="right">${:total:}</td></tr>
-*#</table>
-
-* include ssl_foot;
-
+* include dsp_foot;
 
