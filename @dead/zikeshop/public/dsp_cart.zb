@@ -5,26 +5,26 @@
     * head:
         <h4>contents of cart:</h4>
         <form action="{: link_cart() :}" method="POST">
-
-        <table border="1">
+        <table border="0">
 
     *# @TODO: get rid of links inside the cart ??
-    <tr><td><input name="remove_{:_:}" type="checkbox"/></td>
-        <td><a href="{:link:}">{:label:}</a></td>
-        <td><input name="quantity_{:_:}" size="3" value="{:quantity:}"></td>
-        <td align="right">x ${:price:}</td>
-        <td align="right">= ${:subtotal:}</td>
-    </tr>
+    * body:
+        <tr><td><input name="remove_{:_:}" type="checkbox"/></td>
+            <td><a href="{:link:}">{:label:}</a></td>
+            <td><input name="quantity_{:_:}" size="3"
+                       value="{:quantity:}"></td>
+            <td align="right">x ${:price:}</td>
+            <td align="right">= ${:subtotal:}</td>
+        </tr>
     * foot:
         <tr><td align="right" colspan="5">subtotal: <b>${:total:}</b></td></tr>
         </table>
         <br>
-        <input type="submit" name="action" value="update"> amounts, or
-        <input type="submit" name="action" value="remove"> checked items.
+        <input type="submit" name="action" value="remove"> checked items, or
+        &nbsp;<input type="submit" name="action" value="update"> amounts.
         </form>
         *# @TODO: put some logic here to remember users...
         <a href="{: link_checkout() :}">checkout</a>
-
 * none:
     <h4>your cart is empty</h4>
 
@@ -32,5 +32,4 @@
 <hr>
 <a href="{: link_category('/') :}">continue shopping</a>
 </font>
-* include dsp_foot:
-
+* include dsp_foot;
