@@ -32,14 +32,19 @@ class AbstractPayment:
             setattr(self, key, kwargs[key])
             
 
-    def _submit(self, dict, headers=[]):
+    def _submit(self, dict, page=None, headers=[]):
         """
         Given a dict of form variables, make the HTTPS POST.
         """
         data = urllib.urlencode(dict)
 
+        if page:
+            relurl = page
+        else:
+            relurl = self._securePage
+
         h = httpslib.HTTPS(self._secureServer)
-        h.putrequest('POST', "/" + self._securePage)
+        h.putrequest('POST', "/" + relurl)
         h.putheader('Content-type', 'application/x-www-form-urlencoded')
         h.putheader('Content-length', '%d' % len(data))
         for head in headers:
