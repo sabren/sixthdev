@@ -3,17 +3,12 @@
 from mod_python import apache
 import sys
 import os.path
-sys.path = [".", '/home/sabren/web/blogdrive.com/lib'] + sys.path
 import weblib
 
 class ModPythonEngine(weblib.Engine):
     def setPathInfo(self):
-        if not self.request.environ.get("SCRIPT_NAME"):        
-            if (type(self.script) == type("")):
-                self.request.environ["PATH_INFO"] = "UNKNOWN_SCRIPT.py"
-            else:
-                self.request.environ["PATH_INFO"] = self.script.name
-        
+        self.request.environ["PATH_INFO"] =\
+            self.request.environ["SCRIPT_NAME"]
 
 
 def handler(req):
@@ -25,7 +20,6 @@ def handler(req):
         env[bleh]=e[bleh]
         #print >> req, bleh, ":", e[bleh], "<br>"
     #return apache.OK
-
 
     wreq=weblib.Request(content=req.read(),
                         environ=env)
@@ -43,7 +37,7 @@ def handler(req):
     eng.stop()
 
 
-    if eng.result in (eng.SUCCESS, eng.EXIT):
+    if eng.result in (eng.SUCCESS, eng.REDIRECT, eng.EXIT):
         import string
         headers = eng.response.getHeaders()
         for i in string.split(headers, "\n"):
