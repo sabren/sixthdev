@@ -71,7 +71,9 @@ class Response:
         res = "Content-type: " + self.contentType + "\n"
         for h in self.headers:
             # each header is a (key, value) tuple
-            res = res + h[0] + ": " + h[1] + "\n"
+            if h[1] is not None:
+                res = res + h[0] + ": " + h[1] + "\n"
+            #@TODO: should h[1]==None throw an error?
         return res + "\n"
 
 
