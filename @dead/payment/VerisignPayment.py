@@ -9,42 +9,24 @@ import string
 from M2Crypto import httpslib, SSL ## only until python 2 comes out 
 
 class VerisignPayment(payment.AbstractPayment):
-
-    def _submit(self, dict):
-        """Given a dict of form variables, makes the HTTP POST..."""
-        data = urllib.urlencode(dict)
-
-        h = httpslib.HTTPS(SSL.Context("sslv3"), "payflowlink.verisign.com")
-        h.putrequest('POST',"/payflowlink.cfm")
-        h.putheader('Content-type', 'application/x-www-form-urlencoded')
-        h.putheader('Content-length', '%d' % len(data))
-        h.endheaders()
-        h.send(data)
-
-        errcode, errmsg, headers = h.getreply()
-        assert errcode==200, \
-               "problem reading from verisign.net: %s, %s" \
-               % (errcode, errmsg)
-        fp = h.getfile()
-
-        content = ""
-        chunk = "start"
-        while len(chunk) != 0:
-            chunk = fp.read()
-            content += chunk
-        fp.close()
-
-        return content
-
+    __super = payment.AbstractPayment
+    
+    def __init__(self, **kwargs):
+        self.__super.__init__(self, **kwargs)
+        self._secureServer = "payflowlink.verisign.com"
+        self._securePage = "payflowlink.cfm"
+        
 
     def charge(self, amount, description=""):
-        """Charge the card..."""
+        """
+        Charge the card...
+        """
 
         assert type(self.merchant) == type(()), \
-               "merchant should be a tuple of login, partner for verisign"
+               "merchant should be a tuple of (login, partner) for verisign"
 
         assert not self.test, \
-               "to test verisign, log into verisign managner and turn on test mode"
+               "to test verisign, log into its managner and turn on test mode"
 
         values = {
 
