@@ -197,14 +197,14 @@ class Clerk(object):
                 for row in self.storage.match(self.schema.tableForClass(klass),
                                               *args, **kwargs)]
 
-    def matchOne(self, klass, *args, **kwargs):
-        res = self.match(klass, *args, **kwargs)
+    def matchOne(self, klass, *arg, **kw):
+        res = self.match(klass, *arg, **kw)
         if len(res)==0:
             raise LookupError("matchOne(%s, *%s, **%s) didn't match anything!"
-                              % (klass, args, kw))
+                              % (klass, arg, kw))
         elif len(res)>1:
             raise LookupError("matchOne(%s, *%s, **%s) matched %s objects!"
-                              % (klass, args, kw, len(res)))
+                              % (klass, arg, kw, len(res)))
         return res[0]
         
    

@@ -223,3 +223,31 @@ class ClerkTest(unittest.TestCase):
         rec1b = self.clerk.fetch(Record, 1)
         assert rec1a is rec1b
         
+
+
+    def test_match(self):
+        self.clerk.store(Record(val="one"))
+        self.clerk.store(Record(val="two"))
+        self.clerk.store(Record(val="two"))
+        assert len(self.clerk.match(Record, val="zero")) == 0
+        assert len(self.clerk.match(Record, val="one")) == 1
+        assert len(self.clerk.match(Record, val="two")) == 2
+        
+    def test_matchOne(self):
+        self.clerk.store(Record(val="one"))
+        self.clerk.store(Record(val="two"))
+        self.clerk.store(Record(val="two"))
+        
+        try:
+            self.clerk.matchOne(Record, val="zero")
+            self.fail("should have failed for not matching")
+        except LookupError: pass
+
+        assert isinstance(self.clerk.matchOne(Record, val="one"),
+                          Record)
+
+        try:
+            self.clerk.matchOne(Record, val="two")
+            self.fail("should have failed for matching two")
+        except LookupError: pass
+        
