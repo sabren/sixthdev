@@ -1,8 +1,7 @@
 import unittest
 import zdc.test
 import zikebase.test
-
-from sqlTest import dbc
+from zikebase.test import dbc
 
 from testCard import *
 from testCart import *
