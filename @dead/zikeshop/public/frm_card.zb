@@ -1,34 +1,40 @@
-*# credit card form
-*# $Id$
 * include dsp_head;
-
-<h2>Enter your credit card information.</h2>
-
-<form action="checkout.py" method="post">
-<table border="0">
-<tr>
-<td><b>Name on card:</b></td>
-<td><input type="text" name="name" value="{:name:}"></td></tr>
-<tr><td>Card Number</td>
-    <td><input type="text" value="{:number:}" name="number"></td></tr>
-<tr><td>Expiration Date</td>
-<td>
 * exec:
    from weblib import html
-   mField = html.select("expMonth", map(lambda m: "%02i" % m, range(1,12)),
+   mField = html.select("expMonth", map(lambda m: "%02i" % m, range(1,13)),
                         "%02i" % int(expMonth))
    yField = html.select("expYear", map(lambda m: "%04i" % m, range(2000,2026)),
                         "%04i" % int(expYear))
 
+
+<DIV CLASS="subsection"><img src="pics/common/yellow_button.gif" width="17" height="13">Enter your credit card info below:</DIV>
+
+<form action="checkout.py" method="post">
+<table border="0">
+<tr>
+<td CLASS="contentcopy"><b>Name on card:</b></td>
+<td><input type="text" name="name" value="{:name:}"></td></tr>
+<tr><td CLASS="contentcopy">Card Type</td>
+<td>{:html.select("check_issuer",("","Visa","MasterCard","American Express"),check_issuer):}</td></tr>
+<tr><td CLASS="contentcopy">Card Number</td>
+    <td><input type="text" value="{:number:}" name="number"></td></tr>
+<tr><td CLASS="contentcopy">Expiration Date</td>
+<td>
 {:mField:}&nbsp;/&nbsp;{:yField:}
 </td></tr>
 </table>
 
-<br/>
+<p class="contentcopy"><b>Comments:</b><br/>
+* exec:
+    from weblib import html
+{:html.textarea("comments",comments,'rows="5" cols="40"'):}
+</p>
+
 
 <input type="hidden" name="action" value="add_card">
-<input type="submit" value="process order">
+<input type="submit" value="Process Order">
 </form>
 
 * include dsp_foot;
+
 
