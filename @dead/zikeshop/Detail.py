@@ -22,7 +22,7 @@ class Detail(zdc.RecordObject):
     # the best bet is to make this into a zdc.link of some kind..
     def set_product(self, value):
         self.productID = value.ID
-        self._prod = value
+        self._data['_prod'] = value
 
     def get_product(self):
         if  hasattr(self, "_prod"):
