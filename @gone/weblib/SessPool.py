@@ -35,6 +35,7 @@ class DbmSessPool:
 class SqlSessPool:
     """This class uses a DB-API 2.0 compliant Connection object."""
 
+
     def __init__(self, dbc, table='web_sess'):
         self.dbc = dbc
         self.table = table
@@ -52,20 +53,19 @@ class SqlSessPool:
 
 
     def putSess(self, name, sid, frozensess):
-
-        # strip embedded quotes:
         import string
-        frozensess = string.replace(frozensess, "'", "\\'")
+        
+        frozen = string.replace(frozensess, "'", "\\'")
 
         cur = self.dbc.cursor()
         sql = "update " + self.table + " " + \
-              "set sess='" + frozensess + "', tsUpdate=now() " + \
+              "set sess='" + frozen + "', tsUpdate=now() " + \
               "where name='" + name + "' and sid='" + sid + "'"
         cur.execute(sql)
         if cur.rowcount == 0:
             cur.execute("insert into " + self.table + " (sid, name, sess, tsUpdate) " + \
                         "values ('" + sid + "', '" + name + "', '" + \
-                        frozensess + "', now())")
+                        frozen + "', now())")
             
 
     def drain(self, name, beforeWhen):
