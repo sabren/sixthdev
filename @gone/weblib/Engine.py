@@ -6,6 +6,8 @@ __ver__ = "$Id$"
 import weblib
 import string
 
+#@TODO: a lot of these methods could be consolidated!
+
 class Engine:
     """
     Engine - a wrapper class that runs a script in a custom environment.
@@ -19,7 +21,7 @@ class Engine:
     globals = {'__name__':'__main__'}
     locals  = globals
 
-    parts=("request", "response", "sess", "auth")
+    parts=("request", "response")
 
     script = None
     result = None
@@ -33,18 +35,13 @@ class Engine:
     EXIT      = "* exit *"
       
 
-    def __init__(self, script=None, pool=None, **kw):
-
-        ### NOTE:
-        ### I'm beginning to think that passing these things
-        ### in as a parameter doesn't make much sense..
-        ### especially, since auth checks in the session
-        ### to find a session key (and thus requires an engine      
-        ### just in the __init__)
-        ###
-        ### but maybe that's just a stupid way to do things,
-        ### and I ought to give Auth a start() method just
-        ### like sess... ?
+    def __init__(self, script=None, **kw):
+        """
+        script can be a string with actual code or a file object.
+        acceptable keyword arguments are 'request' and 'response',
+        which should be weblib.Request and weblib.Response objects,
+        respectively.
+        """
 
         self.script = script       
 
@@ -71,9 +68,6 @@ class Engine:
                 _.engine = self
                 setattr(self, item, _)
                 
-            elif item=="sess":
-                self.sess = weblib.Sess(pool, engine=self)
-
             else:
                 # use a new copy of the default (eg, self.auth=weblib.Auth())
                 setattr(self, item,
@@ -104,15 +98,12 @@ class Engine:
         Starts all the internal parts.
         """
         self.response.start()
-        self.sess.start()
-        self.auth.start()
 
 
     def stopParts(self):
         """
         Calls stop for all the internal parts.
         """
-        self.sess.stop()
 
 
     def injectParts(self):

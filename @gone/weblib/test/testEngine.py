@@ -10,7 +10,7 @@ from weblib import trim
 class EngineTestCase(unittest.TestCase):
 
     def setUp(self):
-        parts = ["request", "sess", "auth", "response"]
+        parts = ["request", "response"]
         for part in parts:
             if hasattr(weblib, part):
                 delattr(weblib, part)
@@ -78,8 +78,6 @@ class EngineTestCase(unittest.TestCase):
 
         # explicit:
         eng2 = weblib.Engine(script="print 'eng2'")
-        eng2.sess=weblib.Sess(engine=eng2)
-        eng2.auth=weblib.Auth(engine=eng2)
         eng2.request=weblib.Request(engine=eng2)
         eng2.response=weblib.Response(engine=eng2)
                              
@@ -90,7 +88,7 @@ class EngineTestCase(unittest.TestCase):
         for eng in (eng1, eng2, eng3):
             eng.run()
             name = eng.response.buffer
-            for what in ("auth","sess","request","response"):
+            for what in ("request","response"):
                 assert getattr(eng, what).engine is eng, \
                        ".engine screws up for " + name + "." + what
                 assert getattr(getattr(eng, what).engine, what) \
@@ -108,8 +106,6 @@ class EngineTestCase(unittest.TestCase):
         import weblib
         import __builtin__
         __builtin__.orig = {
-            "auth": getattr(weblib, "auth", None),
-            "sess": getattr(weblib, "sess", None),
             "request": getattr(weblib, "request", None), 
             "response": getattr(weblib, "response", None)}
 
@@ -117,10 +113,6 @@ class EngineTestCase(unittest.TestCase):
             """
             import weblib
             
-            assert weblib.auth is not orig['auth'], \
-                  'weblib.auth isn\'t fresh!'
-            assert weblib.sess is not orig['sess'], \
-                  'weblib.sess isn\'t fresh!'
             assert weblib.request is not orig['request'], \
                   'weblib.request isn't fresh!'
             assert weblib.response is not orig['response'], \
@@ -140,34 +132,22 @@ class EngineTestCase(unittest.TestCase):
         import weblib
         import __builtin__
 
-
-        self.sess = weblib.Sess(engine=self)
-        self.auth = weblib.Auth(engine=self)
         self.request = weblib.Request(engine=self)
         self.response = weblib.Response(engine=self)
 
         
         __builtin__.good = {
-            "sess" : self.sess,
-            "auth" : self.auth,
             "request" : self.request,
             "response" : self.response
             }
         
         weblib.Engine(
-            auth = good["auth"],
-            sess = good["sess"],
             request = good["request"],
             response = good["response"],
             
             script=trim(
             """
             import weblib
-            
-            assert weblib.auth is good['auth'], \
-                   'weblib.auth is wrong!'
-            assert weblib.sess is good['sess'], \
-                   'weblib.sess is wrong!'
             assert weblib.request is good['request'], \
                    'weblib.request is wrong!'
             assert weblib.response is good['response'], \
