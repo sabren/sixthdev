@@ -1,0 +1,39 @@
+*#
+*# This file displays a channel, including its stories. 
+*#
+*# $Id$
+
+* include header;
+
+<h2>channel: {:title:}</h2>
+
+<table border="1">
+  <tr><th>title:</th>
+      <td>{:title:}</td></tr>
+  <tr><th>link:</th>
+      <td>{:link:}</td></tr>
+  <tr><th>RSS output file:</th>
+      <td><a href="{:rssfile:}">{:rssfile:}</a></td></tr>
+  <tr><th colspan="2">description:</th></tr>
+  <tr><td colspan="2">{:description:}</td></tr>
+</table>
+
+
+
+[<a href="rantelope.app?action=edit&what=channel&ID={:ID:}">edit</a>]
+&nbsp;&nbsp;
+[<a href="rantelope.app?action=create&what=story&channelID={:ID:}">add story</a>]
+
+<hr>
+<p><b>Stories in this channel:</b></p>
+
+* for stories:
+    * head:
+        <ul>
+    * body:
+        <li><a href="rantelope.app?action=edit&what=story&ID={:ID:}">{:title:}</a></li>
+    * foot:
+        </ul>
+    * none:
+        <p><i>No stories yet.</i></p>
+
