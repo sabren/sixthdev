@@ -28,6 +28,8 @@ class CheckoutApp(zikeshop.PublicApp):
                                       zikebase.Contact()._data.copy())
         self.cardData = self.data.get("cardData",
                                       zikeshop.Card()._data.copy())
+        self.comments = self.data.get("comments", "")
+        self.model["comments"]=self.comments
 
 
     def exit(self):
@@ -35,6 +37,7 @@ class CheckoutApp(zikeshop.PublicApp):
         self.data["billData"] = self.billData
         self.data["shipData"] = self.shipData
         self.data["cardData"] = self.cardData
+        self.data["comments"] = self.comments
         weblib.sess["__checkout__"] = self.data
 
 
@@ -42,6 +45,11 @@ class CheckoutApp(zikeshop.PublicApp):
         self.next = 'get_billing'
 
     ## other stuff ... ###################################
+
+    def act_set_comments(self):
+        if self.input.get("comments") is not None:
+            self.comments = self.input["comments"]
+        
 
     def act_get_billing(self):
         import zebra
@@ -59,6 +67,7 @@ class CheckoutApp(zikeshop.PublicApp):
     def act_add_address(self):
         #@TODO: this is a lot like userapp..
         import zikebase
+        self.do("set_comments")
         zikebase.load("Contact")
         context = self.input.get('context','bill')
         errs = []
@@ -110,6 +119,8 @@ class CheckoutApp(zikeshop.PublicApp):
                 self.redirect(action='get_card')
 
     def act_add_card(self):
+        self.do("set_comments")
+
         # Add a new card to the database:
         import zikebase, zebra
         errs = []
@@ -196,7 +207,11 @@ class CheckoutApp(zikeshop.PublicApp):
         zebra.show("dsp_receipt", self.model)
 
         # clear the session info:
+        self.billData = None
+        self.shipData = None
+        self.cardData = None
         self.cart.empty()
+
         # but remember the last sale in case they refresh..
         self.data={"saleID":self.data["saleID"]}
 
@@ -231,6 +246,7 @@ class CheckoutApp(zikeshop.PublicApp):
             sale.details << det
             
         import zdc
+        sale.comments = self.comments
         sale.tsSold = zdc.TIMESTAMP
         sale.salestax = shop.calcSalesTax(sale.shipAddress, sale.subtotal)
         sale.shipping = shop.calcShipping(sale.billAddress,
