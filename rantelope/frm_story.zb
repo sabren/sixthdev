@@ -34,7 +34,7 @@
   </table>
 
   <br/>
-  <input name="action" value="save" type="submit">
+  <input name="action" value="save" type="submit"> 
 </form>
 
 
@@ -44,7 +44,7 @@
         <table width="100%">
     * body:
         <tr><td style="border-top: solid silver 1px">
-            <a href="rantelope.app?action=edit&what=story&ID={:ID:}"
+            <a href="rantelope.app?action=show&what=story&ID={:ID:}"
                    >{:title:}</a></td></tr>
         <tr><td>{:description:}</td></tr>
     * foot:

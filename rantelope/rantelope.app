@@ -10,7 +10,7 @@ from Node import Node
 from strongbox import *
 import sixthday
 import zebra
-from schema import *                
+from rantelope import *
 
 
 class RantelopeApp(sixthday.AdminApp):
@@ -91,6 +91,7 @@ class RantelopeApp(sixthday.AdminApp):
     def edit_story(self):
         s = self.clerk.fetch(Story, self.input["ID"])
         self.studyChannel(s.channelID)
+        self.model["stories"] = []
         self.generic_show(Story, "frm_story")
 
     def save_story(self):
@@ -106,7 +107,7 @@ class RantelopeApp(sixthday.AdminApp):
 
         ## go back to the channel:
         self.redirect(action='create&what=story&channelID='
-                            + str(chan.ID))
+                            + str(chan.ID))        
         
     def show_story(self):
         self.generic_show(Story, "sho_story")
@@ -117,7 +118,8 @@ class RantelopeApp(sixthday.AdminApp):
         cmt = self.generic_save(Comment)
         self.redirect(action='show&what=story&ID='
                       + str(cmt.storyID))
-        
+    
+
 ### main code #######################################
 
 if __name__=="__main__":

@@ -13,6 +13,10 @@
 
 {:description:}
 
+
+<p>
+[ <a href="rantelope.app?action=edit&what=story&ID={:ID:}">edit</a> ]
+</p>
 <hr/>
 
 * for comments:
