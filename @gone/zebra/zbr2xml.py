@@ -39,6 +39,8 @@ class Z2X:
 
         x = 0
         while x < len(lines):
+            lineNo = x + 1
+            
             ## only look from the leftmost position onwards.
             ## (it's okay because we make sure theres' nothing
             ## but space in there a little later..
@@ -48,17 +50,25 @@ class Z2X:
             if string.strip(line)=="":
                 res = res + "\n"
 
-            ## comments are single lines starting with *#
-            elif string.lstrip(line)[0:2] == "*#":
-                res = res + "<rem>%s</rem>\n" % xmlEncode(line[2:])
+            ## comments are single lines starting with * #
+            elif string.lstrip(string.lstrip(line[1:]))[0:1] == "#":
+                # this little mess just strips off the * and #
+                res = res + "<rem>%s</rem>\n" \
+                      % xmlEncode(string.lstrip(line[1:])[2:])
 
             ## zebra commands begin with *
             elif string.lstrip(line)[0] == "*":
                 line = string.strip(line)
 
-                ## .. and end with :
-                if line[-1] != ":":
-                    raise SyntaxError, "* tags must end with ':'"
+                ## .. and end with : or ;
+                if line[-1] == ":":
+                    isBlock = 1
+                elif line[-1] == ";":
+                    isBlock == 0
+                else:
+                    raise SyntaxError, \
+                          "* tag without ':' or ';' on line %i" \
+                          % (lineNo)
                 line = line[:-1]
                 
                 ## get the tokens after *:
@@ -69,38 +79,41 @@ class Z2X:
                 if hasattr(self, "parse_"+tok):
                     attrs = apply(getattr(self,"parse_"+tok), (toks,))
                 else:
-                    raise "Don't know how to handle '%s' on line %i" \
-                          % (line, x+1)
+                    raise NameError, \
+                          "Don't know how to handle '%s' on line %i" \
+                          % (line, lineNo)
 
                 ## find the new left edge:
-                newleft = 0
-                topx = x = x + 1
-                if topx >= len(lines):
-                    newleft = left - 1
-                else:
-                    for i in range(len(lines[topx])):
-                        if lines[topx][i]!=" ":
-                            newleft = i
-                            break
+                if isBlock:
+                    newleft = 0
+                    topx = x = x + 1
+                    if topx >= len(lines):
+                        newleft = left - 1
+                    else:
+                        for i in range(len(lines[topx])):
+                            if lines[topx][i]!=" ":
+                                newleft = i
+                                break
 
-                ## find the end of the block, which should be
-                ## less indented than the inside of the block.
-                if newleft <= left:
-                    ## the block is empty
-                    pass
-                else:
-                    while (x<len(lines)):
-                        if (string.strip(lines[x])=="") \
-                           or (lines[x][:newleft])==(" " * newleft):
-                            x = x + 1
-                        else:
-                            break
+                    ## find the end of the block, which should be
+                    ## less indented than the inside of the block.
+                    if newleft <= left:
+                        ## the block is empty
+                        pass
+                    else:
+                        while (x<len(lines)):
+                            if (string.strip(lines[x])=="") \
+                               or (lines[x][:newleft])==(" " * newleft):
+                                x = x + 1
+                            else:
+                                break
                     
-                ## run this routine recursively on the inner block:
-                res = res + self._deBlock(lines[topx:x], tok, attrs, newleft)
+                    ## run this routine recursively on the inner block:
+                    res = res + self._deBlock(lines[topx:x],
+                                              tok, attrs, newleft)
 
-                ## we've already added 1, so jump back to the top:
-                continue
+                    ## we've already added 1, so jump back to the top:
+                    continue
                 
             ## just a normal line..
             else:

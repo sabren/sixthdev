@@ -171,13 +171,15 @@ class Zbr2xmlTestCase(unittest.TestCase):
             """
             *# this is a comment
             this isn't
+            *     # this is
             """)
         goal = zebra.trim(
             """
             <?xml version="1.0"?>
             <zebra>
-            <rem> this is a comment</rem>
+            <rem>this is a comment</rem>
             this isn't
+            <rem>this is</rem>
             </zebra>
             """)
         actual = zebra.Z2X().translate(zbr)

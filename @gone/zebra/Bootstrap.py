@@ -3,6 +3,8 @@ Bootstrap compiler for Zebra.
 """
 __ver__="$Id$"
 
+# @TODO: optional body tags in zebra for loops.. (or just "show?")
+
 import zebra
 import xml2mdl
 
