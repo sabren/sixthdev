@@ -9,31 +9,69 @@ import weblib
 import sys
 
 
-def fetchProduct():
-    if weblib.request.get("ID"):
-        return zikeshop.Product(ID=weblib.request["ID"])
-    else:
-        return zikeshop.Product()
+class ObjectEditor:
+    """A class for editing descendents of zdc.Object"""
+
+    ## attributes ########################################
+
+    what   = None # what class?
+    object = None # an instance of the class
+    input  = {}
+
+    ## constructor #######################################
+
+    def __init__(self, what, **args):
+        """ex: objed=ObjectEditor(Person, fName="fred", lName="smith")"""
+        self.what = what
+        self.object = apply(self.newObject, (), args)
 
 
-def doAction(prod):
-    if weblib.request.get("action")=='save':
-        action_save(prod)
-    elif weblib.request.get("action")=='delete':
-        action_delete(prod)
+    ## public methods ####################################
+
+    def newObject(self, **which):
+        """Create a new instance of whatever class we're editing."""
+        
+        ## this next bit is python magic that will
+        ## create a "what" and pass "where" to the
+        ## constructor, assigning the result to self.object
+        ##
+        ## in the example above, objed.object would be
+        ## a Person object representing "fred smith".
+        
+        return apply(self.what, (), which)
 
 
-def action_delete(prod):
-    print "<b>", prod.code, "deleted.</b><br>"
-    prod.delete()
-    prod = zikeshop.Product()
+    def act(self, input):
+        """objed.act(input) #input=a dict with a key called 'action'."""
+
+        self.input = input
+        if input.has_key("action"):
+            method = "act_" + input["action"]
+
+            ## more python magic to call the method:
+            if hasattr(self, method):
+                apply(getattr(self, method), ())
+            else:
+                raise "Don't know how to %s!" % action
+
+        else:
+            pass # do nothing - no action given
 
 
-def action_save(prod):
-    prod.code = weblib.request.get("code", '')
-    prod.product = weblib.request.get("product", '')
-    prod.descriptLong = weblib.request.get("descriptLong", '')
-    prod.save()
+    ## actions ###########################################
+
+    def act_delete(self):
+        self.object.delete()
+        self.object = self.newObject()
+        
+
+    def act_save(self):
+        for field in self.object.getEditableAttrs():
+            if self.input.has_key(field):
+                setattr(self.object, field, self.input[field])
+        self.object.save()
+
+
 
 
 def showForm(prod):
@@ -82,9 +120,15 @@ def showProductLinks():
 
 if __name__=="__main__":
     import zikeshop.admin.header
-    prod = fetchProduct()
-    doAction(prod)
-    showForm(prod)
+
+    if weblib.request.get("ID"):
+        ed = ObjectEditor(zikeshop.Product, ID=weblib.request["ID"])
+    else:
+        ed = ObjectEditor(zikeshop.Product)
+
+    ed.act(weblib.request)
+
+    showForm(ed.object)
     print '<hr>'
     showProductLinks()
     print '<hr>'
