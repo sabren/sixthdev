@@ -4,13 +4,12 @@ checkout process for the cart (records the sale)
 __ver__="$Id$"
 
 import sixthday
-import zdc
 import zebra
 import zikeshop
 from handy import sendmail
 from zikeshop import Contact
 from zikeshop import Card
-
+from pytypes import DateTime
 
 class CheckoutApp(zikeshop.PublicApp):
 
@@ -273,7 +272,7 @@ class CheckoutApp(zikeshop.PublicApp):
             
         import zdc
         sale.comments = self.comments
-        sale.tsSold = zdc.TIMESTAMP
+        sale.tsSold = DateTime("now")
         sale.salestax = shop.calcSalesTax(sale.shipAddress, sale.subtotal)
         sale.shipping = shop.calcShipping(sale.billAddress,
                                           self.cart.calcWeight())

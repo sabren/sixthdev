@@ -1,12 +1,14 @@
-import weblib, zebra
-import zikebase
-zikebase.load("AdminApp")
+import weblib
+import zebra
+from pytypes import DateTime
+from sixthday import AdminApp
+from sixthday import Node
 
 def popupHelp(msg):
     res = '<a href="#" onclick="alert(\'%s\')">[?]</a>' % msg
     return res
 
-class ZikeShopAdminApp(zikebase.AdminApp):
+class ZikeShopAdminApp(AdminApp):
        
     ## home page ########################################
 
@@ -37,7 +39,7 @@ class ZikeShopAdminApp(zikebase.AdminApp):
         mdl_product.nodeID = nID
         mdl_product.doit()
         if nID:
-            self.model["path"] = zikebase.Node(ID=self.model["nodeID"]).path
+            self.model["path"] = Node(ID=self.model["nodeID"]).path
         self.consult(mdl_product.model)
         self.consult("mdl_category")
         zebra.show("lst_product", self.model)
@@ -81,10 +83,9 @@ class ZikeShopAdminApp(zikebase.AdminApp):
 
     def save_sale(self):
         sed = zikeshop.SaleEditor(zikeshop.Sale, self.input.get("ID"))
-        import zdc
         # new sales get a timestamp:
         if not self.input.get("ID"):
-            sed.input["tsSold"] = zdc.TIMESTAMP
+            sed.input["tsSold"] = DateTime("now")
         sed.act("save")
 
     def list_sale(self):
