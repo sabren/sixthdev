@@ -115,17 +115,18 @@ class CheckoutApp(zikeshop.PublicApp):
 
     def act_add_card(self):
         # Add a new card to the database:
-        import zikebase
+        import zikebase, zebra
         try:
             ed = zikebase.ObjectEditor(zikeshop.Card)
             ed.do("save")
             # use the card for the transaction:
             self.data['cardID'] = ed.object.ID
+            #@TODO: ought to check expiration date... (prolly in Card.py)
             #@TODO: resolve - cards with secondary billing addresses?
             self.redirect(action="checkout")
-        except ValueError, e:
-            self.model["error"] = e[0][0] # e is a LoL 
-            self.redirect(action = "get_card")
+        except ValueError, errs:
+            self.complain(errs)
+            zebra.show("frm_card", self.model)
 
     def act_set_card(self):
         self.data['cardID'] = int(self.input['cardID'])
