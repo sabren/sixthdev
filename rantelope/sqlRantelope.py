@@ -5,6 +5,7 @@ __ver__="$Id$"
 import storage
 import arlo
 from schema import *
+from rantelope import Author
 
 ## database connection ############################
 # ( you could also use MySQLdb and MySQLStorage here )
@@ -19,5 +20,6 @@ dbmap = {Channel: "rnt_channel",
          Category: "rnt_category",
          Story: "rnt_story",
          Story.__attrs__["comments"]: (Comment, "storyID"),
-         Comment: "rnt_comment"}
+         Comment: "rnt_comment",
+         Author: "rnt_author"}
 clerk = arlo.Clerk(sto, dbmap)
