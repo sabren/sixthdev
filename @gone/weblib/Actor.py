@@ -167,7 +167,7 @@ class Actor:
                 me = string.split(weblib.request.environ["REQUEST_URI"],
                                   "?")[0]
             else:
-                me = weblib.request.environ["SCRIPT_NAME"]
+                me = weblib.request.environ.get("SCRIPT_NAME","")
 
             # okay.. now go there.
             self.where["gohere"]="%s?action=%s&__weblib_ignore_form__=1" \
