@@ -6,9 +6,11 @@ import unittest
 
 
 class Thing(Strongbox):
+    ID = attr(long)
     x = attr(str)
 
 class OtherThing(Strongbox):
+    ID = attr(long)
     x = attr(str)
 
 class CallbackClerkTest(unittest.TestCase):

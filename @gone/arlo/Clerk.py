@@ -18,7 +18,7 @@ class Clerk(object):
     def __init__(self, storage, dbmap=None):
         self.storage = storage
         self.dbmap = dbmap or {}
-        self.memo = {} # used so we get the same object on multiple fetch
+        self._memo = {} # used so we get the same object on multiple fetch
 
     ## public interface ##############################################
         
@@ -64,6 +64,7 @@ class Clerk(object):
                 if id_has_changed or item.private.isDirty:
                     self.store(item, _others={column:obj.ID})
 
+        self._make_memo(obj)
         return obj
 
 
@@ -72,23 +73,18 @@ class Clerk(object):
 
     def rowToInstance(self, row, klass):
         attrs, othercols = self._attr_and_other_columns(klass, row)
-        uid = (klass, attrs.get("ID"))
-        if ("ID" in attrs) and (uid in self.memo):
-            obj = self.memo[uid]
-        else:
+        obj = self._get_memo(klass, attrs.get("ID"))
+        if not obj:
             obj = klass(**attrs)
             self._add_injectors(obj, othercols)
             obj.private.isDirty = 0
-            if ("ID" in attrs):
-                self.memo[uid]=obj
+            self._make_memo(obj)
         return obj
 
 
     def match(self, klass, **where):
-        res = []
-        for row in self.storage.match(self._unmap_class(klass), **where):
-            res.append(self.rowToInstance(row, klass))
-        return res
+        return [self.rowToInstance(row, klass)
+                for row in self.storage.match(self._unmap_class(klass), **where)]
    
     def fetch(self, klass, __ID__=None, **kw):
         if __ID__:
@@ -103,15 +99,18 @@ class Clerk(object):
                               % (klass, __ID__, kw))
         return res[0]
 
+    def delete(self, klass, ID):
+        self.storage.delete(self._unmap_class(klass), ID)
+        return None
+
+
+    ## @TODO: are these two methods ever used?
+
     def fetch_or_new(self, klass, ID):
         if ID:
             return self.fetch(klass, ID)
         else:
             return klass()
-
-    def delete(self, klass, ID):
-        self.storage.delete(self._unmap_class(klass), ID)
-        return None
 
     def upsert(self, klass, ID, **vals):
         """
@@ -123,6 +122,16 @@ class Clerk(object):
 
 
     ### private stuff ###############################################
+
+    def _get_memo(self, klass, key):
+        uid = (klass, key)
+        return self._memo.get(uid)
+
+    def _make_memo(self, obj):
+        if hasattr(obj, "ID"):
+            self._memo[(obj.__class__, obj.ID)]=obj
+        else:
+            raise Warning("couldn't memo %s because it had no ID attribute" % obj)
 
 
     def _add_injectors(self, obj, othercols):

@@ -63,7 +63,15 @@ class ClerkTest(unittest.TestCase):
         self.clerk.store(r)
         r = self.clerk.fetch(Record, val="noNext")
         assert r.next is None
-        
+
+
+    def test_store_memo(self):
+        rb = self.clerk.store(Record(val="b"))
+        ra = self.clerk.store(Record(val="a", next=rb))
+
+        a,b = self.clerk.match(Record, orderBy="val")
+        assert a is ra
+        assert b is rb
 
 
     def test_store_linksets(self):

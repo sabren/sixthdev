@@ -15,7 +15,7 @@ class LinkSetInjector:
 
     def inject(self, box, name):
         """
-        box: the StrongboxInstance we're being called from
+        box: the Strongbox instance we're being called from
         name: the attribute name that was getattr'd
         """
         if name == self.atr:
