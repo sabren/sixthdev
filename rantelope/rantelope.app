@@ -1,6 +1,6 @@
 """
 Rantelope!
-(c)2002 Sabren Enterprises, Inc.
+(c)2002-2003 Sabren Enterprises, Inc.
 This program is free software,
 licensed under the GNU GPL.
 """
@@ -77,26 +77,29 @@ def transform(xml, xsl):
 
 ### object model ####################################
 
+# NOTE: all ID attributes must default
+# to "None" for SQLite's autonumbering
+# this doesn't effect MySQL's auto_increment 
+auto = None
 
 class Comment(Strongbox):
-    ID = attr(long)
+    ID = attr(long, default=auto)
     storyID = attr(long)
     name = attr(str)
     mail = attr(str)
     link = attr(str)
-    note = attr(str)   
+    note = attr(str)
 
 class Story(Strongbox):
-    ID = attr(long)
+    ID = attr(long, default=auto)
     channelID = attr(long)
     title = attr(str)
     link = attr(str)
     description = attr(str)
     comments = linkset(Comment)
     
-class Channel(Node):
-    ID = attr(long)
-    parentID = attr(long, default=0)
+class Channel(Strongbox):
+    ID = attr(long, default=auto)
     title = attr(str)
     link = attr(str)
     description = attr(str)
@@ -104,7 +107,7 @@ class Channel(Node):
     htmlfile = attr(str, okay="([^/]+.html|^$)" )
     template = attr(str, default=plainXSLT)
     stories = linkset(Story)
-    path = attr(str, default="./out/") # hard-coded for now.    
+    path = attr(str, default="./out/")
 
     def toRSS(self):
         return zebra.fetch("rss", BoxView(self))
@@ -131,7 +134,7 @@ class RantelApp(sixthday.AdminApp):
     ## channels ########################
 
     def list_channel(self):
-        channels = [BoxView(c) for c in self.clerk.match(Channel, parentID=0)]
+        channels = [BoxView(c) for c in self.clerk.match(Channel)]
         self.generic_list(channels, "lst_channel")
 
     def create_channel(self):
@@ -142,11 +145,8 @@ class RantelApp(sixthday.AdminApp):
 
     def show_channel(self):
         chan = self.clerk.fetch(Channel, long(self.input["ID"]))
-        chan.clerk = self.clerk
         model = {"errors":[]}
         model.update(BoxView(chan))
-        model["kids"]= [BoxView(k) for k in chan.kids]
-        model["crumbs"]= [BoxView(k) for k in chan.crumbs]
         print >> self, zebra.fetch("sho_channel", model)
 
 
@@ -192,12 +192,13 @@ class RantelApp(sixthday.AdminApp):
 if __name__=="__main__":
 
     import arlo, storage, sqlRantelope
+    store = sqlRantelope.sto
     dbmap = {Channel: "rnt_channel",
              Channel.__attrs__["stories"]: (Story, "channelID"),
              Story: "rnt_story",
              Story.__attrs__["comments"]: (Comment, "storyID"),
              Comment: "rnt_comment"}
-    CLERK = arlo.Clerk(storage.MySQLStorage(sqlRantelope.dbc), dbmap)
+    CLERK = arlo.Clerk(store, dbmap)
     
     ## now just run the app!
     print >> RES, RantelApp(CLERK, REQ).act()
