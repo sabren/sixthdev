@@ -5,7 +5,7 @@ __ver__="$Id$"
 
 import unittest
 import types
-from strongbox import Strongbox, attr
+from strongbox import Strongbox, attr, link, linkset
 
 class StealthboxTest(unittest.TestCase):
 
@@ -52,6 +52,25 @@ class StealthboxTest(unittest.TestCase):
            err = 1
         assert err, "assigning to nonexistent slot d should have failed."
 
+    ## All attributes show up in __attrs__
+    # @TODO: it might make sense for links and linksets to go in __links__
+    # since they're slightly different. This would most likely involve
+    # refactoring the way link subclasses attr, because they do share
+    # some features. (link can be assigned to, linkset cannot)
+    # I need to work this out.
+
+    def check_magicmeta(self):
+        class X(Strongbox): pass
+        class Y(Strongbox):
+            a = attr(int)
+            b = attr(str)
+            c = link(X)
+            d = link(X)
+        assert "a" in Y.__attrs__
+        assert "b" in Y.__attrs__
+        assert "c" in Y.__attrs__
+        assert "d" in Y.__attrs__
+            
 
     ## Strongbox turns accessors into properties
 
@@ -71,6 +90,21 @@ class StealthboxTest(unittest.TestCase):
         instance.c = 3
         assert instance.c == 0 # see check_default_defaults
         assert instance.d == 4, instance.d
+
+
+    def check_nestedError(self):
+        class NestedError(Strongbox):
+            def get_a(self):
+                if self.b:
+                    return 1
+        ne = NestedError()
+        try:
+            a = ne.a
+        except AttributeError, e:
+            assert str(e) == "'b' is not a valid attribute for NestedError", \
+                   "got wrong error: %s" % e
+        else:
+            self.fail("Should have gotten an AttributeError!")
 
 
     ## Private variables are explicitly private
