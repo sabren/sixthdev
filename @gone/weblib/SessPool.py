@@ -70,5 +70,7 @@ class SqlSessPool:
 
     def drain(self, name, beforeWhen):
         cur = self.dbc.cursor()
-        cur.execute("delete from " + self.table + \
-                    " where name='" + name + "' and tsUpdate < '" + beforeWhen + "'")
+        #@TODO: cleanup beforeWhen (garbage collection)
+        sql = "delete from " + self.table + \
+              " where name='" + name + "' and tsUpdate < '" + `beforeWhen` + "'"
+        cur.execute(sql)
