@@ -96,9 +96,7 @@ class Sale(zdc.RecordObject):
                      + self.adjustment
 
         self.__super.save(self)
-        for det in self.details:
-            det.saleID = self.ID
-            det.save()
+        self.details.save()
 
         # @TODO: add support for timestamps to ZDC directly.
         if doTS:
