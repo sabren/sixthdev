@@ -9,6 +9,17 @@ import weblib
 class Response:
     """Response object similar to the one from ASP"""
 
+    ## attributes ########################################
+
+    contentType = "text/html"
+    headers = []
+    cookies = []
+    buffer = ""
+    _sentHeaders = 0
+       
+
+    ## constructor #######################################
+
     def __init__(self, engine=weblib, out=None):
 
         self.engine = engine
@@ -85,13 +96,13 @@ class Response:
 
 
     def clear(self):
-        """Clear the output buffer, headers, cookies, and reset content-type..."""
-        self.contentType = "text/html"
-        self.headers = []
-        self.cookies = []
-        self.buffer = ""
+        """Reset all attributes to their defaults.."""
+
+        for atr in ('contentType', 'headers', 'cookies', 'buffer'):
+            setattr(self, atr, getattr(self.__class__, atr))
+
         self._sentHeaders = 0
-       
+            
 
     #### NOT IMPLEMENTED YET #####################
     #
