@@ -124,7 +124,9 @@ class CheckoutApp(zikeshop.PublicApp):
             det.productID = item["extra"]["ID"]
             det.quantity = item["quantity"]
             sale.details << det
-
+            
+        import zdc
+        sale.tsSold = zdc.TIMESTAMP
         sale.salestax = shop.calcSalesTax(sale.shipAddress, sale.subtotal)
         sale.shipping = shop.calcShipping(sale.billAddress,
                                           self.cart.calcWeight())
