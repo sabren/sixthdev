@@ -65,12 +65,13 @@ class CheckoutApp(zikeshop.PublicApp):
         required=[
             ('fname','first name'),
             ('lname','last name'),
-            ('email','email'),
             ('address1','address'),
             ('city','city'),
             ('postal','ZIP/postal code')]
-
+        
         if context=="bill":
+            required.append(('email','email'))
+
             for item in self.billData.keys():
                 self.billData[item]=self.input.get(item)
         else:
