@@ -101,7 +101,7 @@ def select(name, options, value=None, attrs=''):
     for option in  opts:
         res = res + '<option value="%s"' % option[0]
         if option[2]:
-            res = res +  'SELECTED'
+            res = res + ' SELECTED'
         res = res + '>%s</option>' % option[1]
     return res + '</select>'
 
