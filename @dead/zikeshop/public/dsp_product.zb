@@ -1,6 +1,7 @@
 *# product template for zikeshop
+*# $Id$
+* include dsp_head;
 
-* include dsp_head:
 <h1>{:name:}</h1>
 <h4>${:price:}</h4>
 
@@ -20,10 +21,9 @@
 * for categories:
     * head:
         <h3>This product is in these categories:</h3>
-    <a href="{:link_category(path):}">{:path:}</a><br>
+    * body:
+        <a href="{:link_category(path):}">{:path:}</a><br>
 * none:
     <h3>This product is not categorized.</h3>
 
-* include dsp_foot:
-
-
+* include dsp_foot;
