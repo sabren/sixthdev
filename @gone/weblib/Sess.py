@@ -11,7 +11,10 @@ __ver__="$Id$"
 # prepickled objects, so that method is deprecated.. If anyone
 # really needs it, look at HotColdSess.py (the old version)
 
-import weblib, UserDict
+import string
+import UserDict
+import weblib
+import whrandom
 
 try:
     from cPickle import loads, dumps
@@ -76,8 +79,6 @@ class Sess(UserDict.UserDict):
         If in get mode, the current session id is attached to this
         URL, else the URL is returned unmodified.
         """
-        import string
-        
         # if there's not already a querystring:
         if string.find(oldurl, "?") == -1:
             return oldurl + "?%s=%s" % (self.name, self.sid)
@@ -119,7 +120,6 @@ class Sess(UserDict.UserDict):
 
         # if that didn't work, just make one up..
         if sid is None:
-            import weblib
             sid = weblib.uid()
 
         #@TODO: add code for timeouts wrt setCookie
@@ -133,7 +133,6 @@ class Sess(UserDict.UserDict):
 
     def _gc(self):
         """occasionally drains the sesspool"""
-        import whrandom
         if (whrandom.random() * 100 <= self.gcProb):
             self._pool.drain(self.name, 0)
             
