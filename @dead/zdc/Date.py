@@ -19,7 +19,7 @@ class Date:
         if type(s) != type(""):
             raise TypeError, "usage: Date(string)"
         if s == "today":
-            s = "%i-%i-%i" % time.localtime(time.time())[:3]
+            s = "%i-%i-%i %i:%i:%i" % time.localtime(time.time())[:6]
         if " " in s:
             date, timeofday = s.split(" ")
         else:
@@ -52,7 +52,7 @@ class Date:
         if isinstance(other, Date):
             return cmp([self.y, self.m, self.d], [other.y, other.m, other.d])
         else:
-            return cmp(str(self), str(Date(other)))
+            return cmp(self, Date(other))
 
     def __add__(self, days):
         """
