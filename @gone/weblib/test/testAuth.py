@@ -10,7 +10,9 @@ from ziketools import trim
 class AuthTestCase(unittest.TestCase):
 
     def setUp(self):
-        pass
+        # auth requires a PATH_INFO variable.. otherwise,
+        # it doesn't know where to redirect the form.
+        self.myReq = weblib.Request(environ={"PATH_INFO":"dummy.py"})
 
 
     def check_engine(self):
@@ -20,9 +22,9 @@ class AuthTestCase(unittest.TestCase):
 
 
     def check_check(self):
-        myauth = weblib.Auth()
-        engine = weblib.Engine(request=weblib.Request(environ={"PATH_INFO":"xxx"}),
-                            auth=myauth, script="import weblib; weblib.auth.check()" )
+
+        engine = weblib.Engine(request=self.myReq,
+                               script="import weblib; weblib.auth.check()" )
         engine.run()
 
         assert string.find(engine.response.buffer, weblib.Auth.PLEASELOGIN), \
@@ -30,7 +32,7 @@ class AuthTestCase(unittest.TestCase):
         
 
     def check_prompt(self):
-        engine = weblib.Engine(script=trim(
+        engine = weblib.Engine(request=self.myReq, script=trim(
             """
             from weblib import auth
             auth.check()
@@ -38,11 +40,8 @@ class AuthTestCase(unittest.TestCase):
             """))
         engine.run()
 
-        print "XXXXXXXXXXXXXXXX\n", engine.response.buffer
         assert string.find(engine.response.buffer, engine.auth.PLEASELOGIN) > -1, \
                "doesn't show prompt!"
-
-
 
 
     def nocheck_Login(self):
