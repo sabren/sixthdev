@@ -7,7 +7,7 @@ import string
 from Generator import Generator
 from Parser import Parser
 from Engine import Engine
-
+import xml2mdl
 
 ###[ Utility Functions ]#######################################
 
