@@ -10,7 +10,6 @@ from testCart import *
 from testCategory import *
 from testCashier import *
 from testCustomer import *
-from testAddress import *
 from testShopActor import *
 from testWizard import *
 from testStore import *
@@ -39,7 +38,6 @@ suites['product'] = unittest.makeSuite(ProductTestCase, "check_")
 suites['cart'] = unittest.makeSuite(CartTestCase, "check_")
 suites['cashier'] = unittest.makeSuite(CashierTestCase, "check_")
 suites['customer'] = unittest.makeSuite(CustomerTestCase, "check_")
-suites['address'] = unittest.makeSuite(AddressTestCase, "check_")
 suites['shopactor'] = unittest.makeSuite(ShopActorTestCase, "check_")
 suites['store'] = unittest.makeSuite(StoreTestCase, "check_")
 suites['sale'] = unittest.makeSuite(SaleTestCase, "check_")
