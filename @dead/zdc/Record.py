@@ -27,9 +27,6 @@ class Record(UserDict.UserDict):
             self.table = table
         assert self.table is not None, "Record must have an associated Table!"
 
-        # a hack for initial timestamping. @TODO: clean this up!
-        self.insertStamps = []
-
         # populate the data.. you probably don't want to do this,
         # either.. Rather, go through Table.
         self.data = zdc.IdxDict()
