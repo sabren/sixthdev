@@ -1,14 +1,13 @@
 """
 Request.py - emulates the ASP Request object for python CGI's
 
-$Id$
-
 don't want to use cgi because it has no cookies, and form/querystring
 get lumped together. Plus it's old and crufty. :) .. but it also
 *works*, so for now we'll use cgi.py after all..
 
 @TODO: license
 """
+__ver__="$Id$"
 
 # @TODO: cookie support
 # @TODO: request["x"] should look at all 3 sources
@@ -163,7 +162,7 @@ class Request:
 
     def parse(self, what, splitter="&", decode=0):
         res = {}
-        for pair in string.split(what, "&"):
+        for pair in string.split(what, splitter):
             if decode:
                 pair = weblib.urlDecode(pair)
             l = string.split(pair, "=", 1)
