@@ -33,18 +33,22 @@ class Clerk(object):
 
         # we need to save links first, because we depend on them:
         for name, lnk in klass.__get_slots_of_type__(link):
+            fclass, column = self._unmap_link(klass, lnk, name)
             ref = getattr(obj, name)
             if (ref):
                 if ref.private.isDirty:
                     ref = self.store(ref)
-                fclass, column = self._unmap_link(klass, lnk, name)
                 d[column] = ref.ID
+            else:
+                d[column] = None
 
         # now we update obj because of db-generated values
         # (such as autonumbers or timestamps)
+        if hasattr(obj, "ID"): old_id = obj.ID
         data_from_db = self.storage.store(tablename, **d)
         relevant_columns = self._attr_columns(klass, data_from_db)
         obj.update(**relevant_columns)
+        id_has_changed = hasattr(obj,"ID") and (obj.ID != old_id)
 
         # we've got the clean data, but we called update
         # with the new primary key,  so we need to reset
@@ -55,33 +59,49 @@ class Clerk(object):
 
         # linkSETS, on the other hand, depend on us, so they go last:
         for name, lnk in klass.__get_slots_of_type__(linkset):
-            refs = getattr(obj, name)
-            if not self._hasInjectors(refs):
-                fclass, column = self._unmap_link(klass, lnk, name)
-                for item in refs:
-                    if item.private.isDirty:
-                        self.store(item, _others={column:obj.ID})
+            fclass, column = self._unmap_link(klass, lnk, name)
+            for item in obj.__values__[name]:
+                if id_has_changed or item.private.isDirty:
+                    self.store(item, _others={column:obj.ID})
 
         return obj
+
+
+    def classToTable(self, klass):
+        return self._unmap_class(klass)
+
+    def rowToInstance(self, row, klass):
+        attrs, othercols = self._attr_and_other_columns(klass, row)
+        uid = (klass, attrs.get("ID"))
+        if ("ID" in attrs) and (uid in self.memo):
+            obj = self.memo[uid]
+        else:
+            obj = klass(**attrs)
+            self._add_injectors(obj, othercols)
+            obj.private.isDirty = 0
+            if ("ID" in attrs):
+                self.memo[uid]=obj
+        return obj
+
 
     def match(self, klass, **where):
         res = []
         for row in self.storage.match(self._unmap_class(klass), **where):
-            attrs, othercols = self._attr_and_other_columns(klass, row)
-            uid = (klass, attrs.get("ID"))
-            if ("ID" in attrs) and (uid in self.memo):
-                obj = self.memo[uid]
-            else:
-                obj = klass(**attrs)
-                self._add_injectors(obj, othercols)
-                obj.private.isDirty = 0
-                if ("ID" in attrs):
-                    self.memo[uid]=obj
-            res.append(obj)
+            res.append(self.rowToInstance(row, klass))
         return res
    
-    def fetch(self, klass, ID):
-        return self.match(klass, ID=ID)[0]
+    def fetch(self, klass, __ID__=None, **kw):
+        if __ID__:
+            res = self.match(klass, ID=__ID__)
+        else:
+            res = self.match(klass, **kw)
+        if len(res)==0:
+            raise LookupError("fetch(%s, %s, **%s) didn't match anything!"
+                              % (klass, __ID__, kw))
+        elif len(res)>1:
+            raise LookupError("fetch(%s) matched multiple values!"
+                              % (klass, __ID__, kw))
+        return res[0]
 
     def fetch_or_new(self, klass, ID):
         if ID:
@@ -120,7 +140,10 @@ class Clerk(object):
         ## linksetinjectors:
         for name,lnk in klass.__get_slots_of_type__(linkset):
             fclass, column = self._unmap_link(klass, lnk, name)
-            inj = LinkSetInjector(obj, name, self, fclass, column)
+            #@TODO: there can just be one LSI instance per linkset attribute
+            #(since it no longer keeps its own reference to the object)
+            obj.attach(LinkSetInjector(name, self, fclass, column),
+                       onget="inject")
 
 
     def _unmap_class(self, klass):

@@ -1,42 +1,47 @@
 
 from arlo import LinkSetInjector, MockClerk
-from strongbox import Strongbox, attr, linkset
+from strongbox import Strongbox, attr, linkset, forward
 from unittest import TestCase
 
 
-class Foreign(Strongbox):
+class Content(Strongbox):
     ID = attr(long)
-    injID = attr(long)
+    box = attr(forward)
     data = attr(str)
 
-class InjecteeObj(Strongbox):
+class Package(Strongbox):
     ID = attr(long)
-    refs = linkset(Foreign)
+    refs = linkset(Content)
+
+Content.__attrs__["box"].type=Package
 
 class LinkSetInjectorTest(TestCase):
 
     def check_inject(self):
-        cler = MockClerk()
-        cler.dbmap[InjecteeObj.__attrs__["refs"]]=(Foreign, "injID")
-        cler.store(Foreign(data="Here I come to save the day!", injID=1))
-        cler.store(Foreign(data="Mighty Mouse is on his way!",  injID=1))
+        clerk = MockClerk()
+        clerk.dbmap[Package.__attrs__["refs"]]=(Content, "boxID")
+        assert type(Package.__attrs__["refs"]) != attr
 
-        obj = InjecteeObj()
-        assert type(obj.__attrs__["refs"]) != attr
-        cler.store(obj)
+        pak = Package()
+        pak.refs << Content(data="I'm content", box=pak)
+        pak.refs << Content(data="I'm malcontent",  box=pak)
+        pak = clerk.store(pak)
 
-        inj = LinkSetInjector(obj, "refs", cler, Foreign, "injID")
-        assert len(obj.private.observers) == 1
-
-        obj.refs << Foreign(data="Faster than a speeding bullet!")
-
+        pak = clerk.fetch(Package, ID=1)
+        
         # @TODO: should be able to add to the index without triggering load
         # (for performance reasons)
-        #assert len(obj.__values__["refs"]) == 1
+        assert len(pak.__values__["refs"]) == 0
+        assert len(pak.refs) == 2
 
         # but getting any other field triggers the load!
-        assert obj.refs[0].data == "Here I come to save the day!"
-        assert len(obj.private.observers) == 0
+        assert pak.refs[0].data == "I'm content", pak.refs[0].data
+        assert len(pak.private.observers) == 0
 
-        assert len(obj.refs) == 3
-        
+        # make sure it works with << on a fresh load too:
+        newClerk = MockClerk(clerk.dbmap)
+        newClerk.storage = clerk.storage
+        pak = newClerk.fetch(Package, ID=1)
+        assert len(pak.__values__["refs"]) == 0
+        pak.refs << Content(data="I'm discontent",  box=pak)
+        assert len(pak.refs) == 3

@@ -13,9 +13,10 @@ Record.__attrs__["next"].type=Record
 class Node(Strongbox):
     ID = attr(long)
     data = attr(str)
-    parentID = attr(long)
+    parent = link(forward)
     kids = linkset(forward)
-Node.__attrs__["kids"].type=Node   
+Node.__attrs__["kids"].type=Node
+Node.__attrs__["parent"].type=Node   
 
 
 class ClerkTest(unittest.TestCase):
@@ -26,6 +27,7 @@ class ClerkTest(unittest.TestCase):
         # @TODO: figure out how to let me use Record.next here..
         self.clerk.dbmap[Record.__attrs__["next"]] = (Record, 'nextID')
         self.clerk.dbmap[Node.__attrs__["kids"]] = (Node, 'parentID')
+        self.clerk.dbmap[Node.__attrs__["parent"]] = (Node, 'parentID')
 
 
     def test_store(self):
@@ -34,8 +36,8 @@ class ClerkTest(unittest.TestCase):
         stored but the links do not.. 
         """
         self.clerk.store(Record())
-        actual =self.storage.match("Record")
-        assert actual == [{"ID":1, "val":""}]
+        actual = self.storage.match("Record")
+        assert actual == [{"ID":1, "val":"", "nextID":None}], actual
 
     def test_store_again(self):
         self.clerk.store(Record())
@@ -54,25 +56,51 @@ class ClerkTest(unittest.TestCase):
         assert r.next is not None, "didn't store the link"
         assert r.next.val=="b", "didn't store link correctly"
 
-    def test_store_linksets(self):
-        n = Node(data="a")
-        n.kids << Node(data="aa")
-        n.kids << Node(data="ab")
-        n.kids[1].kids << Node(data="aba")
+        r.next = None
+        self.clerk.store(r)
+        r = self.clerk.match(Record, val="a")[0]
+        assert r.next is None, "didn't delete link!"
 
-        self.clerk.store(n)
-        del n
-        n = self.clerk.match(Node, data="a")[0]
+        r = Record(val="noNext")
+        self.clerk.store(r)
+        r = self.clerk.fetch(Record, val="noNext")
+        assert r.next is None
+        
+
+
+    def test_store_linksets(self):
+        n1 = Node(data="a")
+        #@TODO: a Bidirectional LinkSets should do this for me:
+        (n1.kids << Node(data="aa")).parent = n1
+        (n1.kids << Node(data="ab")).parent = n1
+        (n1.kids[1].kids << Node(data="aba")).parent = n1.kids[1]
+        self.clerk.store(n1)
+        del n1
+        
+        n = self.clerk.fetch(Node, data="a")
         assert n.ID == 1, "didn't save parent of linkset first!"
-        assert len(n.kids)== 2, "didn't store the linkset"
+        assert len(n.kids)== 2, "didn't store the linkset: %s" % n.kids
         assert n.kids[0].data=="aa", "didn't store link correctly"
         assert n.kids[1].data=="ab", "didn't store link correctly"
         assert n.kids[1].kids[0].data=="aba", "didn't store link correctly"
+
+        n.kids[1].parent=None
+        n.kids.remove(n.kids[1])
+        self.clerk.store(n)
+        n = self.clerk.match(Node, data="a")[0]
+        assert len(n.kids) == 1
+
         
         
     def test_fetch(self):
         self.clerk.store(Record(val="howdy"))
+
+        # we can pass in an ID:
         obj = self.clerk.fetch(Record, 1)
+        assert obj.val == "howdy"
+
+        # or we can use keywords:
+        obj = self.clerk.fetch(Record, val="howdy")
         assert obj.val == "howdy"
 
 
