@@ -213,6 +213,7 @@ class CheckoutApp(zikeshop.PublicApp):
         self.billData = zikebase.Contact()._data.copy()
         self.shipData = zikebase.Contact()._data.copy()
         self.cardData = zikeshop.Card()._data.copy()
+        self.comments = ""
         self.cart.empty()
 
         # but remember the last sale in case they refresh..
