@@ -89,6 +89,9 @@ class Engine:
         self.auth.start()
         self.response.start()
 
+    def stopParts(self):
+        self.sess.stop()
+
 
     def injectParts(self):
         """Injects our parts into the weblib namespace"""
@@ -114,9 +117,11 @@ class Engine:
         self.interceptPrint()
 
 
+
     def tearDown(self):
         self.restorePrint()
         self.restoreParts()
+        self.stopParts()
             
 
 
@@ -126,7 +131,6 @@ class Engine:
 
 
     def run(self):
-
         self.setUp()
         try:
             self.result = self.SUCCESS
@@ -146,5 +150,4 @@ class Engine:
                 
         finally:
             self.tearDown()
-
 
