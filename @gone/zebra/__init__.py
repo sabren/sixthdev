@@ -3,6 +3,7 @@ Zebra: a text generation and reporting system
 
 $Id$
 """
+import os
 import string
 import lexer
 from zbr2xml import Z2X
@@ -11,48 +12,23 @@ from Bootstrap import Bootstrap
 
 ###[ Utility Functions ]#######################################
 
-
-def compile(template):
-    ifp = open(template + ".zb", "r")
-    data = Z2X().translate(ifp.read())
-    ofp = open(template + ".zbc", "w")
-    #@TODO: also use python's compiler, once the bugs are worked out.
-    ofp.write(Bootstrap().compile(data))
-    ofp.close()
-    ifp.close()
-    
-
 def fetch(template, model={}):
     """
     fetch the template, and appy it to the model
     """
-    import os.path
-
-    path, filename = os.path.split(template)
+    path, filename = os.path.split(template)   
     cwd = os.getcwd()
     if path:
         os.chdir(path)
-    
-    doCompile = 0
-    # if existing compiled template:
-    if os.path.exists(filename + ".zbc"):
-        # if also uncompiled template:
-        if os.path.exists(filename + ".zb"):
-            # and the uncompiled is newer:
-            if os.path.getmtime(filename + '.zb') \
-               > os.path.getmtime(filename + '.zbc'):
-                doCompile = 1
-    else:
-        # no existing template, so compile
-        doCompile = 1
 
-    if doCompile:
-        compile(filename)
+    # @TODO: make the .zb explicit in the call
+    filename += ".zb"
+    if not os.path.exists(filename):
+        raise IOError, "%s not found" % filename
 
-    # get the result..
-    namespace = {}
-    execfile(filename + ".zbc", namespace)
-    res = namespace['fetch'](model)
+    src = open(filename).read()
+    rpt = Bootstrap().toObject(Z2X().translate(src))
+    res = rpt.fetch(model)
 
     # cleanup and go home
     os.chdir(cwd)    
