@@ -10,18 +10,15 @@
 code: <input type="text" name="code" value="{:code:}"><br>
 name: <input type="text" name="name" value="{:name:}"><br>
 
-* if (productID) and not (parentID):
+* if scope.get('productID') and not scope.get('parentID'):
     * exec:
-        #@TODO: clean up this scope issue:
-        parentID = scope.get("productID")
+        parentID = productID
+
 <input type="hidden" name="parentID" value="{:parentID:}">
+<input type="submit" name="action" value="save">
 
 * if ID:
+    &nbsp;&nbsp;
     <input type="hidden" name="ID" value="{:ID:}">
-
-<input type="hidden" name="_next_"
-       value="action=show&what=product&ID={:parentID:}">
-<input type="submit" name="action" value="delete">&nbsp;
-<input type="submit" name="action" value="save">
+    <input type="submit" name="action" value="delete">
 </form>
-
