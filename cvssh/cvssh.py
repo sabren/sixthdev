@@ -110,7 +110,8 @@ def scramble(data):
 
 
 def cvspass_path():
-    return os.environ["HOME"] + os.sep + ".cvspass"
+    # check the environment for HOME dir, else use / (on windows)
+    return os.environ.get("HOME","") + os.sep + ".cvspass"
 
 
 def cvspass_key(username, server, cvsroot):
