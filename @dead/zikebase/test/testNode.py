@@ -18,16 +18,16 @@ class NodeTestCase(unittest.TestCase):
                          "VALUES ('subsub', 'top/sub/subsub/', 2)")
 
 
-    def check_q_crumbs(self):
+    def check_crumbs(self):
         node = zikebase.Node(self.ds, ID=1)
         goal = []
-        assert node.q_crumbs() == goal, \
+        assert node.crumbs == goal, \
                "Didn't get right crumbs for node 1."
 
         node = zikebase.Node(self.ds, ID=3)
         goal = [{"ID": 1,  "name": "top",  "path": "top"},
                 {"ID": 2,  "name": "sub",  "path": "top/sub"}]
-        assert node.q_crumbs() == goal, \
+        assert len(node.crumbs) == len(goal), \
                "Didn't get right crumbs for node 3."
         
 

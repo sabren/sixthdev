@@ -25,9 +25,8 @@ class Node(zdc.RecordObject):
     def get_crumbs(self):
         #@TODO: how do i handle stuff like this????????????????
         import zikebase
-        return map(lambda id: zikebase.Node(self._ds, ID=id),
-                   map(lambda n: n["ID"],
-                       self.q_crumbs()))
+        return [zikebase.Node(self._ds, ID=id) for id in
+                [n["ID"] for n in self.q_crumbs() ]]
 
     def get_children(self):
         if self._kids is None:
