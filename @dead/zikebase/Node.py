@@ -7,6 +7,10 @@ class Node(zdc.RecordObject):
     _table = zdc.Table(zikebase.dbc, "base_node")
     _tuples = ["crumbs", "children"] # @TODO: clean this up!
 
+    def _init(self):
+        self.__super._init(self)
+        self._kids = None
+
     def _new(self):
         self.__super._new(self)
         self.name = ''
@@ -22,12 +26,9 @@ class Node(zdc.RecordObject):
                        self.q_crumbs()))
 
     def get_children(self):
-        #@TODO: clean this junk up and make it a LinkSet!!!!
-        import zikebase
-        return map(lambda id: zikebase.Node(ID=id),
-                   map(lambda n: n["ID"],
-                       self.q_children()))
-    
+        if self._kids is None:
+            self._kids = zdc.LinkSet(self, zikebase.Node, "parentID")
+        return self._kids
 
     def q_crumbs(self):
         """Returns a list of dicts containing the data for the nodes leading
@@ -45,6 +46,7 @@ class Node(zdc.RecordObject):
 
 
     def q_children(self):
+        #@TODO: raise "q_children is deprecated"
         res = []
         cur = self._table.dbc.cursor()
         if self.ID is not None:
@@ -86,6 +88,9 @@ class Node(zdc.RecordObject):
     def save(self):
         # save ourselves AND the children:
         self._updatePaths(self.parent)
+        if self._kids is not None:
+            for child in self._kids:
+                child.save()
         
 
     def _updatePaths(self, parent=None):
