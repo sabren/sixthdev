@@ -84,15 +84,16 @@ class CheckoutApp(zikeshop.PublicApp):
     def act_add_card(self):
         # Add a new card to the database:
         import zikebase
-        ed = zikebase.ObjectEditor(zikeshop.Card)
-        ed.do("update")
-        ed.object.save()
-
-        # use the card for the transaction:
-        self.data['cardID'] = ed.object.ID
-
-        #@TODO: resolve - cards with secondary billing addresses?
-        self.next = "checkout"
+        try:
+            ed = zikebase.ObjectEditor(zikeshop.Card)
+            ed.do("save")
+            # use the card for the transaction:
+            self.data['cardID'] = ed.object.ID
+            #@TODO: resolve - cards with secondary billing addresses?
+            self.next = "checkout"
+        except ValueError, e:
+            self.model["error"] = e[0][0] # e is a LoL 
+            self.next = "get_card"
 
     def act_set_card(self):
         self.data['cardID'] = int(self.input['cardID'])
