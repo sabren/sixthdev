@@ -180,7 +180,26 @@ class StrongboxTest(unittest.TestCase):
 
     #@-node:6::Without explicit defaults, strings default to '', ints and longs to 0
 
-    #@+node:7::Attributes use static typing
+    #@+node:7::Other types pass defaults to the constructor
+
+    #@+body
+    
+    def check_othertypes(self):
+        class UpCase:
+            def __init__(self, value): self.value = str(value).upper()
+            def __cmp__(self, other): return cmp(self.value, other)
+            def __repr__(self): return value
+        class Foo(Strongbox):
+            bar = attr(UpCase, default="xyz")
+            abc = attr(str, default="xyz")
+        foo = Foo()
+        assert foo.bar == "XYZ", foo.bar
+        assert foo.abc == "xyz", foo.abc
+    #@-body
+
+    #@-node:7::Other types pass defaults to the constructor
+
+    #@+node:8::Attributes use static typing
 
     #@+body
     
@@ -236,9 +255,9 @@ class StrongboxTest(unittest.TestCase):
         assert goterr, "ssn regexp should reject even the most famous phone number in america..."
     #@-body
 
-    #@-node:7::Attributes use static typing
+    #@-node:8::Attributes use static typing
 
-    #@+node:8::Attributes allow "None" by default
+    #@+node:9::Attributes allow "None" by default
 
     #@+body
 
@@ -275,7 +294,7 @@ class StrongboxTest(unittest.TestCase):
         assert goterr, "assigning None should have failed!"
     #@-body
 
-    #@-node:8::Attributes allow "None" by default
+    #@-node:9::Attributes allow "None" by default
 
     #@-others
 
