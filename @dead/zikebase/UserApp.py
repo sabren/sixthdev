@@ -11,8 +11,8 @@ class UserApp(weblib.Actor):
     userClass = zikebase.User
     editorClass = zikebase.ObjectEditor
 
-    def sendmail(self, address, mail):
-        zikebase.sendmail(address, mail)
+    def sendmail(self, mail):
+        zikebase.sendmail(mail)
 
     def act_(self):
         self.do("signup")
@@ -57,7 +57,7 @@ class UserApp(weblib.Actor):
         else:
             self.consult(zdc.ObjectView(user))
             msg = zebra.fetch("eml_sendpass", self.model)
-            self.sendmail(user.email, msg)
+            self.sendmail(msg)
             self.msg_sentpass()
 
     def msg_sentpass(self):
