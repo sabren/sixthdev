@@ -1,5 +1,5 @@
 """
-Genierc class for hierarchical structures.
+Generic class for hierarchical structures.
 """
 __ver__="$Id$"
 
@@ -19,7 +19,7 @@ class Node(zdc.RecordObject):
         self.__super._new(self)
         self.name = ''
         self.descript = ''
-        self.parentID = 0
+        self._data['parentID'] = 0
         self._data['path'] = ''
 
     def get_crumbs(self):
@@ -63,13 +63,13 @@ class Node(zdc.RecordObject):
 
     def set_ID(self, value):
         # @TODO: use something like this for generic type checking?
-        self.__dict__["ID"] = int(value)
+        self._data["ID"] = int(value)
         
 
     def set_parentID(self, value):
         assert int(value) != self.ID, \
                "A node can't be its own parent!"
-        self.__dict__["parentID"]=int(value)
+        self._data["parentID"]=int(value)
         
 
     def get_parent(self):
@@ -82,25 +82,24 @@ class Node(zdc.RecordObject):
     def delete(self):
         assert len(self.children)==0, \
                "Cannot delete a Node that has children."
-        zdc.RecordObject.delete(self)
+        self.__super.delete(self)
 
 
     def save(self):
-        # save ourselves AND the children:
+        # _updatePaths saves ourselves AND the children:
         self._updatePaths(self.parent)
         if self._kids is not None:
             self._kids.save()
-        
 
     def _updatePaths(self, parent=None):
         # this is a recursive version.. It's probably really slow.
         
         if parent:
-            self.__dict__["path"] = parent.path + "/" + self.name
+            self._data["path"] = parent.path + "/" + self.name
         else:
-            self.__dict__["path"] = self.name
+            self._data["path"] = self.name
 
-        zdc.RecordObject.save(self)
+        self.__super.save(self)
         
         for kid in self.q_children():
             child = Node(ID=kid["ID"]) # @TODO: maybe the object version IS better?

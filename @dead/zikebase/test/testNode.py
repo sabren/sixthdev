@@ -43,7 +43,7 @@ class NodeTestCase(unittest.TestCase):
         node.save()
 
         assert node.path == "top/subnode", \
-               "Node doesn't generate the proper path when name is changed."             
+               "Node has wrong path after name change: %s" % node.path
 
 
 
@@ -71,7 +71,7 @@ class NodeTestCase(unittest.TestCase):
 
         node2 = zikebase.Node(ID=2)
         assert node2.path == "super/sub", \
-               "updatePaths doesn't update child nodes properly."
+               "wrong child after updatePaths: %s" % node2.path
 
         node3 = zikebase.Node(ID=3)
         assert node3.path == "super/sub/subsub", \
