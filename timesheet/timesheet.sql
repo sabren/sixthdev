@@ -16,3 +16,14 @@ CREATE TABLE times (
   PRIMARY KEY (ID)
 );
 
+CREATE TABLE web_sess (
+  ID int(11) NOT NULL auto_increment,
+  sid varchar(32) NOT NULL default '',
+  name varchar(32) NOT NULL default '',
+  sess text,
+  tsUpdate datetime default NULL,
+  PRIMARY KEY  (ID),
+  KEY name (name)
+);
+
+
