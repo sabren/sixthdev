@@ -69,20 +69,24 @@ class Bootstrap:
         return res
 
 
+## @TODO: probably get rid of this..
+## though, it might come in handy if trying to get zebra to work with
+## a really strict language... (but why do that?)
+
     ## language-specific templates for handling scope ##############
 
     def scopify(self, expression):
         "points names in expressions to the current scope"
-        
         import string, keyword
         res = []
-        toks = zebra.lexer.parse(expression)
+        toks = zebra.lexer.parse(string.strip(expression))
         for token in toks:
             if token[0]=="NAME" and not keyword.iskeyword(token[1]):
                 res.append("scope.get('%s','')" % token[1])
             else:
                 res.append(token[1])
         return string.join(res, " ")
+
 
 
     ## individual tag templates ####################################
@@ -97,12 +101,11 @@ class Bootstrap:
                     print self.fetch(model)
 
                 def fetch(self, model={}):
-                    import copy   # used by scope
-                    self.model = model
-                    scope = {}
+                    import copy   # used for pushing scope onto stack
+                    scope = locals()
+                    scope_stack = []
                     for item in model.keys():
                         scope[item] = model[item]
-                    scope_stack = []
                     zres = ""
             """)
         res = res + zebra.indent(self.walk(model), 2)
@@ -130,21 +133,18 @@ class Bootstrap:
             """
             _ = 0
             _max_ = len(scope["%(series)s"])
-            scope_stack.append(scope)
-            scope = copy.copy(scope)
-            scope.update(locals())
+            scope_stack.append(copy.copy(scope))
             for _ in range(_max_):
                 # can't do .update if it's a UserDict:
-                mdl = self.model["%(series)s"][_]
+                mdl = model["%(series)s"][_]
                 for item in mdl.keys():
-                    scope[item]=mdl[item]
-                scope["_"] = _
+                    exec '%%s=mdl[item]' %% item
             """ % attrs)
         res = res + zebra.indent(self.walk(model), 1)            
         res = res + zebra.trim(
             """
-            scope = scope_stack.pop()
-            #del _
+            locals().update(scope_stack.pop())
+            #X# del _
             """)
         return res
 
@@ -163,11 +163,12 @@ class Bootstrap:
 
     ## <xpr> ##
     def handle_xpr(self, model, attrs):
-        res = "zres = zres + str(%s)\n" % model[0]
+        res = "zres = zres + str(%s)\n" % self.scopify(model[0])
         return res
 
+    ## <exec> ##
     def handle_exec(self, model, attrs):
-        res = model[0]
+        res = model[0] + "\nscope.update(locals())\n"
         return res
 
 

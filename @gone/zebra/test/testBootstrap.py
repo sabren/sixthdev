@@ -32,28 +32,35 @@ class BootstrapTestCase(unittest.TestCase):
     def check_for(self):
 
         model = {
-            "stuff": [
-            {"a":"apple", "b":"banana", "c":"cherry"},
-            {"a":"aardvark", "b":"bull weevil", "c":"catepillar"},
-            {"a":"alice", "b":"betty", "c":"carol"},
-            ]}
+            "a":"alaska",
+            "stuff":[
+                {"a":"apple", "b":"banana", "c":"cherry"},
+                {"a":"aardvark", "b":"bull weevil", "c":"catepillar"},
+                {"a":"alice", "b":"betty", "c":"carol"},
+                ],
+            }
         
         zbx = zebra.trim(
             """
             <?xml version="1.0"?>
             <zebra>
+            <rem>test scope</rem>
+            <xpr>a</xpr><br/>
             <for series="stuff">
-            <var>a</var>, <var>b</var>, <var>c</var>
+            <xpr>a</xpr>, <xpr>b</xpr>, <xpr>c</xpr>
             <br/>            
             </for>
+            <xpr>a</xpr><br/>
             </zebra>
             """)
 
         goal = zebra.trim(
             """
+            alaska
             apple, banana, cherry
             aardvark, bull weevil, catepillar
             alice, betty, carol
+            alaska
             """)
         
 
@@ -75,10 +82,10 @@ class BootstrapTestCase(unittest.TestCase):
             <?xml version="1.0"?>
             <zebra>
             <for series="names">
-            <if condition="name=='a'">Argentina</if>
-            <ef condition="name=='b'">Bolivia</ef>
-            <el>Chile</el>
-            <glue>, </glue>
+                <if condition="name=='a'">Argentina</if>
+                <ef condition="name=='b'">Bolivia</ef>
+                <el>Chile</el>
+                <glue>, </glue>
             </for>
             </zebra>
             """)
