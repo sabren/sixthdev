@@ -31,6 +31,6 @@ data = ifp.read()
 ## if outline format, convert to xml
 if fmt=="zbr":
     data = zebra.Z2X().translate(data)
-    print data
+
 ## parse the xml and output the python code.
-#print zebra.Bootstrap().compile(data)
+print zebra.Bootstrap().compile(data)
