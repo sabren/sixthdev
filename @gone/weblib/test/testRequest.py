@@ -81,15 +81,14 @@ class RequestTestCase(unittest.TestCase):
 
     def check_encoding(self):
         request = weblib.Request(content="a=<>")
-
-        assert request.form["a"] == "<>", "doesn't handle <> correctly"
-
+        assert request.form["a"] == "<>", \
+               "doesn't handle <> correctly (got %s)" % repr(request.form["a"])
 
 
     def check_content(self):
         request = weblib.Request()
-        assert request.content is None, \
-               "request.content doesnt default to None"
+        assert request.content =="", \
+               "request.content doesnt default to blank string"
         
         request = weblib.Request(content="abcdefg")
         assert request.content == "abcdefg", \
@@ -105,7 +104,7 @@ class RequestTestCase(unittest.TestCase):
 
     def check_contentType(self):
         request=weblib.Request()
-        assert request.contentType == None, \
+        assert request.contentType == "application/x-www-form-urlencoded", \
                "request.contentType doesn't default to application/x-www-form-urlencoded"
 
 
@@ -151,7 +150,8 @@ class RequestTestCase(unittest.TestCase):
             ))
 
         assert request.form.get("action")=="upload", \
-               "form values don't work on multipart forms."
+               "form values don't work on multipart forms. (got %s)" \
+               % repr(request.form.get("action"))
 
 
         assert request.form["upfile"].filename == "C:\mimetest.txt", \

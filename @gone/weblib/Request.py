@@ -26,11 +26,22 @@ class Request:
 
         self.engine = engine
         if self.engine is weblib:
-            weblib.request = self  # do I still need this?
+            weblib.request = self  # @TODO: get rid of this!!
 
-        ## environment
-        self.environ = environ
-        if environ is None:
+        #@TODO: rename .contentType to .type !!!!!!!
+        self._doEnvironJunk(environ)
+        self._doQueryJunk(querystring)
+        self._doCookieJunk(cookie)
+        self._doMethodJunk(method, content)
+        self._doTypeJunk(contentType)
+        self._doContentJunk(content, form)
+        
+    ## private methods #################################################
+
+    def _doEnvironJunk(self, environ=None):
+        if environ is not None:
+            self.environ = environ
+        else:
             ## os.environ.copy() actually shares
             ## data with os.environ .. I suppose
             ## because it's an object.. Anyway,
@@ -41,114 +52,115 @@ class Request:
             self.environ = {}
             for item in os.environ.keys():
                 self.environ[item] = os.environ[item]
-            del os
-        del environ
-        
 
-        ## querystring:
-        self.querystring = querystring
-        if querystring is None:
+    def _doQueryJunk(self, querystring=None):
+        if querystring is not None:
+            self.querystring = querystring
+        else:
             self.querystring = self.environ.get("QUERY_STRING", "")
-        del querystring
-        
-
         ## query, a hash of the querystring:
         self.query = self.parse(self.querystring, decode=1)
 
-
-        ## cookie:
+    def _doCookieJunk(self, cookie=None):
         ## @TODO: get some real cookie parsing abilities...
-        self.cookie = cookie
-        if cookie is None:
+        if cookie is not None:
+            self.cookie = cookie
+        else:
             self.cookie = self.parse(self.environ.get("HTTP_COOKIE", ""),
                                      splitter=";")
-        del cookie
-        
 
-        ## content & contentLength:
-        self.content = content
-        if content is None:
-            self.contentLength = int(self.environ.get("CONTENT_LENGTH", 0)) \
-                                 or None
-            if self.contentLength is not None:
-                import sys
-                self.content = sys.stdin.read(self.contentLength)
-        else:
-            self.contentLength = len(content)
-        del content
-
-
-        ## contentType:
-        self.contentType = contentType
-        if (self.content is not None) and (contentType is None):
-            self.contentType=self.environ.get("CONTENT_TYPE")
-            if self.contentType is None:
-                self.contentType = "application/x-www-form-urlencoded"
-                
-        self.environ["CONTENT_TYPE"] = self.contentType
-        del contentType
-
-            
+    def _doMethodJunk(self, method=None, content=None):
         ## method
-        self.method = method
-        if method is None:
+        if method is not None:
+            self.method = method
+        else:
             self.method = self.environ.get("REQUEST_METHOD")
-            if self.method is None: # still
-                if self.content:
+            if self.method is None:
+                if content:
                     self.method = "POST"
                 else:
                     self.method = "GET"
-                self.environ["REQUEST_METHOD"] = self.method
-        del method
-        
 
-        ## form:
-        self.form = form
-        if form is None:
-            if self.contentType == "application/x-www-form-urlencoded":
+    def _doTypeJunk(self, contentType):
+        ## contentType:
+        if contentType is not None:
+            self.contentType = contentType
+        else:
+            self.contentType=self.environ.get("CONTENT_TYPE")
+            if self.contentType is None:
+                self.contentType = "application/x-www-form-urlencoded"
+        
+    def _doContentJunk(self, content=None, form=None):
+        import sys
+
+        ## multipart 
+        if self.contentType[:10]=="multipart/":
+            if content:
+                self.form = self._parseMultiPartForm(content)
+                self.content = content
+            else:
+                self.form = self._parseMultiPartForm(sys.stdin)
+                self.content = ""
+
+        ## any other type of form..
+        else:
+
+            ## content and contentLength:
+            if content is not None:
+                self.content = content
+                self.contentLength = len(content)
+            else:
+                self.contentLength = int(self.environ.get("CONTENT_LENGTH", 0))
+                if self.contentLength:
+                    self.content = sys.stdin.read(self.contentLength)
+                else:
+                    self.content=""
+
+            ## the form itself
+            if form is not None:
+                self.form = form
+            elif self.method == "POST":
                 self.form = self.parse(self.content, decode=1)
             else:
                 self.form = {}
-        del form
 
-
+    def _parseMultiPartForm(self, stream):
         ## multipart/form-data (file upload forms):
         ## @TODO: lots of stuff! probably best to just rewrite this
         ## rather than try to yank stuff out of FieldStorage..
+        form = {}
+        import cgi, StringIO
 
-        if (self.content) and (self.contentType[:10]=='multipart/'):
+        # pretend we're a file (FieldStorage requires this)
+        # on the web, this would usually be stdin, which IS a file,
+        # but if we assume that, we can't assign to content..
+        # perhaps content should be a file-like pointer anyway?
 
-            import cgi, StringIO
+        if type(stream)==type(""):
+            storage = cgi.FieldStorage(StringIO.StringIO(stream), environ=self.environ)
+            #@TODO: this isn't working in test!
+        else:
+            storage = cgi.FieldStorage(stream, environ=self.environ)
 
-            # pretend we're a file (FieldStorage requires this)
-            # on the web, this would usually be stdin, which IS a file,
-            # but if we assume that, we can't assign to content..
-            # perhaps content should be a file-like pointer anyway?
-            
-            storage = cgi.FieldStorage(StringIO.StringIO(self.content),
-                                       environ=self.environ)
-            
-            for field in storage.keys():                
-                ## handle multiple values for one field:
-                if type(storage[field]) == type([]):
-                    self.form[field] = ()
-                    for item in storage[field]:
-                        if item.filename:
-                            self.form[field]=\
-                                self._tupleMerge(self.form[field], item)
-                        else:
-                            self.form[field]=\
-                                self._tupleMerge(self.form[field], item.value)
-                ## or a single value for the field:
-                elif storage[field].filename:
-                    self.form[field]=storage[field]
-                else:
-                    self.form[field]=storage[field].value
-                    
-            del storage
+        for field in storage.keys():                
+            ## handle multiple values for one field:
+            if type(storage[field]) == type([]):
+                form[field] = ()
+                for item in storage[field]:
+                    if item.filename:
+                        form[field]=\
+                            self._tupleMerge(form[field], item)
+                    else:
+                        form[field]=\
+                            self._tupleMerge(form[field], item.value)
+            ## or a single value for the field:
+            elif storage[field].filename:
+                form[field]=storage[field]
+            else:
+                form[field]=storage[field].value
+        return form
 
 
-    ## private methods #################################################
 
     def _tupleMerge(self, head, tail):
         """converts head and tail into tuples (if they're not) and merges them"""
