@@ -9,7 +9,7 @@ import xml2mdl
 class Bootstrap:
     "A class to compile zebra reports until zebra can compile itself."
 
-    parserClass = xml2mdl.X2mParser
+    parserClass = xml2mdl.X2M
 
 
     def toObject(self, zbx):

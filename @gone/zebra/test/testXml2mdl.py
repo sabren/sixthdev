@@ -22,7 +22,7 @@ class Xml2mdlTestCase(unittest.TestCase):
 
 
     def check_X2mParser(self):
-        x2m = zebra.xml2mdl.X2mParser()
+        x2m = zebra.xml2mdl.X2M()
 
         assert x2m.model == [], \
                "Doesn't initialize model."
@@ -37,9 +37,9 @@ class Xml2mdlTestCase(unittest.TestCase):
              }]
         
         
-        x2m.feed(self.data)
-        assert x2m.model == goal, \
-               "Doesn't build model correctly:\n%s" % x2m.model
+        actual = x2m.translate(self.data)
+        assert actual == goal, \
+               "Doesn't build model correctly:\n%s" % actual
 
 
 
