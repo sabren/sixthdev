@@ -1,5 +1,5 @@
 
-class Storage:
+class Storage(object):
 
     def store(self, table, **row):
         if row.get("ID"):

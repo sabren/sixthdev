@@ -33,7 +33,7 @@ class MockStorageTest(unittest.TestCase):
     def check_match(self):
         assert self.wholedb() == []
         self.populate()
-        results = self.s.match("test_person", ID=1)
+        results = self.s.match("test_person",ID=1)
         assert results == [{"ID":1, "name":"fred"}], str(results)
 
     def check_fetch(self):

@@ -33,7 +33,7 @@ class MySQLStorage(Storage):
             return "'" + "''".join(str(val).split("'")) + "'"
             
 
-    def _insert(self, table, **row):
+    def _insert_main(self, table, **row):
 
         # generate column/value lists for INSERT
         cols, vals = "", ""
@@ -49,10 +49,14 @@ class MySQLStorage(Storage):
         sql = "INSERT INTO %s (%s) VALUES (%s)" % (table, cols, vals)
         self._execute(sql)
 
-        # we read from DB in case of timestamps, etc:
-        ID = self.cur._insert_id
-        return self.fetch(table, ID)
-        
+        return self._getInsertID()
+
+    def _insert(self, table, **row):
+        id = self._insert_main(table, **row)
+        return self.fetch(table, id)
+
+    def _getInsertID(self):
+        return self.cur.row_id
 
     def _update(self, table, **row):
 
