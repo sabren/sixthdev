@@ -41,7 +41,7 @@ class RequestData(dict):
                 res[k]=v
         return res
 
-import os
+import os, sys
 class RequestBuilder(object):
     def build(self, method=None, querystring=None, form=None, cookie=None,
               environ=None, content=None):
@@ -52,9 +52,10 @@ class RequestBuilder(object):
                        form=form,
                        cookie=SimpleCookie(cookie or env.get("HTTP_COOKIE", "")),
                        environ= env,
-                       content=content)
+                       content=content or self.fetchContent())
     def fetchContent(self):
-        raise hell # @TODO: fetch content from stdin
+        return sys.stdin.read(int(os.environ.get("CONTENT_LENGTH",0)))
+
     def buildEnviron(self):
         ## os.environ.copy() actually shares data with os.environ [??]
         ## That's bad for us because it makes environ global, and
