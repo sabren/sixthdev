@@ -6,7 +6,7 @@ __ver__="$Id$"
 import os
 import unittest
 import sixthday.spec
-from arlo import Clerk
+from arlo import Clerk, Schema
 from sixthday import AdminApp
 from sixthday import User
 from storage import MockStorage
@@ -16,7 +16,9 @@ class AdminAppTest(unittest.TestCase):
     def setUp(self):
 
         self.storage = MockStorage()
-        self.clerk = Clerk(self.storage)
+        self.clerk = Clerk(self.storage, Schema({
+            User: "User"
+        }))
         self.app = AdminApp(self.clerk, {})
         
         # set up some templates to play with:

@@ -15,7 +15,8 @@ from storage import MockStorage
 class SignupAppTest(unittest.TestCase):
 
     def setUp(self):
-        raise 'skip'
+        raise 'skip' # because this whole app sucks and ther'es a better one
+        # i just want to go through and mine it for ideas later...
         self.storage = MockStorage()
         self.clerk = Clerk(self.storage)
 

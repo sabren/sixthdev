@@ -6,10 +6,11 @@ from sixthday import Node
 class NodeTest(unittest.TestCase):
 
     def setUp(self):
-        self.clerk = arlo.MockClerk(dbmap={
-            Node.__attrs__["parent"]: (Node, "parentID"),
-            Node.__attrs__["children"]: (Node, "parentID"),
-            })
+        self.clerk = arlo.MockClerk(arlo.Schema({
+            Node: "Node",
+            Node.parent: "parentID",
+            Node.children: "parentID",
+            }))
         s = self.clerk.storage
         
         # we use the storage object so we can define the
