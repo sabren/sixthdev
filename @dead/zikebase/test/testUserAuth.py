@@ -1,14 +1,12 @@
 """
 testUserAuth.py - test suite for zikebase.UserAuth
-
-$Id$
 """
+__ver__="$Id$"
 
 import string
-import weblib
+import weblib, weblib.SessPool
 import unittest
 import zikebase.test
-
 
 class UserAuthTestCase(unittest.TestCase):
 
@@ -18,15 +16,21 @@ class UserAuthTestCase(unittest.TestCase):
 
 
     def check_prompt(self):
-        engine = weblib.Engine(request=self.myReq, script=weblib.trim(
-            """
-            from weblib import auth
+        wres = weblib.Response()
+        sess = weblib.Sess(weblib.SessPool.InMemorySessPool(),
+                           self.myReq,
+                           wres)
+        auth = zikebase.UserAuth(sess)
+        try:
             auth.check()
-            print "this should not show up"
-            """))
-        engine.run()
+            gotExit=0
+        except SystemExit:
+            gotExit=1
 
-        assert string.find(engine.response.buffer, engine.auth.PLEASELOGIN) > -1, \
+        assert gotExit, \
+               "should have demanded login"
+
+        assert string.find(wres.buffer, auth.PLEASELOGIN) > -1, \
                "doesn't show prompt!"
 
 

@@ -1,8 +1,9 @@
 """
 UserAuth.py -- extends weblib.Auth to use User object.
-
-$Id$
 """
+
+__ver__="$Id$"
+
 
 import zikebase
 import weblib
@@ -11,6 +12,12 @@ class UserAuth(weblib.Auth):
 
     zikebase.load("User")
     userClass = zikebase.User
+
+    def __init__(self, sess):
+        """
+        usage: auth=UserAuth(sess)
+        """
+        self._sess = sess
 
     def fetch(self, key):
         if key:
@@ -37,8 +44,3 @@ class UserAuth(weblib.Auth):
             key = user.ID
 
         return key
-
-
-    
-
-
