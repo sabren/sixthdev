@@ -92,8 +92,9 @@ class SqlSessPool:
         cur = self.dbc.cursor()
         sql = "REPLACE " + self.table + " " + \
               "set sess='" + frozen + "', tsUpdate=now(), " + \
-              "name='" + name + "' and sid='" + sid + "'"
+              "name='" + name + "', sid='" + sid + "'"
         cur.execute(sql)
+
 
     def drain(self, name, beforeWhen):
         cur = self.dbc.cursor()
