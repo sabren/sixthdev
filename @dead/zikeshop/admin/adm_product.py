@@ -48,8 +48,10 @@ def showForm(prod):
     print '<form action="adm_product.py" method="POST">'
     if prod.ID:
         print '<input type="hidden" name="ID" value="%s">' % prod.ID
-    print 'code: <input type="text" name="code" value="%s"><br>' % prod.code
-    print 'product: <input type="text" name="product" value="%s"><br>' % prod.product
+    print 'code: <input type="text" name="code" value="%s"><br>' \
+          % prod.code
+    print 'product: <input type="text" name="product" value="%s"><br>' \
+          % prod.product
 
     print 'categories:<br>'
     cur = zikeshop.dbc.cursor()
@@ -65,26 +67,25 @@ def showForm(prod):
     print '</form>'
 
 
-print showProductLinks():
+def showProductLinks():
     cur = zikeshop.dbc.cursor()
-    cur.execute("SELECT ID, code, product FROM shop_product order by code")
+    cur.execute(
+        "SELECT ID, code, product FROM shop_product order by code")
 
     print '<b><a href="adm_product.py">add new</a></b><br>'
     for row in cur.fetchall():
-        print '<A HREF="adm_product.py?action=delete&ID=%s">[x]</a>' % (row[0],)
+        print '<A HREF="adm_product.py?action=delete&ID=%s">[x]</a>' \
+              % (row[0],)
         print '<A HREF="adm_product.py?ID=%s">%s</a>' % (row[0], row[1]),
         print row[2], "<br>"
 
 
 if __name__=="__main__":
     import zikeshop.admin.header
-    prod = getProduct()
+    prod = fetchProduct()
     doAction(prod)
     showForm(prod)
     print '<hr>'
     showProductLinks()
     print '<hr>'
     print 'zikeshop alpha (c)2000 zike interactive, inc'
-
-
-
