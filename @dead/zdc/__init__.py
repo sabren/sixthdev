@@ -60,24 +60,23 @@ def toListDict(cur):
 
 
 
-def find(what, where, orderBy=None):
+def find(what, where=None, orderBy=None):
     """
-    find(what, where) -> list of what's matching where
+    find(what, where, orderBy) -> list of what's matching where
     what is a zdc.RecordObject class
     where is a SQL where clause
+    orderBy is a SQL order by clause
 
     this is how to do ad-hoc SQL queries for objects..
     """
     #@TODO: test case for this.. (it was factored out of zikeshop)
     tablename = what._table.name
     # validation logic:
-    sql =\
-        """
-        SELECT ID FROM %s
-        WHERE %s 
-        """  % (tablename, where)
+    sql = "SELECT ID FROM %s " % tablename
+    if where:
+        sql = sql + " WHERE %s " % where
     if orderBy:
-        sql = sql + " ORDER BY %s" % orderBy
+        sql = sql + " ORDER BY %s " % orderBy
     cur = what._table.dbc.cursor()
     cur.execute(sql)
     res = []
