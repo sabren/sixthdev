@@ -21,6 +21,9 @@ class Actor:
     isn't defined.
     """
 
+    ##@TODO: a generic nextMap for action chains might come in handy,
+    ## and keep people from having to override every little method.
+
     ## constructor ################################################
 
     def __init__(self, input=None):
@@ -163,7 +166,11 @@ class Actor:
         Jump to one of the urls defined in .where... expects where=xxx
         """
         import weblib
-        weblib.response.redirect(self.map_where(self.input["where"]))
+        where = self.map_where(self.input["where"])
+        if where:
+            weblib.response.redirect(where)
+        else:
+            self.complain("'%s' is not a valid jump" % self.input["where"])
 
     def act__error__(self):
         """
