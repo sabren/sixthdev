@@ -429,7 +429,9 @@ class Engine (xmllib.XMLParser):
                 ## deal with context (we only care when it's a string)
                 if (context == "show"):
                     stripehead = 'print "'
-                    stripebody = string.replace(stripe, '"', '\\"')
+                    stripebody = string.replace(
+                        string.replace(stripe, '"', '\\"'),
+                        "\n", "\\n")
                     stripetail = '";'
                 elif context == "exec":
                     stripebody = stripe
@@ -500,7 +502,7 @@ class Engine (xmllib.XMLParser):
     def compile(self, xml=None):
         if xml:
             self.parse(xml)
-        return "<?\n" + self.flatten(self.parsed["stripe"], context="show") + "?>"
+        return "<?\n" + self.flatten(self.parsed["stripe"], context="show") + "?>\n"
 
 
 ###################################################
@@ -540,4 +542,3 @@ if __name__ == "__main__":
     zEngine = Engine()
     #print zEngine.parse(zbo)
     print zEngine.compile(zbo)
-
