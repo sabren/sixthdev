@@ -10,6 +10,7 @@ class Payment:
     card = "" # card number
     merchant = "" # merchant's ID
     expires = "" #
+    test = 0
 
     
     def __init__(self, **kwargs):
