@@ -202,6 +202,7 @@ class Actor:
         import weblib
         where = self.map_where(self.input["where"])
         if where:
+            self.exit()
             weblib.response.redirect(where)
         else:
             self.complain("'%s' is not a valid jump" % self.input["where"])
