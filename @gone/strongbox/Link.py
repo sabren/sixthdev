@@ -14,7 +14,7 @@ class Link(attr):
         self.type = classname
         self.default = None
         self.okay = None
-
+        self.allowNone = 1
 
     def _typeok(self, value):
         return isinstance(value, strongbox.Strongbox) \
