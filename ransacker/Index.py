@@ -59,6 +59,9 @@ class Index:
 
     ## public methods ##############################################
 
+
+    #- 1: methods that deal with page keys (k:/i:) ----------------#
+
     def hasPage(self, label):
         return self.rki.has_key("k:"+label)
 
@@ -67,7 +70,12 @@ class Index:
         """addPage(page, text) Add text to index under the given label"""
         assert type(label) == type(""), "label must be a string!"            
 
-        self.forgetPage(label)
+        if self.hasPage(label):
+            self.unlinkPage(label)
+        else:
+            pageID = self.nextPageID()
+            self.rki["i:"+`pageID`] = label
+            self.rki["k:"+label] = (pageID, ())
 
         newWordIDs = []
         for word in ransacker.uniqueWords(text):
@@ -78,34 +86,26 @@ class Index:
         self.rki["k:"+label] = pageData
 
 
-    def forgetPage(self, label):
+    def getPageID(self, label):
+        return self.rki["k:"+label][0]
+
+
+    def wordIDsOnPage(self, label):
+        return self.rki["k:"+label][1:]
+
+
+
+    #- 2: methods that deal with wordID keys ----------------------#
+
+
+    def unlinkPage(self, label):
         """If we know about a page, forget what we know about it."""
         # @TODO: check whether we NEED to delete (eg, word might be in new text)
 
-        if self.hasPage(label):
-            for wordID in self.wordIDsOnPage(label):
-                pageIDs = list(self.pageIDsForWordID(wordID))
-                pageIDs.remove(self.getPageID(label))
-
-                self.rki[`wordID`]= pageIDs
-
-
-    def getPageID(self, label):
-        if self.hasPage(label):
-            return self.rki["k:"+label][0]
-        else:
-            pageID = self.nextPageID()
-            self.rki["i:"+`pageID`] = label
-            self.rki["k:"+label] = (pageID, ())
-            return pageID
-        
-
-    def nextPageID(self):
-        res = 1
-        if self.rki.has_key(ransacker.NEXTNUM):
-            res = int(self.rki[ransacker.NEXTNUM])
-        self.rki[ransacker.NEXTNUM] = str(res+1)
-        return res
+        for wordID in self.wordIDsOnPage(label):
+            pageIDs = list(self.pageIDsForWordID(wordID))
+            pageIDs.remove(self.getPageID(label))
+            self.rki[`wordID`]= pageIDs
 
 
 
@@ -117,16 +117,20 @@ class Index:
             self.rki[`wordID`] = (self.getPageID(label),)
 
 
-    def wordIDsOnPage(self, label):
-        return self.rki["k:"+label][1:]
-
-
-
     def pageIDsForWordID(self, wordID):
         return self.rki[str(wordID)]
 
 
 
+    #- 3: methods that deal with other keys ------------------------#
+
+
+    def nextPageID(self):
+        res = 1
+        if self.rki.has_key(ransacker.NEXTNUM):
+            res = int(self.rki[ransacker.NEXTNUM])
+        self.rki[ransacker.NEXTNUM] = str(res+1)
+        return res
 
 
 
