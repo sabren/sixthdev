@@ -52,7 +52,7 @@ if sale.billAddress:
     """ % rec
 
     ## SHIPPING INFO (cut and pasted from above)
-    rec = sale.billAddress._record
+    rec = sale.shipAddress._record
     print """
     <pre><b>Shipping Info</b>
     %(fname)s %(lname)s""" % rec
