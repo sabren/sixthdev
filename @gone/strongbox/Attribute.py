@@ -23,7 +23,11 @@ class Attribute(object):
         else:
             raise TypeError, "okay must be lambda, list, or string"
 
-    def initialValue(self):
+    def initialValue(self, instance=None):
+        """
+        instance should be ignored, except for links
+        #@TODO: make links a separate interface
+        """
         return self.cast(self.default)
 
     def _determineDefault(self, typ, default):

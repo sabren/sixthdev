@@ -1,32 +1,36 @@
 
-from strongbox import attr, Strongbox, linkset, forward
+from strongbox import attr, Strongbox, linkset, forward, link
 from unittest import TestCase
 
 class Child(Strongbox):
+    mama = link(forward)
     name = attr(str)
 class Parent(Strongbox):
-    kids = linkset(Child)
+    kids = linkset(Child, "mama")
+Child.__attrs__["mama"].type=Parent
 
 class Node(Strongbox):
-    kids = linkset(forward)
+    kids = linkset(forward, None)
+
 
 class NonNode:
     pass
 
 class LinkSetTest(TestCase):
 
-    def check_simple(self):
+    def test_simple(self):
         p = Parent()
         c = Child(name="freddie jr")
         p.kids << c
-        assert p.kids[0] == c
+        assert p.kids[0] is c
+        assert c.mama is p
 
-    def check_typing(self):
+    def test_typing(self):
 
         # should not be able to instantiate until we change the "forward" 
         self.assertRaises(ReferenceError, Node)
         Node.__attrs__["kids"].type = Node
-
+        
         # now it should work:
         top = Node()
         assert top.kids == [], str(top.kids)

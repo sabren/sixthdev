@@ -70,7 +70,7 @@ class Stealthbox(object):
         instance.__dict__['private'] = PrivateNamespace()
         instance.__dict__['__values__'] = {}
         for a in klass.__attrs__:
-            instance.__values__[a] = klass.__attrs__[a].initialValue()
+            instance.__values__[a] = klass.__attrs__[a].initialValue(instance)
         if dbc:
             instance.private.dbc = dbc
         return instance
