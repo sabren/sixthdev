@@ -165,6 +165,16 @@ class EngineTest(unittest.TestCase):
         assert e.hadProblem()
         e = Engine(script="assert 0"); e.run()
         assert e.hadProblem()
+
+
+    def test__main__(self):
+        e = Engine(script=trim(
+            """
+            if __name__=='__main__':
+               print >> RES, 'sup?'
+            """))
+        e.run()
+        assert e.response.buffer =="sup?\n"
         
             
 
