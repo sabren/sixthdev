@@ -1,8 +1,8 @@
 import unittest
 
-import sqlTestZdc, zdc
+import sqlTest, zdc
 import zdc.drivers.DBAPI2Driver
-dbc = zdc.Connection(zdc.drivers.DBAPI2Driver.DBAPI2Driver(sqlTestZdc.dbc))
+dbc = zdc.Connection(zdc.drivers.DBAPI2Driver.DBAPI2Driver(sqlTest.dbc))
 
 
 from testIdxDict import *
