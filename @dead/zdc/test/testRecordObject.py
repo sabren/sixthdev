@@ -21,7 +21,8 @@ class RecordObjectTestCase(unittest.TestCase):
         
         ## part1: table from the constructor
         robj = zdc.RecordObject(self.table)
-        assert robj._table.name == "test_fish", "table passed to constructor didn't work."
+        assert robj._table.name == "test_fish", \
+               "table passed to constructor didn't work."
         del robj
 
         ## part2: table from __class__.table
@@ -29,7 +30,8 @@ class RecordObjectTestCase(unittest.TestCase):
             _table=zdc.Table(zdc.test.dbc, "test_fish")
 
         robj = Fish()
-        assert robj._table.name == "test_fish", "__class__.table didn't work."
+        assert robj._table.name == "test_fish", \
+               "__class__.table didn't work."
 
 
 
@@ -41,11 +43,13 @@ class RecordObjectTestCase(unittest.TestCase):
         assert robj.ID == 1, "ID not updated after save()"
 
         self.cur.execute("SELECT ID, fish FROM test_fish WHERE fish='trout'")
-        assert self.cur.fetchone() == (1, 'trout'), "save() didn't add record correctly."
+        assert self.cur.fetchone() == (1, 'trout'), \
+               "save() didn't add record correctly."
 
 
     def check_update(self):
-        self.cur.execute("INSERT INTO test_fish (ID, fish) VALUES (5, 'fluunder (sic)')")
+        self.cur.execute(
+            "INSERT INTO test_fish (ID, fish) VALUES (5, 'fluunder (sic)')")
 
         robj = zdc.RecordObject(self.table, ID=5)
         robj.fish = 'flounder'
@@ -87,9 +91,10 @@ class RecordObjectTestCase(unittest.TestCase):
 
 
 
-## ## I removed this test because I don't think it applies anymore.. does it?
-## ## actually, there should be SOME kind of error if you try to select a
-## ## record that isn't there, but probably not a KeyError.. maybe NotFoundError?
+## ## I removed this test because I don't think it applies
+## ## anymore.. does it?  actually, there should be SOME kind of error
+## ## if you try to select a record that isn't there, but probably not
+## ## a KeyError.. maybe NotFoundError?
 ## ##
 ## ## .. you'd also never pass in a numeric key anymore..
 ## ## it would be RecordObject(self.table, ID=55)
