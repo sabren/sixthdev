@@ -10,38 +10,46 @@ class AdminApp(weblib.Actor):
 
     def __init__(self, input=None):
         self.__super.__init__(self, input)
+        #@TODO: just make 'whatmap' into a dict, and get .what from input
         self.what = {}
 
-    def map_what(self, what):
-        return self.what.get("what")
+    def map_what(self, what=None):
+        if what is None:
+            return self.what.get(self.input.get("what"))
+        else:
+            return self.what.get(what)
 
-    def enter(self):
-        weblib.auth.check()
-        zebra.show("dsp_head")
 
-    def exit(self):
-        zebra.show("dsp_foot")
+    ## list ###################################################
     
     def act_list(self):
         """
-        generic list routine
+        calls list_{:what:} if defined, else generic_list
         """
         what = self.input.get("what", "")
         if hasattr(self, "list_%s" % what):
             getattr(self, "list_%s" % what)()
         else:
-            import zebra
-            try:
-                self.consult({
-                    "list": getattr(self, "qry_%s" % what)()
-                    })
-            except AttributeError:
-                self.complain("self.qry_%s() not defined" % what)
-            try:
-                zebra.show("lst_%s" % what, self.model)
-            except IOError:
-                self.complain("unable to load lst_%s" % what)
+            self.generic_list(what)
 
+    def generic_list(self, what):
+        """
+        """
+        import zebra
+        try:
+            self.consult({
+                "list": getattr(self, "qry_%s" % what)()
+                })
+        except AttributeError:
+            self.complain("self.qry_%s() not defined" % what)
+        try:
+            zebra.show("lst_%s" % what, self.model)
+        except IOError:
+            self.complain("unable to load lst_%s" % what)
+
+
+
+    ## show ######################################################
 
     def act_show(self):
         """
@@ -53,19 +61,24 @@ class AdminApp(weblib.Actor):
         if hasattr(self, "show_%s" % what):
             getattr(self, "show_%s" % what)()
         else:
-            import zdc
-            #@TODO: this ID stuff is just a hack to get categories working.
-            #@TODO: there needs to be a generic scheme for doing this..
-            if self.input.get("ID"):
-                obj = self.map_what(what)(ID=self.input.get("ID"))
-            else:
-                obj = self.map_what(what)()
-                obj.ID = 0
-            self.consult(zdc.ObjectView(obj))
-            try:
-                zebra.show("dsp_%s" % what, self.model)
-            except IOError:
-                print "[error: dsp_%s template not found]" % what
+            self.generic_show(what)
+
+    def generic_show(self, what):
+        import zdc
+        #@TODO: this ID stuff is just a hack to get categories working.
+        #@TODO: there needs to be a generic scheme for doing this..
+        if self.input.get("ID"):
+            obj = self.map_what(what)(ID=self.input.get("ID"))
+        else:
+            obj = self.map_what(what)()
+            obj.ID = 0
+        self.consult(zdc.ObjectView(obj))
+        try:
+            zebra.show("dsp_%s" % what, self.model)
+        except IOError:
+            self.complain("dsp_%s template not found]" % what)
+
+    ## edit ########################################################
 
     def act_edit(self):
         """
@@ -76,11 +89,18 @@ class AdminApp(weblib.Actor):
             if hasattr(self, "edit_%s" % what):
                 getattr(self, "edit_%s" % what)()
             else:
-                import zdc
-                zebra.show("frm_%s" % what, zdc.ObjectView(
-                    self.map_what(what)(ID=self.input.get("ID"))))
+                self.generic_edit(what)
         else:
             self.complain("no ID given")
+
+    def generic_edit(self, what):
+        import zdc
+        self.consult(self.input)
+        self.consult(zdc.ObjectView(
+            self.map_what(what)(ID=self.input.get("ID"))))
+        zebra.show("frm_%s" % what, self.model)
+
+    ## create #######################################################
 
     def act_create(self):
         """
@@ -91,11 +111,19 @@ class AdminApp(weblib.Actor):
             if hasattr(self, "create_%s" % what):
                 getattr(self, "create_%s" % what)()
             else:
-                import zdc
-                zebra.show("frm_%s" % what, zdc.ObjectView(
-                    self.map_what(what)()))
+                self.generic_create(what)
         except IOError:
             self.complain("frm_%s template not found" % what)
+
+    def generic_create(self, what):
+        import zdc
+        self.consult(self.input)
+        self.consult(zdc.ObjectView(
+            self.map_what(what)()))
+        zebra.show("frm_%s" % what, self.model)
+
+
+    ## delete ######################################################
             
     def act_delete(self):
         """
@@ -103,14 +131,10 @@ class AdminApp(weblib.Actor):
         """
         what = self.input.get("what", "")
         self.objectEdit("delete")
-        next = self._whatnext()
-        if not next:
-            self.do("list", what=what)
-        else:
-            #@TODO: clean up / clarify this magic side effect.. (_next_)
-            self.input = self._next_
-            self.do(next)
+        self.next = ("list", {"what":what})
 
+
+    ## save ########################################################
 
     def act_save(self):
         """
@@ -120,14 +144,15 @@ class AdminApp(weblib.Actor):
         if hasattr(self, "save_%s" % what):
             getattr(self, "save_%s" % what)()
         else:
-            self.objectEdit("save")
-        next = self._whatnext()
-        if not next:
-            self.do("list", what=what)
-        else:
-            #@TODO: clean up / clarify this magic side effect.. (_next_)
-            self.input = self._next_
-            self.do(next)
+            self.generic_save(what)
+        if not self.next:
+            self.next = ("list", {"what":what})
+
+    def generic_save(self, what):
+        self.objectEdit("save")
+
+
+    ###[helper method]##############################################
 
     def objectEdit(self, command):
         """
@@ -146,8 +171,3 @@ class AdminApp(weblib.Actor):
             print "don't know how to %s a %s" % (command, what)
 
 
-    def _whatnext(self):
-        _next_ = weblib.request.parse(self.input.get("_next_", ""))
-        if _next_.has_key("action"):
-            self._next_ = _next_
-            return _next_["action"]
