@@ -40,8 +40,3 @@ class ObjectEditorTestCase(unittest.TestCase):
         assert gotError, \
                "shouldn't be able to assign Nodes to themselves!!"
         
-
-        
-    
-    pass
-
