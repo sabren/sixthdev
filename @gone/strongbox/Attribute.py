@@ -39,6 +39,14 @@ class Attribute(object):
     def cast(self, value):
         if value is None:
             return None
+        elif value == "":
+            # convert "" to None unless we can deal with it
+            # (so we can pass an empty string in from a form)
+            # see StealthboxTest.check_empty_string()
+            try:
+                return self.type(value)
+            except:
+                return None
         else:
             try:
                 return self.type(value)

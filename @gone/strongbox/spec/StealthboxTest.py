@@ -6,6 +6,7 @@ __ver__="$Id$"
 import unittest
 import types
 from strongbox import Strongbox, attr, link, linkset
+from pytypes import Date
 
 class StealthboxTest(unittest.TestCase):
 
@@ -83,7 +84,9 @@ class StealthboxTest(unittest.TestCase):
             get_b = lambda self: 2
             c = attr(int)
             d = attr(int)
+            e = attr(int, default=5)
             def set_c(self, value): self.d = 4
+            def set_e(self, value): pass
         instance = X()
         assert instance.a == 1
         assert instance.b == 2
@@ -91,6 +94,10 @@ class StealthboxTest(unittest.TestCase):
         assert instance.c == 0 # see check_default_defaults
         assert instance.d == 4, instance.d
 
+        # e is a special case, because a default in duckbill.Account
+        # wasn't working when there was also an accessor.
+        # (but I think this issue is with Cyclic, not strongbox)
+        assert instance.e == 5
 
     def check_nestedError(self):
         class NestedError(Strongbox):
@@ -224,11 +231,12 @@ class StealthboxTest(unittest.TestCase):
                "ssn regexp should reject phone numbers - even famous ones"
 
 
-    ## Attributes allow "None" by default
-
-    # But of course, we can turn it off...
+    ## dealing with None / empty strings ########################
     
     def check_allowNone(self):
+        """
+        Attributes allow "None" by default
+        """
         class Foo(Strongbox):
            bar = attr(int)
         foo = Foo()
@@ -237,10 +245,12 @@ class StealthboxTest(unittest.TestCase):
            foo.bar = None
         except ValueError:
            goterr = 1
-        assert not goterr, "assigning None didn't work!"
-    
-    
+        assert not goterr, "assigning None didn't work!"    
+   
     def check_dontAllowNone(self):
+        """
+        We can disallow None if we want.
+        """
         class Foo(Strongbox):
            bar = attr(int,allowNone=0)
         foo = Foo(bar=15)
@@ -250,6 +260,25 @@ class StealthboxTest(unittest.TestCase):
         except ValueError:
            goterr = 1
         assert goterr, "assigning None should have failed!"
+
+    def check_emptyString(self):
+        """
+        Should convert empty strings to None, unless
+        it actually IS a string. This is so we can
+        pass None in from an HTML form.
+
+        Really, I don't think the browser should send an
+        empty string, but IE5.00.2614.3500 sure seems to,
+        so let's deal with it. :)
+        """
+        class Foo(Strongbox):
+            i = attr(int)
+            s = attr(str)
+            d = attr(Date)
+        f = Foo()
+        f.i = ""; assert f.i is None
+        f.s = ""; assert f.s is ""
+        f.d = ""; assert f.d is None
 
        
     def tearDown(self):
