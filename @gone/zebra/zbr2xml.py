@@ -42,13 +42,13 @@ class Z2X:
             lineNo = x + 1
             
             ## only look from the leftmost position onwards.
-            ## (it's okay because we make sure theres' nothing
+	    ## (it's okay because we make sure theres' nothing
             ## but space in there a little later..
             line = lines[x][left:]
 
             ## compress blank lines
             if string.strip(line)=="":
-                res = res + "\n"
+               res = res + "<nl/>\n"
 
             ## comments are single lines starting with * #
             elif string.lstrip(string.lstrip(line[1:]))[0:1] == "#":
@@ -123,7 +123,12 @@ class Z2X:
                 
             ## just a normal line..
             else:
-                res = res + deCurl(xmlEncode(line)) + "\n"
+                
+               if (line.endswith(chr(92))):
+                    line = line[:-1]
+                    res = res + deCurl(xmlEncode(line)) 
+               else:  
+                    res = res + deCurl(xmlEncode(line)) + "<nl/>\n"
 
             ## move on to the next line and continue with the while() loop:
             x = x + 1
