@@ -24,8 +24,9 @@ categories:<br>
 * exec:
     #@TODO: fix dis!
     from selectnode import selectnode
-    values = map(lambda node: node.get("ID"), scope.get("nodes",[]))
-    zres = zres + selectnode("nodeIDs", values, attrs="multiple")
+    values = map(lambda node: node.get("ID"), scope.get("categories",[]))
+    catbox = selectnode("nodeIDs", values, attrs="multiple")
+{:catbox:}
 <br>
 
 description:<br>
