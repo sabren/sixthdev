@@ -1,0 +1,37 @@
+*# product template for zikeshop
+
+* include dsp_head:
+<h1>{:name:}</h1>
+<h4>${:price:}</h4>
+
+* if pictureID:
+    <img src="{:link_picture(pictureID):}">
+
+<p>{:descript:}</p>
+
+* for styles:
+    * if instock:
+        * if not style:
+            <A HREF="{:link_action("add", "productID=%s" %ID):}"
+               >add to cart</a>
+        * el:
+            style: {style}
+            &nbsp;<a href="{basehref}/cart.py?action=add&styleID={ID}">
+            add to cart</a><br>
+    * el:
+        * if not style:
+            (this product is not in stock)<br>
+        * el:
+            style: {style} (this style is not in stock)<br>
+* none:
+    <A HREF="{:link_cart('add','productID=%s' % ID):}">add to cart</a>
+* for nodes:
+    * head:
+        <h3>This product is in these categories:</h3>
+    <a href="{:link_category(path):}">{:path:}</a><br>
+* none:
+    <h3>This product is not categorized.</h3>
+
+* include dsp_foot:
+
+

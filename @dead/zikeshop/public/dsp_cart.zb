@@ -1,0 +1,31 @@
+* include dsp_head:
+<h2>Your Shopping Cart</h2>
+
+* for contents:
+    * head:
+        <h4>contents of cart:</h4>
+        <form action="{: link_cart() :}" method="POST">
+        <ul>
+
+    *# @TODO: get rid of links inside the cart ??
+    <li><input name="remove_{:_:}" type="checkbox"/>
+    <a href="{:link:}">{:label:}</a>&nbsp;
+    <input name="quantity_{:_:}" size="3" value="{:quantity:}">
+
+    * foot:
+        </ul>
+        <input type="submit" name="action" value="update"> amounts, or
+        <input type="submit" name="action" value="remove"> checked items.
+        </form>
+        *# @TODO: put some logic here to remember users...
+        <a href="{: link_user('signup') :}">checkout</a>
+
+* none:
+    <h4>your cart is empty</h4>
+
+
+<hr>
+<a href="{: link_category('/') :}">continue shopping</a>
+</font>
+* include dsp_foot:
+

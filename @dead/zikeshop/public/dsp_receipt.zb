@@ -1,0 +1,21 @@
+* include ssl_head:
+<h2>Thank you!</h2>
+
+<b>{date} - receipt for <a href="http://www.aggressivemall.com/">aggressivemall.com</a></b>
+<br>&nbsp;<br>
+
+<table border="1">
+* for products:
+     <tr><td>{label}
+     * if quantity > 1:
+         <b>(* {quantity})</b>
+     </td><td align="right">${subtotal}</td></tr>
+<tr><td bgcolor="#666666">SalesTax</td><td align="right">${salestax}</td></tr>
+<tr><td bgcolor="#666666">Shipping</td><td align="right">${shipping}</td></tr>
+* if adjustment:
+    <tr><td bgcolor="#666666">Adjustment</td><td align="right">{adjustment}</td></tr>
+<tr><td bgcolor="#000000">Total</td><td align="right">${total}</td></tr>
+</table>
+
+* include ssl_foot:
+

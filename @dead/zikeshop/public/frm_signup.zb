@@ -1,0 +1,40 @@
+* include dsp_head:
+<h1>Tell us about yourself!</h1>
+
+<h3>Ordered from us before?</h3>
+There's no need to fill out this form a second time!<br>
+<a href="user.py?action=login">Click here to log in</a>.
+
+<h3>First time here?</h3>
+
+Enter your <b>billing</b> information in the area below.
+
+<form action="user.py?action=create" method="post">
+<table border="0">
+* include frm_contact:
+
+<tr><td colspan="2">
+    <input type="checkbox" name="isSame" checked="checked">
+    Use this as your <b>shipping</b> address, too.</td></tr>
+
+*#*#--------------------------------------------------------------
+*#*# NOTE: if you want, you can let users create a password here.
+*#*# just uncomment the following area...
+*#*# (otherwise, a password will be generated for them automatically)
+*#*#--------------------------------------------------------------
+*# <tr><td colspan="2">&nbsp;</td></tr>
+*# <tr><td colspan="2">
+*# Next time you shop with us, we'll remember your information.<br>
+*# To protect your privacy, please create a password for your account.<br>
+*# <i>(If you leave this blank, a password will be created for you.)</i>
+*# </td></tr>
+*# <tr><td colspan="2">&nbsp;</td></tr>    
+*# <tr><td>password</td>
+*#    <td><input type="password" name="password"></td></tr>
+*#*#--------------------------------------------------------------
+
+</table>
+
+<tr><td colspan="2">&nbsp;</td></tr>
+<input type="submit" value="submit">
+</form>
