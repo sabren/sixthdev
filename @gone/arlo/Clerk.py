@@ -141,9 +141,16 @@ class Clerk:
         if thing is None: return 0
         if not hasattr(thing, "private"): return 0
         for item in thing.private.observers:
-            if isinstance(item, LinkInjector):
-                return 1
-            if isinstance(item, LinkSetInjector):
-                return 1
+            # @TODO: this originally said (LinkInjector, item)
+            # @TODO: which could not EVER have worked. Why did it
+            # @TODO: take months before this threw an error??!?
+            try:
+                if isinstance(item[0], LinkInjector):
+                    return 1
+                if isinstance(item[0], LinSetInjector):
+                    return 1
+            except Exception, e:
+                raise Exception, "'%s' is invalid injector(??): %s" \
+                      % (item[0], e)
         return 0
         
