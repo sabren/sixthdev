@@ -21,6 +21,7 @@ class MockStorageTest(unittest.TestCase):
         assert len(self.s.match("test_person")) == 1, "didn't update"
 
     def check_match(self):
+        assert self.s.match("test_person") == []
         self.check_store_insert()
         results = self.s.match("test_person", ID=1)
         assert len(results) == 1, results

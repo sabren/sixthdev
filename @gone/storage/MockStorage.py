@@ -43,12 +43,14 @@ class MockStorage(Storage):
         return rec
 
     def match(self, table, **where):
+        self._ensuretable(table)
         return [row for row
                 in self._tables[table]
                 if self._dictmatch(where, row)]
 
 
     def delete(self, table, ID):
+        self._ensuretable(table)
         rows = self._tables[table]
         for i in range(len(rows)):
             if rows[i]["ID"]==ID:

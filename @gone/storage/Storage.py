@@ -9,7 +9,9 @@ class Storage:
 
     def fetch(self, table, ID):
         res = self.match(table, ID=ID)
-        assert len(res)==1, "fetch() should return 1 row. got %i" % len(res)
+        if len(res)!=1:
+            raise LookupError, "match(%r, ID=%r) returned %i rows." \
+                  % (table, ID, len(res))
         return res[0]
 
 

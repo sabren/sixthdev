@@ -25,7 +25,7 @@ class MySQLStorage(Storage):
         for col,val in row.iteritems():
             cols += col + ","
             # ok for numbers in mysql
-            vals += "'" + val + "',"    
+            vals += "'" + val + "',"
 
         # strip off last commas:
         cols = cols[:-1]
