@@ -14,9 +14,12 @@ class Engine:
     You should be able to run a weblib script as a regular cgi just by putting
     a "#/python" line up top, and making it executable.. But, as an alternative,
     you can run it inside an Engine class. this is especially useful for testing
-    or for restricted exection, etc..
+    or for restricted execution, etc..
     
     """
+
+    globals = {'__name__':'__main__'}
+    locals  = globals
 
     parts=("request", "response", "sess", "auth", "perm")
 
@@ -128,7 +131,8 @@ class Engine:
 
     def execute(self, script):
         """This is here so you can do restricted execution in a subclass if you like."""
-        exec(script)
+        exec(script, self.globals, self.locals)
+
 
 
     def run(self):
@@ -147,7 +151,7 @@ class Engine:
                 self.error = string.join(traceback.format_exception(
                     sys.exc_type,
                     sys.exc_value,
-                    sys.exc_traceback), "\n")
+                    sys.exc_traceback), '')
                 
         finally:
             self.tearDown()
