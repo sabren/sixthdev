@@ -145,9 +145,7 @@ class Object:
         because we have to iterate through all the base classes.
         This ought to be built in to python, but it isn't.. :/
         """
-
-        res = None
-
+        
         # __bases__ is only the IMMEDIATE parent, so we have
         # to climb the tree...        
         #@TODO: handle multiple inheritence
@@ -156,12 +154,11 @@ class Object:
             ancestors.append(ancestors[-1].__bases__[0])
         
         for ancestor in ancestors:
-            for item in dir(ancestor):
-                if item == member:
-                    res = ancestor.__dict__[member]
-                    break
-
-        return res
+            if member in dir(ancestor):
+                # grab the first one we find:
+                return ancestor.__dict__[member]
+            
+        return None
         
 
     def __setattr__(self, name, value):
