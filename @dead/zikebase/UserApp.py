@@ -3,10 +3,9 @@ App to let users signup, login, request passwords, etc.
 """
 __ver__="$Id$"
 
-import zikebase
-zikebase.load("AppActor")
+import weblib
 
-class UserApp(zikebase.AppActor):
+class UserApp(weblib.Actor):
 
     def act_create(self):
         # create the user:
