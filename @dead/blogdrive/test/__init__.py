@@ -1,7 +1,10 @@
 # test scripts for blogdrive
 
-import unittest
+# first, turn off print redirection
+import __builtin__; __builtin__.__weblib__ = 1
+
 import weblib
+import unittest
 
 from sqlTest import dbc
 
@@ -33,7 +36,6 @@ class BlogDriveTestCase(unittest.TestCase):
         
         eng = weblib.Engine(script=addPage, request=myRequest)
         eng.run()
-        print eng.response.buffer
 
         cur = dbc.cursor()
         cur.execute("select ID, title, content from base_content")
