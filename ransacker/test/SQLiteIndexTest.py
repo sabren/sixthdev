@@ -10,7 +10,10 @@ from IndexTest import IndexTest
 class SQLiteIndexTest(IndexTest):
 
     def newIndex(self):
-        return SQLiteIndex("spec/sqlite.rk")
+        path = "spec/sqlite.rk"
+        if os.path.exists(path):
+            os.unlink(path)
+        return SQLiteIndex(path)
 
 
     def tearDown(self):
