@@ -41,29 +41,42 @@ import socket
 import select
 import time
 import thread
-import msvcrt  # requires win32 (this is only for getting the password...)
-  
+import getpass
 
 ## LOG =open("w:\cvssh\log.txt", "a")
 ## def debug(msg):
 ##     print >> LOG, msg
 ##     LOG.flush()
 
-def pw_prompt():
+
+# instead of the normal pserver port, we use our own port
+# that wraps the pserver with stunnel ( http://www.stunnel.org/ )
+SCVS_PORT = 2402 # @TODO: get a port assignment from iana.org
+
+def get_connection(server):
+    raw = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    raw.connect((server, SCVS_PORT))
+    sock = socket.ssl(raw)
+    return raw, sock
+
+
+def request_auth(sock, username, cvsroot, password):
     """
-    Prompt the user for a password. We use getch so we
-    can deal with the keyboard directly... (not stdin,
-    since CVS is blocking that).. Oh, and it hides the
-    password, too. :)
+    request authorization from the pserver.
     """
-    res = ""
-    sys.stderr.write("Password: ")
-    while 1:
-        ch = msvcrt.getch() #@TODO: can I use curses for this on unix?
-        res += ch
-        if ord(ch)==13:
-            break
-    sys.stderr.write("\n")
+    print >> sock, "BEGIN AUTH REQUEST"
+    print >> sock, cvsroot
+    print >> sock, username
+    print >> sock, scramble(password)
+    print >> sock, "END AUTH REQUEST"
+
+    # either it loves us or it hates us:
+    verdict = sock.read(len("I ____ YOU\n"))
+
+    ## debug("verdict is: " + verdict)
+    res = 0 # pessimism pays.
+    if verdict == "I LOVE YOU\n":
+        res = 1 # aww. love trumps pessimism. how sweet.
     return res
 
 
@@ -94,6 +107,59 @@ def scramble(data):
         243,233,253,240,194,250,191,155,142,137,245,235,163,242,178,152 )
     return "A" + "".join(map(lambda ch, sh=shifts: chr(sh[ord(ch)]), data))
   
+
+
+def cvspass_path():
+    return os.environ["HOME"] + os.sep + ".cvspass"
+
+
+def cvspass_key(username, server, cvsroot):
+    return ":pserver:%s@%s:%s" % (username, server, cvsroot)
+
+
+def save_password(username, server, cvsroot, password):
+    """
+    Emulate the -d:pserver:... login function.
+    """
+    # @TODO: allow "logout"
+
+    # remove any old passwords for this key:
+    clean = [line[:-1] for line in open(cvspass_path(), "r").readlines()
+             if not line.startswith(cvspass_key(username, server, cvsroot))]
+
+    # now save it with the new password
+    file = open(cvspass_path(), "w")
+    for line in clean:
+        file.write(line)
+    print >> file, cvspass_key(username, server, cvsroot), scramble(password)
+    file.close()
+
+
+def load_password(username, server, cvsroot):
+    """
+    We read passwords out of the .cvspass file, just like
+    cvs -d:pserver: does. Note that this file could be
+    considered fairly insecure...
+    
+    However, it releives the need for an interactive password
+    prompt, which worked okay with msvcrt.getch(), but not
+    on linux.
+    """
+    # @TODO: test whether this works with empty password.
+    res = None
+    try:
+        cvspass = open(cvspass_path(),"r")
+        for line in cvspass.readlines():
+            if line.startswith(cvspass_key(username, server, cvsroot)):
+                res = line.split(" ")[1] # the second field
+                res = res[1:-1]          # strip the 'A" and the newline
+                res = scramble(res)[1:]  # or unscramble it, really... :)
+                raise "found!"
+    finally:
+        # there could either be an error for opening the file,
+        # the "found!" exception, or just a normal loop through
+        # without finding anything.. So we use finally.
+        return res
 
 
 # These next two functions are based on Sam Rushing's
@@ -138,14 +204,47 @@ def server_thread(lock, sock, raw):
             sys.stdout.flush()
 
 
+
 if __name__=="__main__":
     
     ## debug("** start **")
 
     # make sure we use binary mode on win32:
     if sys.platform=="win32":
+        import msvcrt
         msvcrt.setmode(sys.__stdin__.fileno(), os.O_BINARY)
         msvcrt.setmode(sys.__stdout__.fileno(), os.O_BINARY)
+
+    if len(sys.argv) < 3:
+        print "usage: cvssh user@server:/cvs/root login"
+        print "other than that, this should be called by cvs."
+        sys.exit()
+
+
+    ### step 0: login ################################################
+
+
+    # login is -->  cvssh user@server:/cvs/root login
+    if sys.argv[2]=="login":
+
+        # make sure we have all the info...
+        try:
+            username, rest = sys.argv[1].split("@")
+            server, cvsroot = rest.split(":")
+        except:
+            print "usage: cvssh user@server:/cvs/root login"
+            sys.exit()
+
+        # okay, so get the password...
+        password = getpass.getpass()
+
+        # test the login...
+        raw, sock = get_connection(server)
+        if request_auth(sock, username, cvsroot, password):
+            save_password(username, server, cvsroot, password)
+        else:
+            print "ACCESS DENIED: invalid username or password"
+        sys.exit() # yuck. how lazy of me.
 
 
     ### step 1: gather connection info ###############################
@@ -155,40 +254,27 @@ if __name__=="__main__":
     server   = sys.argv[1]
     username = sys.argv[3]    
 
-    # we get the password from the user (for now anyway)
-    password = pw_prompt()
-
     # "Root /cvsroot" is the first line of the local cvs's output to us.
     cvsroot = raw_input().split()[1]
 
-    # instead of the normal pserver port, we use our own port
-    # that wraps the pserver with stunnel ( http://www.stunnel.org/ )
-    scvs_port = 2402 # @TODO: get a port assignment from iana.org
-
+    # load password from user's .cvspass file (or die trying):
+    # note that "" is an okay password, but None isn't....
+    password = load_password(username, server, cvsroot)
+    ## debug("password is: " + password)
+    if password is None:
+        sys.stderr.write("No password found. Use 'cvssh login' first.\n")
+        sys.exit()
 
 
     ### step 2: connect to the server ################################
 
     ## debug("opening socket....")
-    raw = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    raw.connect((server, scvs_port))
-    sock = socket.ssl(raw)
+    raw, sock = get_connection(server)
 
     ## debug("got socket, sending auth request...")
-    print >> sock, "BEGIN AUTH REQUEST"
-    print >> sock, cvsroot
-    print >> sock, username
-    print >> sock, scramble(password)
-    print >> sock, "END AUTH REQUEST"
-
-    # either it loves us or it hates us:
-    verdict = sock.read(len("I ____ YOU\n"))
-
-    ## debug("verdict is: " + verdict)
-    if verdict == "I HATE YOU\n":
-        sys.stderr.write("ACCESS DENIED.\n")
+    if not request_auth(sock, username, cvsroot, password):
+        sys.stderr.write("ACCESS DENIED: try 'cvssh login' again.\n")
         sys.exit()
-
 
 
     ### step 3: let cvs do its thing #################################
