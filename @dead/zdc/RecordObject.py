@@ -4,17 +4,15 @@ zdc.RecordObject - a simple Object that uses only one record for its data
 __ver__="$Id$"
 
 import zdc.Object
-
-#@TODO: there ought to be a validateKey method, for passing in keywords as keys..
-#@TODO: maybe we don't need the concept of a 'key' parameter at all..
-
+import types
 
 class RecordObject(zdc.Object):
 
-    ## attributes ###################################################
+    ## static attributes ############################################
 
-    _table = None
-    _defaults = {} # @TODO: just check whether __class__.attr is defined?
+    __super = zdc.Object
+    _tablename = None
+    
     _record = None
     _tuples = []
     __key__ = "ID"
@@ -22,25 +20,28 @@ class RecordObject(zdc.Object):
 
     ## constructor ##################################################
 
-    def __init__(self, _table=None, _defaults=None, **where):
-        # you can do obj = RecordObject(table)
+    def __init__(self, ds, _tablename=None, **where):
+        # you can do:
+        # >>> obj = RecordObject(ds, tablename)
         #
         # OR you can define a class:
         #
-        # class Person(zdc.RecordObject):
-        #    _table = "mas_person"
-        
-        if _table:
-            self.__dict__['_table'] = _table
-        assert self._table is not None, \
-               "RecordObjects must have a table."
+        # >>> class Person(zdc.RecordObject):
+        # >>>   _tablename = "mas_person"
+        # >>>
+        # >>> Person(ds)
 
-        # same thing with the defaults, except they're optional       
-        if _defaults:
-            self.__dict__['_defaults'] = _defaults
+        self.__dict__['_ds'] = ds
+        
+        if _tablename:
+            self.__dict__['_tablename'] = _tablename
+        if type(self._tablename) is not types.StringType:
+            raise TypeError, "RecordObject._tablename must be a string"
+
+        self.__dict__['_table'] = zdc.Table(self._ds, self._tablename)
 
         # if all's well, go ahead with the init:
-        apply (zdc.Object.__init__, (self,), where)
+        self.__super.__init__(self, **where)
 
 
     ## public methods ################################################
@@ -65,7 +66,6 @@ class RecordObject(zdc.Object):
         
         for f in self._table.fields:
             data = self._data[f.name] 
-            import types
             if type(data) == types.InstanceType:
                 # this is mostly for FixedPoints
                 self._record[f.name] = str(data)
@@ -112,21 +112,15 @@ class RecordObject(zdc.Object):
         
         self.__dict__['_record'] = zdc.Record(self._table)
         for f in self._record.table.fields:
-            
-            # populate with default values.
-            # use _data to avoid overhead/errors with setattr
-            if self._defaults.has_key(f.name):
-                self._data[f.name] =  self._defaults[f.name]
-            else:
-                self._data[f.name] = None
+            self._data[f.name] = None
 
 
     def _fetch(self, **where):
         """
         used internally to fetch a record...
         """
-        self.__dict__['_record'] = apply(self._table.fetch, (), where)
+        self.__dict__['_record'] = self._table.fetch(**where)
         for f in self._record.table.fields:
-            # use __data to avoid overhead/errors with setattr
+            # use _data to avoid overhead/errors with setattr
             self._data[f.name] = self._record[f.name]
 

@@ -11,7 +11,8 @@ import zdc
 class RecordObjectTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.table = zdc.Table(zdc.test.dbc, "test_fish")
+        self.ds = zdc.test.dbc
+        self.table = "test_fish"
         self.cur = zdc.test.dbc.cursor()
         self.cur.execute("delete from test_fish")
         
@@ -19,23 +20,22 @@ class RecordObjectTestCase(unittest.TestCase):
     def check_table(self):
         
         ## part1: table from the constructor
-        robj = zdc.RecordObject(self.table)
+        robj = zdc.RecordObject(self.ds, self.table)
         assert robj._table.name == "test_fish", \
                "table passed to constructor didn't work."
         del robj
 
-        ## part2: table from __class__.table
+        ## part2: table from __class__._tablename
         class Fish(zdc.RecordObject):
-            _table=zdc.Table(zdc.test.dbc, "test_fish")
+            _tablename="test_fish"
 
-        robj = Fish()
+        robj = Fish(self.ds)
         assert robj._table.name == "test_fish", \
-               "__class__.table didn't work."
-
+               "__class__._tablename didn't work."
 
 
     def check_insert(self):
-        robj = zdc.RecordObject(self.table)
+        robj = zdc.RecordObject(self.ds, self.table)
         robj.fish = 'trout'
         robj.save()
 
@@ -50,7 +50,7 @@ class RecordObjectTestCase(unittest.TestCase):
         self.cur.execute(
             "INSERT INTO test_fish (ID, fish) VALUES (5, 'fluunder (sic)')")
 
-        robj = zdc.RecordObject(self.table, ID=5)
+        robj = zdc.RecordObject(self.ds, self.table, ID=5)
         robj.fish = 'flounder'
         robj.save()
 
@@ -62,7 +62,7 @@ class RecordObjectTestCase(unittest.TestCase):
 
     def check_fetch(self):
         self.cur.execute("insert into test_fish (fish) values ('guppy')")
-        robj = zdc.RecordObject(self.table, ID=1)
+        robj = zdc.RecordObject(self.ds, self.table, ID=1)
 
         assert robj.ID == 1, "didn't fetch correct ID"
         assert robj.fish == 'guppy', "didn't fetch correct 'fish' field."
@@ -70,7 +70,7 @@ class RecordObjectTestCase(unittest.TestCase):
         del robj
         ## test search by non-key field..
         ## (essential for, say, the zikeshop product/category pages)
-        robj = zdc.RecordObject(self.table, fish='guppy')       
+        robj = zdc.RecordObject(self.ds, self.table, fish='guppy')       
         assert robj.ID == 1, "didn't fetch correct ID after select by name"
         assert robj.fish == 'guppy', "didn't fetch correct 'fish' field."
 
@@ -78,7 +78,7 @@ class RecordObjectTestCase(unittest.TestCase):
 
         # created this test because it used to give DuplicateError
         
-        robj = zdc.RecordObject(self.table)
+        robj = zdc.RecordObject(self.ds, self.table)
 
         robj.fish = 'eel'
         robj.save()
