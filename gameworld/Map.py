@@ -3,10 +3,11 @@ class Map(object):
 
     NORTH = ( 0, -1)
     SOUTH = ( 0, +1)
-    EAST  = (-1,  0)
-    WEST  = (+1,  0)
+    EAST  = (+1,  0)
+    WEST  = (-1,  0)
 
     def __init__(self):
+        super(Map,self).__init__()
         self.whatsat = {}
         self.whereis = {}
 
@@ -27,7 +28,10 @@ class Map(object):
         del self.whereis[thing]
         self.whatsat[location].remove(thing)
 
+    def move(self, thing, location):
+        self.remove(thing)
+        self.place(thing, location)
+
     def isOccupied(self, location):
         return bool(self.whatsat.get(location))
 
-    
