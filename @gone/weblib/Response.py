@@ -16,7 +16,6 @@ class Response:
             weblib.response = self
 
         self.out = out
-        self.start()
 
 
 ##     def __getattr__(self, name):

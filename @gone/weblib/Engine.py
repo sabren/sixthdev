@@ -85,9 +85,10 @@ class Engine:
 
 
     def startParts(self):
+        self.response.start()
         self.sess.start()
         self.auth.start()
-        self.response.start()
+
 
     def stopParts(self):
         self.sess.stop()
