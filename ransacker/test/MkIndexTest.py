@@ -11,9 +11,9 @@ class MkIndexTest(unittest.TestCase):
 
     def setUp(self):
         self.idx = MkIndex()
-        self.idx.add("onedog", "my dog has fleas")
-        self.idx.add("cathat", "the cat in the hat")
-        self.idx.add("twodog", "it's a dog eat dog world")
+        self.idx.addDocument("onedog", "my dog has fleas")
+        self.idx.addDocument("cathat", "the cat in the hat")
+        self.idx.addDocument("twodog", "it's a dog eat dog world")
 
     def check_match(self):
         actual = self.idx.match('dog')
