@@ -165,7 +165,7 @@ class Object:
         This ought to be built in to python, but it isn't.. :/
         """
         for ancestor in [self.__class__] + self._ancestors():
-            if member in dir(ancestor):
+            if member in ancestor.__dict__.keys():
                 # grab the first one we find:
                 return ancestor.__dict__[member]
         return None
