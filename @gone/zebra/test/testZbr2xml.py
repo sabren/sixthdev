@@ -84,19 +84,62 @@ class Zbr2xmlTestCase(unittest.TestCase):
     def check_var(self):
         zbr = zebra.trim(
             """
+            {
             My name is {name}.
+            }
             """)
 
         goal = zebra.trim(
             """
             <?xml version="1.0"?>
             <zebra>
+            {
             My name is <var>name</var>.
+            }
             </zebra>
             """)
         actual = zebra.Z2X().translate(zbr)
         assert actual==goal, \
                "doesn't cope well with {vars}:\n%s" % actual
+
+
+    
+    def check_expr(self):
+        zbr = zebra.trim(
+            """
+            I will be {:age + 4:} next year.
+            """)
+
+        goal = zebra.trim(
+            """
+            <?xml version="1.0"?>
+            <zebra>
+            I will be <xpr>age + 4</xpr> next year.
+            </zebra>
+            """)
+        actual = zebra.Z2X().translate(zbr)
+        assert actual==goal, \
+               "doesn't cope well with {exprs}:\n%s" % actual
+
+    def check_exec(self):
+        zbr = zebra.trim(
+            """
+            * exec:
+                name = 'fred'
+            """)
+
+        goal = zebra.trim(
+            """
+            <?xml version="1.0"?>
+            <zebra>
+            <exec>
+            name = 'fred'
+            </exec>
+            </zebra>
+            """)
+        actual = zebra.Z2X().translate(zbr)
+        assert actual==goal, \
+               "doesn't cope well with {exprs}:\n%s" % actual
 
 
 
@@ -115,6 +158,26 @@ class Zbr2xmlTestCase(unittest.TestCase):
 
         assert gotError, \
                "Didn't get error on invalid tag."
+
+
+    def check_comment(self):
+        zbr = zebra.trim(
+            """
+            *# this is a comment
+            this isn't
+            """)
+        goal = zebra.trim(
+            """
+            <?xml version="1.0"?>
+            <zebra>
+            <rem> this is a comment</rem>
+            this isn't
+            </zebra>
+            """)
+        actual = zebra.Z2X().translate(zbr)
+        assert actual==goal, \
+               "doesn't handle comments right:\n%s" % actual
+            
 
 
     def check_for(self):

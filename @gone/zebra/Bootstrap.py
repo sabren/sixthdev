@@ -44,8 +44,9 @@ class Bootstrap:
             if type(item) == types.DictType:
 
                 ## do we have a handler for the tag?
-                assert hasattr(self, "handle_" + item["__tag__"]), \
-                       "Don't know how to handle <%s>" % item["__tag__"]
+                if not hasattr(self, "handle_" + item["__tag__"]):
+                    raise NameError, \
+                          "Don't know how to handle <%s>" % item["__tag__"]
 
                 res = res + apply(getattr(self, "handle_" + item["__tag__"]),
                                   (item["__data__"], item))
@@ -98,7 +99,9 @@ class Bootstrap:
                 def fetch(self, model={}):
                     import copy   # used by scope
                     self.model = model
-                    scope = model
+                    scope = {}
+                    for item in model.keys():
+                        scope[item] = model[item]
                     scope_stack = []
                     zres = ""
             """)
@@ -116,25 +119,32 @@ class Bootstrap:
             """)
         return res
 
+    ## <rem> ##
+    def handle_rem(self, model, attrs):
+        return "" # @TODO: do we want comments after compliation?
+
 
     ## <for> ##
     def handle_for(self, model, attrs):
         res = zebra.trim(
             """
             _ = 0
-            _max_ = len(self.model["%(series)s"])
+            _max_ = len(scope["%(series)s"])
             scope_stack.append(scope)
             scope = copy.copy(scope)
             scope.update(locals())
             for _ in range(_max_):
-                scope.update(self.model["%(series)s"][_])
+                # can't do .update if it's a UserDict:
+                mdl = self.model["%(series)s"][_]
+                for item in mdl.keys():
+                    scope[item]=mdl[item]
                 scope["_"] = _
             """ % attrs)
         res = res + zebra.indent(self.walk(model), 1)            
         res = res + zebra.trim(
             """
             scope = scope_stack.pop()
-            del _
+            #del _
             """)
         return res
 
@@ -149,6 +159,15 @@ class Bootstrap:
     ## <var> ##
     def handle_var(self, model, attrs):
         res = "zres = zres + str(scope.get('%s',''))\n" % model[0]
+        return res
+
+    ## <xpr> ##
+    def handle_xpr(self, model, attrs):
+        res = "zres = zres + str(%s)\n" % model[0]
+        return res
+
+    def handle_exec(self, model, attrs):
+        res = model[0]
         return res
 
 
@@ -198,7 +217,6 @@ class Bootstrap:
         res = "if _ + 1 < _max_:\n"
         res = res + zebra.indent(self.walk(model), 1)
         return res
-
 
 
     ## <import> ##

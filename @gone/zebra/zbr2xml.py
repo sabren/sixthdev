@@ -48,13 +48,17 @@ class Z2X:
             if string.strip(line)=="":
                 res = res + "\n"
 
-            ## zebra lines begin with *
+            ## comments are single lines starting with *#
+            elif string.lstrip(line)[0:2] == "*#":
+                res = res + "<rem>%s</rem>\n" % xmlEncode(line[2:])
+
+            ## zebra commands begin with *
             elif string.lstrip(line)[0] == "*":
                 line = string.strip(line)
 
                 ## .. and end with :
-                assert line[-1] == ":", \
-                       "* tags must end with ':'"
+                if line[-1] != ":":
+                    raise SyntaxError, "* tags must end with ':'"
                 line = line[:-1]
                 
                 ## get the tokens after *:
@@ -96,7 +100,7 @@ class Z2X:
                 
             ## just a normal line..
             else:
-                res = res + deVar(xmlEncode(line)) + "\n"
+                res = res + deCurl(xmlEncode(line)) + "\n"
 
             ## move on to the next line and continue with the while() loop:
             x = x + 1
@@ -107,6 +111,9 @@ class Z2X:
 
 
     ## tag handlers #######################################
+
+    def parse_exec(self, tokens):
+        return '' # exec has no options (yet)
 
     def parse_if(self, tokens):
         return 'condition="%s"' % string.join(tokens[1:], " ")
@@ -155,22 +162,36 @@ def xmlEncode(s):
     return res
 
 
-def deVar(s):
-    "converts {} to <var> tags. use backslash to escape."
-    res = ""
-    esc = 0
-    for ch in s:
-        if esc:
-            res = res + ch
-            esc = 0
-        elif ch == "\\":
-            esc = 1
-        elif ch=="{":
-            res = res + "<var>"
-        elif ch=="}":
-            res = res + "</var>"
-        else:
-            res = res + ch
+def deCurl(s):
+    """
+    {abc} => <var>abc</var> 
+    {:xyz:} => <expr>xyz</expr>
+    
+    use backslash to escape.
+    eg, \{abc}
+    or {: 'this is a \:} string' :}
+    """
+    import re
+    # these don't match newlines cuz there's no re.DOTALL.
+    # that's because vars/exprs are single lines only!
+    # which is helpful if you've got {'s in your template
+    # eg, with javascript on an html page..
+    reVar = re.compile(r'(?!\\){(.*?)}')
+    reExpr = re.compile(r'(?!\\){:(.*?)(?!\\):}')
+    res = s
+    # do xpr first so we don't have to complicate reVar to look for :'s
+    res = reExpr.sub('<xpr>\\1</xpr>', res)
+    res = reVar.sub('<var>\\1</var>', res)
     return res
 
 
+if __name__=="__main__":
+    import sys
+    try:
+        file = sys.argv[1]
+    except:
+        print "reading from stdin.."
+        ifp = sys.stdin
+    else:
+        ifp = open(file, "r")
+    print Z2X().translate(ifp.read())

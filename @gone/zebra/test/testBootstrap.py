@@ -10,6 +10,7 @@ class BootstrapTestCase(unittest.TestCase):
         zbx = zebra.trim(
             """
             <zebra>
+            <rem> ignore me! </rem>
             hello, world!
             </zebra>
             """)
@@ -117,6 +118,37 @@ class BootstrapTestCase(unittest.TestCase):
         actual = zebra.Bootstrap().toObject(zbx).fetch(model)
         assert actual == goal, \
                "none doesn't work:\n%s" % actual
+
+
+    def check_xpr(self):
+        zbx = zebra.trim(
+            """
+            <zebra>            
+            <xpr> (1 + 1) * 5 - 8 </xpr>
+            </zebra>
+            """)
+
+        goal = "2"
+        actual = zebra.Bootstrap().toObject(zbx).fetch()
+        assert actual == goal, \
+               "expressions don't work:\n%s" % actual
+
+    def check_exec(self):
+        zbx = zebra.trim(
+            """
+            <zebra>            
+            <exec>
+            ex = 'executive decision'
+            </exec>
+            <xpr>ex</xpr>
+            </zebra>
+            """)
+
+        goal = "executive decision"
+        actual = zebra.Bootstrap().toObject(zbx).fetch()
+        assert actual == goal, \
+               "expressions don't work:\n%s" % actual
+
 
 
     def check_headFootSimple(self):
