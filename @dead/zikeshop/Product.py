@@ -41,6 +41,7 @@ class Product(zdc.RecordObject):
         self.retail = 0
         self.weight = 0
         self.parentID = 0
+        self.isHidden = 0
 
         self.hold = 0
         self.stock = None  # no value known (this doesn't mean no stock..)
