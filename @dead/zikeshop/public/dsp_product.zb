@@ -10,22 +10,14 @@
 <p>{:descript:}</p>
 
 * for styles:
-    * if instock:
-        * if not style:
-            <A HREF="{:link_action("add", "productID=%s" %ID):}"
-               >add to cart</a>
-        * el:
-            style: {style}
-            &nbsp;<a href="{basehref}/cart.py?action=add&styleID={ID}">
-            add to cart</a><br>
-    * el:
-        * if not style:
-            (this product is not in stock)<br>
-        * el:
-            style: {style} (this style is not in stock)<br>
+    style: {:name:}
+    &nbsp;<a href="{:link_cart('add','productID=%s' % ID):}">
+    add to cart</a><br>
 * none:
     <A HREF="{:link_cart('add','productID=%s' % ID):}">add to cart</a>
-* for nodes:
+
+
+* for categories:
     * head:
         <h3>This product is in these categories:</h3>
     <a href="{:link_category(path):}">{:path:}</a><br>
