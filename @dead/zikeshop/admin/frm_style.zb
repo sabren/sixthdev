@@ -12,6 +12,7 @@ name: <input type="text" name="name" value="{:name:}"><br>
 
 * if scope.get('productID') and not scope.get('parentID'):
     * exec:
+        global parentID
         parentID = productID
 
 <input type="hidden" name="parentID" value="{:parentID:}">
