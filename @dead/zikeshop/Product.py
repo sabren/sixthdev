@@ -32,6 +32,7 @@ class Product(zdc.RecordObject):
         self._data['class'] = "product"
         self.code = ""
         self.name = ""
+        self.brief=""
         self.descript = ""
         self.brief = ""
         self.warn = 0
