@@ -3,13 +3,12 @@ Notes about a particular task.
 """
 __ver__="$Id$"
 
-import zdc
-import zikebase
+import zdc, zikebase
 zikebase.load("Content")
 
 class Note(zikebase.Content):
     __super = zikebase.Content
-    _table = zdc.Table(zikeshop.dbc, "plan_task_note")
+    _table = zdc.Table(zikebase.dbc, "plan_task_note")
 
     ## RecordObject constructors ###########################
 

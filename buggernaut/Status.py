@@ -3,11 +3,11 @@ Status labels..
 """
 __ver__="$Id$"
 
-import zdc
+import zdc, zikebase
 
 class Status(zdc.RecordObject):
     __super = zdc.RecordObject
-    _table = zdc.Table(zikeshop.dbc, "plan_status")
+    _table = zdc.Table(zikebase.dbc, "plan_status")
 
     ## RecordObject constructors ###########################
     
