@@ -1,7 +1,7 @@
 """
 Misc handy routines
 """
-import whrandom
+import whrandom, string
 
 def randpass(length=5):    
     okay = "abcdefghijkmnopqrstuvwxyz2345678923456789"
@@ -9,7 +9,21 @@ def randpass(length=5):
     for i in range(length+1):
         res += okay[whrandom.randrange(0, len(okay))]
     return res
-    
+
+
+def readable(bytes):
+    """
+    convert a bytecount into human-readable text
+    """
+    x = bytes
+    b = x % 1000; x-=b; x/=1000
+    k = x % 1000; x-=k; x/=1000
+    m = x % 1000; x-=m; x/=1000
+    g = x % 1000; x-=g; x/=1000
+    if g: return str(g) + "." + string.zfill(str(m),3)[0] + "G"
+    if m: return str(m) + "." + string.zfill(str(k),3)[0] + "M"
+    if k: return str(k) + "." + string.zfill(str(b),3)[0] + "k"
+    return str(b)
 
 def sendmail(mail):
     import os
