@@ -115,9 +115,18 @@ class Engine:
             setattr(weblib, part, self._oldParts[part])
 
 
+    def setPathInfo(self):
+        if not self.request.environ.get("PATH_INFO"):        
+            if (type(self.script) == type("")):
+                self.request.environ["PATH_INFO"] = "UNKNOWN_SCRIPT.py"
+            else:
+                self.request.environ["PATH_INFO"] = self.script.name
+        
+
     def setUp(self):
         self.startParts()
         self.injectParts()
+        self.setPathInfo()
         self.interceptPrint()
 
 

@@ -80,6 +80,7 @@ class Auth:
     def logout(self):
         """Logs out the current user."""
         self.onLogout()
+        self.isLoggedIn = 0
         self.key = None
 
 
@@ -180,7 +181,8 @@ class Auth:
         # screw up in some browsers.. (eg, lynx)
         #
         # note: SCRIPT_NAME should always be there, but if you use the
-        # wrapper, it will be the path to the wrapper..
+        # wrapper, it will be the path to the wrapper, in which
+        # case you want PATH_INFO...
 
         res = self.engine.request.environ.get("PATH_INFO", 
             self.engine.request.environ.get("SCRIPT_NAME", None))

@@ -204,3 +204,12 @@ class EngineTestCase(unittest.TestCase):
 
         assert eng.result == eng.FAILURE, \
                "engine.result doesn't return FAILURE on assertion failure."
+
+
+
+    def check_PATH_INFO(self):
+        eng = weblib.Engine(script=open("test/pathinfo.py"))
+        eng.setUp()
+        assert eng.request.environ.get("PATH_INFO") == "test/pathinfo.py", \
+               "Engine doesn't set PATH_INFO correctly for open()ed scripts."
+        
