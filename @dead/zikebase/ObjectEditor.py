@@ -42,6 +42,10 @@ class ObjectEditor(weblib.Actor):
                 # just make a new instance:
                 self.object = self.whatClass()
 
+        # new data for links, if used:
+        self._newData = {}
+        for fld in self.object.getEditableTuples():
+            self._newData[fld] = {}
 
     ## public methods ####################################
 
@@ -87,9 +91,57 @@ class ObjectEditor(weblib.Actor):
                 errs.append(str(err))
 
         #@TODO: get rid of editable tuples, or add __expect__
+        ## this next bit lets you pass in a tuple of IDs..
+        ## it comes in handy for multi-select boxes and checboxes.
         for field in self.object.getEditableTuples():
             if self.input.has_key(field):
                 setattr(self.object, field, self.tuplize(self.input[field]))
+
+        ## @TODO: break these down into their own methods..
+        ## this stuff lets you post multiple objects to a tuple
+        ## (instead of just the IDs)... 
+        for item in self.input.keys():
+            #@TODO: loop through whatClass._tuples:
+            for fld in self.object.getEditableTuples():
+                if (item[:len(fld)+1] == fld+"(") and (item[-1]==")"):
+                    # item should be in one of the following formats:
+                    #
+                    # fld{which|subfield}=value .. for existing 1:* joins
+                    # fld{+new|subfield}=value .. for new 1:* joins
+                    # @TODO: fld{+}=ID .. for linking w/ *:* joins 
+                    # @TODO: fld{-}=ID .. for unlinking w/ *:* joins 
+                    # @TODO: fld{subfield}  .. for 1:1 joins
+                    #
+                    meta = item[len(fld):]
+                    meta = meta[1:-1] # strip off {}
+                    import string
+                    meta = string.split(meta,"|")
+                    if len(meta)==2:
+                        # this is a 1:* join
+                        which, subfld = meta
+                        # so figure out what kind of action it is (add, edit..)
+                        if which[0]=="+":
+                            # add a new record:
+                            # actually, add to the _newData dictionary so we
+                            # can add a new record later. We need to collect
+                            # data on several fields first.
+                            which = which[1:]
+                            if not self._newData[fld].has_key(which):
+                                # @TODO: make this an instance?
+                                self._newData[fld][which]=\
+                                    getattr(self.object, fld).new()
+
+                            setattr(self._newData[fld][which], subfld,
+                                    self.input[item])
+                        else:
+                            #@TODO: allow adding existing ID's, eg for *:* joins
+                            #detail{+} maybe?
+                            pass # edit existing record
+                    
+        # now actually add the data..
+        for fld in self._newData.keys():
+            for i in self._newData[fld].keys():
+                getattr(self.object, fld) << self._newData[fld][i]
 
         if errs:
             raise ValueError, errs

@@ -1,37 +1,52 @@
 """
 testObjectEditor.py - test scripts for zikebase.ObjectEditor
-
-$Id$
 """
+__ver__="$Id$"
 
-# not everything is tested yet... ObjectEditor was refactored into existence from
+# not everything is tested yet...
+# ObjectEditor was refactored into existence from
 # other, tested scripts..
 
 import zikebase
 import unittest
-
+import zdc
 
 class ObjectEditorTestCase(unittest.TestCase):
 
+    def setUp(self):
+        self.cur = zikebase.test.dbc.cursor()
+        self.cur.execute("delete from base_node")
+
+
+    def check_simple(self):
+        """
+        can we save a single node to the database?
+        """        
+        req = {"action":"save"}
+        ed = zikebase.ObjectEditor(zikebase.Node, input=req)
+        ed.act()
+        assert isinstance(ed.object, zikebase.Node), \
+               "Didn't even create a simple node.."
+        assert ed.object.ID == 1, \
+               "didn't save node to database..."
+
 
     def check_editNode(self):
+        """
+        for some reason, it wasn't triggering error
+        on a recursive node, even though the node
+        object itself did.. (??)
 
-        # for some reason, it wasn't triggering error
-        # on a recursive node, even though the node
-        # object itself did.. (??)
-
-        # ah.. turns out it had to do with the fact that
-        # on the web, the parentID is a string..
-        
-        cur = zikebase.test.dbc.cursor()
-        cur.execute ("delete from base_node")
-
+        turns out it had to do with the fact that
+        on the web, the parentID is a string..
+        """
         node = zikebase.Node()
         node.name="fred"
         node.save()
 
-        ed = zikebase.ObjectEditor(zikebase.Node, 1,
-                                   input={"action":"save", "parentID":"1"})
+        req = {"action":"save", "parentID":"1"}
+        ed = zikebase.ObjectEditor(zikebase.Node, 1, input = req)
+
         try:
             gotError = 0
             ed.act()
@@ -40,7 +55,7 @@ class ObjectEditorTestCase(unittest.TestCase):
 
         assert gotError, \
                "shouldn't be able to assign Nodes to themselves!!"
-        
+
 
     def check_expect(self):
         """
@@ -72,21 +87,24 @@ class ObjectEditorTestCase(unittest.TestCase):
 
         You can have multiple __expect__ fields on a form.
         """
-        
-        class FooBar:
-            def getEditableAttrs(self):
-                return ['isTrue', 'isAlsoTrue']
+        class FooBar(zdc.Object):
+            __super = zdc.Object
 
+            def _init(self):
+                self.isTrue=1
+                self.isAlsoTrue=1
+
+            def _new(self):
+                pass
+
+            #@TODO: shouldn't the base Object class be more useful?
+            def getEditableAttrs(self):
+                return self._data.keys()
             def getEditableTuples(self):
-                #@TODO: get rid of EditableTuples, replace with addXXX,delXXX
                 return []
             
             def save(self):
                 pass
-
-            def __init__(self, ID=None):
-                self.isTrue = 1
-                self.isAlsoTrue = 1
         
         ed = zikebase.ObjectEditor(FooBar)
         assert ed.object.isTrue, \
@@ -114,3 +132,44 @@ class ObjectEditorTestCase(unittest.TestCase):
                "isTrue should be 0 because of __expect__."
         assert ed.object.isAlsoTrue == '0', \
                "isAlsoTrue should be 0 because of __expect__."
+
+
+
+
+    def check_nested(self):
+        """
+        Sometimes, we want to save several objects at once.
+        for example, in zikeshop's point of sale system
+        we want to save a Sale object with several details.
+
+        This test attemps to save a node and one subnode.
+        """
+        node = zikebase.Node()
+        node.name = 'general'
+        node.save()
+
+        nodeID = node.ID
+        del node
+
+        req = {
+            "action":"save",
+            "children(+0|parentID)":nodeID,
+            "children(+0|name)":'specific',
+            }
+        
+        ed = zikebase.ObjectEditor(zikebase.Node, nodeID, input=req)
+        ed.act()
+
+        assert len(ed.object.children) == 1, \
+               "wrong length for ed.object.children: %s" \
+               % len(ed.object.children)
+
+
+        # now check that it actually made it to the db..
+        del ed
+        node = zikebase.Node(ID=nodeID)
+        assert len(node.children) == 1, \
+               "wrong length for node.children: %s" % len(node.children)
+
+        assert node.children[0].name=='specific', \
+               "wrong name for child node: %s" % node.children[0].name
