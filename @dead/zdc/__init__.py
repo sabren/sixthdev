@@ -60,7 +60,7 @@ def toListDict(cur):
 
 
 
-def find(what, where):
+def find(what, where, orderBy=None):
     """
     find(what, where) -> list of what's matching where
     what is a zdc.RecordObject class
@@ -76,7 +76,8 @@ def find(what, where):
         SELECT ID FROM %s
         WHERE %s 
         """  % (tablename, where)
-
+    if orderBy:
+        sql = sql + " ORDER BY %s" % orderBy
     cur = what._table.dbc.cursor()
     cur.execute(sql)
     res = []
