@@ -55,7 +55,7 @@ class ZikeShopAdminApp(zikebase.AdminApp):
         zebra.show("frm_sale", self.model)
 
     def save_sale(self):
-        sed = zikeshop.SaleEditor(zikeshop.Sale)
+        sed = zikeshop.SaleEditor(zikeshop.Sale, self.input.get("ID"))
         sed.act("save")
 
     def list_sale(self):
