@@ -6,6 +6,7 @@ __ver__="$Id$"
 from AbstractPayment import *
 from AuthorizeNetPayment import *
 from VerisignPayment import *
+from BankOfAmericaPayment import *
 
 ## result codes (constants)
 
