@@ -27,4 +27,4 @@
 
 # "list notification"
 .*    CVSROOT/log -m notify@sabren.com -f CVSROOT/commitlog %s
-##test
+
