@@ -120,6 +120,13 @@ def sum(series, initial=None):
     return reduce(operator.add, series, 0)
 
 
+class Everything:
+    def __contains__(self, thing):
+        return True
+Everything=Everything()
+
+
 if __name__=="__main__":
     #print edit("testing...")
     assert sum((1,2,3)) == 6
+    assert 234324 in Everything
