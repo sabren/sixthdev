@@ -35,3 +35,12 @@ class ResponseTestCase(unittest.TestCase):
             res = 1
 
         assert res == 1, "response.end() doesn't exit!"
+
+
+    def check_cgiEnd(self):
+        import os
+        res = os.popen('python -c"import weblib; print \'x\'; weblib.response.end()"').read()
+
+        assert res == "Content-type: text/html\n\nx\n", \
+               "CGI doesn't flush after response.end()"
+        

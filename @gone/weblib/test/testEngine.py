@@ -181,10 +181,10 @@ class EngineTestCase(unittest.TestCase):
         target = trim(
             """
             Content-type: text/html
-
-            hello
             
+            hello
             """)
+
         assert actual==target, "didn't get headers in CGI-mode!"
 
 

@@ -121,16 +121,14 @@ if not __builtin__.__dict__.get("__weblib__"):
         
         def __init__(self):
             import sys
-            Response.__init__(self)
-            self.stdout = sys.stdout
+            Response.__init__(self, out=sys.stdout)
             sys.stdout = self
 
 
         def __del__(self):
+            self.flush()
             import sys
-            sys.stdout = self.stdout
-            print self.getHeader()
-            print self.buffer
+            sys.stdout = self.out
 
     import sys
     stdout = sys.stdout

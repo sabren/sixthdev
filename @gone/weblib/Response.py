@@ -6,27 +6,25 @@ import weblib
 class Response:
     """Response object similar to the one from ASP"""
 
-    def __init__(self, engine=weblib):
+    def __init__(self, engine=weblib, out=None):
 
         self.engine = engine
         if engine is weblib:
             weblib.response = self
 
+        self.out = out
         self.clear()
 
 
-    def __getattr__(self, name):
-        res = None
-
-        import sys
-        sys.stdout.write("*******************" +  name +" *************")
-        
-        if name in self.__dict__.keys():
-            res = self.__dict__[name]
-        else:
-            raise AttributeError
+##     def __getattr__(self, name):
+##         res = None
+       
+##         if name in self.__dict__.keys():
+##             res = self.__dict__[name]
+##         else:
+##             raise AttributeError
             
-        return res
+##         return res
         
 
     #### I/O Methods (needed for print redirection) ########
@@ -36,7 +34,13 @@ class Response:
 
 
     def flush(self):
-        pass
+        if self.out:
+            if not self._sentHeaders:
+                self.out.write(self.getHeaders())
+                self._sentHeaders = 1
+                
+            self.out.write(self.buffer)
+            self.buffer = ""
     
 
     #### PUBLIC METHODS ####################
@@ -45,12 +49,12 @@ class Response:
         self.buffer = self.buffer + data
 
 
-    def getHeader(self):
+    def getHeaders(self):
         res = "Content-type: " + self.contentType + "\n"
         for h in self.headers:
             # each header is a (key, value) tuple
             res = res + h[0] + ": " + h[1] + "\n"
-        return res
+        return res + "\n"
 
 
     def addHeader(self, key, value):
@@ -63,6 +67,7 @@ class Response:
 
 
     def end(self):
+        self.flush()
         import sys
         sys.exit()
 
@@ -78,7 +83,8 @@ class Response:
         self.headers = []
         self.cookies = []
         self.buffer = ""
-        
+        self._sentHeaders = 0
+       
 
     #### NOT IMPLEMENTED YET #####################
     #
