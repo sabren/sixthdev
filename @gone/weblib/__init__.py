@@ -1,9 +1,30 @@
-#
-# weblib : a library for web stuff
-# 
-##########################################################
+"""
+weblib : a library for web stuff
+
+$Id$
+"""
 
 # start with some utility functions... 
+
+
+#### trim() for saving bandwith while making code look nice ####
+
+def trim(s):
+    """strips leading indentation from a multi-line string."""
+
+    import string
+    lines = string.split(s, "\n")
+
+    # strip leading blank line
+    if lines[0] == "":
+        lines = lines[1:]
+        
+    # strip indentation
+    indent = len(lines[0]) - len(string.lstrip(lines[0]))
+    for i in range(len(lines)):
+        lines[i] = lines[i][indent:]
+
+    return string.join(lines, "\n")
 
 
 ### unique identifier generator, for sessions, etc #######
