@@ -43,8 +43,8 @@ class Product(zdc.RecordObject):
         self.parentID = 0
 
         self.hold = 0
-        self.stock = 0
-        self.warn = 0
+        self.stock = None  # no value known (this doesn't mean no stock..)
+        self.warn = None   # no warning
 
 
     def _fetch(self, **where):
@@ -99,7 +99,7 @@ class Product(zdc.RecordObject):
         # would come in handy
         res = (self.stock or 0) - self.hold
         for item in self.styles:
-            res = res + item.stock - item.hold
+            res = res + (item.stock or 0) - item.hold
         return res
 
     def set_picture(self, blob):

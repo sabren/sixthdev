@@ -63,7 +63,7 @@ show products in... &nbsp;
             style = "color:red; font-weight:bold;"
         else:
             style = "color:black"
-    <td class="{:tdclass:}" style="{:style:}">{:weblib.deNone(stock):}</td>
+    <td class="{:tdclass:}" style="{:style:}">{:weblib.deNone(stock,'?'):}</td>
     <td class="{:tdclass:}" style="{:style:}">{:weblib.deNone(hold):}</td>
     <td class="{:tdclass:}" style="{:style:}">{:weblib.deNone(available):}</td>
     </tr>
