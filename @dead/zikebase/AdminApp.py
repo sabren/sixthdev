@@ -36,11 +36,11 @@ class AdminApp(weblib.Actor):
         """
         """
         import zebra
-        try:
+        if hasattr(self,"qry_%s" % what):
             self.consult({
                 "list": getattr(self, "qry_%s" % what)()
                 })
-        except AttributeError:
+        else:
             self.complain("self.qry_%s() not defined" % what)
         try:
             zebra.show("lst_%s" % what, self.model)
