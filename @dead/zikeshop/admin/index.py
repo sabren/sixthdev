@@ -78,7 +78,9 @@ class ZikeShopAdminApp(zikebase.AdminApp):
     def save_sale(self):
         sed = zikeshop.SaleEditor(zikeshop.Sale, self.input.get("ID"))
         import zdc
-        sed.input["tsSold"] = zdc.TIMESTAMP
+        # new sales get a timestamp:
+        if not self.input.get("ID"):
+            sed.input["tsSold"] = zdc.TIMESTAMP
         sed.act("save")
 
     def list_sale(self):
