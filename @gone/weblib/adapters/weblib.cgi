@@ -51,7 +51,7 @@ if __name__=="__main__":
         sys.stdout.write(out.getHeaders())
         sys.stdout.write(out.getBody())
         
-        if eng.hadProblem and eng.locals["SITE_MAIL"]:
+        if eng.hadProblem and eng.globals["SITE_MAIL"]:
             out.sendError()
 
     except Exception, e:
