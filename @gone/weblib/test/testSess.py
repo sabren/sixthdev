@@ -3,18 +3,47 @@
 #
 
 import unittest
-from weblib import Sess, DBSessPool
+import weblib
 import test
 
 
 class SessTestCase(unittest.TestCase):
-    def setUp(self):
-        self.sess = Sess(DBSessPool(test.dbc))
+
+    def setUp(self, sid=None):
+        self.sess = weblib.Sess(weblib.DBSessPool(test.dbc))
+        self.sess.start(sid)
+
+    def check_engine(self):
+        assert self.sess.engine==weblib, "sess.engine doesn't default to weblib. :/"
+        assert weblib.sess is self.sess, "sess doesn't register itself with weblib"
+        
 
     def check_sid(self):
-        self.sess.start()
         sid = self.sess.sid
         assert len(sid)==32, "sess.sid isn't right."
+
+
+    def check_persistence(self):       
+        self.sess["x"] = 10
+        self.sess.freeze()
+        sid = self.sess.sid
+
+        del self.sess
+        self.setUp(sid)
+
+        assert self.sess["x"]==10, "peristence doesn't work! :/"
+
+
+    def check_dictstuff(self):
+        
+        gotError = 0
+        try:
+            cat = self.sess["cat"]
+        except KeyError:
+            gotError = 1
+
+        assert gotError, "Didn't get keyError on nonexistant key"
+
 
     def tearDown(self):
         del self.sess

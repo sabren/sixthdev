@@ -5,6 +5,7 @@ Sess.py : emulates PHPLIB's session support in python
 """
 
 import weblib
+import UserDict
 
 try:
     from cPickle import loads, dumps
@@ -13,13 +14,16 @@ except ImportError:
 
 ## Sess : a session handler ################
 
-class Sess:
+class Sess(UserDict.UserDict):
 
     ## attributes ##########################
 
     def __init__(self, pool=None, engine=weblib):
 
-        self.engine = weblib
+        self.engine = engine
+        # if we don't have an engine, store a pointer to us in weblib:
+        if self.engine is weblib:
+            weblib.sess = self
         
         self.sid = ""
         self.name = "weblib.Sess"
@@ -33,18 +37,18 @@ class Sess:
         # naturally, you keep your Sess in a SessPool.. :)
         
         self._pool = pool   # where to store the data
-        self._bag = {}      # all the stuff to remember
+        self.data = {}      # all the stuff to remember
 
     ## public methods ########################
 
-    def start(self, sid=""):
+    def start(self, sid=None):
         """starts the session. call at the top of the page.
 
         Not really sure why you'd ever want to pass
         the sid variable in.. except possibly for testing..
         but PHPLIB lets you do it, so I guess I will, too.
         """
-        if sid == "":
+        if sid is None:
             self.sid = self._getSid()
         else:
             self.sid = sid
@@ -55,7 +59,7 @@ class Sess:
     def abandon(self):
         """abandons the session"""
         self.sid = ""
-        self._bag = {}
+        self.clear()
 
     def url(oldurl):
         """ returns oldurl, but referencing the current session.
@@ -69,38 +73,15 @@ class Sess:
 
     def freeze(self):
         """freezes sess and dumps it into the sesspool. call at end of page"""
-        self._pool.putSess(self.name, self.sid, dumps(self._bag, 1)) # 1 for binary
+        self._pool.putSess(self.name, self.sid, dumps(self.data, 1)) # 1 for binary
 
     def thaw(self):
         """gets a frozen sess out of the sesspool and thaws it out"""
         frozen = self._pool.getSess(self.name, self.sid)
         if frozen is None:
-            self._bag = {}
+            self.data = {}
         else:
-            self._bag = loads(frozen)
-
-
-    ## dictionary methods #####################   
-    ## ... guess I coulda just extended UserDict.. <shrug> :)
-    
-    def __getitem__(self, key):
-        return self._bag[key]
-    
-    def __setitem__(self, key, value):
-        self._bag[key] = value
-
-    def __delitem__(self, key):
-        del self._bag[key]
-
-    def __len__(self):
-        return len(self._bag)
-
-    def keys(self):
-        return self._bag.keys()
-
-    def has_key(self, key):
-        return self._bag.has_key(key)
-
+            self.data = loads(frozen)
 
     ## internal methods ####################
 
@@ -141,17 +122,3 @@ class Sess:
 if __name__ == "__main__":
     pass
 
-"""
-### this should all happen in the framework ###
-from weblib import sess
-sesspool = weblib.SessPool()
-sess.start(sesspool)
-
-### this happens inside your code ###
-sess["x"] = sess["x"] + 1
-### and this really ought to happen in zebra: ###
-print "you have visited this page", sess["x"], "times."
-
-### this happens back in the framework... ###
-sess.freeze()
-"""
