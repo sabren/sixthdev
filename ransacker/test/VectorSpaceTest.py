@@ -11,7 +11,7 @@ class VectorSpaceTest(unittest.TestCase):
 	pass
 
 
-    def check_everything(self):
+    def test_everything(self):
 
         docs = ["dog", "cat", "dog? cat", "cat cat"]
         idx = VectorSpace(docs)

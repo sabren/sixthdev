@@ -12,7 +12,7 @@ class MkIndexTest(IndexTest):
     def newIndex(self):
         return MkIndex()
 
-    def check_file(self):
+    def test_file(self):
         name = "./spec/test"
         exts = [".rki", ".rkw", ".rkp"]
         for e in exts:
