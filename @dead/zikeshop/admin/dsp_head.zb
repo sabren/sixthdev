@@ -42,6 +42,8 @@ td.odd { background-color: #ccffcc }
            <a href="index.py" style="color:#33CCFF">^</a></font>
       <font size="3" face="arial black">
       <font color="#000000">--</font>
+      <font color="#00FF00"><a style="color:#FFCC00" href="index.py?action=create&what=product">*</a></font>
+      <font color="#000000">--</font>
       <font color="#00FF00"><a style="color:#00ff00" href="index.py?action=new_sale">$</a></font>
       <font color="#000000">--</font>
       <font color="#FFCC00">?</font> 
