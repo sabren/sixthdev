@@ -78,7 +78,7 @@ class Bootstrap:
         toks = zebra.lexer.parse(expression)
         for token in toks:
             if token[0]=="NAME" and not keyword.iskeyword(token[1]):
-                res.append("scope['%s']" % token[1])
+                res.append("scope.get('%s','')" % token[1])
             else:
                 res.append(token[1])
         return string.join(res, " ")
@@ -109,10 +109,10 @@ class Bootstrap:
                     return zres
 
             def fetch(model={}):
-                Report().fetch(model)
+                return Report().fetch(model)
                 
             def show(model={}):
-                Report().show(model)
+                return Report().show(model)
             """)
         return res
 
@@ -128,6 +128,7 @@ class Bootstrap:
             scope.update(locals())
             for _ in range(_max_):
                 scope.update(self.model["%(series)s"][_])
+                scope["_"] = _
             """ % attrs)
         res = res + zebra.indent(self.walk(model), 1)            
         res = res + zebra.trim(
@@ -147,7 +148,7 @@ class Bootstrap:
 
     ## <var> ##
     def handle_var(self, model, attrs):
-        res = "zres = zres + str(scope['%s'])\n" % model[0]
+        res = "zres = zres + str(scope.get('%s',''))\n" % model[0]
         return res
 
 
@@ -196,4 +197,12 @@ class Bootstrap:
     def handle_glue(self, model, attrs):
         res = "if _ + 1 < _max_:\n"
         res = res + zebra.indent(self.walk(model), 1)
+        return res
+
+
+
+    ## <import> ##
+    def handle_import(self, model, attrs):
+        res = "import %s\n" % attrs["module"]
+        res = res + "zres = zres+ %s.fetch(scope)\n" % attrs["module"]
         return res
