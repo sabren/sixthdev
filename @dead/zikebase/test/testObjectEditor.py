@@ -45,7 +45,7 @@ class ObjectEditorTestCase(unittest.TestCase):
         can we save a single node to the database?
         """        
         req = {"action":"save"}
-        ed = zikebase.ObjectEditor(zikebase.Node, self.ds, input=req)
+        ed = zikebase.ObjectEditor(zikebase.Node, self.ds, req)
         ed.act()
         assert isinstance(ed.object, zikebase.Node), \
                "Didn't even create a simple node.."
@@ -67,7 +67,7 @@ class ObjectEditorTestCase(unittest.TestCase):
         node.save()
 
         req = {"action":"save", "parentID":"1"}
-        ed = zikebase.ObjectEditor(zikebase.Node, self.ds, 1, input = req)
+        ed = zikebase.ObjectEditor(zikebase.Node, self.ds, req, key=1)
 
         try:
             gotError = 0
@@ -154,7 +154,7 @@ class ObjectEditorTestCase(unittest.TestCase):
         this just exercises the behaviour of objecteditor based
         on results from expected()..
         """
-        ed = zikebase.ObjectEditor(TestObjectClass, self.ds)
+        ed = zikebase.ObjectEditor(TestObjectClass, self.ds, {})
         assert ed.object.isTrue, \
                "foo should be true by default!"
 
@@ -165,7 +165,7 @@ class ObjectEditorTestCase(unittest.TestCase):
         assert ed.object.isTrue == '0', \
                "that shoulda turned foo's isTrue field off."
         
-        ed = zikebase.ObjectEditor(TestObjectClass, self.ds)
+        ed = zikebase.ObjectEditor(TestObjectClass, self.ds, {})
         ed.input = {"__expect__":"isTrue:0"}
         ed.act("save")
         assert ed.object.isTrue == '0', \
@@ -173,7 +173,7 @@ class ObjectEditorTestCase(unittest.TestCase):
 
         
         # now try testing two of 'em
-        ed = zikebase.ObjectEditor(TestObjectClass, self.ds)
+        ed = zikebase.ObjectEditor(TestObjectClass, self.ds, {})
         ed.input = {"__expect__":("isTrue:0", "isAlsoTrue:0")}
         ed.act("save")
         assert ed.object.isTrue == '0', \
@@ -205,7 +205,7 @@ class ObjectEditorTestCase(unittest.TestCase):
             "children(+0|name)":'specific',
             }
         
-        ed = zikebase.ObjectEditor(zikebase.Node, self.ds, nodeID, input=req)
+        ed = zikebase.ObjectEditor(zikebase.Node, self.ds, req, nodeID)
         ed.act()
 
         assert len(ed.object.children) == 1, \

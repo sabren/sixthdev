@@ -16,17 +16,24 @@ class ObjectEditor(weblib.Actor):
 
     ## constructor #######################################
 
-    def __init__(self, what, ds, key=None, input=None):
+    def __init__(self, what, ds, input=None, key=None):
         """
-        ex: ed=ObjectEditor(Person, ds, aKey)
-        or: ed=ObjectEditor(Person, ds)
-        or: ed=ObjectEditor(aParticularPersonInstance)
+        ex: ed=ObjectEditor(Person, ds, input)
+        or: ed=ObjectEditor(Person, ds, input, aKey)
+        or: ed=ObjectEditor(aParticularPersonInstance, ds, input)
 
         In the first case, if aKey is None, a new object is created.
         This makes it handy for doing something like:
 
         ed = ObjectEditor(Person, ds, weblib.request.get('ID'))
         """
+        ## @TODO REMOVE THIS:
+        if type(input) in [type(1), type(1L)]:
+            raise "wrong param order for ObjectEditor"
+        if input is None:
+            raise "input can no longer be None"
+        ## 
+        
         weblib.Actor.__init__(self, input)
         import types
         if type(what) == types.InstanceType:
