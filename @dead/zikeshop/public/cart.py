@@ -7,8 +7,8 @@ import zikeshop
 class CartApp(zikeshop.PublicApp):
     __super = zikeshop.PublicApp
 
-    def __init__(self):
-        self.__super.__init__(self)
+    def __init__(self, cart):
+        self.__super.__init__(self, cart)
         self.silent = 0
         self.consult("lib_link")
 
