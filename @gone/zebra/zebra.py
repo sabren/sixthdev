@@ -9,34 +9,6 @@
 #   or copied under the terms of the GNU General
 #   Public License. See http://www.fsf.org/ for details
 #
-##################################################
-#
-# CHANGELOG:
-#
-# v0.5  1219.1999 sabren@manifestation.com
-#       minor bug fixes
-#       renamed "suit" to "skin"
-#       added eval, site, page
-#
-# v0.4  1215.1999 sabren@manifestation.com
-#       fixed bug with o2x (was trying to match 1 char w/ "<?")
-#       added: include, wrap, suit
-#       changed "slot" to "insert" (so it would be a verb like "wrap")
-#       changed default context to "show"
-#
-# v0.3  1204.1999 sabren@manifestation.com
-#       can now be used as module..
-#       standalone reads from stdin by default
-#
-# v0.2  1124.1999 sabren@manifestation.com
-#       added o2x for emacs outline mode
-#       seperated <zebra> and <report> tags
-#       added if/el/code/exec/ etc..
-#       (still alpha.. broke the compiler)
-#
-# v0.1  1017.1999 sabren@manifestation.com
-#       initial version. (alpha release)
-#
 ###################################################
 ##[ configuration ]################################
 ###################################################
@@ -353,8 +325,7 @@ class Engine (xmllib.XMLParser):
         res = ""
         res = res + \
               "$__db = new " + report["source"] + ";\n" + \
-              "$__db->query(\"" + self.flatten(report["query"], context="exec") + "\"
-);\n"
+              "$__db->query(\"" + self.flatten(report["query"], context="exec") + "\");\n"
 
         ## set up two arrays for handling groups
         res = res + "$__groups=array('all'"
@@ -385,11 +356,9 @@ class Engine (xmllib.XMLParser):
         for i in range(len(report["groups"])):
             if report["grouph"][i]:
                 res = res + \
-                      "      if ($__tr[\"" + report["groups"][i] + "\"] != $__pr[\""
-+ \
+                      "      if ($__tr[\"" + report["groups"][i] + "\"] != $__pr[\"" + \
                       report["groups"][i] + "\"]){\n" + \
-                      "         " + self.flatten(report["grouph"][i],depth,"show") +
-\
+                      "         " + self.flatten(report["grouph"][i],depth,"show") + \
                       "         unset($__pr);\n" + \
                       "      }\n"
 
@@ -414,8 +383,7 @@ class Engine (xmllib.XMLParser):
             if report["groupt"][i]:
                 res = res + \
                       "      if ($__showTail[" + `i+1` + "]){\n" + \
-                      "         " + self.flatten(report["groupt"][i],depth,"show") +
-\
+                      "         " + self.flatten(report["groupt"][i],depth,"show") + \
                       "      }\n"
 
         ## cap off the loop, show the tail...
