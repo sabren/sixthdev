@@ -12,6 +12,9 @@ class Perm:
     
     def __init__(self, engine=weblib):
         self.engine = engine
+        if self.engine is weblib:
+            weblib.perm = self
+            
         self.perms = {}
 
     ## public methods #########################
