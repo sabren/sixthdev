@@ -15,6 +15,10 @@ class Card(zdc.RecordObject):
 
     def _new(self):
         self.__super._new(self)
+        import time
+        nowYear, nowMonth = time.localtime(time.time())[0:2]
+        self.expYear  = nowYear
+        self.expMonth = nowMonth
         self.customerID = 0
 
     def get_masked(self):
