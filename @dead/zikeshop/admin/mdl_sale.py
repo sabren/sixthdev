@@ -20,7 +20,7 @@ if (dmin): where = where + " AND tsSold >= '%s' " % dmin
 if (dmax): where = where + " AND tsSold <= '%s 23:59:59' " % dmax
 
 if not includeFilled:
-    where = where + " AND (status!='complete') "
+    where = where + " AND (status NOT IN ('cancelled','complete')) "
 
 # @TODO: clean this whole query thing up!
 # kids, don't try this at home.
