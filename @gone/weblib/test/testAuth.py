@@ -36,7 +36,7 @@ class AuthTestCase(unittest.TestCase):
             """
             from weblib import auth
             auth.check()
-            print "hello"
+            print "this should not show up"
             """))
         engine.run()
 
@@ -44,8 +44,38 @@ class AuthTestCase(unittest.TestCase):
                "doesn't show prompt!"
 
 
-    def nocheck_Login(self):
-        pass
+    def check_login(self):
+
+        engine = weblib.Engine(request= 
+                               weblib.Request(environ = {"PATH_INFO":"sadfaf"},
+                                              querystring="auth_check_flag=1",
+                                              form={"auth_name":"wrong_username",
+                                                    "auth_pass":"wrong_password"},
+                                              ),
+                               script=trim(
+            """
+            import weblib
+            weblib.auth.check()
+            
+            print "this should show up"
+            """))
+        
+        engine.run()
+
+        assert string.find(engine.response.buffer, engine.auth.LOGINFAILED) > -1, \
+               "invalid login doesn't give LOGINFAILED!"
+
+
+
+        ## run it again with the "right" credentials 
+        engine.request.form = {"auth_name" : "username", "auth_pass":"password"}
+        engine.run()
+
+        assert engine.response.buffer == "this should show up\n", \
+               "valid login doesn't let you in!!!!"
+        
+        
+        
 
     def nocheck_Logout(self):
         pass

@@ -83,7 +83,7 @@ class Auth:
 
         authKey = None
 
-        if (dict["name"] == "username") and (dict["pass"] == "password"):
+        if (dict.get("name") == "username") and (dict.get("pass") == "password"):
             authKey = 1 # user's key = 1
 
 
@@ -133,9 +133,9 @@ class Auth:
         # first move all the auth_* variables into a hash,
         # transforming them along the way.
         
-        for item in request.form.keys():
+        for item in self.engine.request.form.keys():
             if item[:5] == "auth_":
-                dict[item[5:]] = self.transform(item[5:], request.form[item])
+                dict[item[5:]] = self.transform(item[5:], self.engine.request.form[item])
 
 
         # now pass it to validate() and see if we get in:
@@ -187,7 +187,7 @@ class Auth:
         """
         res = ""
 
-        for item in self.engine.request.form.keys():  # form really ought to be an IdxDict..
+        for item in self.engine.request.form.keys():  # form should be an IdxDict..
             if item[:5] == "auth_":
                 pass # Ignore auth stuff here, too
             else:
