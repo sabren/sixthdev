@@ -15,6 +15,7 @@ class SignupApp(App):
     tplDir = "."
 
     def __init__(self, input, clerk, auth):
+        raise Exception("this class sucks. don't use it. see the 'signup' lib, or refactor this mess")
         self.clerk = clerk
         self.auth = auth
         super(SignupApp, self).__init__(input)
@@ -34,10 +35,12 @@ class SignupApp(App):
         print >> self.out, zebra.fetch(self.tplDir + "/frm_signup", self.model)
 
     def act_save(self):
+        
         try:
-            obj = self.clerk.upsert(self.userClass,
-                                    self.input.get("ID"),
-                                    **self.input)
+            raise Exception("this should work like adminapp...ugh")
+            #obj = self.clerk.upsert(self.userClass,
+            #                        self.input.get("ID"),
+            #                        **self.input)
         except ValueError, err:
             #@TODO: clean up the type mess on ValueError
             if type(err)==type([]):
