@@ -13,12 +13,29 @@ from Bootstrap import Bootstrap
 
 
 def fetch(template, model={}):
-    #@TODO: clean this up and optimize it!
-    ifp = open(template + ".zb", "r")
-    data = Z2X().translate(ifp.read())
-    ofp = open(template + ".zbc", "w")
-    ofp.write(Bootstrap().compile(data))
-    ofp.close()
+    import os.path
+    doCompile = 0
+    # if existing compiled template:
+    if os.path.exists(template + ".zbc"):
+        # if also uncompiled template:
+        if os.path.exists(template + ".zb"):
+            # and the uncompiled is newer:
+            if os.path.getmtime(template + '.zb') \
+               > os.path.getmtime(template + '.zbc'):
+                doCompile = 1
+    else:
+        # no existing template, so compile
+        doCompile = 1
+
+    if doCompile:
+        ifp = open(template + ".zb", "r")
+        data = Z2X().translate(ifp.read())
+        ofp = open(template + ".zbc", "w")
+        #@TODO: also use python's compiler, once the bugs are worked out.
+        ofp.write(Bootstrap().compile(data))
+        ofp.close()
+        ifp.close()
+        
     namespace = {}
     execfile(template + ".zbc", namespace)
     return namespace['fetch'](model)
