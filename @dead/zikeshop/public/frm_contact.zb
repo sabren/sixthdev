@@ -1,21 +1,22 @@
 <tr><td>first name:</td>
-    <td><input type="text" name="fname" value=""></td></tr>
+    <td><input type="text" name="fname" value="{:fname:}"></td></tr>
 <tr><td>last name:</td>
-    <td><input type="text" name="lname" value=""></td><tr>
+    <td><input type="text" name="lname" value="{:lname:}"></td><tr>
 <tr><td>email address:</td>
-    <td><input type="text" name="email" value=""></td><tr>
+    <td><input type="text" name="email" value="{:email:}"></td><tr>
 
 <tr><td>address 1:</td>
-    <td> <input type="text" size="40"name="address1" value=""></td></tr>
+    <td> <input type="text" size="40"name="address1" value="{:address1:}"></td></tr>
 <tr><td>address 2:</td>
-    <td> <input type="text" size="40" name="address2" value=""></td></tr>
+    <td> <input type="text" size="40" name="address2" value="{:address2:}"></td></tr>
 <tr><td>address 3:</td>
-    <td> <input type="text" size="40"name="address3" value=""></td></tr>
+    <td> <input type="text" size="40"name="address3" value="{:address3:}"></td></tr>
 <tr><td>city, state, zip:</td>
-    <td> <input type="text" name="city" value="">&nbsp;
+    <td> <input type="text" name="city" value="{:city:}">&nbsp;
          <input type="text" name="stateCD"
-                size="2" maxlength="2"  value=""> &nbsp;
-         <input type="text" name="postal" size="5" value=""></td></tr>
+                size="2" maxlength="2"  value="{:stateCD:}"> &nbsp;
+         <input type="text" name="postal" size="5" value="{:postal:}"></td></tr>
+*# @TODO: make this keep the country after an error!
 <tr><td>country: </td>
     <td><select name="countryCD">
 <option value="AF">Afghanistan</option>
@@ -264,7 +265,4 @@
 </select>
 </td></tr>
 <tr><td>phone:</td>
-    <td> <input type="text" name="phone" value=""></td></tr>
-
-
-
+    <td> <input type="text" name="phone" value="{:phone:}"></td></tr>
