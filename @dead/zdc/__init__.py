@@ -57,3 +57,29 @@ def toListDict(cur):
             dict[cur.description[i][0]] = row[i]
         res.append(dict)
     return res
+
+
+
+def find(what, where):
+    """
+    find(what, where) -> list of what's matching where
+    what is a zdc.RecordObject class
+    where is a SQL where clause
+
+    this is how to do ad-hoc SQL queries for objects..
+    """
+    #@TODO: test case for this.. (it was factored out of zikeshop)
+    tablename = what._table.name
+    # validation logic:
+    sql =\
+        """
+        SELECT ID FROM %s
+        WHERE %s 
+        """  % (tablename, where)
+
+    cur = what._table.dbc.cursor()
+    cur.execute(sql)
+    res = []
+    for row in cur.fetchall():
+        res.append(what(ID=row[0]))
+    return res
