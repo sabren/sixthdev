@@ -33,3 +33,7 @@ class CallbackClerkTest(unittest.TestCase):
 
         assert len(queue2) == 1
         assert queue2[0].x=="c"
+
+if __name__=="__main__":
+    unittest.main()
+    
