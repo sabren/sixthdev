@@ -1,0 +1,26 @@
+<h1>Tell us about yourself!</h1>
+
+<h3>Been here before?</h3>
+
+<a href="user.py?action=update">Click here to update your information.</a>.
+
+<h3>First time here?</h3>
+
+Enter your contact information in the area below.
+  
+
+<form action="user.py" method="post">
+* if ID:
+    <input type="hidden" name="action" value="save">
+* el:
+    <input type="hidden" name="action" value="create">
+
+<table border="0">
+<tr><td>
+
+* include frm_user;
+
+</td></tr>
+</table>
+<input type="submit" name="action" value="save">
+</form>
