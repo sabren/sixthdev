@@ -12,12 +12,30 @@ import xml2mdl
 
 ###[ Utility Functions ]#######################################
 
+def escape(s):
+    """Escape backslashes, quotes, and newlines"""
+
+    replace = {
+        "\\":"\\\\",  # backslash
+        "\n":"\\n",   # newline
+        "'":"\\'",    # single quote
+        "\"":"\\\""   # double quote
+        }
+
+    res = ""
+    for ch in s:
+        if ch in replace.keys():
+            res = res + replace[ch]
+        else:
+            res = res + ch
+    return res
+
 def trim(s):
     """strips leading indentation from a multi-line string."""
     lines = string.split(s, "\n")
 
     # strip leading blank line
-    if lines[0] == "":
+    if string.strip(lines[0]) == "":
         lines = lines[1:]
 
     # strip indentation
