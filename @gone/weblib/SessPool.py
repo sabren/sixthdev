@@ -35,7 +35,12 @@ class SessPool:
 
 class InMemorySessPool(SessPool):
     """
-    just uses a dictionary.
+    Just uses a dictionary.
+    
+    **NOTE**: this WON'T WORK with, eg, mod_python unless you only
+    use a single instance of apache, because the dictionary is
+    local to a single python interpreter, and apache wants to have
+    several...
     """
     def __init__(self, dict=None):
         if dict:
