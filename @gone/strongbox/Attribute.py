@@ -42,17 +42,16 @@ class Attribute(object):
         else:
             try:
                 return self.type(value)
-            except:
+            except Exception, e:
                 if value=="":
                     return None
                 else:
-                    raise TypeError, "%s: expected %s, got %s" \
-                          % (value, self.type, type(value))
+                    raise TypeError, "%s: expected %s, got %s\n[%s]" \
+                          % (value, self.type, type(value), e)
 
     def validate(self, value):
         if (value is None):
             return self.allowNone
-
         if self.okay is None:
             return 1
         elif type(self.okay)==LambdaType:
@@ -68,7 +67,7 @@ class Attribute(object):
         else:
             val = self.cast(value)
         if not self.validate(val):
-            raise ValueError, repr(value)
+            raise ValueError, repr(value) + " vs " + repr(self.okay)
         return val # so the instance can store it
 
 
