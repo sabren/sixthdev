@@ -33,7 +33,7 @@ class Bootstrap:
         return self.walk(self.parse(zbx))
 
 
-    def walk(self, model):
+    def walk(self, model, mode="show"):
         "Walks along the model, converting it to code..."
         import types
 
@@ -60,8 +60,11 @@ class Bootstrap:
                 if item and item[-1]=="\n": item = item[:-1]
 
                 if item:
-                    res = res + "zres = zres + '%s'\n" \
-                          % zebra.escape(item)
+                    if mode=="show":
+                        res = res + "zres = zres + '%s'\n" \
+                              % zebra.escape(item)
+                    else:
+                        res = res + item
             
             else:
                 raise TypeError, \
@@ -187,8 +190,9 @@ class Bootstrap:
     ## <exec> ##
     def handle_exec(self, model, attrs):
         res = "globals().update(scope)\n" \
-              + model[0] + "\n" \
-              "scope.update(globals())\n"
+              + self.walk(model, mode="exec") + "\n" \
+              + "scope.update(globals())\n" \
+              + "scope.update(locals())\n"
         return res
 
 
@@ -243,7 +247,7 @@ class Bootstrap:
     ## <include> ##
     def handle_include(self, model, attrs):
         res = "import zebra\n"
-        res = res + "zres=zres + zebra.fetch('%s')\n" % attrs["file"]
+        res = res + "zres=zres + zebra.fetch('%s',scope)\n" % attrs["file"]
 
         # @TODO: include shouldn't depend on zebra!
         #res = res + "zres = zres+ %s.fetch(scope)\n" % attrs["module"]

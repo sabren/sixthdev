@@ -126,6 +126,9 @@ class Zbr2xmlTestCase(unittest.TestCase):
             """
             * exec:
                 name = 'fred'
+                xml = '<xml>woohoo!</xml>'
+                dict = {}
+                dict['a'] = 'b'
             """)
 
         goal = zebra.trim(
@@ -134,6 +137,9 @@ class Zbr2xmlTestCase(unittest.TestCase):
             <zebra>
             <exec>
             name = 'fred'
+            xml = '&lt;xml&gt;woohoo!&lt;/xml&gt;'
+            dict = {}
+            dict['a'] = 'b'
             </exec>
             </zebra>
             """)

@@ -140,17 +140,20 @@ class BootstrapTestCase(unittest.TestCase):
                "expressions don't work:\n%s" % actual
 
     def check_exec(self):
+        # note: the <>'s mean something!
         zbx = zebra.trim(
             """
             <zebra>            
             <exec>
-            ex = 'executive decision'
+            ex = '&lt;executive'
+            ex = ex + ' decision&gt;'
             </exec>
             <xpr>ex</xpr>
             </zebra>
             """)
 
-        goal = "executive decision"
+        goal = "<executive decision>"
+       
         actual = zebra.Bootstrap().toObject(zbx).fetch()
         assert actual == goal, \
                "expressions don't work:\n%s" % actual
