@@ -191,37 +191,14 @@ class Auth:
         Returns a string with the current URL and coded querystring.
         This is used for the ACTION property of the login form.
         """
-
         import weblib
-
-        # start with a basic url (no query string)
-        # Either PATH_INFO (for wrapper) or SCRIPT_NAME (for CGI)
-        # MUST be here. if it's not, you need to build it
-        # into the environ for the current Engine.
-        # can't even use a blank as default, because it'll
-        # screw up in some browsers.. (eg, lynx)
-        #
-        # note: SCRIPT_NAME should always be there, but if you use the
-        # wrapper, it will be the path to the wrapper, in which
-        # case you want PATH_INFO...
-
-        res = self._sess._request.environ.get("PATH_INFO", 
-            self._sess._request.environ.get("SCRIPT_NAME", None))
-
-        assert res is not None, \
-               "You must set SCRIPT_NAME or PATH_INFO to use Auth."
-        
-
-        # add in a query string of our own:
-        res = res + "?auth_check_flag=1"
-
+        res = self._sess._request.path + "?auth_check_flag=1"
         for item in self._sess._request.query.keys():
             if item[:5] == "auth_":
                 pass # IGNORE old auth stuff
             else:
                 res = res + "&" + weblib.urlEncode(item) + \
                       "=" + weblib.urlEncode(self._sess._request.query[item])
-        
         return res
 
     
