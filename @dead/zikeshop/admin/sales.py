@@ -6,6 +6,7 @@ import header
 import weblib
 import zikeshop
 import zdc
+weblib.auth.check()
 
 cur = zikeshop.dbc.cursor()
 
@@ -97,10 +98,12 @@ else:
     print "<h2>search results</h2>"
 
 
-sql = "SELECT s.ID, s.tsSold, ba.fname, ba.lname, s.subtotal, s.total " \
-      "FROM shop_sale s, shop_address ba, shop_address sa, shop_status st " \
-      "WHERE s.bill_addressID=ba.ID AND s.ship_addressID=sa.ID AND " \
-      "      s.statusID=st.ID AND "
+sql = """
+   SELECT s.ID, s.tsSold, ba.fname, ba.lname, s.subtotal, s.total 
+   FROM shop_sale s, shop_address ba, shop_address sa, shop_status st
+   WHERE s.siteID=%i AND s.bill_addressID=ba.ID
+     AND s.ship_addressID=sa.ID AND s.statusID=st.ID AND
+     """ % weblib.auth.user.siteID
 
 
 ## build the where clause
