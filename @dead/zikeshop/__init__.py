@@ -10,7 +10,6 @@ Product._links["styles"][1] = Style
 from PublicApp import PublicApp
 from Category import Category
 from Customer import Customer
-from CustomerAuth import CustomerAuth
 from Detail import Detail
 from Sale import Sale
 from SaleEditor import SaleEditor
