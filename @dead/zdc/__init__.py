@@ -60,7 +60,7 @@ def toListDict(cur):
 
 
 
-def find(what, where=None, orderBy=None):
+def find(what, where=None, orderBy=None, _select=None):
     """
     find(what, where, orderBy) -> list of what's matching where
     what is a zdc.RecordObject class
@@ -70,9 +70,12 @@ def find(what, where=None, orderBy=None):
     this is how to do ad-hoc SQL queries for objects..
     """
     #@TODO: test case for this.. (it was factored out of zikeshop)
-    tablename = what._table.name
-    # validation logic:
-    sql = "SELECT ID FROM %s " % tablename
+    if _select:
+        # this is a really dumb kludge at the moment..
+        sql = _select
+    else:
+        tablename = what._table.name
+        sql = "SELECT ID FROM %s " % tablename
     if where:
         sql = sql + " WHERE %s " % where
     if orderBy:
