@@ -6,6 +6,11 @@ __ver__="$Id$"
 
 class Payment:
     """A base class for Payment objects.."""
+
+    card = "" # card number
+    merchant = "" # merchant's ID
+    expires = "" #
+
     
     def __init__(self, **kwargs):
         for key in kwargs.keys():

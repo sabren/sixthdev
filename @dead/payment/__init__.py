@@ -6,6 +6,15 @@ __ver__="$Id$"
 from Payment import *
 from AuthorizeNetPayment import *
 
+## result codes (constants)
+
+SUCCESS = 1
+FAILURE = 0
+
+
+
+## utility functions
+
 def create(which, **kwargs):
     """Factory routine for creating objects that implement the
     Payment interface. Given an account type (as a string
