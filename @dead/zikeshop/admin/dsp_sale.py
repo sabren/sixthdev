@@ -22,11 +22,13 @@ sale = zikeshop.Sale(ID=saleID)
 print '<a href="index.py?action=list&what=sale">back to sales list</a>'
 print '<h2>Sale #%s</h2>' % int(sale.ID)
 
-if sale.customerID != 0:
+if sale.billAddress:
+    rec = sale.billAddress._record
 
-    print """
-    <p><b>customer: <A href="mailto:%(email)s">%(email)s</a></b></p>
-    """ % sale.customer._record
+    if sale.billAddress.email:
+        print """
+        <p><b>customer: <A href="mailto:%(email)s">%(email)s</a></b></p>
+        """ % sale.billAddress._record
 
     #@TODO: store organization? or should that be address line 1?
     #@TODO: logic for hiding state if not in US
