@@ -155,10 +155,9 @@ def urlDecode(what):
 
 ## sub-modules ################################################
 
-# In all of these cases, we importsa class with the
-# same name as the module. This means the module basically
-# disappears, and all the user sees is that weblib has
-# a bunch of classes defined.
+# In all of these cases, we import a class with the same name as the
+# module. This means the module basically disappears, and all the user
+# sees is that weblib has a bunch of classes defined.
 
 from Actor import Actor
 from Engine import Engine
@@ -166,20 +165,4 @@ from Request import Request
 from Response import Response
 from Sess import Sess
 from Auth import Auth
-
-
-# note that the actual singletons (request, response, etc)
-# are not created unless you do "import weblib.script", or
-# create an Engine.
-
-
-# the config module is different. It defines a SessPool
-# object called pool... This is why we don't import SessPool
-# in the section above.
-#
-# we put it in a seperate module so that it would be easy to
-# customize.
-
-from config import *
-
 
