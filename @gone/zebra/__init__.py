@@ -12,6 +12,18 @@ from Bootstrap import Bootstrap
 
 ###[ Utility Functions ]#######################################
 
+def old_parse(string):
+    """
+    parse the old, non-xml format
+    """
+    return Bootstrap().toObject(Z2X().translate(string))
+
+def parse(string):
+    """
+    parse the xml format
+    """
+    return Bootstrap().toObject(string)
+
 def fetch(template, model={}):
     """
     fetch the template, and appy it to the model
@@ -21,17 +33,24 @@ def fetch(template, model={}):
     if path:
         os.chdir(path)
 
-    # @TODO: make the .zb explicit in the call
-    filename += ".zb"
-    if not os.path.exists(filename):
-        raise IOError, "%s not found" % filename
+    try:
+        # @TODO: make the .zb explicit in the call
+        if not os.path.exists(filename):
+            if os.path.exists(filename + ".zb"):
+                filename += ".zb"
+            else:
+                raise IOError, "%s not found" % filename
 
-    src = open(filename).read()
-    rpt = Bootstrap().toObject(Z2X().translate(src))
-    res = rpt.fetch(model)
-
-    # cleanup and go home
-    os.chdir(cwd)    
+        src = open(filename).read()
+        if filename.endswith(".zb"):
+            rpt = old_parse(src)
+        else:
+            rpt = parse(src)
+        res = rpt.fetch(model)
+    finally:
+        # cleanup and go home
+        os.chdir(cwd)
+        
     return res
 
 
