@@ -23,7 +23,7 @@ class Channel(Strongbox):
     title = attr(str)
     link = attr(str)
     description = attr(str)
-    rssfile = attr(str)
+    rssfile = attr(str, okay=lambda x: "/" not in x and x.endswith(".rss"))
     stories = linkset(Story)
 
     def writeRSS(self):
