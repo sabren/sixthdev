@@ -73,11 +73,11 @@ class Bootstrap:
     def scopify(self, expression):
         "points names in expressions to the current scope"
         
-        import string
+        import string, keyword
         res = []
         toks = zebra.lexer.parse(expression)
         for token in toks:
-            if token[0]=="NAME":
+            if token[0]=="NAME" and not keyword.iskeyword(token[1]):
                 res.append("scope['%s']" % token[1])
             else:
                 res.append(token[1])
