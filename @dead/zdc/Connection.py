@@ -19,16 +19,18 @@ class Connection:
 
     # delegate everything to the source...
 
-    def select(self, table, where=None, **wdict):
+    def select(self, table, where=None, order=None, **wdict):
         #@TODO: clean this up and test it!
         import types
         if type(table) == types.ClassType:
             tablename = table._table.name
             res =  map(lambda row, klass=table: klass(ID=row["ID"]),
-                       apply(self.source.select, (tablename, where), wdict))
+                       apply(self.source.select,
+                             (tablename, where, order), wdict))
         else:
             tablename = table
-            res = apply(self.source.select, (tablename, where), wdict)
+            res = apply(self.source.select,
+                        (tablename, where, order), wdict)
         return res
 
     def fields(self, tablename):
