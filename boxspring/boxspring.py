@@ -1,7 +1,8 @@
 #!/usr/bin/python
-from PythonCardPrototype import model
-from wxPython.wx import *
+from PythonCardPrototype import model, dialog
 from boxspring import Drawing, Box
+from wxPython.wx import *
+import pickle
 
 class MyBox(Box):
     def __init__(self, x, y):
@@ -22,13 +23,53 @@ class MyBox(Box):
         
     
         
+class Arrow:
+    def __init__(self, start):
+        self.start = start
+        self.end = start
+
+    def erase(self, canvase):
+        pass
+
+    def draw(self):
+        canvas._setForegroundColor("silver")
+        canvas.DrawLine(self.start.x, self.start.y, self.end.x, self.end.y)        
+
+    def bounds(self):
+        l = min(self.start.x, self.end.x)
+        r = max(self.start.x, self.end.x)
+        t = min(self.start.y, self.end.y)
+        b = min(self.start.x, self.end.y)
+        return [(l,t), (r,t), (l,b), (r,b)]
+
+    def point(self, canvas, x,y):
+        self.end.x = x
+        self.end.y = y
+
 
 class BoxSpring(model.Background):
 
-    def on_openBackground(self, event):
-        # this seems to be the place to initalize things.
+    def newDrawing(self):
         self.drawing = Drawing()
         self.focus = None
+        self.filename = None
+
+    def openDrawing(self, filename):
+        self.newDrawing()
+        file = open(filename)
+        self.drawing = pickle.load(file)
+        file.close()
+        self.filename = filename
+
+    def saveDrawing(self, filename):
+        self.filename = filename
+        file = open(filename, "w")
+        pickle.dump(self.drawing, file)
+        file.close()
+
+    def on_openBackground(self, event):
+        # this seems to be the place to initalize things.
+        self.newDrawing()
         self.canvas = self.components.canvas
         
         self.gripx = 0  # grip is how far the cursor is from the center
@@ -37,11 +78,31 @@ class BoxSpring(model.Background):
     def on_menuFileExit_select(self, event):
         self.Close()
 
+    def defaultPath(self):
+        return "w:/"
+
+    def on_menuFileOpen_select(self, event):
+        result = dialog.openFileDialog(self, 'Open',
+                                       self.defaultPath(), '', '*.box' )
+        if result['accepted']:
+            path = result['paths'][0]            
+            self.openDrawing(path)
+            self.refresh()
+
+    def on_menuFileSaveAs_select(self, event):
+        result = dialog.saveFileDialog(self, 'Save As',
+                                       self.defaultPath(), '', '*.box' )
+        if result['accepted']:
+            path = result['paths'][0]            
+            self.saveDrawing(path)
+
+    def on_menuFileSave_select(self, event):
+        if self.filename:
+            self.saveDrawing(self.filename)
+        else:
+            self.on_menuFileSaveAs_select(event)
+
     def on_canvas_mouseDown(self, event):
-        """
-        Look through the boxes in reverse 
-        so we can pick up the topmost one.
-        """
         g = self.drawing.glyphAt(event.x, event.y)
         if g:
             self.focus = g
@@ -65,6 +126,10 @@ class BoxSpring(model.Background):
             self.focus.y = event.y + self.gripy
             self.canvas.autoRefresh = 1
             self.focus.draw(self.canvas)
+
+    def on_canvas_mouseMove(self, event):
+        if isinstance(self.focus, Arrow):
+            self.focus.point(self.canvas, event.x, event.y)
                     
     def on_canvas_mouseDoubleClick(self, event):
         if self.focus: return
@@ -86,17 +151,22 @@ class BoxSpring(model.Background):
         self.canvas.setFillColor("white")
         self.canvas.drawRectangle(x,y,w,h)
         self.canvas._setForegroundColor("black")
+
+    def refresh(self):
+        self.canvas.Clear()
+        for g in self.drawing.glyphs:
+            g.draw(self.canvas)
         
     def redraw(self, rectangle):
         bounds = rectangle
-        for b in self.drawing.glyphs:
-            if b is self.focus:
+        for g in self.drawing.glyphs:
+            if g is self.focus:
                 continue
             else:
                 for x,y in rectangle:
-                    if b.contains(x,y):
-                        b.draw(self.canvas)
-                        bounds.extend(b.getBounds())
+                    if g.contains(x,y):
+                        g.draw(self.canvas)
+                        bounds.extend(g.getBounds())
                         break
 
 if __name__ == '__main__':
