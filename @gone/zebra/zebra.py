@@ -9,6 +9,16 @@
 #   or copied under the terms of the GNU General
 #   Public License. See http://www.fsf.org/ for details
 #
+##################################################
+#
+# CHANGELOG:
+#
+# v0.4 1215.1999 sabren@manifestation.com
+#      fixed bug with o2x (was trying to match 1 char w/ "<?")
+#      added: include, wrap, suit
+#      changed "slot" to "insert" (so it would be a verb like "wrap")
+#      changed default context to "show"
+#
 # v0.3 1204.1999 sabren@manifestation.com
 #      can now be used as module..
 #      standalone reads from stdin by default
@@ -58,7 +68,9 @@ class Engine (xmllib.XMLParser):
 
 		# datstack is a stack of various thingies (stripes/structures)
 		self.datstack = []
-	
+		# wrapstack keeps track of nested wraps
+		self.wrapstack = []
+		
 		self.named  = {} # named structures go in here
 		self.suits  = {} # suits go in here
 		
@@ -69,21 +81,25 @@ class Engine (xmllib.XMLParser):
 
 	def interpolate(self, match):
 
-		"""replaces {fields}, {$vars} and {!slots}
+		"""replaces {fields}, {$vars} and {!inserts}
 		in a flattened zebra stripeset..."""
 
 		#@TODO: this is all hard-coded for PHP3. make it generic.
-		# @TODO: interpolation needs to be table driven so that
+		#@TODO: interpolation needs to be table driven so that
 		# we can translate into different languages
 		# (or maybe an overridable function?)
-		# also, it ought to be per-stripe (and only used on stripe bodies and conditionals)
+		# also, it ought to be per-stripe (and only used on stripe
+		# bodies and conditionals)
 		# .. that way, we can change interpolation as context changes.
 
 		token = match.group(1)
 		if token[0]=="!":
-			if self.zbr["named"].has_key(token[1:]):
-				#return self.flatten(self.zbr["named"][token[1:]])
-				return self.zbr["named"][token[1:]]
+			if self.named.has_key(token[1:]):
+				# context="exec" so you don't get: print "print"whatever""
+				# @TODO: maybe have a "passthru" context, as some
+				# languages might alter "exec"?
+				# (eg, php3 mode might one day use "<?" and  "?>"
+				return self.flatten(self.named[token[1:]], context="exec")
 			else:
 				return ""
 		elif token[0] == "$":
@@ -176,14 +192,28 @@ class Engine (xmllib.XMLParser):
 			self.datstack.append(self.stripe)
 			self.stripe = []
 			self.named[tag] = self.stripe
+		elif tag == "wrap":
+			self.wrapstack.append(attrs["suit"])
+			self.stripe.append(self.suits[attrs["suit"]]["head"])
 		elif tag == "group":
 			self.struct["gdepth"] = self.struct["gdepth"] + 1
-			if attrs.has_key("field"):
-				self.struct["groups"].append(attrs["field"])
-			else:
-				pass
-				## @TODO: only allow/require this for species
-				#self.struct["groups"].append(None)
+			self.struct["groups"].append(attrs["field"])
+		elif tag == "suit":
+			# initialize a new, empty suit:
+			self.datstack.append(self.struct)
+			self.struct = {"head": "",  "tail": ""}
+			self.suits[attrs["name"]] = self.struct
+		elif tag == "include":
+			incfile = attrs["file"]
+			inctext = open(incfile,"r").read()
+			newZebra = Engine().parse(inctext)
+			self.stripe.append(newZebra["stripe"])
+			## overwrite existing names...???!?!
+			## @TODO: maybe some notion of namespaces?
+			for i in newZebra["named"].keys():
+				self.named[i] = newZebra["named"][i]
+		elif tag == "insert":
+			self.stripe.append("{!" + attrs["stripe"] + "}")
 		else:
 			pass # <zebra>, or unknown tag
 
@@ -206,18 +236,25 @@ class Engine (xmllib.XMLParser):
 				self.struct[tag] = self.stripe
 			self.stripe = self.datstack[-1]
 			self.datstack = self.datstack[:-1]
-		elif tag in ["report","suit"]:
+		elif tag in ["report"]:
 			## append the structure to the current stripe
 			self.stripe.append(self.struct)
 			self.struct = self.datstack[-1]
 			self.datstack = self.datstack[:-1]
+		elif tag in ["suit"]:
+			## just pop the old struct off the stack.
+			self.struct = self.datstack[-1]
+			self.datstack = self.datstack[:-1]
 		elif tag in ["stripe", "description", "content", "keywords", \
-					 "show", "exec", "if", "el", "ef"]:
+					 "title", "show", "exec", "if", "el", "ef"]:
 			## all we have to do is shift our attention to the
 			## parent.. the current stripe is already a part of
 			## the parent..
 			self.stripe = self.datstack[-1]
 			self.datstack = self.datstack[:-1]
+		elif tag == "wrap":
+			self.stripe.append(self.suits[self.wrapstack[-1]]["tail"])
+			self.wrapstack = self.wrapstack[:-1]
 		elif tag == "group":
 			## not all groups have heads or tails. If this one
 			## doesn't, even out the stack(s) with an empty value
@@ -326,7 +363,7 @@ class Engine (xmllib.XMLParser):
 
 	###############################################
 
-	def flatten(self, stripeset, depth=0, context="exec"):
+	def flatten(self, stripeset, depth=0, context="show"):
 
 		"""Converts a stripe or stripeset into a string"""
 
@@ -357,7 +394,7 @@ class Engine (xmllib.XMLParser):
 				stripebody = self.flatten(stripe,depth+1)
 			elif type(stripe)==types.DictionaryType:
 				# @TODO: this ought to all be stored in a
-				# dictionary mapping tags to functions
+				# dictionary that maps tags to functions
 				tag = stripe["tag"]
 				if tag == "stripe":
 					stripebody = self.flatten(stripe["content"],depth+1,
@@ -399,7 +436,7 @@ class Engine (xmllib.XMLParser):
 	def parse(self, zbr):
 
 		# if it's not XML-ish, assume it's an outline
-		if zbr[0:1] != "<?":
+		if zbr[0:2] != "<?":
 			import o2x
 			zbr = o2x.o2x(zbr)
 
@@ -452,5 +489,5 @@ if __name__ == "__main__":
 
 	# compile it and print the results
 	zEngine = Engine()
-	#print zEngine.parse(zbo)
+	print zEngine.parse(zbo)
 	print zEngine.compile(zbo)
