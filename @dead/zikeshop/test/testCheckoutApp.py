@@ -24,7 +24,7 @@ class CheckoutAppTestCase(unittest.TestCase):
         self.cur.execute("DELETE FROM shop_sale")
         self.cur.execute("DELETE FROM shop_detail")
 
-        self.app = CheckoutApp()
+        self.app = CheckoutApp(zikeshop.Cart({}))
         self.cwd = os.getcwd()
         os.chdir("public")
         

@@ -10,13 +10,9 @@ import weblib, zikeshop
 class PublicApp(weblib.Actor):
     __super = weblib.Actor
 
-    def __init__(self, cart=None, input=None):
+    def __init__(self, cart, input=None):
         self.__super.__init__(self, input)
-        if cart:
-            self.cart = cart
-        else:
-            self.cart = zikeshop.Cart({})
-
+        self.cart = cart
 
     def enter(self):
         self.__super.enter(self)
