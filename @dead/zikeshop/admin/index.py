@@ -40,6 +40,16 @@ class ZikeShopAdminApp(zikebase.AdminApp):
         zebra.show("lst_product", self.model)
 
     ## style stuff ######################################
+    def create_style(self):
+        try:
+            prod = zikeshop.Product(ID=int(self.input["productID"]))
+        except:
+            self.complain("unable to create style for product #%s" \
+                          % self.input["productID"])
+        else:
+            self.input["price"]=str(prod.price)
+            self.generic_create("style")
+    
     def save_style(self):
         self.generic_save("style")
         self.next = ("show", {"what":"product",
