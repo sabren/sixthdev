@@ -212,7 +212,7 @@ class Auth:
         but we want to remember their data while they're logging back in!
         """
         res = ""
-        for item in self._sess._request.keys():
+        for item in self._sess._request.form.keys():
             # form should be an IdxDict..
             if item[:5] == "auth_":
                 pass # Ignore auth stuff here, too
