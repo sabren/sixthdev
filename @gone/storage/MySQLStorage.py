@@ -1,4 +1,4 @@
-from storage import Storage
+from storage import Storage, QueryBuilder
 from pytypes import Date
 
 #from SQLQueryBuilder import *
@@ -87,10 +87,11 @@ class MySQLStorage(Storage):
         
 
     def delete(self, table, where):
-        if type(where) in (int, long):
-            self._execute("DELETE FROM %s WHERE ID=%s" % (table, where))
-        else:
+        if isinstance(where, QueryBuilder):
             self._execute("DELETE FROM %s WHERE %s" % (table, str(where)))
+        else:
+            # might be a string, int, or long
+            self._execute("DELETE FROM %s WHERE ID=%s" % (table, where))
 
     def _execute(self, sql):
         try:

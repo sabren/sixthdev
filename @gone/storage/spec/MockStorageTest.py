@@ -74,10 +74,20 @@ class MockStorageTest(unittest.TestCase):
         self.s.store("test_person", **row)
         assert self.wholedb() == [{"ID":1, "name":"frood"},
                                   {"ID":2, "name":"wanda"}]        
+
     def check_store_update_longs(self):
         # same as above but with lnogs
         self.populate()
         row = self.s.fetch("test_person", 1L)
+        row["name"] = "frood"
+        self.s.store("test_person", **row)
+        assert self.wholedb() == [{"ID":1, "name":"frood"},
+                                  {"ID":2, "name":"wanda"}]        
+
+    def check_store_update_strings(self):
+        # same as above but with lnogs
+        self.populate()
+        row = self.s.fetch("test_person", "1")
         row["name"] = "frood"
         self.s.store("test_person", **row)
         assert self.wholedb() == [{"ID":1, "name":"frood"},
@@ -94,21 +104,21 @@ class MockStorageTest(unittest.TestCase):
         wanda = self.s.fetch("test_person", 2)
         assert wanda["name"]=="wanda"
 
-    def check_delete(self):
-        self.check_store_insert()
-        self.s.delete("test_person", 1)
+    def _check_delete(self, key_type):
+        self.populate()
+        self.s.delete("test_person", key_type(1))
         people = self.s.match("test_person")
         assert people == [{"ID":2, "name":"wanda"}]
-        self.s.delete("test_person", 2)
+        self.s.delete("test_person", key_type(2))
         people = self.s.match("test_person")
         assert people == []
 
+
+    def check_delete_with_int_id(self):
+        self._check_delete(int)
+
     def check_delete_with_long_id(self):
-        # same as above but with longs
-        self.check_store_insert()
-        self.s.delete("test_person", 1L)
-        people = self.s.match("test_person")
-        assert people == [{"ID":2, "name":"wanda"}]
-        self.s.delete("test_person", 2L)
-        people = self.s.match("test_person")
-        assert people == []
+        self._check_delete(long)
+
+    def check_delete_with_str_id(self):
+        self._check_delete(str)        

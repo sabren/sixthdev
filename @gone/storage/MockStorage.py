@@ -2,7 +2,7 @@
 Mock Storage object for in-memory testing.
 """
 
-from storage import Storage, where
+from storage import Storage, QueryBuilder, where
 
 OPS = {
     "="   : "__eq__",
@@ -108,19 +108,19 @@ class MockStorage(Storage):
                   % (table, ID, len(res))
         return res[0]
 
-    def delete(self, table, ID):
+    def delete(self, table, w):
         self._ensuretable(table)
         rows = self._tables[table]
-        if type(ID) in (int,long):
-            for i in range(len(rows)):
-                if rows[i]["ID"]==ID:
-                    rows.remove(rows[i])
-                    break
-        else:
+        if isinstance(w, QueryBuilder):
             # repeat until no rows are deleted
             l = 1
             while l > 0:
-                l = len(self.__deleteMatch(ID, rows))
+                l = len(self.__deleteMatch(w, rows))
+        else:
+            for i in range(len(rows)):
+                if rows[i]["ID"]==long(w):
+                    rows.remove(rows[i])
+                    break
 
     def __deleteMatch(self, where, rows):
         # the loop stops once a row is deleted
