@@ -17,6 +17,7 @@ class LinkSetInjectorTest(TestCase):
 
     def check_inject(self):
         cler = MockClerk()
+        cler.dbmap[InjecteeObj.__attrs__["refs"]]=(Foreign, "injID")
         cler.store(Foreign(data="Here I come to save the day!", injID=1))
         cler.store(Foreign(data="Mighty Mouse is on his way!",  injID=1))
 
