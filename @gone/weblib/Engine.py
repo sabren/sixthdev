@@ -25,7 +25,7 @@ class Engine(object):
         script can be a string with actual code or a file object.
         """
         self.script = script
-        self.request = request or weblib.Request()
+        self.request = request or weblib.RequestBuilder().build()
         self.response = None # until run()
         self.result = None
         self.error = None

@@ -85,7 +85,7 @@ def urlDecode(what):
 # sees is that weblib has a bunch of classes defined.
 
 from Engine import Engine
-from Request import Request
+from Request import Request, RequestBuilder, RequestData
 from Response import Response
 from Sess import Sess
 import SessPool

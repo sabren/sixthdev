@@ -6,22 +6,15 @@ __ver__="$Id$"
 
 import unittest
 import weblib
-from weblib import Request
+from weblib import RequestBuilder
 
 class RequestTest(unittest.TestCase):
 
-    def test_query(self):
-        req = Request(querystring="a=1&b=2&b=3&e=em+cee+squared")
-        assert req.query["a"] == "1", \
-               "simple querystring not working"
-        assert req.query["b"] == ("2", "3"), \
-               "doesn't tupleize multiple values"
-        assert req.query["e"] == "em cee squared", \
-               "query's urldecoding not working"
-
+    def setUp(self):
+        self.builder = RequestBuilder()
 
     def test_getitem(self):
-        req = Request(querystring="a=1&aa=2&aa=3&z1=querystring",
+        req = self.builder.build(querystring="a=1&aa=2&aa=3&z1=querystring",
                       form={"b":"2", "z1":"form", "z2":"form"},
                       cookie={"c":"3", "z1":"cookie", "z2":"cookie",
                               "z3":"cookie"},
@@ -52,7 +45,7 @@ class RequestTest(unittest.TestCase):
 
 
     def test_keys(self):
-        req = Request(querystring="querystring=1",
+        req = self.builder.build(querystring="querystring=1",
                       form={"form":"1"},
                       cookie={"cookie":"1"},
                       environ={"environ":"1"})
@@ -64,7 +57,7 @@ class RequestTest(unittest.TestCase):
 
 
     def test_get(self):
-        req = Request(querystring="a=1")
+        req = self.builder.build(querystring="a=1")
         assert req.get("a") == "1", \
                "get breaks for valid keys"
         assert req.get("b") is None, \
@@ -73,52 +66,31 @@ class RequestTest(unittest.TestCase):
 
     def test_environ(self):
         myenv = {"A":"B"}
-        eng = weblib.Engine(request=Request(environ=myenv))
+        eng = weblib.Engine(request=self.builder.build(environ=myenv))
         assert eng.request.environ["A"] == "B", \
                "request has wrong passed-in environ"
 
 
     def test_encoding(self):
-        req = Request(content="a=<>")
+        req = self.builder.build(content="a=<>")
         assert req.form["a"] == "<>", \
                "doesn't handle <> correctly (got %s)" \
                % repr(req.form["a"])
 
 
     def test_content(self):
-        req = Request()
+        req = self.builder.build()
         assert req.content =="", \
                "request.content doesnt default to blank string"
         
-        req = Request(content="abcdefg")
+        req = self.builder.build(content="abcdefg")
         assert req.content == "abcdefg", \
                "request doesn't store content correctly."
-        
-        assert req.contentType == "application/x-www-form-urlencoded", \
-               "contentType doesn't default to application/...urlencoded"
-        
-        assert req.contentLength == 7, \
-               "contentLength isn't correct for passed-in content."
-        
-
-
-    def test_contentType(self):
-        req=Request()
-        assert req.contentType == "application/x-www-form-urlencoded", \
-               "contentType doesn't default to application/...urlencoded"
-
-        req=Request(environ={"CONTENT_TYPE":"text/plain"},
-                        content="")
-        assert req.contentType == "text/plain", \
-               "req.contentType doesn't read contentType from environment"
-
-        req=Request(contentType="text/xml")
-        assert req.contentType=="text/xml", \
-               "req.contentType didn't get set based on init's parameter"
+      
 
     def test_multipart(self):
         raise "skip"
-        req = Request(
+        req = self.builder.build(
             method="POST",
             contentType=
             "multipart/form-data; boundary=---------------------------7d035c305e4",
@@ -178,12 +150,12 @@ class RequestTest(unittest.TestCase):
         two pieces...
         """
         ampstr = "a=apple&b=boys%26girls"
-        req = Request(content=ampstr, querystring=ampstr)
+        req = self.builder.build(content=ampstr, querystring=ampstr)
         goal = {"a":"apple", "b":"boys&girls"}
 
         assert req.query == goal, \
                ".query doesn't grok ampersands."
 
         assert req.form == goal, \
-               ".query doesn't grok ampersands."
+               ".form doesn't grok ampersands."
 

@@ -6,10 +6,13 @@ __ver__="$Id$"
 import os
 import unittest
 import weblib
-from weblib import Engine, Request
+from weblib import Engine, Request, RequestBuilder
 from handy import trim
 
 class EngineTest(unittest.TestCase):
+
+    def setUp(self):
+        self.builder = RequestBuilder()
 
     def test_globals(self):
         myscript = trim(
@@ -129,15 +132,15 @@ class EngineTest(unittest.TestCase):
         os.environ["QUERY_STRING"]="enginetest"
 
         engine = Engine()        
-        assert engine.request.querystring=="enginetest", \
+        assert engine.request.query.string=="enginetest", \
                "engine has wrong default request"
         del engine
 
-        req = Request(querystring="e=mc2&this=a+test")
+        req = self.builder.build(querystring="e=mc2&this=a+test")
         engine = Engine(request=req)
-        assert engine.request.querystring=="e=mc2&this=a+test", \
+        assert engine.request.query.string=="e=mc2&this=a+test", \
                "engine has wrong passed-in request:" + \
-               engine.request.querystring
+               engine.request.query.string
 
     #@TODO: move to testRequest
     def test_form(self):
@@ -149,7 +152,7 @@ class EngineTest(unittest.TestCase):
                 assert REQ.form is weblib.MYFORM, \
                     'request uses wrong form'
                 """)
-            req = weblib.Request(form=weblib.MYFORM)
+            req = self.builder.build(form=weblib.MYFORM)
             eng = weblib.Engine(request=req, script=myscript)
             eng.run()
             assert eng.result == eng.SUCCESS, eng.result

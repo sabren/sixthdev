@@ -8,16 +8,17 @@ import weblib
 
 #@TODO: there ought to be test cases for each type of SessPool
 
-from weblib import SessPool
+from weblib import SessPool, RequestBuilder
 
 
 class SessTest(unittest.TestCase):
     dict = {"":""} # @TODO: why doesn't it work with just {} ??
     
     def setUp(self, sid=None):
+        self.builder = weblib.RequestBuilder()
         self.pool = SessPool.InMemorySessPool(SessTest.dict)
         self.sess = weblib.Sess(self.pool,
-                                weblib.Request(),
+                                self.builder.build(),
                                 weblib.Response())
         self.sess.start(sid)
 
@@ -109,7 +110,7 @@ class SessTest(unittest.TestCase):
         """
         sess should read sid from the cookie.
         """
-        req = weblib.Request(cookie={"weblib.Sess":"123"},
+        req = self.builder.build(cookie={"weblib.Sess":"123"},
                              querystring="weblib.Sess=ABC")
         sess = weblib.Sess(self.pool, req, weblib.Response())
         
@@ -121,7 +122,7 @@ class SessTest(unittest.TestCase):
         """
         if no cookie, sess should read from the querystring
         """
-        req = weblib.Request(querystring="weblib.Sess=ABC")
+        req = self.builder.build(querystring="weblib.Sess=ABC")
         sess = weblib.Sess(self.pool, req, weblib.Response())
 
         actual = sess._getSid()
