@@ -35,7 +35,7 @@ class Store(zdc.RecordObject):
 
     def get_products(self):
         #@TODO: get rid of this?
-        return zdc.find(zikeshop.Product, "class='product'", orderby="code")
+        return zdc.find(zikeshop.Product, "class='product'", orderBy="code")
 
     ## calculations #######################################
 

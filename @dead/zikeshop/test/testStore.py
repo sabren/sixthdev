@@ -40,6 +40,17 @@ class StoreTestCase(unittest.TestCase):
                % (actual, goal)
         
 
+    def check_products(self):
+        import zikeshop.test
+        cur = zikeshop.test.dbc.cursor()
+        cur.execute("DELETE FROM shop_product")
+        cur.execute("INSERT INTO shop_product (class, name)" 
+                    "values ('product', 'asdfasf')")
+        actual = len(self.store.products)
+        assert actual==1, \
+               "wrong # of products found: %s"  % actual
+        
+
     def check_fakedata(self):
         import fakedata
         fakedata.load()
