@@ -40,13 +40,13 @@ class LinkSetInjectorTest(TestCase):
         # (for performance reasons)
 
         # asking for .refs will trigger the load:
-        assert len(pak.__values__["refs"]) == 0
+        assert len(pak.private.refs) == 0
         assert len(pak.refs) == 2
 
         # make sure it works with << on a fresh load too:
         newClerk = Clerk(ms, clerk.dbmap)
         newClerk.storage = clerk.storage
         pak = newClerk.fetch(Package, ID=1)
-        assert len(pak.__values__["refs"]) == 0
-        pak.refs << Content(data="I'm discontent",  box=pak)
+        assert len(pak.private.refs) == 0
+        pak.refs << Content(data="I'm malcontent",  box=pak)
         assert len(pak.refs) == 3

@@ -2,9 +2,17 @@ from arlo import LinkInjector, LinkSetInjector
 from pytypes import IdxDict
 from strongbox import *
 from storage import where
+from __future__ import generators
 import operator
 
 class ClerkError(Exception): pass
+
+def getSlotsOfType(klass, t):
+    for slot in klass.__attrs__:
+        attr = getattr(klass, slot)
+        if isinstance(attr, t):
+            yield (slot, attr)
+
 
 class Clerk(object):
     __ver__="$Id$"
@@ -34,7 +42,7 @@ class Clerk(object):
         tablename = self._unmap_class(klass)
 
         # we need to save links first, because we depend on them:
-        for name, lnk in klass.__get_slots_of_type__(link):
+        for name, lnk in getSlotsOfType(klass,link):
             fclass, column = self._unmap_link(klass, lnk, name)
             ref = getattr(obj, name)
             if (ref):
@@ -60,9 +68,9 @@ class Clerk(object):
         obj.private.isDirty = 0
 
         # linkSETS, on the other hand, depend on us, so they go last:
-        for name, lnk in klass.__get_slots_of_type__(linkset):
+        for name, lnk in getSlotsOfType(klass,linkset):
             fclass, column = self._unmap_link(klass, lnk, name)
-            for item in obj.__values__[name]:
+            for item in getattr(obj.private, name):
                 if id_has_changed or item.private.isDirty:
                     self.store(item, _others={column:obj.ID})
 
@@ -138,22 +146,21 @@ class Clerk(object):
     def _add_injectors(self, obj, othercols):
         klass = obj.__class__
         ## linkinjectors:
-        for name,lnk in klass.__get_slots_of_type__(link):
+        for name,lnk in getSlotsOfType(klass,link):
             fclass, column = self._unmap_link(klass, lnk, name)
             fID = othercols.get(column)
             if fID:
                 stub = fclass(ID = fID)
                 stub.private.isDirty = 0
                 setattr(obj, name, stub)
-                stub.attach(LinkInjector(self, fclass, fID),
-                            onget="inject")
+                stub.addInjector(LinkInjector(self, fclass, fID).inject)
+
         ## linksetinjectors:
-        for name,lnk in klass.__get_slots_of_type__(linkset):
+        for name,lnk in getSlotsOfType(klass,linkset):
             fclass, column = self._unmap_link(klass, lnk, name)
             #@TODO: there can just be one LSI instance per linkset attribute
             #(since it no longer keeps its own reference to the object)
-            obj.attach(LinkSetInjector(name, self, fclass, column),
-                       onget="inject")
+            obj.addInjector(LinkSetInjector(name, self, fclass, column).inject)
 
 
     def _unmap_class(self, klass):

@@ -22,5 +22,5 @@ class LinkSetInjector:
             table = self.clerk.classToTable(self.fclass)
             for row in self.clerk.storage.match(table, **{self.fkey:box.ID}):
                 obj = self.clerk.rowToInstance(row, self.fclass)
-                box.__values__[self.atr].append(obj)
-            box.detach(self)
+                getattr(box.private, self.atr) << obj
+            box.removeInjector(self.inject)

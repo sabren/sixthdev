@@ -23,8 +23,15 @@ class LinkInjector:
             ## can't just call stub.update() because it
             ## was trying to assign linksets, which raises
             ## an AttributeError
-            for name,attr in stub.__attrs__.items():
+            #
+            # @TODO: I'm not sure I believe that.
+            # is this a good place for a memento pattern?
+            #
+            # ah.. we don't want fetch... we want to get
+            # a memento from the database... no wonder.
+            #
+            for name, attr in stub.__attrs__.items():
                 ## @TODO: this doesn't seem very object-oriented. :/
                 if type(attr) != strongbox.linkset:
-                    setattr(stub, name, data.__values__[name])
-            stub.detach(self)
+                    setattr(stub, name, getattr(data.private, name))
+            stub.removeInjector(self.inject)

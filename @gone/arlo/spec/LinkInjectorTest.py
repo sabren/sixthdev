@@ -26,17 +26,17 @@ class LinkInjectorTest(TestCase):
         self.clerk.store(Foreign(data="Here I come to save the day!"))
 
         obj.ref = Foreign(ID=1)
-        obj.ref.attach(LinkInjector(self.clerk, Foreign, 1), onget="inject")
-        assert len(obj.ref.private.observers) == 1
+        obj.ref.addInjector(LinkInjector(self.clerk, Foreign, 1).inject)
+        assert len(obj.ref.private.injectors) == 1
 
         # should be able to fetch the ID without triggering load
         assert obj.ref.ID == 1
-        assert obj.ref.__values__["data"] == ""
-        assert len(obj.ref.private.observers) == 1
+        assert obj.ref.private.data == ""
+        assert len(obj.ref.private.injectors) == 1
 
         # but getting any other field triggers the load!
         assert obj.ref.data == "Here I come to save the day!"
-        assert len(obj.ref.private.observers) == 0
+        assert len(obj.ref.private.injectors) == 0
 
     def check_with_linkset(self):
         """
@@ -60,8 +60,7 @@ class LinkInjectorTest(TestCase):
         
         unc = Uncle()
         unc.brother = Parent(ID=1)
-        unc.brother.attach(LinkInjector(self.clerk, Parent, 1),
-                           onget="inject")
+        unc.brother.addInjector(LinkInjector(self.clerk, Parent, 1).inject)
 
         ## this next line threw an AttributeError because the
         ## injector tried to include "kids" in the .update() call

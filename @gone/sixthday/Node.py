@@ -6,13 +6,6 @@ __ver__="$Id$"
 import sixthday
 from strongbox import *
 
-
-##----------------------------------------------
-## [0528.2002 01:32]
-## This code is probably good, but not working yet.
-## we can't do this without the ability to do recursive links.
-##----------------------------------------------
-
 class Node(Strongbox):
     ID = attr(long)
     name = attr(str)
@@ -22,13 +15,13 @@ class Node(Strongbox):
     children = linkset(forward("sixthday.Node"), "parent")
 
     def __init__(self, **kwargs):
+        super(Node, self).__init__()
         self.private.named = False
-        super(Node, self).__init__(**kwargs)
-
-        
+        self.update(**kwargs)
+       
 ##     def set_path(self, value):
 ##         # only allow setting once
-##         if self.__values__["path"]:
+##         if self.private.path:
 ##             raise AttributeError, "Node.path is read only"
 
     def get_crumbs(self):
@@ -45,7 +38,7 @@ class Node(Strongbox):
 ##                "A node can't be its own parent!"
 
     def set_name(self, value):
-        self.__values__["name"]=str(value)
+        self.private.name=str(value)
         # this .private.named thing prevents a max
         # bug of some kind. It probably needs a
         # closer look.
@@ -60,5 +53,5 @@ class Node(Strongbox):
         for kid in self.children:
             kid._updatePath(path)
 
-Node.__attrs__["parent"].type=Node
-Node.__attrs__["children"].type=Node
+Node.parent.type=Node
+Node.children.type=Node
