@@ -73,19 +73,19 @@ class Bootstrap:
 ## though, it might come in handy if trying to get zebra to work with
 ## a really strict language... (but why do that?)
 
-    ## language-specific templates for handling scope ##############
+##     ## language-specific templates for handling scope ##############
 
-    def scopify(self, expression):
-        "points names in expressions to the current scope"
-        import string, keyword
-        res = []
-        toks = zebra.lexer.parse(string.strip(expression))
-        for token in toks:
-            if token[0]=="NAME" and not keyword.iskeyword(token[1]):
-                res.append("scope.get('%s','')" % token[1])
-            else:
-                res.append(token[1])
-        return string.join(res, " ")
+##     def scopify(self, expression):
+##         "points names in expressions to the current scope"
+##         import string, keyword
+##         res = []
+##         toks = zebra.lexer.parse(string.strip(expression))
+##         for token in toks:
+##             if token[0]=="NAME" and not keyword.iskeyword(token[1]):
+##                 res.append("scope.get('%s','')" % token[1])
+##             else:
+##                 res.append(token[1])
+##         return string.join(res, " ")
 
 
 
@@ -186,22 +186,22 @@ class Bootstrap:
 
     ## <exec> ##
     def handle_exec(self, model, attrs):
-        res = "locals().update(scope)\n" \
+        res = "globals().update(scope)\n" \
               + model[0] + "\n" \
-              "scope.update(locals())\n"
+              "scope.update(globals())\n"
         return res
 
 
     ## <if> ##
     def handle_if(self, model, attrs):
-        res = "if %s:\n" % self.scopify(attrs["condition"])
+        res = "if %s:\n" % attrs["condition"]
         res = res + zebra.indent(self.walk(model), 1)
         return res
 
 
     ## <ef> ##
     def handle_ef(self, model, attrs):
-        res = "elif %s:\n" % self.scopify(attrs["condition"])
+        res = "elif %s:\n" % attrs["condition"]
         res = res + zebra.indent(self.walk(model), 1)
         return res
 
