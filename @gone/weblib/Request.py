@@ -14,7 +14,14 @@ get lumped together. Plus it's old and crufty. :) .. but it also
 
 
 class Request:
+    count = 0
+    
     def __init__(self):
+
+        if self.__class__.count:
+            raise "Request is a Singleton! Don't try to instantiate it. Use request."
+        self.__class__.count = 1
+        
         import os, string
         self.environ = os.environ
 
@@ -67,6 +74,8 @@ class Request:
 
 
 
+request = Request()
+
 ################## OLD STUFF (NO LONGER IN USE) ####################
 
 #import cgi, Cookie, os
@@ -85,4 +94,5 @@ class oldRequest:
         
         def __getitem__(self, key):
             return self._dict[key]
+
 
