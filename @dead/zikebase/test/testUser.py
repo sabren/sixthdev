@@ -13,8 +13,9 @@ class UserTestCase(unittest.TestCase):
         self.cur = zikebase.test.dbc.cursor()
         self.cur.execute("DELETE FROM base_user")
         # username: username.. password: password
-        self.cur.execute("INSERT INTO base_user (username, cryptedpass) "
+        self.cur.execute("INSERT INTO base_user (username, password) "
                          "VALUES ('username', '$1$pw$D/pJQB6/3vtfaOYajbG6l0')")
+        self.cur.execute("INSERT INTO base_contact (userID) values (0)")
         
 
     def check_password(self):

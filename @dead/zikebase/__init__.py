@@ -32,6 +32,8 @@ load() function lets us do that. For example:
 from config import dbc
 
 __objs=(
+    'AppActor',
+    'Contact',
     'Content',
     'Picture',
     'User',
@@ -40,6 +42,7 @@ __objs=(
     'Rot13Password',
     'ObjectEditor',
     'Node',
+    'UserApp',
     )
 
 for __item in __objs:
