@@ -14,6 +14,8 @@ from testLinkSet import *
 from testJunction import *
 from testConnection import *
 from testDBAPI2Driver import *
+from testObjectView import *
+from testFunctions import *
 
 suites = {
     "Connection" : unittest.makeSuite(ConnectionTestCase, "check_"),
@@ -25,5 +27,7 @@ suites = {
     "RecordObject" : unittest.makeSuite(RecordObjectTestCase, "check_"),
     "Table": unittest.makeSuite(TableTestCase, "check_"),
     "DBAPI2Driver": unittest.makeSuite(DBAPI2DriverTestCase, "check_"),
+    "ObjectView": unittest.makeSuite(ObjectViewTestCase, "check_"),
+    "Functions": unittest.makeSuite(FunctionsTestCase, "check_"),
     }
 
