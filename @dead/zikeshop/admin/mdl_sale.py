@@ -5,7 +5,6 @@ __ver__="$Id$"
 import weblib
 import zikeshop
 import zdc
-weblib.auth.check()
 
 cur = zikeshop.dbc.cursor()
 

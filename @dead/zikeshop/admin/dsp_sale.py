@@ -9,7 +9,6 @@ import weblib
 import zikebase
 import zikeshop
 
-#weblib.auth.check()
 saleID = weblib.request.get("ID")
 
 assert saleID is not None, \

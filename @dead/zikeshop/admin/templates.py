@@ -41,9 +41,8 @@ def tpldir():
     if hasattr(zikeshop, "tpldir"):
         return zikeshop.tpldir
     else:
+        raise hell
         #@TODO: unhardcode base directory for templates
-        return "/usr/home/zike/web/zike/users/%s" \
-               % weblib.auth.user.username
 
 if weblib.request.get("action") == "save":
 

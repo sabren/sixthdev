@@ -1,4 +1,4 @@
-import zikeshop, weblib, zdc
+import zikeshop, zdc
 store = zikeshop.Store()
 
 model={}
