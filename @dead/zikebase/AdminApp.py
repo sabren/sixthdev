@@ -117,9 +117,9 @@ class AdminApp(weblib.Actor):
 
     def generic_create(self, what):
         import zdc
-        self.consult(self.input)
         self.consult(zdc.ObjectView(
             self.map_what(what)()))
+        self.consult(self.input) # goes second so we can modify via input..
         zebra.show("frm_%s" % what, self.model)
 
 
