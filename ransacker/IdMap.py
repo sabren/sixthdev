@@ -47,6 +47,9 @@ class IdMap:
         return [k for k in self.data.keys()
                 if k is not ransacker.NEXTNUM]
 
+    def has_key(self, key):
+        return self.data.has_key(key)
+
     def __setitem__(self, name, value):
         raise KeyError, "cannot assign to IdMap"
 
