@@ -156,6 +156,9 @@ class Sess:
             return failObj
 
             
+    def clear(self):
+        self._warmData.clear()
+        self._coldData.clear()
 
     ## internal methods ####################
 

@@ -46,12 +46,23 @@ class SessTestCase(unittest.TestCase):
             cat = self.sess["cat"]
         except KeyError:
             gotError = 1
+        assert gotError, \
+               "Sess didn't raise keyError on nonexistant key"
 
-        assert gotError, "Didn't get keyError on nonexistant key"
+
+        cat = self.sess.get("cat", "Indiana")
+        assert cat == "Indiana", \
+               "Sess doesn't do .get()"
+        
 
         self.sess["cat"] = "Indy"
+        assert self.sess.keys() == ['cat'], \
+               "sess.keys() doesn't work"
 
-        assert self.sess.keys() == ['cat'], "sess.keys() doesn't work"
+
+        self.sess.clear()
+        assert self.sess.get("cat") is None, \
+               "sess.clear() doesn't work"
 
 
     def check_del(self):
