@@ -1,0 +1,3 @@
+merchant = {
+    "AuthorizeNet" : "aggressive",
+    }
