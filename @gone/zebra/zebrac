@@ -33,4 +33,12 @@ if fmt=="zbr":
     data = zebra.Z2X().translate(data)
 
 ## parse the xml and output the python code.
-print zebra.Bootstrap().compile(data)
+## zbr files are compiled into .py's... (at least for now..)
+if ifp.name[-3:] == "zbr":
+    ofp = open(ifp.name[:-3] + "py", "w")
+    ofp.write(zebra.Bootstrap().compile(data))
+    ofp.close()
+    print "OK"
+else:
+    print zebra.Bootstrap().compile(data)
+
