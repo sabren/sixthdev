@@ -64,8 +64,8 @@ class Engine:
         self._oldParts = {}
        
         for part in Engine.parts:
-            self._oldParts[part] = getattr(weblib, part)
-            setattr(weblib, part, getattr(self, part))
+            self._oldParts[part] = getattr(weblib, part, None)
+            setattr(weblib, part, getattr(self, part, None))
 
 
 
@@ -80,6 +80,7 @@ class Engine:
     def setUp(self):
         self.injectParts()
         self.interceptPrint()
+        self.response.clear()
 
 
 
