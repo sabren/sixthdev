@@ -3,21 +3,24 @@ from config import dbc
 from Product import Product
 from Cart import Cart
 from Style import Style
-from ShopActor import ShopActor
-from Wizard import Wizard #@TODO: move to weblib
-from Bagger import Bagger
-from Cashier import Cashier
+
+#@TODO: chicken and egg problem! :/ [need a factory?]
+Product._links["styles"][1] = Style
+
+from PublicApp import PublicApp
+#from Cashier import Cashier
 from Category import Category
 from Customer import Customer
 from Address import Address
 from FixedPoint import FixedPoint
 from CustomerAuth import CustomerAuth
-from Status import Status
+#from Status import Status
+from Detail import Detail
 from Sale import Sale
 from Store import Store
 from Card import Card
 from State import State
-from Location import Location
+from SaleEditor import SaleEditor
 
 ### PICTURE ROUTINE #######################
 

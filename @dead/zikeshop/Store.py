@@ -13,22 +13,39 @@ class Store(zdc.RecordObject):
     ## zdc init  ##########################################
 
     def _init(self):
-        self._locations = []
         self._onHold = {}
+        self._address = None
 
 
     ## magic zdc properties ###############################
+
+    def set_address(self, value):
+        self._address = value
         
     def get_address(self):
         # @TODO: allow getting the address without saving first
-        return zikeshop.Address(ID=self.addressID)
+        if self._address:
+            return self._address
+        elif self.addressID:
+            return zikeshop.Address(ID=self.addressID)
+        else:
+            return zikeshop.Address()
 
 
     ## collections ########################################
-    def addLocation(self, loc):
-        if loc not in self._locations:
-            self._locations.append(loc)
 
+    def get_products(self):
+        cur = zikeshop.dbc.cursor()
+        sql = "SELECT ID FROM shop_product " \
+              "WHERE siteID=%i and class='product' ORDER BY code" \
+              % self.siteID
+        cur.execute(sql)
+
+        # @TODO: this is horribly inefficient!
+        res = []
+        for row in cur.fetchall():
+            res.append(zikeshop.Product(ID=row[0]))
+        return tuple(res)
 
     ## calculations #######################################
 
@@ -57,7 +74,8 @@ class Store(zdc.RecordObject):
         if weight > 0:
             ## ask ups for the price
             import zikeshop.UPS
-            res = zikeshop.UPS.getRate(fromZip, toZip, toCountryCD, weight)
+            res = zikeshop.FixedPoint(
+                zikeshop.UPS.getRate(fromZip, toZip, toCountryCD, weight))
 
             ## it also occasionally charges 6 grand for invalid
             ## shipping options..
@@ -76,9 +94,12 @@ class Store(zdc.RecordObject):
 
 
     def hasNexus(self, stateCD):
-        for item in self._locations:
-            if item.stateCD == stateCD:
-                return 1
+        #@TODO: allow multi-state nexus
+        #for item in self._locations:
+        #    if item.stateCD == stateCD:
+        #        return 1
+        if self.address.stateCD == stateCD:
+            return 1
 
 
     ## other routines #########################################
@@ -96,17 +117,13 @@ class Store(zdc.RecordObject):
 
 
 
-    ## these two factory methods return new events and sales
-    ## use them instead of just creating objects to make
-    ## sure that the links work correctly.
-
-    def newEvent(self):
-        event = zikeshop.Event()
-        #@TODO: make this read "event.store = self"
-        event.storeID = self.ID
-        return event
-
     def newSale(self):
+        """
+        this factory method returns a new sale
+        use it instead of just creating objects to make
+        sure that the links work correctly.
+        """
         sale = zikeshop.Sale()
+        #@TODO: make this read "sale.store = self"
         sale.saleID = self.ID
         return sale

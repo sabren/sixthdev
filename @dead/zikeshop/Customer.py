@@ -6,7 +6,7 @@ zikebase.load("User")
 zikebase.load("Rot13Password")
 
 class Customer(zikebase.User):
-
+    _tuples = ['cards']
     
     passwordClass = zikebase.Rot13Password
 
@@ -14,7 +14,7 @@ class Customer(zikebase.User):
         import weblib
         zikebase.User._new(self)
         self.uid = weblib.uid()
-        self.siteID = zikeshop.siteID
+        self.siteID = getattr(zikeshop, "siteID", 0)
         self.username = ""
 
 
@@ -44,6 +44,10 @@ class Customer(zikebase.User):
 
 
     ## credit cards
+
+    def get_cards(self):
+        return map(lambda c: zikeshop.Card(ID=c['ID']),
+                   self.q_creditcards())
     
     def q_creditcards(self):
         cur = zikeshop.dbc.cursor()

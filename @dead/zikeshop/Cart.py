@@ -162,5 +162,3 @@ class Cart:
         """private method to generate a key for the pool."""
         return "__cart_" + self.name
 
-
-

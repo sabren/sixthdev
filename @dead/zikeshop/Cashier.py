@@ -23,7 +23,7 @@ def calcShipping(addr, weight):
 
 
 def chargeCard(theCard, amount):
-    import payment, zikeshop
+    import zikeshop
     
     ## bill the card
     if getattr(zikeshop, "authorizenetmerchant", None):
@@ -90,9 +90,6 @@ class Cashier(zikeshop.Wizard):
     def __init__(self, cart, cust, input=None, pool=None):
         zikeshop.Wizard.__init__(self, cart, input)
 
-        self.cust = cust # a Customer object
-        assert self.cust is not None, \
-               "Cashier requires a valid Customer."
 
         if pool is None:
             import weblib
@@ -118,8 +115,6 @@ class Cashier(zikeshop.Wizard):
 
         self.error = "" # assume no errors...
 
-        ##print "<div style='background:red'>"
-
 
     def exit(self):
         """Afterwards, store our state in the pool."""
@@ -136,43 +131,6 @@ class Cashier(zikeshop.Wizard):
             self.act_checkout()
         else:
             zikeshop.Wizard.showPage(self, page)
-
-
-    def act_update(self):
-        """
-        Update Cashier with some new information.  This method allows
-        you to inform the Cashier incrementally, if you want. Just
-        post to the page with an 'update' action, and it'll recognize
-        any of the required fields.
-        """
-        for item in self.steps:
-            if self.input.has_key(item):
-                setattr(self, item, self.input[item])
-        
-        ## calculate the sales tax
-        if (self.salestax is None) and (self.billAddressID is not None):
-            self.salestax = calcSalesTax(self.billAddressID, self.cart.subtotal())
-
-        ## calculate the shipping:
-        if (self.shipping is None) and (self.shipAddressID is not None):
-            self.shipping = calcShipping(zikeshop.Address(ID=self.shipAddressID),
-                                         self.cart.calcWeight())
-        self.nextStep()
-
-
-    def act_addcard(self):
-        """Add a new card to the database"""
-        card = zikeshop.Card()
-        card.customerID = self.cust.ID
-        card.name = self.input["name"]
-        card.number = self.input["number"]
-        card.expMonth = self.input["expMonth"]
-        card.expYear = self.input["expYear"]
-        card.addressID = self.billAddressID
-        card.save()
-
-        self.cardID = card.ID
-        self.nextStep()
 
 
     def act_checkout(self):
@@ -205,26 +163,16 @@ class Cashier(zikeshop.Wizard):
             ## to change if the prices or codes change.
             import zdc
             for item in self.cart.q_contents():
-                r = zdc.Record(zdc.Table(zikeshop.dbc, "shop_sale_item"))
-                r["saleID"] = sale.ID
-                r["styleID"] = item["extra"]["styleID"]
-                r["item"] = item["label"]
-                r["quantity"] = item["quantity"]
-                r["price"] = str(item["price"]) # because its a FixedPoint!
-                r.save()
-
-                ## also: update the inventory...
-                ## @TODO: handle decreasing inventory when multiple locations
-                ## @TODO: move this into its own routine or whatever..
-                rec = zdc.Record(zdc.Table(zikeshop.dbc, "shop_inventory"),
-                                 styleID=item["extra"]["styleID"])
-                rec["amount"] = rec["amount"] - item["quantity"]
-                rec.save()
+                det = zikeshop.Detail()
+                det.productID = item["extra"]["ID"]
+                det.quantity = item["quantity"]
+                det.amount = zikeshop.Product(ID=det.productID).price * det.quantity
+                sale.addDetail(det)
 
                 import weblib
-                style = zikeshop.Style(ID=item["extra"]["styleID"])
-                prod = zikeshop.Product(ID=style.productID)
-                if rec["amount"] < prod.instock_warn:
+                prod = det.product
+                #@TODO bring back inventory monitoring
+                if 0: #rec["amount"] < prod.instock_warn:
                     #@TODO: make this template-driven
                     msg = weblib.trim(
                         """
@@ -232,13 +180,14 @@ class Cashier(zikeshop.Wizard):
                         
                         Zikeshop Warning:
 
-                        Inventory for %s [%s] {%s} has dropped below %s.
+                        Inventory for %s [%s] has dropped below %s.
                         """ \
-                        % (prod.name, prod.code, style.style, rec["amount"] ))
+                        % (prod.name, prod.code, rec["amount"] ))
                     zikeshop.sendmail("inventorybot@zike.net",
                                       zikeshop.owneremail,
                                       "inventory alert",
                                       msg)
+            sale.save()
             alertNewSale(sale)
             
         except ValueError, e:
@@ -262,6 +211,29 @@ class Cashier(zikeshop.Wizard):
             self.receipt = 1
             for item in self.steps:
                 setattr(self, item, None)
+    def act_update(self):
+        """
+        Update Cashier with some new information.  This method allows
+        you to inform the Cashier incrementally, if you want. Just
+        post to the page with an 'update' action, and it'll recognize
+        any of the required fields.
+        """
+        for item in self.steps:
+            if self.input.has_key(item):
+                setattr(self, item, self.input[item])
+        
+        ## calculate the sales tax
+        if (self.salestax is None) and (self.billAddressID is not None):
+            self.salestax = calcSalesTax(self.billAddressID, self.cart.subtotal())
+
+        ## calculate the shipping:
+        if (self.shipping is None) and (self.shipAddressID is not None):
+            self.shipping = calcShipping(zikeshop.Address(ID=self.shipAddressID),
+                                         self.cart.calcWeight())
+        self.nextStep()
+
+
+
 
     def get_model(self):
         res = {}
@@ -277,7 +249,3 @@ class Cashier(zikeshop.Wizard):
         res["date"] = time.asctime(time.localtime(time.time()))[:10] \
                       + ", " + time.asctime(time.localtime(time.time()))[-4:]
         return res
-
-
-
-

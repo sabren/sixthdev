@@ -10,10 +10,28 @@ import zikeshop
 
 class Product(zdc.RecordObject):
     _table = zdc.Table(zikeshop.dbc, "shop_product")
-    _defaults = {
-        "price": 0,
+    _links = {
+        #@TODO: we have a chicken and egg problem here...
+        "styles": [zdc.LinkSet, None, "parentID"],
         }
-    _tuples = ['nodeIDs']
+    _defaults = {
+        "class":"product",
+        "price": 0,
+        "retail": 0,
+        "weight": 0,
+        "parentID": 0,
+        "inStock": 0,
+        "onHold" : 0,
+        }
+
+    # @TODO: fix this!!!!!! there should be no _tuples..
+    # or should there be? I DO need to tell ObjectView
+    # that there's a collection called nodes...
+    # I'm only doing it this way because I don't have
+    # a *:* join object yet.
+    _tuples = ['nodes']
+
+    #@TODO: this caching mechanism should probably go too..
     _pic = None
 
     ### Magic RecordObject Methods ############################
@@ -41,7 +59,10 @@ class Product(zdc.RecordObject):
                 
 
     def get_price(self):
-        return zikeshop.FixedPoint(self._data['price'])
+        if self._data.get('price') is not None:
+            return zikeshop.FixedPoint(self._data['price'])
+        else:
+            return zikeshop.FixedPoint('0.00')
 
 
     def set_nodeIDs(self, value):
@@ -88,7 +109,10 @@ class Product(zdc.RecordObject):
         return zdc.RecordObject.getEditableAttrs(self) + ['picture']
 
     def delete(self):
+        #@TODO: decrease inventory
         self.deleteNodes()
+        for style in self.styles:
+            style.delete()
         zdc.RecordObject.delete(self)
 
 
@@ -122,13 +146,6 @@ class Product(zdc.RecordObject):
             cur.execute("INSERT INTO shop_product_node (nodeID, productID) "
                         "VALUES (%s, %s)" % (id, int(self.ID)))
 
-        # handle the styles: @TODO: fix this!
-        if not self.q_styles():
-            # insert one blank style record:
-            cur.execute("INSERT INTO shop_style (productID) VALUES (%s)" \
-                        % self.ID)
-
-
 
     ## Queries ###############################################
 
@@ -143,21 +160,49 @@ class Product(zdc.RecordObject):
 
 
     def q_styles(self):
-        """Returns a list of dicts with ID, style, and instock amount
-        for the product's styles"""
-
-        cur = self._table.dbc.cursor()
-        cur.execute(
-            """
-            SELECT s.ID, style, amount from shop_style s
-            LEFT JOIN shop_inventory i ON s.ID=i.styleID
-            WHERE s.productID=%s
-            """ % self.ID)
+        """
+        Returns a list of dicts with ID, style, and instock amount
+        for the product's styles
+        """
         res = []
-        for row in cur.fetchall():
-            res.append({"ID":row[0], "style":row[1], "instock":row[2]})
+        for style in self.styles:
+            res.append({
+                "ID":style.ID,
+                "style":style.name,
+                "instock": 999, #@TODO: fix this!
+                })
         return res
-        
+
+
+    def get_nodes(self):
+        #@TODO: replace with a junction thingy..
+        return map(lambda x: zikebase.Node(ID=x), self.nodeIDs)
+
+
+    def get_styles(self):
+        res = []
+        if self.ID:
+            sql = "SELECT ID from shop_product WHERE parentID=%s" % self.ID
+            cur = zikeshop.dbc.cursor()
+            cur.execute(sql)
+            for row in cur.fetchall():
+                res.append(zikeshop.Product(ID=row[0]))
+        return res
+
+    def get_available(self):
+        return self.inStock - self.onHold
+
+## @TODO: inStock/onHold/available should belong to the store,
+## @TODO: not the product. (or should they?)
+##
+## I don't have to worry about this until we
+## get more useful inventory management going though..
+##
+## maybe it doesn't even matter..
+##
+##     def get_instock(self):
+##         return zikeshop.Store(ID=zikeshop.siteID).calcInventory(self)
+
         
     ## Other stuff ############################################
 
