@@ -1,15 +1,15 @@
 
 ## SessPool : for holding frozen Sesses :) ##########################
 
-class DumbSessPool:
+class DbmSessPool:
 
-    """The default SessPool uses a dumbdb file.
+    """The default SessPool uses an anydbm file.
     You should subclass this, or just build your own object with the
     same interface (getSess(), setSess(), and drain())..."""
     
     def __init__(self, filename):
-        import dumbdbm
-        self.storage = dumbdbm.open(filename,"c")
+        import anydbm
+        self.storage = anydbm.open(filename,"c")
         
     def getSess(self, name, sid):
         """returns the sess with the specified name and id, or None"""
@@ -29,7 +29,7 @@ class DumbSessPool:
 
 
 
-class DBSessPool:
+class SqlSessPool:
     """This class uses a DB-API 2.0 compliant Connection object."""
 
     def __init__(self, dbc, table='web_sess'):
