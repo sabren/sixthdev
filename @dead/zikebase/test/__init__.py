@@ -9,7 +9,8 @@ from testNode import *
 from testObjectEditor import *
 from testUser import *
 from testUserAuth import *
-from testPassword import * 
+from testPassword import *
+from testRot13Password import *
 
 suites = {
     "objectEditor" : unittest.makeSuite(ObjectEditorTestCase, "check_"),
@@ -18,5 +19,6 @@ suites = {
     "userAuth": unittest.makeSuite(UserAuthTestCase, "check_"),
     "node" : unittest.makeSuite(NodeTestCase, "check_"),
     "password": unittest.makeSuite(PasswordTestCase, "check_"),
+    "rot13pass": unittest.makeSuite(Rot13PasswordTestCase, "check_"),
 }	
 

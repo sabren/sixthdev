@@ -37,6 +37,7 @@ __objs=(
     'User',
     'UserAuth',
     'Password',
+    'Rot13Password',
     'ObjectEditor',
     'Node',
     )
