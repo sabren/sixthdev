@@ -4,29 +4,15 @@
 
 <h1>Credit Card</h1>
 
-* for cards:
-    * head:
-        <form action="checkout.py" method="POST">
-        <h3>Select a credit card from the list below...</h3>
-        <select name="cardID">
-
-    <option value="{:ID:}">{:masked:}</option>
-    * foot:
-        </select>
-        <input type="hidden" name="action" value="set_card">
-        <input type="submit" value="submit">
-        </form>
-
-    <h3>... or enter a new card below:</h3>
-* none:
-    <h3>enter your credit card info below:</h3>
+<h3>enter your credit card info below:</h3>
 
 <form action="checkout.py" method="post">
 <table border="0">
 <tr>
 <td><b>name on card:</b></td>
 <td><input type="text" name="name" value=""></td></tr>
-<tr><td>card number</td><td><input type="text" name="number"></td></tr>
+<tr><td>card number</td>
+    <td><input type="text" value="41111111111111113" name="number"></td></tr>
 <tr><td>expiration date</td>
 <td>
 <select name="expMonth">
@@ -46,7 +32,6 @@
 
 /
 <select name="expYear">
-    <option>2000</option>
     <option>2001</option>
     <option>2002</option>
     <option>2003</option>

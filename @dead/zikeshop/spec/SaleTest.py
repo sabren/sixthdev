@@ -6,6 +6,7 @@ __ver__ = "$Id$"
 import unittest
 import zikeshop, zikebase
 
+zikebase.load("Contact")
 class SaleTestCase(unittest.TestCase):
 
     
@@ -21,6 +22,6 @@ class SaleTestCase(unittest.TestCase):
         assert isinstance(sale.card, zikeshop.Card), \
                "invalid card"
 
-        assert isinstance(sale.customer, zikeshop.Customer), \
+        assert isinstance(sale.customer, zikebase.Contact), \
                "invalid customer"
         

@@ -23,7 +23,7 @@
         <input type="submit" name="action" value="remove"> checked items.
         </form>
         *# @TODO: put some logic here to remember users...
-        <a href="{: link_user('signup') :}">checkout</a>
+        <a href="{: link_checkout() :}">checkout</a>
 
 * none:
     <h4>your cart is empty</h4>

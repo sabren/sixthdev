@@ -9,9 +9,13 @@ import zikeshop
 class Card(zdc.RecordObject):
     __super = zdc.RecordObject
     _table = zdc.Table(zikeshop.dbc, "shop_card")
-    __members__= [
-        'masked'
-        ]
+    #__members__= [
+    #    'masked'
+    #    ]
+
+    def _new(self):
+        self.__super._new(self)
+        self.customerID = 0
 
     def get_masked(self):
         return ("x" * (len(self.number)-4)) + self.number[-4:]

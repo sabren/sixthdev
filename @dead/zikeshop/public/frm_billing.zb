@@ -1,0 +1,25 @@
+*# default billing-selection template for zikeshop
+*# $Id$
+
+* include dsp_head;
+
+<h2>Enter your billing information.</h2>
+
+<form action="checkout.py" method="post">
+<table>
+* include frm_contact;
+
+<tr><td colspan="2">
+    <input type="checkbox" name="shipToBilling" value="1" checked="checked">
+    Use this as your <b>shipping</b> address, too.</td></tr>
+
+</table>
+
+<input type="hidden" name="action" value="add_address">
+<input type="hidden" name="context" value="bill">
+<input type="submit" value="submit">
+</form>
+
+
+* include dsp_foot;
+

@@ -45,9 +45,9 @@ class Sale(zdc.RecordObject):
 
     def get_customer(self):
         if self.customerID:
-            return zikeshop.Customer(ID=self.customerID)
+            return zikebase.Contact(ID=self.customerID)
         else:
-            return zikeshop.Customer()
+            return zikebase.Contact()
 
     def get_card(self):
         if self.cardID:

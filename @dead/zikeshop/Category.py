@@ -3,7 +3,6 @@ Category - a Node with Products in it.
 """
 __ver__="$Id$"
 
-#@TODO: make products into a *:* link...
 
 
 import zikeshop, zdc, zikebase
@@ -11,21 +10,21 @@ zikebase.load("Node")
 
 class Category(zikebase.Node):
     __super = zikebase.Node
-    #_links = {
-    #    "products": [zdc.LinkSet, zikeshop.Product, "nodeID"]
-    #    }
+#@TODO: make products into a junction.. (waiting on ability to << junctions)
+##     _links = {
+##         "products": [zdc.Junction, zikeshop.Product, "nodeID", "productID",
+##                      'shop_product_node']
+##         }
         
     _tuples = ["crumbs", "children", "products"] # @TODO: clean this up!
 
     def get_products(self):
-        #@TODO: clean this junk up and make it a LinkSet!!!!
         import zikeshop
         res =  map(lambda id: zikeshop.Product(ID=id),
                    map(lambda n: n["ID"],
                        self.__q_products()))
         return res
-    
-    # @TODO: get rid of all this q_xxx nonsense.. objectView is better
+ 
     def __q_products(self):
         res = []
         if self.ID:

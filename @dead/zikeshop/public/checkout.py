@@ -4,6 +4,7 @@ checkout process for the cart (records the sale)
 __ver__="$Id$"
 
 import zikeshop
+import weblib
 
 class CheckoutApp(zikeshop.PublicApp):
     __super = zikeshop.PublicApp
@@ -11,27 +12,12 @@ class CheckoutApp(zikeshop.PublicApp):
     def __init__(self, cart=None, input=None):
         self.__super.__init__(self, cart, input)
 
-        import weblib
-        # get the customer?
-        try:
-            #@TODO: this is only "tried" for testing purposes.. clean up!
-            weblib.auth.check()
-            self.cust = weblib.auth.user
-        except AttributeError:
-            self.cust = zikeshop.Customer()
-            self.cust.ID = 0
-
         # internal data:
         #@TODO: why  won't weblib store a Sale object in the session?
         if not weblib.sess.has_key("checkout_data"):
             weblib.sess["checkout_data"] = {}
         self.data = weblib.sess["checkout_data"]
-
-        if not self.data.has_key('bill_addressID'):
-            #@TODO: double check that .ID is correct
-            self.data['bill_addressID']=self.cust.ID
-
-            
+          
         
     ## Actor methods ############################
     
@@ -57,8 +43,7 @@ class CheckoutApp(zikeshop.PublicApp):
             self.data['ship_addressID']=self.data['bill_addressID']
             
     def act_get_billing(self):
-        self.consult(self.cust)
-        #@TODO: add list of contacts to zikebase.user
+        import zebra
         zebra.show('frm_billing', self.model)
 
     def act_set_billing(self):
@@ -70,8 +55,8 @@ class CheckoutApp(zikeshop.PublicApp):
             self.next='get_shipping'
 
     def act_get_shipping(self):
-        self.consult(self.cust)
-        zebra.show('frm_billing', self.model)
+        import zebra
+        zebra.show('frm_shipping', self.model)
 
     def act_set_shipping(self):
         self.checkShipToBilling()
@@ -82,7 +67,6 @@ class CheckoutApp(zikeshop.PublicApp):
         zikebase.load("Contact")
         ed = zikebase.ObjectEditor(zikebase.Contact)
         ed.do("update")
-        ed.object.userID = self.cust.ID
         ed.object.save()
 
         context = self.input.get('context','bill')
@@ -102,7 +86,6 @@ class CheckoutApp(zikeshop.PublicApp):
         import zikebase
         ed = zikebase.ObjectEditor(zikeshop.Card)
         ed.do("update")
-        ed.object.customerID = self.cust.ID
         ed.object.save()
 
         # use the card for the transaction:
@@ -117,12 +100,10 @@ class CheckoutApp(zikeshop.PublicApp):
 
     def act_get_card(self):
         import zebra, zdc
-        self.consult(zdc.ObjectView(self.cust))
         zebra.show("frm_card", self.model)
 
 
     def act_show_receipt(self):
-        # @TODO: move this to customer app page?
         import zebra, zdc
         sale = zikeshop.Sale(ID=self.data['saleID'])
         self.consult(zdc.ObjectView(sale))
