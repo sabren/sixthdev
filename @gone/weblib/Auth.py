@@ -82,11 +82,12 @@ class Auth:
         self.onLogout()
         self.isLoggedIn = 0
         self.key = None
-
+        if self.engine.sess.has_key('__auth_key'):
+            del self.engine.sess['__auth_key']
+                    
 
 
     ## abstract methods ########################
-    ## see DBAuth.py for an implementation #
     
     def fetch(self, key):
         pass # raise AbstractError ?
@@ -103,15 +104,15 @@ class Auth:
         if (dict.get("name") == "username") and (dict.get("pass") == "password"):
             authKey = 1 # user's key = 1
 
-
         return authKey
+
 
     def prompt(self, message, action, hidden):
         """This should show an HTML prompt and call response.end().
         You should overwrite this!"""
 
         self.engine.response.write("""
-        <h1>%s</h1>
+        <h1>Auth: %s</h1>
         <form action="%s" method="post">
         username: <input type="text" name="auth_name"><br>
         password: <input type="password" name="auth_pass"><br>
