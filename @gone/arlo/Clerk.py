@@ -48,7 +48,8 @@ class Clerk:
             if not self._hasInjectors(refs):
                 fclass, column = self._unmap_link(klass, link, name)
                 for item in refs:
-                    self.store(item, _others={column:obj.ID})
+                    if item.private.isDirty:
+                        self.store(item, _others={column:obj.ID})
         obj.private.isDirty = 0
         return obj
 
