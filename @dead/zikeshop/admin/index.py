@@ -55,6 +55,7 @@ class ZikeShopAdminApp(zikebase.AdminApp):
     def act_new_sale(self):
         #@TODO: come up with a real standard for new/adm/edit/whatever actions
         self.model = self.input
+        import mdl_product; mdl_product.doit() #@TODO: FIX THIS!!
         self.consult("mdl_product")
         zebra.show("frm_sale", self.model)
 
