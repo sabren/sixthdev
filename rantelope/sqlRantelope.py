@@ -19,6 +19,7 @@ dbmap = {Channel: "rnt_channel",
          Category: "rnt_category",
          Story: "rnt_story",
          Story.__attrs__["comments"]: (Comment, "storyID"),
+         Story.__attrs__["author"]: (Author, "authorID"),
          Comment: "rnt_comment",
          Author: "rnt_author"}
 clerk = arlo.Clerk(sto, dbmap)

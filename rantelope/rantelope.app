@@ -15,8 +15,33 @@ from schema import *
 
 class RantelopeApp(sixthday.AdminApp):
 
+    def __init__(self, clerk, input, user):
+        super(RantelopeApp, self).__init__(clerk, input)
+        self.user = user
+
+        
     def act_(self):
         self.list_channel()
+
+    ## authors #########################
+
+    def list_author(self):
+        authors = [BoxView(a) for a in self.clerk.match(Author)]
+        self.generic_list(authors, "lst_author")
+
+    def create_author(self):
+        self.generic_create(Author, "frm_author")
+
+    def edit_author(self):
+        self.generic_show(Author, "frm_author")
+
+    def save_author(self):
+        a = self._getInstance(Author)
+        if self.input.get("password"):
+            a.password = self.input["password"]
+        self.clerk.store(a)
+        self.redirect(action="list&what=author")
+
 
     ## channels ########################
 
@@ -70,7 +95,10 @@ class RantelopeApp(sixthday.AdminApp):
 
     def save_story(self):
         ## first save to database:
-        story = self.generic_save(Story)
+        story = self._getInstance(Story)
+        if not story.author:
+            story.author = self.user
+        self.clerk.store(story)
 
         ## now write the XML file:
         chan=self.clerk.fetch(Channel, self.input["channelID"])
@@ -93,13 +121,17 @@ class RantelopeApp(sixthday.AdminApp):
 ### main code #######################################
 
 if __name__=="__main__":
+
     from sqlRantelope import clerk, dbc
+    ENG.do_on_exit(dbc.close)
+    
     from AuthorAuth import AuthorAuth
     from weblib import Sess, SessPool
     sess = Sess(SessPool.SqlSessPool(dbc), REQ, RES)
     sess.start()
+    ENG.do_on_exit(sess.stop)
+
     auth = AuthorAuth(sess, clerk)
     auth.check()
-    print >> RES, RantelopeApp(clerk, REQ).act()
-    sess.stop()
-
+    
+    print >> RES, RantelopeApp(clerk, REQ, auth.user).act()

@@ -8,7 +8,7 @@
 CREATE TABLE rnt_author (
     ID integer not null auto_increment primary key,
     username varchar(32),
-    password varchar(32),
+    cryptpwd varchar(32),
     fname varchar(32),
     lname varchar(32),
     email varchar(32),
@@ -16,23 +16,24 @@ CREATE TABLE rnt_author (
 );
 
 /* initial admin/admin user */
-INSERT INTO rnt_author (username, password)
-     VALUES ('admin', 'xxiz1FI3TBLPs');
+INSERT INTO rnt_author (fname, lname, username, cryptpwd)
+    VALUES ('admin', 'user', 'admin', 'xxiz1FI3TBLPs');
 
 
 CREATE TABLE rnt_story (
     ID integer not null auto_increment primary key,
+    authorID integer not null,
     channelID integer not null,
     categoryID integer,
     title varchar(255),
-    link varchar(255),
+    url varchar(255),
     description text
 );
 
 CREATE TABLE rnt_channel (
     ID integer not null auto_increment primary key,
     title varchar(255),
-    link varchar(255),
+    url varchar(255),
     rssfile varchar(32),
     htmlfile varchar(32),
     description text,
@@ -51,7 +52,7 @@ CREATE TABLE rnt_comment (
     storyID integer not null,
     name varchar(50),
     mail varchar(50),
-    link varchar(255),
+    url varchar(255),
     note text
 );
 

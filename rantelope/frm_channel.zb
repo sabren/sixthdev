@@ -24,7 +24,7 @@
       <td>{:html.text("title",title):}</td></tr>
 
   <tr><td>public URL:</td>
-      <td>{:html.text("link",link):}</td></tr>
+      <td>{:html.text("url",url):}</td></tr>
 <!--
   <tr><td>RSS output file (must end in .rss):</td>
       <td>{:html.text("rssfile",rssfile):}</td></tr>

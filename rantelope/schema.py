@@ -13,6 +13,10 @@ auto = None
 
 class Author(Strongbox):
     ID = attr(long, default=auto)
+    fname = attr(str)
+    lname = attr(str)
+    email = attr(str)
+    homepage = attr(str)
     username = attr(str)
     cryptpwd = attr(str)
     
@@ -33,7 +37,7 @@ class Comment(Strongbox):
     storyID = attr(long)
     name = attr(str)
     mail = attr(str)
-    link = attr(str)
+    url = attr(str)
     note = attr(str)
 
 class Story(Strongbox):
@@ -44,9 +48,10 @@ class Story(Strongbox):
     channelID = attr(long)
     categoryID = attr(long, default=0)
     title = attr(str)
-    link = attr(str)
+    url = attr(str)
     description = attr(str)
     comments = linkset(Comment)
+    author = link(Author)
 
 class Category(Strongbox):
     """
@@ -84,7 +89,7 @@ class Channel(Strongbox):
     """
     ID = attr(long, default=auto)
     title = attr(str)
-    link = attr(str)
+    url = attr(str)
     description = attr(str)
     rssfile = attr(str, okay="([^/]+.rss|^$)" )
     htmlfile = attr(str, okay="([^/]+.html|^$)" )

@@ -16,7 +16,7 @@
 <hr/>
 
 * for comments:
-  <p class="comment"><b><a href="{:link:}">{:name:}</a>:</b><br/>
+  <p class="comment"><b><a href="{:url:}">{:name:}</a>:</b><br/>
      {:note:}
   </p>
 
@@ -33,7 +33,7 @@
     <tr><th>your email:</th>
         <td>{:html.text("mail",""):}</td></tr>
     <tr><th>your page:</th>
-        <td>{:html.text("link",""):}</td></tr>
+        <td>{:html.text("url",""):}</td></tr>
     <tr><td colspan="2"><textarea name="note"
             rows="7" cols="40"></textarea></td></tr>
   </table>

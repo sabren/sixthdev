@@ -10,8 +10,8 @@
 <table border="1">
   <tr><th>title:</th>
       <td>{:title:}</td></tr>
-  <tr><th>link:</th>
-      <td>{:link:}</td></tr>
+  <tr><th>url:</th>
+      <td>{:url:}</td></tr>
 <!--
   <tr><th>RSS output file:</th>
       <td><a href="{:path:}{:rssfile:}">{:rssfile:}</a></td></tr>

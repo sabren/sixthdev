@@ -2,12 +2,12 @@
 <rss version="2.0" xmlns="http://backend.userland.com/rss2">
   <channel>
     <title>{:title:}</title>
-    <link>{:link:}</link>
+    <link>{:url:}</link>
     <description>{:description:}</description>
     * for stories:
         <item>
           <title>{:title:}</title>
-          <link>{:link:}</link>
+          <link>{:url:}</link>
           <description>{:description:}</description>
         </item>
   </channel>
