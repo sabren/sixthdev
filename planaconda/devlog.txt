@@ -205,4 +205,43 @@ get started.
 
 
 
+5:55 PM 4/25/2004 okay. i lost another 10 minutes moving
+aside the old cvs repository and starting fresh, but I'm 
+ready to go now. time to start coding!
+
+5:59 PM 4/25/2004 well.. okay.. dammit... i can't just work
+straight through. i gotta take breaks and stuff.. 5 minutes
+here and there adds up. i gotta plan for that. okay. it's
+6:00 now and I'm coding. go.
+
+6:03 PM 4/25/2004 holy moly! sixthday.Node worked out of the
+box and all test cases pass! i wasn't sure. :)
+
+6:19 PM 4/25/2004 first working test case for THIS app. just
+an empty list of projects. I went ahead and used the model
+concept because it's easy. That got me PlanApp... But I still
+don't have a front end. Wait. Zebra doesn't use this kind of
+model. Let's just go directly for zebra. That's what I agreed.
+
+6:21 PM 4/25/2004 fair enough... but what about clerk and
+all that crap? Hrm. I want to test the logic just like old
+times but separate out the presentation... I can do just
+what I did for the coke site. Basically map each function
+to a template. Hrm. Can I put that right in the code? Do I
+want to? 
+
+I'm making design decisions still. I said to stick with what
+I know but I also said test first. This sucks. 
+
+6:25 PM 4/25/2004 Well, okay... I can't just sit here and ponder
+it forever. I have to make a decision. and quickly. I'm going to
+map function names to template names, and then show the appropriate
+template based on the "action" in the request. Those templates
+will just be listed in a dictionary in the .app file. There we
+go. Easy.
+
+
+6:27 PM 4/25/2004 oh shit. .app files. i don't have a nice local
+web server where i can test this.. I need to check this little bit
+of code in in and move development to my web server.
 

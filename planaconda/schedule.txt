@@ -3,6 +3,9 @@
           PLANACONDA 1.0 SCHEDULE
           =======================
 
+PLANNED
+=======
+
 05:45 - start development on nodes
 06:45 - should be on tree page / split node
 07:45 - done with nodes, start on estimates + plate
@@ -11,4 +14,9 @@
 10:45 - graphics
 11:45 - deadline
 
+
+ACTUAL
+======
+
+06:00 - started development
 
