@@ -16,17 +16,12 @@ __ver__="$Id$"
 import string
 import weblib
 
-
 class Request(object):
 
     ## constructor ###################################################
     
     def __init__(self, querystring=None, form=None, environ=None, method=None,
-                 cookie=None, engine=weblib, content=None, contentType=None):
-
-        self.engine = engine
-        if self.engine is weblib:
-            weblib.request = self  # @TODO: get rid of this!!
+                 cookie=None, content=None, contentType=None):
 
         #@TODO: rename .contentType to .type !!!!!!!
         self._doEnvironJunk(environ)

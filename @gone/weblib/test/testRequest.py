@@ -11,10 +11,8 @@ class RequestTestCase(unittest.TestCase):
     
     def check_engine(self):
         request = weblib.Request()
-        assert request.engine==weblib, \
-               "request.engine doesn't default to weblib. :/"
-        assert weblib.request is request, \
-               "request doesn't register itself with weblib"
+        assert not hasattr(request, "engine")
+        assert not hasattr(weblib, "request")
         
 
     def check_query(self):
@@ -136,7 +134,6 @@ class RequestTestCase(unittest.TestCase):
         request = weblib.Request(
             contentType=
             "multipart/form-data; boundary=---------------------------7d035c305e4",
-            
             content=weblib.trim(
             """
             -----------------------------7d035c305e4

@@ -58,8 +58,7 @@ class Engine(object):
                 kw[item].engine = self
             else:
                 # use new copy as default (eg, self.request=weblib.Request())
-                setattr(self, item,
-                        weblib.__dict__[string.capitalize(item)](engine=self))
+                setattr(self, item, weblib.__dict__[string.capitalize(item)]())
 
 
         # set up internal namespaces..
@@ -149,7 +148,7 @@ class Engine(object):
                         self.request.environ["PATH_INFO"] + where)
                 else:
                     self.response.redirect(where)
-            except SystemExit, ex:
+            except SystemExit:
                 pass
         except:
             self.result = self.EXCEPTION

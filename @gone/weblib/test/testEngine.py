@@ -70,31 +70,6 @@ class EngineTestCase(unittest.TestCase):
         assert res==1, "Engine doesn't trap system.exit()!"
 
 
-
-    def check_context(self):
-        # default case:
-        eng1 = weblib.Engine(script="RES.write('eng1')")   
-
-        # explicit:
-        eng2 = weblib.Engine(script="RES.write('eng2')")
-        eng2.request=weblib.Request(engine=eng2)
-        eng2.response=weblib.Response(engine=eng2)
-                             
-        # defaults after setting another engine explicitly:
-        eng3 = weblib.Engine(script="RES.write('eng3')", )
-        
-
-        for eng in (eng1, eng2, eng3):
-            eng.run()
-            name = eng.response.buffer
-            for what in ("request","response"):
-                assert getattr(eng, what).engine is eng, \
-                       ".engine screws up for " + name + "." + what
-                assert getattr(getattr(eng, what).engine, what) \
-                       is getattr(eng, what), \
-                       ".eng." + what + " screws up for " + name 
-
-
     def check_weblib_defaults(self):
         """
         Engine should ALWAYS create a new copy of the objects in
@@ -130,8 +105,8 @@ class EngineTestCase(unittest.TestCase):
         import weblib
         import __builtin__
 
-        self.request = weblib.Request(engine=self)
-        self.response = weblib.Response(engine=self)
+        self.request = weblib.Request()
+        self.response = weblib.Response()
 
         
         __builtin__.good = {
