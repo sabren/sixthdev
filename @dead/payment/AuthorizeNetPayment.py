@@ -7,9 +7,9 @@ class AuthorizeNetPayment(payment.AbstractPayment):
     """
     a Payment class for talking to Authorize.net servers
     """
-    
     __super = payment.AbstractPayment
-    __ver__="$Revision$"    
+    __ver__="$Revision$"
+    
     def __init__(self, **kwargs):
         self.__super.__init__(self, **kwargs)
         self._secureServer = "secure.authorize.net"

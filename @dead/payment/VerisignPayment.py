@@ -1,14 +1,13 @@
-"""
-a Payment class for talking to Verisign (formerly signio)
-"""
-__ver__="$Id$"
-
 import payment
 import urllib
 import string
 from M2Crypto import httpslib, SSL ## only until python 2 comes out 
 
 class VerisignPayment(payment.AbstractPayment):
+    """
+    a Payment class for talking to Verisign (formerly signio)
+    """
+    __ver__="$Revision$"
     __super = payment.AbstractPayment
     
     def __init__(self, **kwargs):

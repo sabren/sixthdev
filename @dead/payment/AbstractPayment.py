@@ -3,7 +3,7 @@ class AbstractPayment:
     """
     An Abstract base class for Payment objects.
     """
-    __ver__="$Id$"
+    __ver__="$Revision$"
     
     def __init__(self, **kwargs):
         """
