@@ -24,8 +24,14 @@ from Connection import Connection
 # we need to get certain constants (eg, for field types)
 # that are in the module, but not connected to the
 # connection object... This is a shortcoming of the DB-API.. :/
-from MySQLdb import NUMBER, TIMESTAMP
+from MySQLdb import NUMBER #, TIMESTAMP
 
+
+############# TIMESTAMPS
+
+class TIMESTAMP:
+    "Just a class used as a value for timestamps"
+    
 ###############
 
 def sqlEscape(s):
@@ -63,10 +69,10 @@ def sqlSet(*data):
 
 
 def toListDict(cur):
-    """converts cursor.fetchall() results into a list of dicts"""
+    """converts cursor.fetchall() results into a list of IdxDicts"""
     res = []
     for row in cur.fetchall():
-        dict = {}
+        dict = IdxDict()
         for i in range(len(cur.description)):
             dict[cur.description[i][0]] = row[i]
         res.append(dict)
