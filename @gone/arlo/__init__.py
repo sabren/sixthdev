@@ -1,5 +1,6 @@
 
 from LinkInjector import *
+from LinkSetInjector import *
 from Clerk import *
 
 def MockClerk():

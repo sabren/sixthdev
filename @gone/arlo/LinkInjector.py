@@ -1,7 +1,7 @@
 
 
 class LinkInjector:
-    def __init__(self, box, atr, sto, fclass, fID):
+    def __init__(self, box, atr, clerk, fclass, fID):
         """
         Registers a callback so that when getattr(box, atr)
         is called, the object of box.atr's type with given ID
@@ -11,7 +11,7 @@ class LinkInjector:
         strongboxen.
         """
 
-        self.storage = sto
+        self.clerk = clerk
         self.fID = fID
         self.fclass = fclass
 
@@ -22,6 +22,6 @@ class LinkInjector:
 
     def inject(self, stub, name):
         if name != "ID":
-            data = self.storage.fetch(self.fclass, self.fID)
+            data = self.clerk.fetch(self.fclass, self.fID)
             stub.update(**data.__values__)
             stub.detach(self)

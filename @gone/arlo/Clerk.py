@@ -1,12 +1,17 @@
-import zdc
+
+from arlo import LinkInjector
 from pytypes import IdxDict
+from strongbox import attr
+
+class ClerkError(Exception): pass
+
 
 class Clerk:
     def __init__(self, storage, dbmap=None):
         self.storage = storage
         self.dbmap = dbmap or {}
 
-    def _mapname(self, klass):
+    def _unmap_class(self, klass):
         if klass in self.dbmap:
             return self.dbmap[klass]
         else:
@@ -15,13 +20,40 @@ class Clerk:
     def store(self, obj):
         d = {}
         for item in obj.__attrs__:
-            d[item] = getattr(obj, item)
-        newdata = self.storage.store(self._mapname(obj.__class__), **d)
+            # the "if" here filters out links and linksets
+            if type(obj.__attrs__[item]) == attr:
+                d[item] = getattr(obj, item)
+        newdata = self.storage.store(self._unmap_class(obj.__class__), **d)
         obj.update(**newdata)
         return obj
 
+    def _unmap_link(self, klass, link, name):
+        try:
+            return self.dbmap[link]
+        except KeyError:
+            raise ClerkError, "no mapping found for %s.%s" \
+                  % (klass.__name__, name)
+        
+
     def fetch(self, klass, ID):
-        return klass(**self.storage.fetch(self._mapname(klass), ID))
+        attrs, othercols = self._fetch_grouped_columns(klass, ID)
+        obj = klass(**attrs)
+        for name,link in klass.__get_links__():
+            fclass, column = self._unmap_link(klass, link, name)
+            fID = othercols.get(column)
+            if fID:
+                inj = LinkInjector(obj, name, self, fclass, fID)
+        return obj
+
+    def _fetch_grouped_columns(self, klass, ID):
+        attrs, links = {}, {}
+        rec = self.storage.fetch(self._unmap_class(klass), ID)
+        for item in rec.keys():
+            if item in klass.__attrs__:
+                attrs[item]=rec[item]
+            else:
+                links[item]=rec[item]
+        return attrs, links
 
     def fetch_or_new(self, klass, ID):
         if ID:
@@ -31,10 +63,10 @@ class Clerk:
 
     def match(self, klass, **where):
         return [klass(**row) for row
-                in self.storage.match(self._mapname(klass), **where)]
+                in self.storage.match(self._unmap_class(klass), **where)]
 
     def delete(self, klass, ID):
-        self.storage.delete(self._mapname(klass), ID)
+        self.storage.delete(self._unmap_class(klass), ID)
         return None
 
     def upsert(self, klass, ID, **vals):
@@ -44,6 +76,12 @@ class Clerk:
         obj = self.fetch_or_new(klass, ID)
         obj.update(**vals)
         return self.store(obj)
+
+
+
+
+##### OLD STUFF - NO LONGER IMPLEMENTED ###############
+# @TODO: this is just here for reference until all tests pass
 
     def new(self, klass):
         raise NotImplementedError, "just use the constructor"
@@ -66,7 +104,7 @@ class Clerk:
 
     def select(self, klass, **wargs):
         raise NotImplementedError #, "use match instead"
-##        return self.storage.select(self._mapname(klass), **wargs)
+##        return self.storage.select(self._unmap_class(klass), **wargs)
 
     def save(self, obj):
         raise NotImplementedError, "use store instead"
