@@ -51,8 +51,6 @@ class StealthboxTest(unittest.TestCase):
     #@+at
     # 
     # Attributes must be present in the class definition.
-    # 
-    # @TODO: maybe a "shared" notion for static variables?
 
     #@-at
     #@@code

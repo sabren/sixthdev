@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <leo_file>
-<leo_header file_format="2" tnodes="0" max_tnode_index="17" clone_windows="0"/>
+<leo_header file_format="2" tnodes="0" max_tnode_index="16" clone_windows="0"/>
 <globals body_outline_ratio="0.5">
 	<global_window_position top="10" left="10" height="624" width="768"/>
 	<global_log_window_position top="0" left="0" height="0" width="0"/>
@@ -29,8 +29,7 @@
 </v>
 <v t="T14" a="E"><vh>@file StrongboxTest.py</vh>
 <v t="T15" a="E"><vh>Observers manage themselves with attach() and detatch()</vh></v>
-<v t="T16"><vh>subject.notify() sends messages to all the observers</vh></v>
-<v t="T17" a="EV"><vh>setattr fires off notify</vh></v>
+<v t="T16" a="V"><vh>setattr and getattr trigger messages to the observers</vh></v>
 </v>
 </vnodes>
 <tnodes>
@@ -166,8 +165,6 @@ def check_looks_like_a_class(self):
     assert isinstance(X(), Strongbox)</t>
 <t tx="T6">@
 Attributes must be present in the class definition.
-
-@TODO: maybe a "shared" notion for static variables?
 @code
 
 def check_slots(self):
@@ -338,7 +335,7 @@ __ver__="$Id$"
 
 import unittest
 import types
-from Strongbox import Strongbox
+from strongbox import Strongbox, attr
 
 class StrongboxTest(unittest.TestCase):
 
@@ -354,28 +351,68 @@ class StrongboxTest(unittest.TestCase):
 def check_attach(self):
     subject = Strongbox()
     observer = object()
-    subject.attach(observer)
-    assert observer in subject.private.observers
+    subject.attach(observer, onset="on_set")
+    assert observer in [row[0] for row in subject.private.observers]
 
 
 def check_detach(self):
     subject = Strongbox()
     observer = object()
-    subject.attach(object)
+    subject.attach(object, onset="on_set")
     subject.detach(object)
     assert len(subject.private.observers) == 0</t>
-<t tx="T16">
-def check_notify(self):
+<t tx="T16">@
+First the setter. Setters are easy. This is very useful for
+transparent persistence (a la ZODB) and also for general 
+Model/View/Controller and Observer pattern stuff.
+
+As such, the events are fired AFTER the value is set
+in the object. (Contrast to getter events, below...)
+@code
+
+def check_set_event(self):
     class Observer:
-        def update(self, subject): self.updated = 1
+        def __init__(self):
+            self.updated = 0
+        def update(self, subject, name, value):
+            self.updated = 1
+            self.name = name
+            self.value = value
+    class Subject(Strongbox):
+        name = attr(str)
     obs = Observer()
-    sub = Strongbox()
-    sub.attach(obs)
-    sub.notify()
-    assert obs.updated, "observer should have been updated"</t>
-<t tx="T17">
-def check_setevent(self):
-	pass
-	</t>
+    sub = Subject()
+    sub.attach(obs, onset="update")
+    sub.name = "fred"
+    assert obs.updated, "observer should have been updated on setattr"
+    assert obs.name == "name"
+    assert obs.value == "fred"
+
+@
+Getters, on the other hand are useful for lazy loading. 
+As such, the events get fired BEFORE the value is returned.
+
+Of course, you couldn't call anything after you returned 
+a value anyway :)
+@code
+
+def check_get_event(self):
+    class Observer:
+        def __init__(self):
+            self.called = 0
+        def getter_called(self, subject, name):
+            self.called += 1
+            self.name = name
+            subject.name = "wilma"
+    class Subject(Strongbox):
+        name = attr(str)
+    obs = Observer()
+    sub = Subject(name="wanda")
+    sub.attach(obs, onget="getter_called")
+    value = sub.name
+    assert obs.called==1, "should have been called 1 time (vs %i)" % obs.called
+    assert obs.name == "name"
+    assert value == "wilma"
+</t>
 </tnodes>
 </leo_file>
