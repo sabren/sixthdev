@@ -24,8 +24,8 @@ class Connection:
     def select(self, table, where=None, **wdict):
         import types
         if type(table) == types.ClassType:
-            tablename = table._table.name
-            res =  [table(ID=row["ID"])
+            tablename = table._tablename
+            res =  [table(self, ID=row["ID"])
                     for row in self.source.select(tablename, where, **wdict)]
         else:
             tablename = table
