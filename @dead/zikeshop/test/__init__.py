@@ -3,7 +3,8 @@ import zdc.test
 
 import zdc, zdc.drivers.DBAPI2Driver, sqlTest
 dbc = zdc.Connection(zdc.drivers.DBAPI2Driver.DBAPI2Driver(sqlTest.dbc))
-
+from strongbox import Clerk
+clerk = Clerk(dbc)
 
 from testCard import *
 from testCart import *

@@ -7,19 +7,20 @@ import unittest
 import zdc
 import zikeshop
 from zikeshop import Contact
-
-
+from zikeshop import State
+from zikeshop import Store
+from zikeshop.test import clerk
+from zikeshop.test import dbc
 
 class StoreTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.ds = zikeshop.test.dbc
-        self.store = zikeshop.Store(self.ds)
+        self.store = Store(clerk)
         try:
             try:
-                state = zikeshop.State(self.ds, CD="CA")
+                state = clerk.load(State, CD="CA")
             except:
-                state = zikeshop.State(self.ds)
+                state = clerk.new(State)
                 state.CD = "CA"
             import zdc
             state.salestax = zdc.FixedPoint("8.25")
@@ -30,7 +31,7 @@ class StoreTestCase(unittest.TestCase):
 
     def check_salesTax(self):
 
-        addr = Contact(self.ds)
+        addr = clerk.new(Contact)
         addr.stateCD = 'NY'
         addr.postal = '123456'
 
@@ -38,11 +39,11 @@ class StoreTestCase(unittest.TestCase):
         assert actual == 0, \
                "shouldn't have sales tax because no nexus in NY"
 
-        addr = Contact(self.ds)
+        addr = clerk.new(Contact)
         addr.stateCD = 'CA'
 
         actual = self.store.calcSalesTax(addr, 10)
-        goal = (zdc.FixedPoint(zikeshop.State(self.ds, CD="CA").salestax)
+        goal = (zdc.FixedPoint(clerk.load(State, CD="CA").salestax)
                 * 10) / 100.0
         assert actual == goal, \
                "wrong sales tax after nexus established: %s vs %s" \

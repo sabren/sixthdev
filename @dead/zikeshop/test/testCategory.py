@@ -5,17 +5,19 @@ __ver__="$Id$"
 
 import unittest
 import zikeshop
+from zikeshop.test import clerk
+from zikeshop import Category
+from zikeshop import Product
 
 class CategoryTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.ds = zikeshop.test.dbc
         self.cur = zikeshop.test.dbc.cursor()
 
 
     def check_products(self):
 
-        cat = zikeshop.Category(self.ds)
+        cat = clerk.new(Category)
         assert len(cat.products) == 0, \
                ".products should be empty list by default"
         
@@ -36,17 +38,17 @@ class CategoryTestCase(unittest.TestCase):
         self.cur.execute("INSERT INTO shop_product_node (productID, nodeID) "
                          "VALUES (3, 1)")
 
-        prods = zikeshop.Category(self.ds, ID=1).products
+        prods = clerk.load(Category, ID=1).products
         assert len(prods) == 3, \
                "wrong number of categories (%s) shown on category page" \
                % len(prods)
 
 
     def check_delete(self):
-        cat = zikeshop.Category(self.ds)
+        cat = clerk.new(Category)
         cat.name = "stuff"
 
-        prod = zikeshop.Product(self.ds)
+        prod = clerk.new(Product)
         prod.name = "ASDF"
         prod.code = "ASFD"
         cat.products << prod

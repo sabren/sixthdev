@@ -9,19 +9,18 @@ import weblib
 
 import sys, os
 from zikeshop.public.checkout import CheckoutApp
+from zikeshop.test import clerk
 
 class CheckoutAppTestCase(unittest.TestCase):
     
     def setUp(self):
-        self.ds = zikeshop.test.dbc
-        
         # wipe the database clean.
         self.cur = zikeshop.test.dbc.cursor()
         self.cur.execute("DELETE FROM shop_sale")
         self.cur.execute("DELETE FROM shop_detail")
         
         self.sess = {}
-        self.app = CheckoutApp({}, zikeshop.Cart({}), self.ds, self.sess)
+        self.app = CheckoutApp({}, zikeshop.Cart({}), clerk, self.sess)
 
         self.cwd = os.getcwd()
         os.chdir("public")
@@ -42,7 +41,7 @@ class CheckoutAppTestCase(unittest.TestCase):
         myCart = zikeshop.Cart({})
         myCart.add("super-evil-destructo-ray")
 
-        app = CheckoutApp({}, myCart, self.ds, self.sess)
+        app = CheckoutApp({}, myCart, clerk, self.sess)
 
         # check for xxxData
         app.enter()

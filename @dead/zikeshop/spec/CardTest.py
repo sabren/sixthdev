@@ -5,13 +5,14 @@ __ver__ = "$Id$"
 
 import unittest
 import zikeshop
+from zikeshop.test import clerk
+from zikeshop import Card
 
 class CardTestCase(unittest.TestCase):
 
     #@TODO: really test the validation stuff!
 
     def setUp(self):
-        self.ds = zikeshop.test.dbc
         
         # a little game of good card, bad card...
         # this card is unlikely, but passes the mod10 check:
@@ -19,7 +20,7 @@ class CardTestCase(unittest.TestCase):
         self.BADCARD  = '4111111111111119' 
     
     def check_masked(self):
-        card = zikeshop.Card(self.ds)
+        card = clerk.new(Card)
         card.number = self.GOODCARD
         assert card.masked == 'xxxxxxxxxxxx1111', \
                "masking doesn't work: %s" % card.masked
@@ -28,7 +29,7 @@ class CardTestCase(unittest.TestCase):
         """
         check the checker..
         """
-        card = zikeshop.Card(self.ds)
+        card = clerk.new(Card)
         assert card.checkdigits(self.GOODCARD) == 1, \
                "check of good card failed..."
 

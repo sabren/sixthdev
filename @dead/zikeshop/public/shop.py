@@ -4,6 +4,11 @@ zikeshop!
 __ver__="$Id$"
 
 import zikeshop
+from zikeshop import Cart
+from zikeshop import Category
+from zikeshop import Product
+from zikeshop import PublicApp
+
 class ShopApp(zikeshop.PublicApp):
     __super = zikeshop.PublicApp
 
@@ -17,22 +22,22 @@ class ShopApp(zikeshop.PublicApp):
 
 
     def act_show_category(self):
-        import zikeshop, zdc, zebra
+        import zdc, zebra
         if self.input.get("path","/")== "/":
-            cat = zikeshop.Category(self.ds)
+            cat = self.clerk.new(Category)
             cat.ID = 0
         else:
-            cat = zikeshop.Category(self.ds, path=self.input["path"])
+            cat = self.clerk.load(Category, path=self.input["path"])
 
         self.consult(zdc.ObjectView(cat))
         self.write(zebra.fetch("dsp_category", self.model))
 
     def act_show_product(self):
-        import zikeshop, zdc, zebra
-        prod = zikeshop.Product(self.ds, code=self.input["code"])
+        import zdc, zebra
+        prod = self.clerk.load(Product, code=self.input["code"])
         self.consult(zdc.ObjectView(prod))
         print >> self, zebra.fetch("dsp_product", self.model)
 
 
 if __name__=="__main__":
-    print >> RES, ShopApp(REQ, zikeshop.Cart(SESS), DBC).act()
+    print >> RES, ShopApp(REQ, Cart(SESS), DBC).act()

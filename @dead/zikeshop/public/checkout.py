@@ -9,6 +9,7 @@ import zebra
 import zikeshop
 from handy import sendmail
 from zikeshop import Contact
+from zikeshop import Card
 
 
 class CheckoutApp(zikeshop.PublicApp):
@@ -16,8 +17,8 @@ class CheckoutApp(zikeshop.PublicApp):
 
     ## Actor methods ############################
 
-    def __init__(self, input, cart, ds, sess):
-        self.__super.__init__(self, input, cart, ds)
+    def __init__(self, input, cart, clerk, sess):
+        self.__super.__init__(self, input, cart, clerk)
         self.sess = sess
 
     def enter(self):
@@ -33,11 +34,11 @@ class CheckoutApp(zikeshop.PublicApp):
         # internal data (basically a bunch of dicts until checkout)
         self.data = self.sess.get("__checkout__",{})
         self.billData = self.data.get("billData",
-                                      Contact(self.ds)._data.copy())
+                                      self.clerk.new(Contact)._data.copy())
         self.shipData = self.data.get("shipData",
-                                      Contact(self.ds)._data.copy())
+                                      self.clerk.new(Contact)._data.copy())
         self.cardData = self.data.get("cardData",
-                                      zikeshop.Card(self.ds)._data.copy())
+                                      self.clerk.new(Card)._data.copy())
         self.comments = self.data.get("comments", "")
         self.model["comments"]=self.comments
 
@@ -105,7 +106,7 @@ class CheckoutApp(zikeshop.PublicApp):
 
         try:
             ed = sixthday.ObjectEditor(Contact,
-                                       self.ds, input=self.input)
+                                       self.clerk, input=self.input)
             ed.do("update")
         except ValueError, valErrs:
             errs.extend(valErrs[0])
@@ -137,7 +138,7 @@ class CheckoutApp(zikeshop.PublicApp):
 
         try:
             #@TODO: REQUIRE input for objectEditor, model for zebra.
-            ed = sixthday.ObjectEditor(zikeshop.Card, self.ds,
+            ed = sixthday.ObjectEditor(zikeshop.Card, self.clerk,
                                        input=self.input)
             ed.do("update")
             #@TODO: resolve - cards with secondary billing addresses?
@@ -191,12 +192,12 @@ class CheckoutApp(zikeshop.PublicApp):
         #@TODO: make a .fromDict or .consult for zdc.RecordObjects
         # for now, we'll assume this is okay, since the classes have
         # already validated everything in here:
-        bill = Contact(self.ds); bill._data = self.billData
-        ship = Contact(self.ds); ship._data = self.shipData
-        card = zikeshop.Card(self.ds); card._data = self.cardData
+        bill = self.clerk.new(Contact); bill._data = self.billData
+        ship = self.clerk.new(Contact); ship._data = self.shipData
+        card = self.clerk.new(Card); card._data = self.cardData
 
         #@TODO: lots of duplicate logic here.. clean up
-        store = zikeshop.Store(self.ds)
+        store = zikeshop.Store(self.clerk)
         self.model["details"] = self.cart.q_contents()
         self.model["grandsubtotal"] = self.cart.subtotal()
         self.model["salestax"] = store.calcSalesTax(ship,self.cart.subtotal())

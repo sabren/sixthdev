@@ -4,28 +4,28 @@ test cases for zikeshop.Detail
 __ver__="$Id$"
 import unittest
 import zikeshop
+from zikeshop.test import clerk
+from zikeshop import Detail
+from zikeshop import Product
 
 class DetailTestCase(unittest.TestCase):
-
-    def setUp(self):
-        self.ds = zikeshop.test.ds
 
     def check_get_subtotal(self):
         """
         subtotal should always be product price * quantity
         """
         
-        det = zikeshop.Detail(self.ds)
+        det = clerk.new(Detail)
         assert det.subtotal == 0, \
                "wrong default subtotal: %s" % det.subtotal
         
-        prod = zikeshop.Product(self.ds)
+        prod = clerk.new(Product)
         prod.price = '12.00'
         det.product = prod
         assert det.subtotal == 0, \
                "wrong subtotal for 0 quantity: %s" % det.subtotal
 
-        det = zikeshop.Detail(self.ds)
+        det = clerk.new(Detail)
         det.quantity = 10
         det.product = prod
         assert det.subtotal == 120, \
@@ -38,7 +38,7 @@ class DetailTestCase(unittest.TestCase):
         
         
     def check_set_subtotal(self):
-        det = zikeshop.Detail(self.ds)
+        det = clerk.new(Detail)
         try:
             gotError = 0
             det.subtotal = 5

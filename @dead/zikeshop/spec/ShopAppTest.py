@@ -7,11 +7,11 @@ import unittest
 import zikeshop
 import sys, os
 from zikeshop.public.shop import ShopApp
+from zikeshop.test import clerk
 
 class ShopAppTestCase(unittest.TestCase):
     
     def setUp(self):
-        self.ds = zikeshop.test.dbc
 
         # a hack to make the storage thing work.
         import weblib
@@ -19,7 +19,7 @@ class ShopAppTestCase(unittest.TestCase):
         weblib.sess = self.sess
 
         self.REQ = weblib.Request()
-        self.app = ShopApp(self.REQ, zikeshop.Cart({}), self.ds)
+        self.app = ShopApp(self.REQ, zikeshop.Cart({}), clerk)
         self.cwd = os.getcwd()
         os.chdir("public")
 

@@ -4,17 +4,19 @@ test cases for zikeshop.SaleEditor
 __ver__="$Id$"
 import unittest
 import zikeshop
+from zikeshop.test import clerk
+from zikeshop.test import dbc
+from zikeshop import Product
 
 class SaleEditorTestCase(unittest.TestCase):
 
     def setUp(self):
-        from zikeshop.test import dbc
-        self.ds = dbc
+
         cur = dbc.cursor()
         cur.execute("DELETE FROM shop_product")
 
         for i in range(4):
-            prod = zikeshop.Product(self.ds)
+            prod = clerk.new(Product)
             prod.code = "PROD%i" % i
             prod.save()
 
@@ -32,7 +34,7 @@ class SaleEditorTestCase(unittest.TestCase):
             "details(+3|productID)":"4",
             "details(+3|quantity)":"2",
             }
-        ed = zikeshop.SaleEditor(zikeshop.Sale, self.ds, input=req)
+        ed = zikeshop.SaleEditor(zikeshop.Sale, clerk, input=req)
         ed.act("save")
         assert len(ed.object.details)==2, \
                "didn't filter out 0's.. expected len=2, got len=%i" \

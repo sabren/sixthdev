@@ -6,13 +6,14 @@ __ver__ = "$Id$"
 import unittest
 import zikeshop
 from zikeshop import Contact
-from zikeshop.test import dbc as ds
+from zikeshop import Sale
+from zikeshop.test import clerk
 
 class SaleTestCase(unittest.TestCase):
 
     
     def check_links(self):
-        sale = zikeshop.Sale(ds)
+        sale = clerk.new(Sale)
         
         assert isinstance(sale.billAddress, Contact),\
                "invalid billAddress"

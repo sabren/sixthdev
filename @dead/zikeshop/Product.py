@@ -152,8 +152,9 @@ class Product(zdc.RecordObject):
                   "not %s" % type(value)
 
         self.categories.clear()
+        from zikeshop import Category
         for catID in vals:
-            self.categories << zikeshop.Category(self._ds, ID=catID)
+            self.categories << Category(self._ds, "@TODO: fixme!", ID=catID)
 
     def get_label(self):
         return self.name

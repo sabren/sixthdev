@@ -8,9 +8,9 @@ import zikeshop
 
 class PublicApp(sixthday.App):
 
-    def __init__(self, input, cart, ds):
+    def __init__(self, input, cart, clerk):
         super(PublicApp, self).__init__(input)
-        self.ds = ds
+        self.clerk = clerk
         self.cart = cart
 
     def enter(self):

@@ -11,9 +11,9 @@ class Store(zdc.Object): #(zdc.RecordObject):
 
     ## zdc init  ##########################################
 
-    def __init__(self, ds):
+    def __init__(self, clerk):
         self.__super.__init__(self)
-        self.__dict__['ds'] = ds
+        self.__dict__['clerk'] = clerk
 
     def _init(self):
         self._onHold = {}
@@ -24,7 +24,8 @@ class Store(zdc.Object): #(zdc.RecordObject):
 
     def get_products(self):
         #@TODO: get rid of this?
-        return self.ds.select(zikeshop.Product,
+        #@TODO: improper use of clerk.store!
+        return self.clerk.store.select(zikeshop.Product,
                               "class='product'",
                               orderBy="code")
 
