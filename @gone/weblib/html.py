@@ -14,8 +14,7 @@ def textarea(name, value, attrs=''):
     return '<textarea name="%s"%s>%s</textarea>' \
            % (name, attrs, weblib.htmlEncode(weblib.deNone(value)))
 
-
-def checkbox(name, value, isChecked, attrs=''):
+def checkbox(name, isChecked, value=1, attrs=''):
     '''
     An html checkbox. Also adds a hidden __expect__ variable
     since the browser doesn\'t often send unchecked checkboxes.
@@ -24,7 +23,7 @@ def checkbox(name, value, isChecked, attrs=''):
            '<input type="checkbox" name="%s" %s %s value="%s">' \
            % (name, name, attrs, ['','CHECKED'][isChecked], value)
 
-def radio(name, value, isChecked, attrs=''):
+def radio(name, isChecked, value=1, attrs=''):
     '''
     An html radio button. 
     '''
@@ -95,6 +94,4 @@ def select(name, options, value=None, attrs=''):
             res = res +  'SELECTED'
         res = res + '>%s</option>' % option[1]
     return res + '</select>'
-
-
 
