@@ -4,6 +4,9 @@ fake data for testing Zikeshop
 $Id$
 """
 
+import zikeshop
+zikeshop.siteID=1 #@TODO: make this work on live database?
+
 def load():
     import zdc, zikeshop, zikebase
     from sqlTest import dbc
@@ -20,37 +23,37 @@ def load():
 
     ## set up a location
     dbc.cursor().execute("INSERT INTO shop_location (name, siteID) "
-                         "VALUES ('main location', 1)")
+                         "VALUES ('main location', %i)" % zikeshop.siteID)
 
     user = zikebase.User()
     user.username=user.uid=user.email="username"
     user.password="password"
-    user.siteID=1
+    user.siteID=zikeshop.siteID
     user.save()
 
     user = zikebase.User()
     user.username=user.uid=user.email="michal@sabren.com"
     user.password="michal"
-    user.siteID=2
+    user.siteID=-1
     user.save()
 
     for n in ("toys", "books", "electronics", "games", "michal's stuff"):
         node = zikebase.Node()
         node.name=n
         node.descript=""
-        node.siteID=1
+        node.siteID=zikeshop.siteID
         node.save()
 
 
     node = zikebase.Node(name="games")
     node.parentID=1
-    node.siteID=1
+    node.siteID=zikeshop.siteID
     node.save()
 
 
     ## MY NODE ##################################
     node = zikebase.Node(name="michal's stuff")
-    node.siteID=2
+    node.siteID=-1
     node.save()
 
 
@@ -75,10 +78,10 @@ def load():
         prod.price=5.00 # everything's five bucks!
         prod.descript=p[2]
         if len(p)>4:
-            prod.siteID=2
+            prod.siteID=-1
             prod.pictureID = p[4]
         else:
-            prod.siteID=1
+            prod.siteID=zikeshop.siteID
         prod.nodeIDs=p[3]
         prod.save()
 
