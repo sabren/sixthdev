@@ -64,6 +64,12 @@ class RecordObject(zdc.Object):
             self._record.delete()
 
 
+    def getEditableAttrs(self):
+        res = []
+        for f in self._table.fields:
+            res.append(f.name)
+        return res
+
     ## private methods ###############################################
 
     def _new(self):

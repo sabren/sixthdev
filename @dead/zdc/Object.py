@@ -17,6 +17,7 @@ class Object:
 
     locks = []
     isNew = 0
+
     
     def __init__(self, dbc, key=None, **where):
         """Don't override this. override _new() or _fetch() instead."""
@@ -61,6 +62,10 @@ class Object:
 
     def delete(self):
         raise NotImplementedError, "Object.delete()"
+
+
+    def getEditableAttrs(self):
+        raise NotImplementedError, "Object.getEditableAttrs()"
 
 
     ### private Methods ####################################
