@@ -21,7 +21,7 @@ class Card(zdc.RecordObject):
         self.expMonth = nowMonth
         self.customerID = 0
         
-        self.issuer = "unknown" # semi-calculated field, not in db
+        self._data["issuer"] = "unknown" # semi-calculated field, not in db
 
     def get_masked(self):
         return ("x" * (len(self.number)-4)) + self.number[-4:]
