@@ -130,17 +130,18 @@ app.model["errors"]=[]
 app.input["expYear"]=nowYear+1
 app.do("add_card")
 assert app.model["errors"]==[], "STILL got error after everything is right"
-assert app.where["gohere"][:16]=="?action=checkout", \
-       "didn't redirect to checkout page: %s" % app.where["gohere"][:16]
-## assert app.where["gohere"][:15]=="?action=confirm", \
-##        "didn't redirect to confirmation page: %s" % app.where["gohere"][:15]
+assert app.where["gohere"][:15]=="?action=confirm", \
+       "didn't redirect to confirmation page: %s" % app.where["gohere"][:15]
 
 
 # show the confirmation page
+#@TODO: compare to expected
 stdout, sys.stdout = sys.stdout, fakeout
 app.do("confirm")
 sys.stdout = stdout
 
+#assert app.where["gohere"][:16]=="?action=checkout", \
+#       "didn't redirect to checkout page: %s" % app.where["gohere"][:16]
 
 
 #import pdb; pdb.set_trace()
