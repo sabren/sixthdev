@@ -75,7 +75,10 @@ if doProfile:
             import sys, cStringIO, pstats
             stats = cStringIO.StringIO()
             oldout, sys.stdout = sys.stdout, stats
-            pstats.Stats(self.prof).sort_stats('time').print_stats()
+            p = pstats.Stats(self.prof)
+            p.sort_stats('time').print_stats(50) # only 50 slowest ones
+            p.print_callers(10) # who called the 10 slowest ones?
+            p.print_callees(10) # what did the 10 slowest ones call?
             self.stats = stats.getvalue()
             sys.stdout = oldout
     eng = ProfileEngine()
@@ -117,6 +120,9 @@ if eng.result in (eng.SUCCESS, eng.EXIT):
     if doProfile:
         print '<br/>'
         print '<pre style="color: black; background:#99ccff;' \
+              'padding:5px;'\
+              'font-size:90%;'\
+              'font-family:lucida console,courier new,courier;' \
               'border:solid black 1px;">'
         print eng.stats
         print "</pre>"
@@ -222,5 +228,5 @@ else:
         msg = msg + eng.response.buffer + "\n"
         msg = msg + hr
 
-        from handy import sendmail
+        from weblib.handy import sendmail
         sendmail(msg)
