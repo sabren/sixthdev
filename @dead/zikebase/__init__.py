@@ -29,7 +29,8 @@ load() function lets us do that. For example:
 
 """
 
-from config import dbc
+import zdc
+dbc=zdc.Connection()
 
 __objs=(
     'Contact',
@@ -66,3 +67,16 @@ def sendmail(mail):
     sender = os.popen("sendmail -t", "w")
     sender.write(mail)
     sender.close()
+
+def randpass(passlen=5):
+    """
+    This routine generates a random password.
+    """
+    import whrandom
+    # we'll only use easy to interpret symbols (no 1/l 0/o worries)
+    ok = "abdefghijkmnopqrstuvwxyz" + "23456789" + "23456789"
+    res = ""
+    for i in range(passlen):
+        res = res + ok[whrandom.randint(0,len(ok)-1)]
+    return res
+
