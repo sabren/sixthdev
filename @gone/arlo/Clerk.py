@@ -57,6 +57,7 @@ class Clerk:
             attrs, othercols = self._attr_and_other_columns(klass, row)
             obj = klass(**attrs)
             self._add_injectors(obj, othercols)
+            obj.private.isDirty = 0
             res.append(obj)
         return res
    

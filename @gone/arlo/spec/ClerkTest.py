@@ -151,6 +151,11 @@ class ClerkTest(unittest.TestCase):
         # and not after a fetch:
         r = self.clerk.fetch(Record, ID=1)
         assert not r.private.isDirty
+
+        # or a match:
+        r = self.clerk.match(Record)[0]
+        assert not r.private.isDirty
+        
         
 
 
@@ -166,7 +171,7 @@ class ClerkTest(unittest.TestCase):
         class User(Strongbox):
             ID = attr(long)
             username = attr(str)
-            domains = linkset(forward)            
+            domains = linkset(forward)
         class Domain(Strongbox):
             ID = attr(long)
             domain = attr(str)
@@ -208,3 +213,8 @@ class ClerkTest(unittest.TestCase):
         # with site, but I fixed that with private.isDirty:
         d.site = clerk.store(Site(domain=d))
         clerk.store(d)
+
+        # and another one with linksets:
+        d.user = clerk.store(User(username="cat"))
+        clerk.store(d)
+
