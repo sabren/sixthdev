@@ -1,8 +1,5 @@
 # test scripts for blogdrive
 
-# first, turn off print redirection
-import __builtin__; __builtin__.__weblib__ = 1
-
 import weblib
 import unittest
 
