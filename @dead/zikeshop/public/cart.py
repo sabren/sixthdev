@@ -1,17 +1,64 @@
+"""
+Cart app for zikeshop.
+"""
 
-import weblib
 import zikeshop
-import tpl_cart
-from zikeshop import dbc
 
-bagger = zikeshop.Bagger(zikeshop.Cart())
-bagger.act()
+class CartApp(zikeshop.PublicApp):
+    __super = zikeshop.PublicApp
+
+    def enter(self):
+        self.silent = 0
+        self.__super.enter(self)
+        self.consult("lib_link")
 
 
-model={"contents":bagger.cart.q_contents(),
-       #@TODO: get rid of zikeshop..checkouturl..??
-       "checkouturl": weblib.sess.url(getattr(zikeshop, "checkouturl",
-                                              "checkout.py")),
-       "basehref":zikeshop.basehref}
-tpl_cart.show(model)
+    def act_(self):
+        self.do("view")
 
+    def act_add(self):
+
+        productID = self.input.get("productID")
+        assert productID, "Don't know what to add."
+
+        prod = zikeshop.Product(ID=productID)
+        assert prod.siteID == zikeshop.siteID, \
+               "Invalid product"
+
+        label = prod.name
+        link  = "product/%s" % (prod.code)
+
+        extra={"ID":prod.ID, "weight": prod.weight}
+        quantity = self.input.get("quantity")
+
+        self.cart.add(label, prod.price, quantity, link, extra)
+        self.do("view")
+
+    def act_view(self):
+        import zebra
+        self.model["contents"] = self.cart.q_contents()
+        if not self.silent:
+            zebra.show("dsp_cart", self.model)
+
+
+    def act_remove(self):
+        items = []
+        for i in range(self.cart.count()):
+            if self.input.get("remove_%s" % i):
+                self.cart.update(i, 0)
+        self.do("view")
+        
+
+    def act_update(self):
+        quantities = []
+        for i in range(self.cart.count()):
+            try:
+                newamt = int(self.input.get("quantity_%s" % i, 0))
+            except:
+                newamt = 0
+            self.cart.update(i, newamt)
+        self.do("view")
+
+
+if __name__=="__main__":
+    CartApp().act()
