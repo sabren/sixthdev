@@ -164,9 +164,8 @@ of the system, following the above diagram from left to right:</p>
     <code>cvssh</code> the command <code>Root /cvsroot</code>.
 </li>
 <li>At this point, <code>cvssh</code> has everything it needs
-    to connect to a pserver. It now opens an SSL connection to
-    <code>remotesystem</code> on a predetermined port (2402 for now,
-    but this isn't official)
+    to connect to a <code>pserver</code>. It now opens an SSL connection to
+    <code>remotesystem</code> on a predetermined port.
 </li>
 <li>The remote machine has <code>stunnel</code> listening on that port.
 </li>
@@ -174,7 +173,8 @@ of the system, following the above diagram from left to right:</p>
     <code>cvs pserver</code> and connects its input and output
     to the socket connection from the developer's machine.</li>
 </li>
-<li><code>cvssh</code> can now talk securely to the <code>pserver process</code></li>
+<li><code>cvssh</code> can now talk securely to the <code>pserver</code>
+    process.</li>
 <li><code>cvssh</code> sends the <code>pserver</code> login information
     as if the developer had actually typed <code>-d:pserver:...</code> instead
     of <code>-d:ext:...</code></li>
@@ -202,36 +202,100 @@ of the system, following the above diagram from left to right:</p>
    whatever you set <code>CVS_RSH</code> to be an <code>*.exe</code>.
    At least, my version did... So the distribution includes a
    precompiled <code>cvssh.exe</code> made with <code>py2exe</code>.
-   (It's in dist/cvssh but don't try to run it yourself because
-   you're not <code>cvs</code>!)
+   (It's in the <code>dist/cvssh/</code> directory, along with its 
+    required files... But don't try to run it yourself because
+    you're not <code>cvs</code>!)
 </p>
 
 <p><a href="cvssh_0.1.zip">download cvssh-0.1.zip</a></p>
+
+<p><b>Note: <span style="color:red; font-size:15pt;">This is alpha software!!!</span></b>
+I was able to do a simple "<code>co module</code>" command without
+problems, but this code has <i>not</i> been extensively tested. Use with
+caution!</p>
 
 <a href="#top" title="back to top">^</a>
 
 <a name="helpwanted"><br></a>
 <h2>help wanted</h2>
 
+<p>The best way to help would be to try it out and see how it
+   works (preferably  on a <i>test</i> repository!).</p>
 
+<p>If you want to get involved, please contact me at 
+   <a href="mailto:sabren@manifestation.com">sabren@manifestation.com</a>.
+   Better yet, join the 
+   <a href="http://groups.yahoo.com/group/cvssh-list/">cvssh list</a> at Yahoo!</p>
+
+<p>Here are several things I would like to do to improve 
+  <code>cvssh</code>:</p>
+
+<ul>
+<li><b>Add support for <code>.cvspass</code> files.</b>
+     Using <code>:ext:</code>
+    prevents us from using the <code>login</code> command, but there's no
+    reason we can't optionally remember the password anyway.</li>
+<li><b>Get rid of the win32 dependency.</b> I used <code>msvcrt.getch()</code>
+    to read in the password because the parent <code>cvs</code>
+    process controlled <code>stdin</code>. There's probably a 
+    better, cross-platform way to do this.</li>
+<li><b>Port it to C.</b> I usually prefer to stay up in the clouds with 
+    python, but in this case, I think small, fast, low-level C code might
+    be more appropriate. I'm not much of a C programmer, though, so 
+    this is one place I could definitely use some help!</li>    
+</ul>
+
+<p>I'm sure there's plenty of other ways this could be made better.
+   Why not join the list and share your ideas?</p>
 
 <a href="#top" title="back to top">^</a>
 <a name="license"><br></a>
 <h2>license</h2>
 
+<p>It's all GPL, baby. 
+   (<A href="http://www.gnu.org/copyleft/gpl.html">GNU General Public License)
+</p>
 
 <a href="#top" title="back to top">^</a>
 <a name="links"><br></a>
-<h2>links</h2>
+<h2>links and credits</h2>
 
-cvs protocol:
-http://www.loria.fr/~molli/cvs/doc/cvsclient_toc.html
-<a href="http://www.stunnel.org/">stunnel</a>
+<p>Here's some good stuff to read:</p>
+
+<ul>
+<li>Pascal Molli knows all about the <a href="http://www.loria.fr/~molli/cvs/doc/cvsclient_toc.html">CVS protocol</a>. Reading this document (as well as the CVS code itself) made the <code>ext</code>-<code>pserver</code> bridge possible.</li>
+<li><a href="http://www.stunnel.org/">stunnel.org</a> is the home page
+    for <code>stunnel</code>, which has plenty of other great uses!</li>
+<li><a href="http://ch.twi.tudelft.nl/~arthur/cvsd/">cvsd</a> makes it
+    easier to run a <code>pserver</code> in  <code>chroot</code> 
+    jail, addressing another major security hole in the <code>pserver</code>
+    system.</li>
+<li>"Tim Timewaster" has a great page describing the
+     <a href="http://cuba.xs4all.nl/~tim/scvs/"><code>cvs</code>-over-<code>ssh</code> approach</a>.</li>
+<li>Robin Dunn's 
+    <a href="http://alldunn.com/python/">precompiled socket.ssl</a> 
+    for win32 made the python SSL stuff easy. 
+    (He's also the guy behind 
+     <A href="http://www.wxpython.org/">wxPython</a>)</li>
+<li>Thomas Heller's 
+    <a href="http://starship.python.net/crew/theller/py2exe/">py2exe</a> 
+    makes building an exe file a snap!</li>
+<li>I based the threading portion of cvssh on code from 
+    <a href="http://www.nightmare.com/">Sam Rushing</a>'s Medusa project.
+    (Thanks to <a href="http://www.jorendorff.com/">Jason Orendorff</a>
+    and Laurent Szyster for pointing me in the right direction here.)
+</li>
+<li>My personal homepage is <a href="http://www.sabren.net/">sabren.net</a>.
+    Most of my software is over at
+    <a href="http://www.sixthdev.com">sixthdev.com</a>, though.</li>
+<li>The cvs hosting plans I mentioned are available from
+    <a href="http://www.cornerhost.com/">cornerhost.com</a>.
+</ul>
 
 <a href="#top" title="back to top">^</a>
 
 <p>&nbsp;</p>
 <hr style="color:gold">
-(c) 2002 
+(c) Copyright 2002 <a href="http://www.sabren.com/">Sabren Enterprises, Inc</a>.
 </td></tr>
 </table>
