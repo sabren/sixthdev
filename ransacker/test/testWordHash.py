@@ -36,7 +36,7 @@ class WordHashTestCase(unittest.TestCase):
 
 
     def check_values(self):
-        assert (self.hash["ant"] == 1) and (self.hash["dog"] == 4), \
+        assert (self.hash["ant"] == "1") and (self.hash["dog"] == "4"), \
                "WordHash doesn't autonumber correctly"
     
 

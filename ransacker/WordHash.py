@@ -13,7 +13,7 @@ file format (disk-based hash):
 
 import ransacker
 import UserDict
-import shelve
+import anydbm
 
 class WordHash(UserDict.UserDict):
 
@@ -21,17 +21,14 @@ class WordHash(UserDict.UserDict):
         assert filename[-4:] == ".rkw", \
                "WordHash files must be named *.rkw"
         
-        self.data = shelve.open(filename, "cf")
-        
-        if not self.data.has_key(ransacker.NEXTNUM):
-            self.data[ransacker.NEXTNUM] = 1
+        self.data = anydbm.open(filename, "cf")
 
 
     def get(self, word):
         try:
             res = self.add(word)
         except KeyError:
-            res = self.data[word]
+            res = int(self.data[word])
         return res
 
 
@@ -39,14 +36,18 @@ class WordHash(UserDict.UserDict):
         if self.data.has_key(word):
             raise KeyError, '"%s" is already in this hash.' % word
         else:
-            self.data[word] = newID = self.newWordID()
+            newID = self.nextWordID()
+            self.data[word] = str(newID)
             return newID
 
 
-    def newWordID(self):
-        wordID = self.data[ransacker.NEXTNUM]
-        self.data[ransacker.NEXTNUM] = wordID+1
-        return wordID      
+    def nextWordID(self):
+        res = 1
+        if self.data.has_key(ransacker.NEXTNUM):
+            res = int(self.data[ransacker.NEXTNUM])
+        self.data[ransacker.NEXTNUM] = str(res+1)
+        return res
+
     
 
     def close(self):
