@@ -4,7 +4,6 @@ Expression Parser for Zebra
 $Id$
 """
 import zebra
-import parser, token, symbol
 
 INT, STR, TUP = type(0), type(""), type(())
 
@@ -25,7 +24,8 @@ def _walk(tree, res):
 
 def lex(expression):
     "Tokenize the expression by flattening python's own parse tree."
-
+    #@TODO: the tokenize module already does this..
+    import parser, token, symbol
     tree = parser.expr(expression).totuple()
     toks = []
     _walk(tree,toks)
