@@ -75,7 +75,7 @@ def load():
         prod.descript=p[2]
         #if len(p)>4:
         #    prod.pictureID = p[4]
-        prod.nodeIDs=p[3]
+        prod.categories=p[3]
         prod.save()
 
         ## set up 10 of each product in inventory..

@@ -25,7 +25,7 @@ categories:<br>
     #@TODO: fix dis!
     from selectnode import selectnode
     values = map(lambda node: node.get("ID"), scope.get("categories",[]))
-    catbox = selectnode("nodeIDs", values, attrs="multiple")
+    catbox = selectnode("categories", values, attrs="multiple")
 {:catbox:}
 <br>
 

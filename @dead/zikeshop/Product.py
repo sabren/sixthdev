@@ -116,7 +116,10 @@ class Product(zdc.RecordObject):
 
     def get_categories(self):
         if not self._data.has_key("cats"):
-            self._data["cats"] = CatJunction(self)
+            self._data["cats"] = zdc.Junction(self,
+                                              zikeshop.Category,
+                                              "shop_product_node",
+                                              "productID", "nodeID")
         return self._data["cats"]
           
     def set_categories(self, value):
@@ -137,42 +140,3 @@ class Product(zdc.RecordObject):
         for catID in vals:
             self.categories << zikeshop.Category(ID=catID)
 
-        
-class CatJunction(zdc.IdxDict):
-    __super = zdc.IdxDict
-
-    def __init__(self, owner):
-        self.__super.__init__(self)
-        self.owner = owner
-
-    def delete(self):
-        """
-        delete nodes for this product. used internally.
-        """
-        cur = self.owner._table.dbc.cursor()
-        cur.execute("DELETE FROM shop_product_node WHERE productID=%s" \
-                    % int(self.owner.ID))
-
-    def fetch(self):
-        if self.owner.ID:
-            cur = self.owner._table.dbc.cursor()
-            cur.execute("select nodeID from shop_product_node " + \
-                        "where productID=%s ORDER BY nodeID" \
-                        % int(self.owner.ID))
-
-            # cur.execute returns a tuple of tuples, eg ((1,), (2,) ...)
-            # we only want the first value (column) from each tuple.
-            for row in cur.fetchall():
-                self << zikeshop.Category(ID=row[0])
-
-    def IDs(self):
-        #@TODO: do I really need .IDs? (maybe for the edit product form?)
-        return tuple(map( lambda cat: cat.ID, self))
-                
-    def save(self):
-        # handle the nodes:
-        cur = self.owner._table.dbc.cursor()        
-        self.delete()
-        for cat in self:
-            cur.execute("INSERT INTO shop_product_node (nodeID, productID) "
-                        "VALUES (%s, %s)" % (cat.ID, int(self.owner.ID)))
