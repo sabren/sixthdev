@@ -57,10 +57,12 @@ class EngineTest(unittest.TestCase):
     def test_runtwice(self):
         eng = Engine(script='print >> RES, "hello"')
         eng.run()
-        eng.run()
-        assert eng.response.buffer == "hello\n", \
-               "engine doesn't let you run twice!"
-
+        try:
+            eng.run()
+            gotError = 0 
+        except:
+            gotError = 1
+        assert gotError, "you should not be able to use engine twice!"
 
     def test_on_exit(self):
         """
@@ -70,7 +72,6 @@ class EngineTest(unittest.TestCase):
             pass
         
         eng = Engine(script="")
-        eng.start()
         assert len(eng._exitstuff)==0, \
                "exitstuff not empty by default"
         
@@ -87,12 +88,10 @@ class EngineTest(unittest.TestCase):
                 print >> RES, 'wokka wokka wokka'
             ENG.do_on_exit(cleanup)
             """))
-        eng.start()
         eng.execute(eng.script)
         assert len(eng._exitstuff) == 1, \
                "didn't register exit function: %s" % str(eng._exitstuff)
-
-        eng.stop()
+        eng._exit()
         assert eng.response.buffer=='wokka wokka wokka\n', \
                "got wrong response: %s" % eng.response.buffer
         
@@ -107,17 +106,17 @@ class EngineTest(unittest.TestCase):
         assert eng.result == eng.SUCCESS, \
                "engine.result doesn't return SUCCESS on success"
 
-        eng.script = "print 'cat' + 5"
+        eng = Engine(script="print 'cat' + 5")
         eng.run()
         assert eng.result == eng.EXCEPTION, \
                "engine.result doesn't return EXCEPTION on error."
 
-        eng.script = "assert 1==0, 'math is working.. :('"
+        eng = Engine("assert 1==0, 'math is working.. :('")
         eng.run()
         assert eng.result == eng.FAILURE, \
                "engine.result doesn't return FAILURE on assertion failure."
 
-        eng.script = "import weblib; raise weblib.Redirect, '?newquery'"
+        eng = Engine("import weblib; raise weblib.Redirect, 'url?query'")
         eng.run()
         assert eng.result == eng.REDIRECT, \
                "engine.result doesn't return REDIRECT on redirect."
@@ -160,11 +159,15 @@ class EngineTest(unittest.TestCase):
             del weblib.MYFORM
             
 
-    # Is this really something Engine should do?
-    # If so, why?
-    def test_PATH_INFO(self):
+
+
+    # engine needs to set pathinfo so that response
+    # can redirect to ?lsakdfjlsdkafj
+    # scripts should not pull it out of os.environ
+    # because that won't work for twisted
+    # instead, the engine for each service should
+    # do this. (twisted, cgi, etc...)
+    def test_pathInfo(self):
         eng = Engine(script=open("spec/pathinfo.app"))
-        eng.start()
-        assert eng.request.environ.get("PATH_INFO") == "spec/pathinfo.app", \
-               "Engine doesn't set PATH_INFO correctly for open()ed scripts."
-        
+        assert eng.request.pathInfo == "spec/pathinfo.app", \
+               "Engine doesn't set .pathInfo correctly for open()ed scripts."

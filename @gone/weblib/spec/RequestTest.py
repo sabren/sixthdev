@@ -17,11 +17,8 @@ class RequestTest(unittest.TestCase):
         req = self.builder.build(querystring="a=1&aa=2&aa=3&z1=querystring",
                       form={"b":"2", "z1":"form", "z2":"form"},
                       cookie={"c":"3", "z1":"cookie", "z2":"cookie",
-                              "z3":"cookie"},
-                      environ={"e":"mc2",
-                               "z1":"environ", "z2":"environ",
-                               "z3":"environ", "z4":"environ"})
-        
+                              "z3":"cookie"})
+       
         assert req["a"] == "1", \
                "getitem scews up on querystring"
         assert req["aa"] == ("2", "3"), \
@@ -38,17 +35,11 @@ class RequestTest(unittest.TestCase):
                "getitem goes in wrong order (z2)"
         assert req["z3"] == "cookie", \
                "getitem goes in wrong order (z3)"
-        
-        # environ is not part of the dictionary interface:
-        assert (req.get("e") is None) and (req.get("z4") is None), \
-               "request.__getitem__ should not access environ."
-
 
     def test_keys(self):
         req = self.builder.build(querystring="querystring=1",
                       form={"form":"1"},
-                      cookie={"cookie":"1"},
-                      environ={"environ":"1"})
+                      cookie={"cookie":"1"})
         keys = req.keys()
         keys.sort()
         
@@ -62,13 +53,6 @@ class RequestTest(unittest.TestCase):
                "get breaks for valid keys"
         assert req.get("b") is None, \
                "get breaks for non-present keys"
-
-
-    def test_environ(self):
-        myenv = {"A":"B"}
-        req = self.builder.build(environ=myenv)
-        assert req.environ["A"] == "B", \
-               "request has wrong passed-in environ"
 
 
     def test_encoding(self):

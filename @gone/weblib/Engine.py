@@ -4,12 +4,10 @@ A wrapper object for running weblib scripts.
 __ver__ = "$Id$"
 
 import weblib
-import string
 import traceback
 import sys
 import os
 import handy
-from weblib import Finished
 
 class Engine(object):
 
@@ -19,39 +17,31 @@ class Engine(object):
     REDIRECT  = "* redirect *"
     EXIT      = "* exit *"
 
-
-
-    def __init__(self, script=None,  request=None,
-                 SITE_NAME=None, SITE_MAIL=None, scriptFile=None):
+    def __init__(self, script=None,  request=None, path="."):
         """
-        script should be a string with actual code. :)
+        script should be a string with actual code.
         """
         self.script = script
         self.request = request or weblib.RequestBuilder().build()
-        self.response = None # until run()
+        self.response = self.makeResponse()
+
         self.result = None
         self.error = None
-
-        # set up internal namespaces..
-        self.globals = {
-            '__name__':'__main__',
-            'SITE_NAME': SITE_NAME,
-            'SITE_MAIL': SITE_MAIL,
-        }
-        self.locals  = self.globals
-
+        self.path = path
+        self.makeGlobals()
+        
         # stuff to do at exit:
         self._exitstuff = []
+        self.setPathInfo()
 
-
-    def injectParts(self):
-        """
-        Injects our parts into the weblib namespace.
-        """
+    def makeGlobals(self):
+        self.globals = {}
+        self.globals['__name__']='__main__'
+        self.globals['SITE_NAME']= None
+        self.globals['SITE_MAIL']= None
         self.globals["ENG"] = self
         self.globals["REQ"] = self.request
         self.globals["RES"] = self.response
-
 
     def setPathInfo(self):
         """
@@ -59,37 +49,22 @@ class Engine(object):
         PATH_INFO CGI variable.
         """
         #@TODO: should this really be PATH_INFO? how about SCRIPT_NAME?
-        if not self.request.environ.get("PATH_INFO"):
+        if not getattr(self.request, "pathInfo", None):
             if (type(self.script) == type("")):
-                self.request.environ["PATH_INFO"] = "UNKNOWN_SCRIPT.py"
+                self.request.pathInfo = "UNKNOWN_SCRIPT.py"
             else:
-                self.request.environ["PATH_INFO"] = self.script.name
+                self.request.pathInfo = self.script.name
 
 
     def makeResponse(self):
         return weblib.Response()
     
-    def start(self):
-        """
-        Start the Engine
-
-        """
-        self.response = self.makeResponse()
-        self.injectParts()
-        self.setPathInfo()
-
-    def stop(self):
-        """
-        Stop the Engine
-        """
-        self._exit()
 
     def do_on_exit(self, func, *targs, **kargs):
         """
         Register a callback for the end of page.
         """
         self._exitstuff.append((func, targs, kargs))
-
 
     def _exit(self):
         """
@@ -100,11 +75,11 @@ class Engine(object):
             apply(func, targs, kargs)
             self._exitstuff.remove(self._exitstuff[-1])
 
-    def _execute(self, script):
+    def _exec(self, script):
         """
         This is in its own method so a subclass can restrict execution.
         """
-        exec(script, self.globals, self.locals)
+        exec(script, self.globals)
 
     def execute(self, script):
         """
@@ -114,188 +89,49 @@ class Engine(object):
         try:
             self.script = script
             self.setPathInfo() 
-            self._execute(script)
-        except Finished:
+            self._exec(script)
+        except weblib.Finished:
             self.result = self.EXIT
         except AssertionError, e:
             self.result = self.FAILURE
             self.error = e
         except weblib.Redirect, e:
+            #@TODO: get rid of weblib.Redirect (gotta fix App first)
             self.result = self.REDIRECT
             try:
                 where = str(e)
                 if where[0]=="?":
-                    self.response.redirect(
-                        self.request.environ["PATH_INFO"] + where)
-                else:
-                    self.response.redirect(where)
-            except Finished:
+                    raise Exception("can't redirect to ?xxx (%s)" % where)
+                self.response.redirect(where)
+            except weblib.Finished:
                 pass
         except Exception, e:
             self.result = self.EXCEPTION
             self.exception = e
-            self.error = string.join(traceback.format_exception(
+            self.error = "".join(traceback.format_exception(
                 sys.exc_type,
                 sys.exc_value,
-                sys.exc_traceback), '')
+                sys.exc_traceback))
 
-
-    def setDir(self, directory):
-        self.directory = directory
-        if not directory in sys.path:
-            sys.path.append(directory) # @TODO: Shouldn't chdir be enough?
-        os.chdir(directory)            # @TODO: this should be elsewhere.
+    def chdir(self):
+        os.chdir(self.path)
 
     def runDotWeblibPy(self):
-        path = self.directory + os.sep + ".weblib.py"
+        path = self.path + os.sep + ".weblib.py"
         if os.path.exists(path):
             # we use execute instead of run because we only want
             # to run the setup once.
             self.execute(open(path))
 
-
-    def getScriptName(self):
-        return os.environ["PATH_TRANSLATED"]
-
     def runScript(self):
         # self.result is None if nothing's been run yet
         # it would be error or exception if dotWeblibPy had a problem
         if (self.result is None) or (self.result == self.SUCCESS):
-            if os.path.exists(self.getScriptName()):
-                self.execute(open(self.getScriptName()))
-            else:
-                self.scriptNotFound()
-                
-    def scriptNotFound(self):
-        self.stop()
-        print "Status: 404"
-        sys.exit()
+            self.execute(self.script)               
 
-
-##     def run(self): # @TODO: this is used by twisted, runscript by cgi. resolve!
-##         self.start()
-##         try:
-##             self.execute(self.script)
-##         finally:
-##             self.stop()
-
-    def printResponse(self):
-        print self.response.getHeaders() + self.response.buffer
-
-
-    ## ERROR HANDLING @TODO: test cases for these!
-        
-    def sendError(self):
-        SITE_MAIL = self.locals["SITE_MAIL"]
-        SITE_NAME = self.locals["SITE_NAME"]
-        assert SITE_MAIL is not None, "must define SITE_MAIL first!"
-        hr = "-" * 50 + "\n"
-        msg = weblib.trim(
-            """
-            To: %s
-            From: weblib.cgi <%s>
-            Subject: uncaught exception in %s
-
-            """ % (SITE_MAIL, SITE_MAIL, SITE_NAME))
-        msg += "uncaught exception in %s\n\n" % self.getScriptName()
-        msg += hr
-        msg += self.error
-        msg += hr
-        msg += "FORM: %s\n"  % self.request.form
-        msg += "QUERYSTRING: %s\n" % self.request.query.string
-        msg += "COOKIE: %s\n" % self.request.cookie
-
-        if hasattr(self, "sess"):
-            msg = msg + "SESSION DATA:\n"
-            for item in self.sess.keys():
-                msg += item + ': '
-                try:
-                    msg += self.sess[item] + "\n"
-                except:
-                    msg += "(can't unpickle)\n"
-        else:
-            msg += "NO SESSION DATA\n"
-        msg += hr
-        msg += "OUTPUT:\n\n"
-        msg += self.response.getHeaders() + "\n"
-        msg += self.response.buffer + "\n"
-        msg += hr
-
-        handy.sendmail(msg)
-
-    def printException(self):
-        print "<b>uncaught exception while running %s</b><br>" \
-              % self.getScriptName()
-        print '<pre class="traceback">' \
-              + weblib.htmlEncode(self.error) + "</pre>"
-        print "<b>script input:</b>"
-        print '<ul>'
-        print '<li>form: %s</li>' % self.request.form
-        print '<li>querystring: %s</li>' % self.request.query.string
-        print '<li>cookie: %s</li>' % self.request.cookie
-        print '</ul>'
-
-        if self.globals.has_key("SESS"):
-            print '<b>session data:</b><br>'
-            print '<ul>'
-
-            for item in self.globals["SESS"].keys():
-                print '<li>', item, ': '
-                try:
-                   print self.globals["SESS"][item]
-                except:
-                   print '(can\'t unpickle)'
-                print '</li>'
-            print '</ul>'
-
-        print "<b>script output:</b>"
-        print '<pre class="output">' + \
-              weblib.htmlEncode(self.response.getHeaders()) + \
-              weblib.htmlEncode(self.response.buffer) + \
-              "</pre>"
-
-    def errorPageHeader(self):
-        print "Content-Type: text/html"
-        print
-        print weblib.trim(
-            """
-            <html>
-            <head>
-            <title>weblib.cgi exception</title>
-            <style type="text/css">
-                body, p {
-                   background: #cccccc;
-                   font-family: verdana, arial;
-                   font-size: 75%;
-                }
-                pre { font-size: 120%; }
-                pre.traceback { color: red; }
-                pre.output{ color : green }
-            </style>
-            </head>
-            <body>
-            """)
-
-
-    def printFooter(self):
-        print "<hr>"
-        print '<a href="http://www.sixthdev.com/wiki.cgi/weblib/">weblib</a>'
-        print '(c) copyright 2000-2002 '
-        print '<a href="http://www.sabren.com/">Sabren Enterprises, Inc</a>. '
-        print 'All rights reserved.'
-        print "</body>"
-        print "</html>"
-
-    def printFullResponse(self):        
-        if self.result in (self.SUCCESS, self.REDIRECT, self.EXIT):
-            self.printResponse()
-        else:
-            self.errorPageHeader()
-            if self.result == self.FAILURE:
-                print "<b>assertion failure:</b>", self.error
-            elif self.result == self.EXCEPTION:
-                self.printException()
-            self.printFooter()
-            sys.stdout.flush()
-            if self.locals["SITE_MAIL"]:
-                self.sendError()
+    def run(self):
+        assert not self.result, "can't use an Engine more than once"
+        self.chdir()
+        self.runDotWeblibPy()
+        self.runScript()
+        self._exit()

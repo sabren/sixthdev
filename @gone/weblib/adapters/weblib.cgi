@@ -12,13 +12,9 @@ USAGE (Apache):
 ## print "content-type: text/plain"
 ## print
 
-
 ## CONFIGURATION ############################
-        
-SITE_MAIL = None # eg, webmaster@yoursite.com
-SITE_NAME = None # eg, "yoursite intranet"
-
 ## use this to add custom lib directories:
+
 import sys
 sys.path = ["/web/lib"] + sys.path
 
@@ -48,13 +44,8 @@ if __name__=="__main__":
         script = open(filename).read()
         
         req = weblib.RequestBuilder().build()
-        eng = weblib.Engine(script, req, SITE_MAIL, SITE_NAME)
+        eng = weblib.Engine(script, req)       
         
-        eng.start()
-        eng.setDir(path)
-        eng.runDotWeblibPy()
-        eng.runScript()
-        eng.stop()        
         eng.printFullResponse() # ick!
         
 

@@ -43,36 +43,29 @@ class RequestData(dict):
 
 import os, sys
 class RequestBuilder(object):
+    """
+    should only be used for CGI and testing
+    """
     def build(self, method=None, querystring=None, form=None, cookie=None,
-              environ=None, content=None):
-        env = environ or self.buildEnviron()
+              content=None):
         if content and not method: method = "POST"
-        return Request(method= method or env.get("REQUEST_METHOD", "GET"),
-                       query=RequestData(querystring or env.get("QUERY_STRING", "")),
-                       form=form,
-                       cookie=SimpleCookie(cookie or env.get("HTTP_COOKIE", "")),
-                       environ= env,
-                       content=content or self.fetchContent())
+        return Request(
+            method= method or os.environ.get("REQUEST_METHOD", "GET"),
+            query=RequestData(querystring
+                              or os.environ.get("QUERY_STRING", "")),
+            form=form,
+            cookie=SimpleCookie(cookie or os.environ.get("HTTP_COOKIE", "")),
+            content=content or self.fetchContent())
     def fetchContent(self):
         return sys.stdin.read(int(os.environ.get("CONTENT_LENGTH",0)))
-
-    def buildEnviron(self):
-        ## os.environ.copy() actually shares data with os.environ [??]
-        ## That's bad for us because it makes environ global, and
-        ## that's NOT what we want. so we do this instead:
-        res = {}
-        for item in os.environ.keys():
-            res[item] = os.environ[item]
-        return res
 
 
 class Request(object):
     """
     A read-only dictionary that represents an HTTP reqeust
     """
-    def __init__(self, method, query, form, cookie, environ, content):
+    def __init__(self, method, query, form, cookie, content):
         self.method = method
-        self.environ = environ
         self.query = query
         self.cookie = cookie
         self.form = form or RequestData(content or "")
