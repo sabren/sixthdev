@@ -11,6 +11,7 @@ from testSess import *
 from testAuth import *
 from testPerm import *
 from testEngine import *
+from testScript import *
 #from testUser import *
 
 # you should have a module called
@@ -26,5 +27,6 @@ suites = {
     "auth" : unittest.makeSuite(AuthTestCase, "check_"),
     "perm" : unittest.makeSuite(PermTestCase, "check_"),
     "engine" : unittest.makeSuite(EngineTestCase, "check_"),
+    "script" : unittest.makeSuite(ScriptTestCase, "check_"),
     }
 

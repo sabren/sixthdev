@@ -179,22 +179,21 @@ class EngineTestCase(unittest.TestCase):
                "engine doesn't let you run twice!"
 
 
+    def check_result(self):
+        eng = weblib.Engine(script='print "hello"')
 
-    def check_cgi(self):
-        import os, string
-        actual = os.popen('python -c"import weblib.script; print \'hello\'"').readlines()
 
-        # scond line should be the set-cookie. ignore it!
-        actual = string.join([actual[0]] + actual[2:], '')
+        assert eng.result == None, \
+               "engine.result doesn't default to None"
         
-        target = trim(
-            """
-            Content-type: text/html
-            
-            hello
-            """)
+        eng.run()
 
-        assert actual==target, "didn't get headers in CGI-mode!"
+        assert eng.result == eng.SUCCESS, \
+               "engine.result doesn't return SUCCESS on success"
 
+        eng.script = "print 'cat' + 5"
+        eng.run()
 
+        assert eng.result == eng.ERROR, \
+               "engine.result doesn't return ERROR on error."
 
