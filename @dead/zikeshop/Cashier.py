@@ -8,7 +8,7 @@ __ver__="$Id$"
 
 #######################################################################
 # 0923.2000 refactorings:
-
+import zikeshop
 
 def calcSalesTax(addressID):
     #@TODO: put this somewhere else.. probably in the Sale object?
@@ -50,9 +50,14 @@ def calcShipping(addr, weight):
     if weight > 0:
         ## ask ups for the price
         import zikeshop.UPS
-        return zikeshop.UPS.getRate(fromZip, toZip, toCountryCD, weight)
-    else:
-        return 0
+        res = zikeshop.UPS.getRate(fromZip, toZip, toCountryCD, weight)
+
+        ## it also occasionally charges 6 grand for invalid
+        ## shipping options..
+        if res >= 6000:
+            res = 0
+        
+    return res
 
 
 def chargeCard(theCard, amount):
