@@ -30,6 +30,12 @@ class Card(zdc.RecordObject):
         nowYear, nowMonth = time.localtime(time.time())[0:2]
         return (nowYear, nowMonth) > (self.expYear, self.expMonth)
 
+    def set_expMonth(self, value):
+        self._data['expMonth']=int(value)
+
+    def set_expYear(self, value):
+        self._data['expYear']=int(value)
+
     def set_number(self, value):
         if self.checkdigits(value):
             self._data['number']=value
