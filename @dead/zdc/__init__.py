@@ -20,14 +20,7 @@ from Connection import Connection
 # we need to get certain constants (eg, for field types)
 # that are in the module, but not connected to the
 # connection object... This is a shortcoming of the DB-API.. :/
-from MySQLdb import NUMBER #, TIMESTAMP
-
-
-############# TIMESTAMPS
-
-class TIMESTAMP:
-    "Just a class used as a value for timestamps"
-
+from MySQLdb import NUMBER
 
 
 ###############

@@ -72,11 +72,10 @@ class DBAPI2Driver:
             #
             # actually, I think that it works with some dates and not
             # with others... but not sure..
-            if not f.type == zdc.TIMESTAMP:
-                if not f.isGenerated:
-                    if data.has_key(f.name):
-                        sql = sql + f.name + "=" \
-                              + self._sqlQuote(tablename, f.name, data[f.name]) + ","
+            if not f.isGenerated:
+                if data.has_key(f.name):
+                    sql = sql + f.name + "=" \
+                          + self._sqlQuote(tablename, f.name, data[f.name]) + ","
         #@TODO: unhardcode "ID" without coupling this to table..
         sql = sql[:-1] + self._whereClause(tablename, None, {"ID":key})
         self.execSQL(sql)
@@ -88,12 +87,8 @@ class DBAPI2Driver:
         vals = ''
         # .. and the fieldnames :
         for f in self._fields(tablename):
-            # a hack to handle initialtimestamps:
-            if data.get(f.name) == zdc.TIMESTAMP:
-                sql = sql + f.name + ","
-                vals = vals + "now(),"
             # this is the normal case:
-            elif not f.isGenerated:
+            if not f.isGenerated:
                 sql = sql + f.name + ","
                 # let's do fields and values at once
                 vals = vals + self._sqlQuote(tablename, f.name,
@@ -165,10 +160,6 @@ class DBAPI2Driver:
         field = self._fields(tablename)[fieldname]
         if value is None:
             res = "NULL"
-        
-        #@TODO: handle DATE types explicitly
-        elif value is zdc.TIMESTAMP:
-            res = "now()"
         elif field.type == zdc.NUMBER:
             res = `value`
             if res[-1]=="L": res = res[:-1]
