@@ -49,16 +49,23 @@ class DBSessPool:
 
 
     def putSess(self, name, sid, frozensess):
+
+        # strip embedded quotes:
+        import string
+        frozensess = string.replace(frozensess, "'", "\\'")
+
         cur = self.dbc.cursor()
-        cur.execute("update " + self.table + \
-                    "set sess='" + frozensess + "', tsWhen=now() " + \
-                    "where name='" + name + "' and sid='" + sid "'")
+        sql = "update " + self.table + " " + \
+              "set sess='" + frozensess + "', tsUpdate=now() " + \
+              "where name='" + name + "' and sid='" + sid + "'"
+        cur.execute(sql)
         if cur.rowcount == 0:
-            cur.execute("insert into " + self.table + " (sid, name, sess, tsWhen) " + \
-                        "values ('" + sid + "', '" + name + "', '" + sess + "')")
+            cur.execute("insert into " + self.table + " (sid, name, sess, tsUpdate) " + \
+                        "values ('" + sid + "', '" + name + "', '" + \
+                        frozensess + "', now())")
             
 
     def drain(self, name, beforeWhen):
         cur = self.dbc.cursor()
         cur.execute("delete from " + self.table + \
-                    " where name='" + name + "' and tsWhen < '" + beforeWhen + "'")
+                    " where name='" + name + "' and tsUpdate < '" + beforeWhen + "'")
