@@ -21,7 +21,8 @@ def load():
     dbc.delete("shop_product_node")
 
     user = zikebase.User()
-    user.username=user.uid=user.email="username"
+    user.username=user.uid="username"
+    user.email="user@schmoop.com"
     user.password="password"
     user.save()
 
