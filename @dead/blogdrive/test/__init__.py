@@ -29,6 +29,7 @@ class BlogDriveTestCase(unittest.TestCase):
                   "auth_pass":"password",
                   "title":"testSubject",
                   "content":"content",
+                  "submit":"1"
                   }
             )
 
