@@ -39,6 +39,9 @@ class Record:
         ## create records directly, but call someTable.getRecord()
 
         self.values = IdxDict()
+
+        # a hack for ititial timestamping. @TODO: clean this up!
+        self.insertStamps = []
                
         if table:
             self.table = table
@@ -183,7 +186,12 @@ class Record:
         vals = ''
         # .. and the fieldnames :
         for f in self.table.fields:
-            if not f.isGenerated:
+            # a hack to handle initialtimestamps:
+            if f.name in self.insertStamps:
+                sql = sql + f.name + ","
+                vals = vals + "now(),"
+            # this is the normal case:
+            elif not f.isGenerated:
                 sql = sql + f.name + ","
                 # let's do fields and values at once
                 vals = vals + self._sqlQuote(f) + ","
