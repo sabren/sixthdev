@@ -5,6 +5,7 @@ __ver__="$Id$"
 
 import unittest
 import zikebase
+import weblib
 
 class UserAppTestCase(unittest.TestCase):
 
@@ -21,7 +22,7 @@ class UserAppTestCase(unittest.TestCase):
             'password':'tempy',
             'email':'fred@tempyco.com',
             }
-        app = zikebase.UserApp(self.ds, input=req)
+        app = zikebase.UserApp(req, self.ds, weblib.Auth({},{}))
         #import pdb; pdb.set_trace()
         app.do("save")
         assert not app.errors, \
@@ -35,7 +36,7 @@ class UserAppTestCase(unittest.TestCase):
                "email is wrong: %s" % fred.email
         
         # try to save again..
-        app = zikebase.UserApp(self.ds, input=req)
+        app = zikebase.UserApp(req, self.ds, weblib.Auth({},{}))
         app.do("save")
         assert app.errors, \
                "didn't get errors saving duplicate fred"

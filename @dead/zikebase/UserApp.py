@@ -13,8 +13,9 @@ class UserApp(weblib.Actor):
     editorClass = zikebase.ObjectEditor
     tplDir = "."
 
-    def __init__(self, ds, input):
+    def __init__(self, input, ds, auth):
         self.ds = ds
+        self.auth = auth
         self.__super.__init__(self, input)
         
 
@@ -52,9 +53,7 @@ class UserApp(weblib.Actor):
             self.next = "signup"
         else:
             # now log in as that user:
-            import weblib
-            if hasattr(weblib, "auth"):
-                weblib.auth.login(ed.object.ID)
+            self.auth.login(ed.object.ID)
             self.next = "on_signup"
 
     def act_on_signup(self):
@@ -102,8 +101,8 @@ class UserApp(weblib.Actor):
     ## update --> save
 
     def act_update(self):
-        weblib.auth.check()
-        self.consult(zdc.ObjectView(weblib.auth.user))
+        self.auth.check()
+        self.consult(zdc.ObjectView(self.auth.user))
         print >> self.out, zebra.fetch(self.tplDir + "/frm_update", self.model)
 
 
