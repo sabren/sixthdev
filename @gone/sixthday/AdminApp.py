@@ -40,10 +40,10 @@ import sixthday
 import zdc
 import zebra
 
-class AdminActor(sixthday.Actor):
+class AdminApp(sixthday.App):
 
     def __init__(self, dbc, input):
-        super(AdminActor, self).__init__(input)
+        super(AdminApp, self).__init__(input)
         self.dbc = dbc
 
     ## list ###################################################

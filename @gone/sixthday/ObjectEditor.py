@@ -5,7 +5,7 @@ __ver__="$Id$"
 
 import sixthday
 
-class ObjectEditor(sixthday.Actor):
+class ObjectEditor(sixthday.App):
 
     ## attributes ########################################
 

@@ -3,20 +3,22 @@ App to let users signup, login, request passwords, etc.
 """
 __ver__="$Id$"
 
-import weblib, zikebase, zebra, zdc
-zikebase.load("User")
-zikebase.load("ObjectEditor")
+import weblib
+import zikebase
+import zebra
+import zdc
+from sixthday import App
+from sixthday import ObjectEditor
 
-class UserApp(weblib.Actor):
-    __super = weblib.Actor
+class SignupApp(App):
     userClass = zikebase.User
-    editorClass = zikebase.ObjectEditor
+    editorClass = ObjectEditor
     tplDir = "."
 
     def __init__(self, input, ds, auth):
         self.ds = ds
         self.auth = auth
-        self.__super.__init__(self, input)
+        super(SignupApp, self).__init__(self, input)
         
 
     def act_(self):
@@ -104,3 +106,4 @@ class UserApp(weblib.Actor):
         self.consult(zdc.ObjectView(self.auth.user))
         import os
         print >> self.out, zebra.fetch(self.tplDir + "/frm_update", self.model)
+
