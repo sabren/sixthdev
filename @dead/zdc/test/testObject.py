@@ -6,14 +6,6 @@ __ver__="$Id$"
 import unittest
 import zdc.Object
 
-
-class TestObj(zdc.Object):
-    def _new(self):
-        pass
-    def _init(self):
-        pass
-
-
 class ObjectTestCase(unittest.TestCase):
 
     def check_lock(self):
@@ -22,18 +14,18 @@ class ObjectTestCase(unittest.TestCase):
         If you want to do stuff to locked fields, do it in
         _init(), _fetch(), or _new().
         """
-        tobj = TestObj()
+        tobj = zdc.Object()
         assert tobj._isLocked, \
                "oh no! zdc.Object instances aren't locked!"
 
     def check_locks(self):
         "Locked attributes should be readonly"
-        class TestObj2(TestObj):
+        class TestObj(zdc.Object):
             _locks = ["ABC"]
             def _new(self):
                 self.ABC = 5
 
-        tobj = TestObj2()
+        tobj = TestObj()
         try:
             gotError = 0
             tobj.ABC = 6
@@ -44,7 +36,7 @@ class ObjectTestCase(unittest.TestCase):
                "Didn't get an AttributeError assigning to locked field."
 
     def check_getMethod(self):
-        class GetClass(TestObj):
+        class GetClass(zdc.Object):
             aaa = 5
             def get_aaa(self):
                 return 1
@@ -63,7 +55,7 @@ class ObjectTestCase(unittest.TestCase):
 
 
     def check_setMethod(self):
-        class SetClass(TestObj):
+        class SetClass(zdc.Object):
             def set_xxx(self, value):
                 self._data['xyz'] = value
 

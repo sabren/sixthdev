@@ -77,14 +77,28 @@ class Object:
     
 
     def _new(self):
-        raise NotImplementedError, "Object._new()"
+        """
+        Override this to initialize a new instance of an
+        object.. This is NOT called for objects that already
+        exist in storage.
+        """
+        pass
 
 
     def _fetch(self, key=None, **kw):
-        raise NotImplementedError, "Object._fetch()"
+        """
+        Override this to initialize fetched instances of an
+        object. This is ONLY called for objects that already
+        exist in storage.
+        """
+        pass
 
 
     def _lock(self):
+        """
+        This just locks the object. You probably don't want to
+        override it.
+        """
         self.__dict__["_isLocked"] = 1
 
 
