@@ -16,6 +16,13 @@ class Attribute(property):
         self.allowNone = allowNone
         self._determineDefault(typ, default)
         self._setOkay(okay)
+
+    def __repr__(self):
+        return "#< %s = %s(%s, ...) >#" % (
+            self.__name__,
+            self.__class__.__name__,
+            self.type.__name__,
+        )
         
     def _setOkay(self, okay):
         if type(okay) == str:
