@@ -5,14 +5,14 @@ import anydbm
 import metakit
 import ransacker
 
-def esc(s):
-    return s.replace("'","''")
-
 
 class SQLiteIndex(ransacker.Index):
     """
     An index that uses SQLite as the backend.
     """
+
+    def _esc(self, s):
+        return s.replace("'","''")
 
     def __init__(self, path):
         import sqlite, os
@@ -22,11 +22,14 @@ class SQLiteIndex(ransacker.Index):
         if new:
             self._makeTables()
 
-    def _doIndexing(self, name, text):
+    def _registerPage(self, name):
         self.cur.execute(
             """
             INSERT OR IGNORE INTO idx_page (page) VALUES ('%s')
-            """ % esc(name))
+            """ % self._esc(name))
+
+    def _doIndexing(self, name, text):
+        self._registerPage(name)
         super(SQLiteIndex, self)._doIndexing(name, text)
         self.dbc.commit()
 
@@ -59,18 +62,18 @@ class SQLiteIndex(ransacker.Index):
         self.cur.execute(
             """
             INSERT OR IGNORE INTO idx_word (word) VALUES ('%s')
-            """ % esc(word))
+            """ % self._esc(word))
         self.cur.execute(
             """
             INSERT INTO idx_freq (pageID, wordID, count)
             VALUES (%s,
                     (SELECT ID FROM idx_word WHERE word='%s'),
                     %s)
-            """ % (pageID, esc(word), count))
+            """ % (pageID, self._esc(word), count))
 
     def _getPageID(self, name):
         self.cur.execute("SELECT ID FROM idx_page WHERE page='%s'"
-                         % esc(name))
+                         % self._esc(name))
         res = self.cur.fetchone()
         if res:
             return res[0]
@@ -91,7 +94,7 @@ class SQLiteIndex(ransacker.Index):
             FROM idx_freq f, idx_word w, idx_page p
             WHERE f.wordID=w.ID and f.pageID=p.ID and w.word='%s'
             ORDER BY count DESC
-            """ % esc(word))
+            """ % self._esc(word))
         self.cur.execute(sql)
         #print sql
         #res = self.cur.fetchall()
