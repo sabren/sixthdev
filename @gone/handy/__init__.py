@@ -6,7 +6,7 @@ import sys
 import whrandom
 import string
 import tempfile
-
+import operator
 
 def randpass(length=5):    
     okay = "abcdefghijkmnopqrstuvwxyz2345678923456789"
@@ -116,6 +116,10 @@ def edit(s):
     return open(fn).read()
 
 
+def sum(series):
+    return reduce(operator.add, series)
+
+
 if __name__=="__main__":
-    print edit("testing...")
-    
+    #print edit("testing...")
+    assert sum((1,2,3)) == 6
