@@ -59,6 +59,15 @@ class InMemorySessPool(SessPool):
 class SqlSessPool:
     """
     This uses a DB-API 2.0 compliant Connection object to store Sessions.
+    It expects a table like:
+
+    CREATE TABLE web_sess (
+        name varchar(32),
+        sid varchar(64),
+        sess blob,
+        tsUpdate timestamp,
+        primary key (name, sid)
+    );
     """
 
     def __init__(self, dbc, table='web_sess'):
@@ -87,7 +96,7 @@ class SqlSessPool:
     def putSess(self, name, sid, frozensess):
         import string
         
-	frozen = string.replace(frozensess, "'", "\\'")
+	frozen = string.replace(frozensess, "'", "''")
 
         cur = self.dbc.cursor()
         sql = "REPLACE " + self.table + " " + \
