@@ -66,8 +66,8 @@ class RequestTest(unittest.TestCase):
 
     def test_environ(self):
         myenv = {"A":"B"}
-        eng = weblib.Engine(request=self.builder.build(environ=myenv))
-        assert eng.request.environ["A"] == "B", \
+        req = self.builder.build(environ=myenv)
+        assert req.environ["A"] == "B", \
                "request has wrong passed-in environ"
 
 
