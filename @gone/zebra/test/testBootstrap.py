@@ -48,7 +48,7 @@ class BootstrapTestCase(unittest.TestCase):
             <xpr>a</xpr><nl/>
             <for series="stuff">
             <xpr>a</xpr>, <xpr>b</xpr>, <xpr>c</xpr>
-            <nl/>            
+            <nl/>
             </for>
             <xpr>a</xpr><nl/>
             </zebra>
@@ -81,16 +81,16 @@ class BootstrapTestCase(unittest.TestCase):
             <?xml version="1.0"?>
             <zebra>
             <for series="names">
-                <if condition="name=='a'">Argentina</if>
-                <ef condition="name=='b'">Bolivia</ef>
-                <el>Chile</el>
-                <glue>, </glue>
+            <if condition="name=='a'">Argentina</if>
+            <ef condition="name=='b'">Bolivia</ef>
+            <el>Chile</el>
+            <glue>, </glue>
             </for>
             </zebra>
             """)
-        
         goal = "Argentina, Bolivia, Chile"
-       
+
+        
         actual = zebra.Bootstrap().toObject(zbx).fetch(model)
         assert actual== goal, \
                "if/el/ef don't work:\n---%s---" % actual
@@ -127,23 +127,29 @@ class BootstrapTestCase(unittest.TestCase):
 
 
     def check_xpr(self):
-        zbx = zebra.trim(
-            """
-            <zebra>            
-            <xpr> (1 + 1) * 5 - 8 </xpr>
-            </zebra>
-            """)
-
+        zbx = "<zebra><xpr> (1 + 1) * 5 - 8 </xpr></zebra>"
         goal = "2"
         actual = zebra.Bootstrap().toObject(zbx).fetch()
         assert actual == goal, \
                "expressions don't work:\n%s" % actual
 
+    def check_whitespace(self):
+        zbx = zebra.trim(
+            """
+            <zebra>
+            <xpr>5</xpr> <xpr>2</xpr><nl/>
+            </zebra>
+            """)
+        goal = "5 2\n"        
+        actual = zebra.Bootstrap().toObject(zbx).fetch()
+        assert actual == goal, \
+               "whitespace is screwed up:\n%s" % actual
+
     def check_exec(self):
         # note: the <>'s mean something!
         zbx = zebra.trim(
             """
-            <zebra>            
+            <zebra>
             <exec>
             ex = '&lt;executive'
             ex = ex + ' decision&gt;'
@@ -196,38 +202,26 @@ class BootstrapTestCase(unittest.TestCase):
     def check_include(self):
         zbx = zebra.trim(
             """
-            <zebra>            
+            <zebra>
             <include file="test/includefile">
             </include>
             </zebra>
             """)
 
-        goal = "This is the include file!"
+        goal = "This is the include file!\n"
         actual = zebra.Bootstrap().toObject(zbx).fetch()
         assert actual == goal, \
                "includes don't work:\n%s" % actual
 
     def check_brackets(self):
-        zbx = zebra.trim(
-            """
-            <zebra>            
-            <xpr> ("a","b","c")[1] </xpr>
-            </zebra>
-            """)
-
+        zbx = '<zebra><xpr> ("a","b","c")[1] </xpr></zebra>'
         goal = "b"
         actual = zebra.Bootstrap().toObject(zbx).fetch()
         assert actual == goal, \
                "brackets cause problems:\n%s" % actual
         
     def check_body(self):
-        zbx = zebra.trim(
-            """
-            <zebra>            
-            <body>blah</body>
-            </zebra>
-            """)
-
+        zbx = '<zebra><body>blah</body></zebra>'
         goal = "blah"
         actual = zebra.Bootstrap().toObject(zbx).fetch()
         assert actual == goal, \

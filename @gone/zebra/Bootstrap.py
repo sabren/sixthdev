@@ -16,14 +16,12 @@ class Bootstrap:
 
     def toObject(self, zbx):
         "bstrap.toObject(zbx) => a python Report object"
-
         exec(self.compile(zbx))
         return Report()
 
 
     def parse(self, zbx):
         "Returns a Model-style representation of zbx"
-
         parser = self.parserClass()
         parser.feed(zbx)
         return parser.model
@@ -98,7 +96,7 @@ class Bootstrap:
 
     def handle_zebra(self, model, attrs):
         res = zebra.trim(
-            '''
+            """
             class Report:
             
                 def show(self, model={}):
@@ -130,7 +128,7 @@ class Bootstrap:
 
                     # zres is the result (the output we're building)
                     zres = ""
-            ''')
+            """)
         res = res + zebra.indent(self.walk(model), 2)
         res = res + zebra.trim(
             ''' 

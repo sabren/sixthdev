@@ -284,7 +284,7 @@ class Zbr2xmlTestCase(unittest.TestCase):
         assert actual==goal, \
                "Doesn't handle ; blocks right:\n%s" % actual
 
-    def test_newlines(self):
+    def test_newline(self):
         zbr = zebra.trim(
             """
             hello, world!

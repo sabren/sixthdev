@@ -20,26 +20,32 @@ class Xml2mdlTestCase(unittest.TestCase):
             </top>
             """)
 
-
     def check_X2mParser(self):
         x2m = zebra.xml2mdl.X2M()
 
         assert x2m.model == [], \
                "Doesn't initialize model."
-
-        # now test for the correct model:
-        goal = [
-            {"__tag__":"top", "__data__" :
-             [{"__tag__":"person", "name":"Michal", "__data__":
-               [{"__tag__":"skill", "__data__":["Python"]},
-                {"__tag__":"skill", "__data__":["ASP"]}]
-               }]
-             }]
         
+        # now test for the correct model:
+        goal = ['\n',
+                {'__tag__': 'top',
+                 '__data__':
+                 ['\n  ',
+                  {'__tag__': 'person',
+                   '__data__':
+                   ['\n  ',
+                    {'__tag__':
+                     'skill', '__data__':
+                     ['Python']},
+                    '\n  ',
+                    {'__tag__': 'skill',
+                     '__data__': ['ASP']},
+                    '\n  '],
+                   'name': 'Michal'},
+                  '\n']},
+                '\n']
         
         actual = x2m.translate(self.data)
         assert actual == goal, \
                "Doesn't build model correctly:\n%s" % actual
-
-
-
+        
