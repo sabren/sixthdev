@@ -9,6 +9,7 @@ class PHPGenerator(Generator):
     def __init__(self):
         self.head = "<?\n"
         self.foot = "?>\n"
+        self.initialDepth = 0
 
 
     def flatten(self, stripeset, depth=0, context="show"):
