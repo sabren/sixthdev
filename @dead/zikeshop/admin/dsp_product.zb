@@ -42,7 +42,9 @@
     * head:
         <table>
     <tr>
+    <td><a href="index.py?action=edit&what=style&ID={:ID:}">{:code:}</a></td>
     <td><a href="index.py?action=edit&what=style&ID={:ID:}">{:name:}</a></td>
+    <td><a href="index.py?action=edit&what=style&ID={:ID:}">{:price:}</a></td>
     </tr>
     * foot:
         </table>
