@@ -106,7 +106,7 @@ class RecordObject(zdc.Object):
         for f in self._record.table.fields:
             
             # populate with default values.
-            # use __dict__ to avoid overhead/errors with setattr
+            # use _data to avoid overhead/errors with setattr
             if self._defaults.has_key(f.name):
                 self._data[f.name] =  self._defaults[f.name]
             else:
@@ -119,6 +119,6 @@ class RecordObject(zdc.Object):
         """
         self.__dict__['_record'] = apply(self._table.fetch, (), where)
         for f in self._record.table.fields:
-            # use __dict__ to avoid overhead/errors with setattr
+            # use __data to avoid overhead/errors with setattr
             self._data[f.name] = self._record[f.name]
 
