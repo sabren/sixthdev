@@ -35,7 +35,7 @@ class Index(object):
             self.remove(name)
         self._doIndexing(name, text)
 
-    def countWords(self, text):
+    def wordFreqs(self, text):
         """
         Return a dict mapping words to frequencies
         """
@@ -48,7 +48,7 @@ class Index(object):
     def _doIndexing(self, name, text):
         # fetch pageID only once for speed
         pageID = self._getPageID(name)
-        for chunk, count in self.countWords(text).items():
+        for chunk, count in self.wordFreqs(text).items():
             self._storeFreq(pageID, chunk, count)
 
     def _storeFreq(self, name, word, count):
