@@ -8,9 +8,10 @@ __ver__="$Id$"
 
 #######################################################################
 # 0923.2000 refactorings:
-import zikeshop
 
 def calcSalesTax(addressID):
+    import zikeshop    
+
     #@TODO: put this somewhere else.. probably in the Sale object?
     #@TODO: Sale should have a reference to a "Store" object, and
     #@TODO: "Store" should have a .hasNexus(state) for sales tax..
@@ -61,6 +62,8 @@ def calcShipping(addr, weight):
 
 
 def chargeCard(theCard, amount):
+    import payment, zikeshop
+    
     ## bill the card
     if getattr(zikeshop, "authorizenetmerchant"):
         import payment
@@ -76,6 +79,7 @@ def chargeCard(theCard, amount):
 
 
 def alertNewSale(sale):
+    import zikeshop
     msg = weblib.trim(
         """
         Subject: new order.
