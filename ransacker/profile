@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import ransacker, os, profile, sys
+import ransacker, os, profile, sys, time
 
 # make sure we have a fresh index
 try:
@@ -10,34 +10,31 @@ except:
     pass
 
 
-
 if len(sys.argv) > 1:
     filename = sys.argv[1]
 else:
-    # by default, we'll have it index its own source
-    filename = "Index.py"
-
-idx = ransacker.Index("test/profile.rki", "test.rkw")
-profile.run('idx.index("src", open("%s").read())' % filename)
+    filename = "test/profile.this"
 
 
-## import cPickle, struct, array
-
-## def pick(data):
-##     return cPickle.dumps(data)
-
-## def pack(data):
-##     return apply(struct.pack, ["I"*len(data)] + data)
+txt = open(filename).read()
+idx = ransacker.Index("test/profile.rki")
 
 
-## def arra(data):
-##     return array.array("I", data).tostring()
+now = lambda: time.asctime(time.localtime(time.time()))
+
+print "START PASS1:", now()
+profile.run('idx.index("pass1", txt)')
+print "DONE:", now()
 
 
-## def loop():
-##     for x in range(10000):
-##         stringify(range(100))
+# do it again, but with an existing word file
+del idx
+os.unlink("test/profile.rki")
+idx = ransacker.Index("test/profile.rki")
 
-## stringify = pick; print "** pick:"; profile.run('loop()')
-## stringify = pack; print "** pack:"; profile.run('loop()')
-## stringify = arra; print "** arra:"; profile.run('loop()')
+
+print "START PASS2:", now()
+profile.run('idx.index("pass2", txt)')
+print "DONE:", now()
+
+
