@@ -160,7 +160,7 @@ class Bootstrap:
             scope_stack.append(copy.copy(scope))
             for _ in range(_max_):
                 # can't do .update if it's a UserDict:
-                mdl = model["%(series)s"][_]
+                mdl = scope["%(series)s"][_]
                 for item in mdl.keys():
                     scope[item]=mdl[item]
             """ % attrs)
