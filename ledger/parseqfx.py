@@ -2,7 +2,8 @@
 """
 qfx (web connect file) parser 
 """
-import sys
+import sys, re
+sys.path.append("/Users/michal/lib")
 from pytypes import Date, FixedPoint
 
 
@@ -67,6 +68,91 @@ def parse(file):
 
 
 
+from cashqueue import Transaction
+import cash2led
+
+reDes = re.compile("DES=(.*)")
+def rowToTransaction(row):
+    t = Transaction()
+    name = row["NAME"]
+    t.amount = FixedPoint(row["amount"])
+    t.date = row["date"]
+
+    if name.startswith("PAYPAL"):
+        if t.amount > 0:
+            t.comment = "paypal"
+            t.lines.append(("asset:checking", row["amount"]))
+            t.lines.append(("income:hosting", ))
+        else:
+            t.comment = "[???] " + name
+
+    elif name.startswith("BOFA MS"):
+        if name.count("MERCH SETL"):
+            t.comment = "bofa ms"
+            t.lines.append(("asset:checking", row["amount"]))
+            t.lines.append(("asset:merchant", ))
+        elif name.count("MERCH FEES"):
+            t.comment = "bofa ms fees"
+            t.lines.append(("expense:fees:bofams", -row["amount"]))
+            
+    elif name.startswith("OVERDRAFT"):
+        t.comment = "overdraft"
+        t.lines.append(("expense:fees:overdraft", -row["amount"]))
+
+    elif name.startswith("Overdraft Interest"):
+        t.comment = "overdraft interest"
+        t.lines.append(("expense:fees:overdraft", -row["amount"]))
+        
+    elif name == "AMERICAN EXPRESS;DES=SETTLEMENT;":
+        t.comment = "amex"
+        # already have data broken down from cashqueue
+        
+    elif name in ("Deposit", "Counter Credit"):
+        t.comment = "checks"
+        # should already have data here, too        
+        
+    elif name.count("DES=ADP - FEES"):
+        t.comment = "adp"
+        t.lines.append(("expense:fees:adp", -row["amount"]))
+        
+    elif name.count("DES=ADP - TAX"):
+        t.comment = "adp"
+        t.lines.append(("expense:payroll", -row["amount"]))
+
+    elif name.count("Monthly Maintenance Fee"):
+        t.comment = "monthly maintenance fee"
+        t.lines.append(("expense:fees:bofa", -row["amount"]))
+
+    elif name.startswith("CHECKCARD"):
+        _, when, memo = name.split(None, 2)
+        t.clearedOn = Date(row["date"].toUS()) # make a copy
+        t.date.m = int(when[:2])
+        t.date.d = int(when[2:])
+        t.comment = "[???] %s" % memo
+
+        # and we know two types of check card:
+        if memo.count("RACKSPACE"):
+            t.comment = "rackspace"
+            t.lines.append(("expense:datacenter", -row["amount"]))
+        elif memo.count("EV1.NET"):
+            t.comment = "ev1"
+            t.lines.append(("expense:datacenter", -row["amount"]))
+            
+    else:
+        t.comment = "[???] " + name
+
+
+    # fill in default account data:
+    if len(t.lines) == 0:
+        t.lines.append(("unknown", -row["amount"]))
+    if len(t.lines) == 1:
+        t.lines.append(("asset:checking", ))
+    
+    return t
+
+
+
+
 if __name__=="__main__":
 
     try:
@@ -75,11 +161,22 @@ if __name__=="__main__":
         print "usage: parseqfx.py filename"
         sys.exit()
 
-    
-
     data = parse(open(filename))
+    data.rows.reverse()
     for row in data.rows:
-        print row
+        t = rowToTransaction(row)
+        print cash2led.fmtDate(t.date), t.comment,
+        if t.clearedOn:
+            print "{%s}" % cash2led.fmtDate(t.clearedOn)
+        else:
+            print
+        for line in t.lines:
+            if len(line) == 2:
+                print cash2led.fmt % line
+            else:
+                print cash2led.indent, line[0]
+        print
+        
     
-    print len(data.credits()), "credits:", data.amtIn()
-    print len(data.debits()), "debits:", data.amtOut()
+    print ";", len(data.credits()), "credits:", data.amtIn()
+    print ";", len(data.debits()), "debits:", data.amtOut()
