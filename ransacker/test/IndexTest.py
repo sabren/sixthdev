@@ -34,3 +34,6 @@ class IndexTest(unittest.TestCase):
         actual = self.idx.score("dog")
         self.assertEquals(actual, (('twodog', 2), ('onedog',1)))
 
+    def check_incremental(self):
+        self.idx.addDocument("onedog", "don't mess with the big dog")
+        assert not self.idx.match("fleas")

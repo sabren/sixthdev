@@ -16,6 +16,7 @@ class Index(object):
        _storeFreq
        score
        contains
+       remove
        
     """
 
@@ -26,6 +27,8 @@ class Index(object):
         """
         add a document to the database and index its contents.
         """
+        if self.contains(pageName):
+            self.remove(pageName)
         for chunk, count in ransacker.wordFreqs(text).items():
             self._storeFreq(pageName, chunk, count)
 
@@ -52,6 +55,9 @@ class Index(object):
 
     def contains(self, pageName):
 	return self.data.has_key(pageName)
+
+    def remove(self, pageName):
+        del self.data[pageName]
     
     
     def match(self, word):

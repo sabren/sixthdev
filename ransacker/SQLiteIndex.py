@@ -68,6 +68,22 @@ class SQLiteIndex(ransacker.Index):
                     %s)
             """ % (esc(name), esc(word), count))
 
+    def getPageID(self, name):
+        self.cur.execute("SELECT ID FROM idx_page WHERE page='%s'"
+                         % esc(name))
+        res = self.cur.fetchone()
+        if res:
+            return res[0]
+        else:
+            return None
+        
+        
+        
+
+    def remove(self, name):
+        self.cur.execute("DELETE FROM idx_freq where pageID=%s"
+                         % self.getPageID(name))
+
     def score(self, word):        
         sql =(
             """

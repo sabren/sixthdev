@@ -13,6 +13,10 @@ class IdMap:
             self.data = dict
         else:
             self.data = {}
+
+
+    def __delitem__(self, key):
+        del self.data[key]
             
 
     def __getitem__(self, key):

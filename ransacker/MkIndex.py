@@ -32,3 +32,8 @@ class MkIndex(ransacker.Index):
 
     def contains(self, name):        
         return self.pages.has_key(name)
+
+    def remove(self, name):
+        id = self.pages[name]
+        self.index.remove(self.index.filter(lambda row: row.page==id))
+        del self.pages[name]
