@@ -1,0 +1,43 @@
+"""
+"""
+__ver__="$Id$"
+
+import weblib, zebra, zikebase
+zikebase.load("AdminApp")
+
+class XXXXXXXX(zikebase.AdminApp):
+    __super = zikebase.AdminApp
+
+    ## constructor page ##################################
+    
+    def __init__(self, input=None):
+        self.__super.__init__(self, input)
+        self.what = {} # eg: {"classname":SomeClass}
+
+
+    ## home page ########################################
+
+##     def act_(self):
+##         pass # call default action here..
+
+    ## actions ##########################################
+
+##     def qry_XXX(self):
+##         pass # for generic_list, which calls this and then lst_XXX.zb
+# -- OR: --
+##     def list_XXX(self):
+##         pass # usually consult something, call zebra..
+
+##     def show_XXX(self):
+##         pass # consult an objectview, call zebra
+    
+##     def create_XXX(self):
+##         self.generic_create("XXX") # show form for creating
+
+##     def save_XXX(self):
+##         self.generic_save("XXX")
+
+
+
+if __name__=="__main__":
+    XXXXXXX().act()
