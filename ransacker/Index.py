@@ -20,7 +20,7 @@ rki looks like: {
 
 """
 
-import shelve
+import anydbm
 import string
 import ransacker
 
@@ -52,7 +52,7 @@ class Index:
             # then assume it's the same name as the .rki
             rkw = rki[:-4] + ".rkw"
 
-        self.rki = shelve.open(rki)
+        self.rki = anydbm.open(rki, "cf")
         self.wordHash = ransacker.WordHash(rkw)
 
 
@@ -72,22 +72,22 @@ class Index:
 
         if self.hasPage(label):
             self.unlinkPage(label)
+            pageID = self.getPageID(label)
         else:
             pageID = self.nextPageID()
             self.rki["i:"+`pageID`] = label
-            self.rki["k:"+label] = (pageID, ())
 
         newWordIDs = []
         for word in ransacker.uniqueWords(text):
-            self.linkPageToWord(label, word)
+            self.linkPageIDToWord(pageID, word)
             newWordIDs.append(self.wordHash.get(word))
 
-        pageData = [self.getPageID(label)] + newWordIDs
-        self.rki["k:"+label] = pageData
+        pageData = [pageID] + newWordIDs
+        self.rki["k:"+label] = ransacker.intListToStr(pageData)
 
 
     def getPageID(self, label):
-        return self.rki["k:"+label][0]
+        return ransacker.strToIntList(self.rki["k:"+label])[0]
 
 
     def getLabel(self, pageID):
@@ -95,7 +95,7 @@ class Index:
 
 
     def wordIDsOnPage(self, label):
-        return self.rki["k:"+label][1:]
+        return ransacker.strToIntList(self.rki["k:"+label])[1:]
 
 
 
@@ -112,14 +112,14 @@ class Index:
             self.rki[`wordID`]= ransacker.intListToStr(pageIDs)
 
 
-    def linkPageToWord(self, label, word):
+    def linkPageIDToWord(self, pageID, word):
         wordID = self.wordHash.get(word)
 
         pageIDs = []
         if self.rki.has_key(str(wordID)):
             pageIDs = self.pageIDsForWordID(wordID)
 
-        pageIDs.append(self.getPageID(label))
+        pageIDs.append(pageID)
         self.rki[str(wordID)] = ransacker.intListToStr(pageIDs)
 
 
