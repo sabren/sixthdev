@@ -79,7 +79,7 @@ class Index:
 
         wordIDs = []
         for word in ransacker.uniqueWords(text):
-            wordID = self.wordHash.get(word)
+            wordID = self.wordHash.getID(word)
             wordIDs.append(wordID)
             
             pageIDs = []

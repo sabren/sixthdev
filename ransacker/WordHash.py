@@ -24,7 +24,7 @@ class WordHash(UserDict.UserDict):
         self.data = anydbm.open(filename, "cf")
 
 
-    def get(self, word):
+    def getID(self, word):
         if self.data.has_key(word):
             return int(self.data[word])
         else:
