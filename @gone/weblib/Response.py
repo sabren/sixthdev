@@ -9,8 +9,11 @@ class Response:
     def __init__(self, engine=weblib):
 
         self.engine = engine
+        if engine is weblib:
+            weblib.response = self
 
-        self._headers = ""
+        self.header = ""
+        self.buffer = ""
         self._headerSent = 0
 
         import StringIO
@@ -37,7 +40,7 @@ class Response:
     def _sendHeader(self):
         #@TODO: allow changing the content-type..
         self._webout.write("content-Type: text/html\n")
-        self._webout.write(self._headers)
+        self._webout.write(self.header)
         self._webout.write("\n")
         self._headerSent = 1
     
@@ -45,13 +48,10 @@ class Response:
     #### PUBLIC METHODS ####################
 
     def write(self, data):
-        if not self._headerSent:
-            self._sendHeader()
-        self._webout.write(data)
-
+        self.buffer = self.buffer + data
 
     def addHeader(self, key, value):
-        self._headers = self._headers + key + ": " + value + "\n"
+        self.header = self.header + key + ": " + value + "\n"
 
 
     def addCookie(self, key, value):
@@ -59,12 +59,12 @@ class Response:
 
 
     def end(self):
+        import sys
         sys.exit()
 
 
     def redirect(self, url):
-        self._webout.write("content-type: text/html\n")
-        self._webout.write("Location: " + url + "\n\n")
+        self.addHeader("Location", url)
         self.end()
     
 
