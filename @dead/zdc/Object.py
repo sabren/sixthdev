@@ -24,7 +24,14 @@ class Object:
         """
         Don't override this! override _init(), _new() or _fetch() instead.
         """
-        self.__dict__['_data']={}
+        # 1121.2001.. not sure why _isLocked is needed here, but
+        # without it, I got an inexplicable bug in duckbill.Subscription
+        # telling me _isLocked wasn't found. Something to do with
+        # the fact that it uses a MixIn class, I'm sure (possibly
+        # because the mixin includes setters?)... Anyway, this fixed
+        # it and I didn't have time to figure out how or why, so I
+        # could write a test to document it.
+        self.__dict__['_data']={"_isLocked":0}
         self._link()
         self._init()
 

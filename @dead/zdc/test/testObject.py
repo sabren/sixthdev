@@ -14,9 +14,10 @@ class ObjectTestCase(unittest.TestCase):
         If you want to do stuff to locked fields, do it in
         _init(), _fetch(), or _new().
         """
-        tobj = Object()
+        tobj = Object()        
         assert tobj._isLocked, \
                "oh no! Object instances aren't locked!"
+       
 
     def check_locks(self):
         "Locked attributes should be readonly"
@@ -65,11 +66,17 @@ class ObjectTestCase(unittest.TestCase):
                "set_XXX() methods don't work!"
 
 
-    def check_ancestors(self):
+
+    def check_findmember(self): pass  # we test both of
+    def check_ancestors(self):        # these methods at once:
         class Soup:
             pass
         class Primordial(Soup):
             pass
         class Descendent(Object, Primordial):
             pass
+
         assert Descendent()._ancestors() == [Object, Primordial, Soup]
+        #import pdb; pdb.set_trace()
+        assert Descendent()._findmember("get__isLocked") is not None
+        assert Descendent()._isLocked
