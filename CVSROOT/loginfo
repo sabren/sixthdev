@@ -24,3 +24,7 @@
 #DEFAULT (echo ""; id; echo %s; date; cat) >> $CVSROOT/CVSROOT/commitlog
 # or
 #DEFAULT (echo ""; id; echo %{sVv}; date; cat) >> $CVSROOT/CVSROOT/commitlog
+
+# "list notification"
+notify CVSROOT/log notify@sabren.com -f CVSROOT/commitlog %s
+
