@@ -1,5 +1,9 @@
 # test framework for weblib
-# (actually, this is pretty generic & could be used elsewhere..)
+
+# prevent weblib from going into CGI mode..
+import __builtin__
+__builtin__.__weblib__ = 1
+
 
 from testRequest import *
 from testResponse import *
