@@ -120,7 +120,7 @@ class App(object):
                   % str(self.action)
 
         method = getattr(self, "act_" + self.action, self.act__error__)
-        method() # hey! method acting! :)
+        method()
         self.action = oldaction
 
     def complain(self, problems):
