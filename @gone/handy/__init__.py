@@ -1,6 +1,7 @@
 """
 Misc handy routines
 """
+import whrandom
 
 def randpass(length=5):
     okay = "abcdefghijkmnopqrstuvwxyz2345678923456789"
