@@ -18,22 +18,11 @@ class ResponseTestCase(unittest.TestCase):
                "response.buffer doesn't initialize correctly."
 
 
-
-    def check_engine(self):
-        #@TODO: get rid of this code now that I have weblib.script.. (??)
-        assert self.response.engine==weblib, \
-               "response.engine doesn't default to weblib. :/"
-        assert weblib.response is self.response, \
-               "response doesn't register itself with weblib"
-
-
-
     def check_write(self):
         self.response.write("hello, world")
         assert self.response.buffer == "hello, world", \
                "response.write() doesn't work"
 
-        
 
     def check_end(self):
         res = 0
@@ -44,6 +33,26 @@ class ResponseTestCase(unittest.TestCase):
 
         assert res == 1, "response.end() doesn't exit!"
 
+
+    def check_simpleRedirect(self):
+        self.assertRaises(SystemExit,
+                     self.response.redirect, "http://www.sabren.com/")
+        assert self.response.headers[0] == ("Status", "303"),\
+               "didn't get Status: 303 header on redirect- %s" \
+               % self.response.headers
+        assert self.response.headers[1] \
+               == ("Location", "http://www.sabren.com/"),\
+               "didn't get Location: header on redirect - %s" \
+               % self.response.headers
+
+
+    def check_queryRedirect(self):
+        """
+        if the first char of a redirect is ?, should redirect to
+        the current url with the querystring.
+        """
+        self.assertRaises(SystemExit, self.response.redirect, "?a=b")
+        
 
 ## this causes problems for python 2.0
 ##

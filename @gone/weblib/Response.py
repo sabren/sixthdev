@@ -1,13 +1,14 @@
 """
 Response.py - loosely emulates the ASP Response object for python CGI's
-
-$Id$
-
 """
+__ver__="$Id$"
+
 import weblib
 
 class Response:
-    """Response object similar to the one from ASP"""
+    """
+    Response object similar to the one from ASP
+    """
 
     ## attributes ########################################
 
@@ -23,22 +24,8 @@ class Response:
     def __init__(self, engine=weblib, out=None):
 
         self.engine = engine
-        if engine is weblib:
-            weblib.response = self
-
         self.out = out
-
-
-##     def __getattr__(self, name):
-##         res = None
        
-##         if name in self.__dict__.keys():
-##             res = self.__dict__[name]
-##         else:
-##             raise AttributeError
-            
-##         return res
-        
 
     #### I/O Methods (needed for print redirection) ########
 

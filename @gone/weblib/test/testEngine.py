@@ -203,6 +203,11 @@ class EngineTestCase(unittest.TestCase):
         assert eng.result == eng.FAILURE, \
                "engine.result doesn't return FAILURE on assertion failure."
 
+        eng.script = "import weblib; raise weblib.Redirect, '?newquery'"
+        eng.run()
+        assert eng.result == eng.REDIRECT, \
+               "engine.result doesn't return REDIRECT on redirect."
+
 
     def check_PATH_INFO(self):
         eng = weblib.Engine(script=open("test/pathinfo.py"))

@@ -3,14 +3,24 @@ weblib: Classes for easy server-side web scripting in Python.
 """
 __ver__="$Id$"
 
-# start with some utility functions... 
+#### Exceptions ######################################################
 
-#### selectBox() ####################################################
+class Redirect(Exception):
+    """
+    Raise this when you want to redirect but don't have access to
+    a response object. (Eg, for testing without the RES variable,
+    or just so you don't have to keep passing it down a call stack)
+    """
+    pass
 
+#### utility functions ###############################################
 
-#@TODO: get rid of this - we have html.select now
 def selectBox(name, rows, blank=None, extra=''):
-    "rows should be a sequence of (real value, displayed value, isSelected)"
+    """
+    display a selectbox
+    #@TODO: get rid of weblib.selectBox - we have html.select now
+    rows should be a sequence of (real value, displayed value, isSelected)
+    """
     res = '<select name="%s" %s>\n' % (name, extra)
     if blank is not None:
         res = res + '<OPTION value="%s">&nbsp;</OPTION>\n' % blank
@@ -22,12 +32,12 @@ def selectBox(name, rows, blank=None, extra=''):
     res = res + '</select>'
     return res
 
-
-
-#### trim() for saving bandwith while making code look nice ####
-
 def trim(s):
-    """strips leading indentation from a multi-line string."""
+    """
+    strips leading indentation from a multi-line string.
+    for saving bandwith while making code look nice
+    @TODO: this should be in handy
+    """
 
     import string
     lines = string.split(s, "\n")
@@ -44,10 +54,11 @@ def trim(s):
     return string.join(lines, "\n")
 
 
-
-#### indent() for the opposite of trim ##########################
-
 def indent(s, depth=1, indenter="    "):
+    """
+    opposite of trim
+    @TODO: this should be in handy
+    """
     import string
     lines = string.split(s, "\n")
 
@@ -64,9 +75,11 @@ def indent(s, depth=1, indenter="    "):
     return string.join(lines, "\n") + trailer
    
 
-#### deNone() replaces None with the replacement string ##########
-
 def deNone(s, replacement=''):
+    """
+    replaces None with the replacement string
+    @TODO: this should be in handy
+    """
     # if s won't be zero, you might as well use:
     # "s or ''" instead of "deNone(s)"
     if s is None:
@@ -74,12 +87,12 @@ def deNone(s, replacement=''):
     else:
         return s
     
-
-
-### unique identifier generator, for sessions, etc #######
-
 def uid():
-    """Returns a 32 character, printable, unique string"""
+    """
+    unique identifier generator, for sessions, etc
+    Returns a 32 character, printable, unique string
+    @TODO: should be in handy
+    """
     import md5, whrandom, string
     tmp, uid = "", ""
     

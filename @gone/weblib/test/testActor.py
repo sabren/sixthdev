@@ -1,8 +1,8 @@
 """
 testActor.py - unit tests for Actor.py
-
-$Id$
 """
+__ver__="$Id$"
+
 import unittest
 import weblib
 
@@ -74,3 +74,10 @@ class ActorTestCase(unittest.TestCase):
         actual = devito.act()
         assert actual == goal, \
                "Actor.write() doesn't work. got: %s" % actual
+
+
+    def check_jump(self):
+        brando = weblib.Actor()
+        self.assertRaises(weblib.Redirect,
+                          brando.redirect, action="somewhere")
+        

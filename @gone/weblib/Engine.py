@@ -27,6 +27,7 @@ class Engine:
     SUCCESS   = "* success *"
     FAILURE   = "* failure *"
     EXCEPTION = "* exception *"
+    REDIRECT  = "* redirect *"
     EXIT      = "* exit *"
       
 
@@ -137,6 +138,17 @@ class Engine:
         except AssertionError, e:
             self.result = self.FAILURE
             self.error = e
+        except weblib.Redirect, e:
+            self.result = self.REDIRECT
+            try:
+                where = str(e)
+                if where[0]=="?":
+                    self.response.redirect(
+                        self.request.environ["PATH_INFO"] + where)
+                else:
+                    self.response.redirect(where)
+            except SystemExit, ex:
+                pass
         except:
             self.result = self.EXCEPTION
             import traceback, sys, string

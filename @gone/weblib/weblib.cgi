@@ -114,7 +114,7 @@ eng.stop()
 SITE_MAIL=eng.locals["SITE_MAIL"]
 SITE_NAME=eng.locals["SITE_NAME"]
 
-if eng.result in (eng.SUCCESS, eng.EXIT):
+if eng.result in (eng.SUCCESS, eng.REDIRECT, eng.EXIT):
     ## print the results
     print eng.response.getHeaders() + eng.response.buffer
     if doProfile:

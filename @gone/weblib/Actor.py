@@ -152,33 +152,22 @@ class Actor:
             for item in model.keys():
                 self.model[item] = model[item]
 
-    #@TODO: this replace (??) act_jump...
-    #@TODO: make a test case for this.
-    #@TODO: should this INSTANTLY redirect? what about nonbrowsers?
-    def redirect(self, url=None, action=None):
-        assert ((url is not None) ^ (action is not None)), \
-               "syntax: actor.redirect(url XOR action)"
-        if url:
-            self.where["gohere"]=url
-        else:
-            import string, weblib
-            # this next bit is in case the current page
-            # is a GET with a ? in it..
-            # (otherwise, we'd pass the querystring to the next page
-            # - a recipe for disaster!)
-            
-            # Apache uses REQUEST_URI, IIS uses SCRIPT_NAME
-            # (SCRIPT_NAME is weblib.cgi on Apache..)
-            if weblib.request.environ.has_key("REQUEST_URI"):
-                me = string.split(weblib.request.environ["REQUEST_URI"],
-                                  "?")[0]
-            else:
-                me = weblib.request.environ.get("SCRIPT_NAME","")
 
-            # okay.. now go there.
-            self.where["gohere"]="%s?action=%s&__weblib_ignore_form__=1" \
-                                  % (me, action)
-        self.next  = ("jump", {"where":"gohere"})
+    def redirect(self, url=None, action=None):
+        """
+        Sets self.next and throws weblib.Redirect
+        """
+        if not ((url is not None) ^ (action is not None)):
+            raise TypeError, "syntax: actor.redirect(url XOR action)"
+        if url:
+            where=url
+            self.next = None
+        else:
+            #@TODO: why __weblib_ignore_form__ again?
+            where="?action=%s&__weblib_ignore_form__=1" % (action)
+            self.next = action
+        import weblib
+        raise weblib.Redirect, where
 
 
     def map_where(self, where):
@@ -204,20 +193,6 @@ class Actor:
         Default action. Does nothing, but you can override it.
         """
         pass
-
-    def act_jump(self):
-        """
-        Jump to one of the urls defined in .where... expects where=xxx
-        in input from a browser...
-        Alternately, pass in the url from a script.
-        """
-        import weblib
-        where = self.map_where(self.input["where"])
-        if where:
-            self.exit()
-            weblib.response.redirect(where)
-        else:
-            self.complain("'%s' is not a valid jump" % self.input["where"])
 
     def act__error__(self):
         """
