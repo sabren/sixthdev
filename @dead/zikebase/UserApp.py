@@ -3,7 +3,7 @@ App to let users signup, login, request passwords, etc.
 """
 __ver__="$Id$"
 
-import weblib
+import weblib, zikebase
 
 class UserApp(weblib.Actor):
 
