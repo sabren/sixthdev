@@ -11,6 +11,16 @@ from Bootstrap import Bootstrap
 
 ###[ Utility Functions ]#######################################
 
+def compile(template):
+    ifp = open(template + ".zb", "r")
+    data = Z2X().translate(ifp.read())
+    ofp = open(template + ".zbc", "w")
+    #@TODO: also use python's compiler, once the bugs are worked out.
+    ofp.write(Bootstrap().compile(data))
+    ofp.close()
+    ifp.close()
+    
+
 
 def fetch(template, model={}):
     import os.path
@@ -28,13 +38,7 @@ def fetch(template, model={}):
         doCompile = 1
 
     if doCompile:
-        ifp = open(template + ".zb", "r")
-        data = Z2X().translate(ifp.read())
-        ofp = open(template + ".zbc", "w")
-        #@TODO: also use python's compiler, once the bugs are worked out.
-        ofp.write(Bootstrap().compile(data))
-        ofp.close()
-        ifp.close()
+        compile(template)
         
     namespace = {}
     execfile(template + ".zbc", namespace)
