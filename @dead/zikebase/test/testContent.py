@@ -13,7 +13,7 @@ class ContentTestCase(unittest.TestCase):
         cur.execute("DELETE FROM base_content")
 
     def check_add(self):
-        cont = Content(test.dbc)
+        cont = Content()
         cont.title = "a simple test"
         cont.save()
         del cont

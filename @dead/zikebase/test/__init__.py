@@ -2,8 +2,7 @@
 # test framework for zikebase
 
 import MySQLdb
-from sqlTest import * # a module that defines the following four variables
-dbc = MySQLdb.connect(db=DB, host=HOST, user=USER, passwd=PASSWD)
+from sqlTest import dbc
 
 from testContent import *
 from zdc.test.testObject import *  #@TODO: take this out?
