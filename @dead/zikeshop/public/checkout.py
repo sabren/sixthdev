@@ -3,24 +3,13 @@ checkout process for the cart (records the sale)
 """
 __ver__="$Id$"
 
-import zikeshop
-import weblib
+import zikeshop, zikebase, weblib
 
 class CheckoutApp(zikeshop.PublicApp):
     __super = zikeshop.PublicApp
-
-    def __init__(self, cart=None, input=None):
-        self.__super.__init__(self, cart, input)
-
-        # internal data:
-        #@TODO: why  won't weblib store a Sale object in the session?
-        if not weblib.sess.has_key("checkout_data"):
-            weblib.sess["checkout_data"] = {}
-        self.data = weblib.sess["checkout_data"]
-          
         
     ## Actor methods ############################
-    
+
     def enter(self):
         self.__super.enter(self)
 
@@ -30,34 +19,35 @@ class CheckoutApp(zikeshop.PublicApp):
         if self.input.get("action") != "show_receipt":
             assert not self.cart.isEmpty(), \
                    "Can't check out because cart is empty."
+            
+        # internal data (basically a bunch of dicts until checkout)
+        self.data = weblib.sess.get("__checkout__",{})
+        self.billData = self.data.get("billData",
+                                      zikebase.Contact()._data.copy())
+        self.shipData = self.data.get("shipData",
+                                      zikebase.Contact()._data.copy())
+        self.cardData = self.data.get("cardData",
+                                      zikeshop.Card()._data.copy())
+
 
     def exit(self):
         self.__super.exit(self)
-        if self.data:
-            weblib.sess["checkout_data"] = self.data
+        self.data["billData"] = self.billData
+        self.data["shipData"] = self.shipData
+        self.data["cardData"] = self.cardData
+        weblib.sess["__checkout__"] = self.data
+
 
     def act_(self):
         self.next = 'get_billing'
 
     ## other stuff ... ###################################
 
-    def checkShipToBilling(self):
-        if self.input.get('shipToBilling'):
-            self.data['ship_addressID']=self.data['bill_addressID']
-            
-    def act_get_billing(self,refresh=1):
-        import zebra, zdc, zikebase
-        if refresh:
-            self.consult(zdc.ObjectView(zikebase.Contact()))
+    def act_get_billing(self):
+        import zebra
+        self.consult(self.billData)
         zebra.show('frm_billing', self.model)
 
-    def act_set_billing(self):
-        self.data['bill_addressID']=self.input['addressID']
-        self.checkShipToBilling()
-        if self.data.get('ship_addressID'):
-            self.redirect(action='get_card')
-        else:
-            self.redirect(action='get_shipping')
 
     def act_get_shipping(self, refresh=1):
         import zebra, zdc, zikebase
@@ -65,9 +55,6 @@ class CheckoutApp(zikeshop.PublicApp):
             self.consult(zdc.ObjectView(zikebase.Contact()))
         zebra.show('frm_shipping', self.model)
 
-    def act_set_shipping(self):
-        self.checkShipToBilling()
-        self.redirect(action='get_card')
 
     def act_add_address(self):
         #@TODO: this is a lot like userapp..
@@ -82,25 +69,32 @@ class CheckoutApp(zikeshop.PublicApp):
             ('address1','address'),
             ('city','city'),
             ('postal','ZIP/postal code')]
+
+
+        if context=="bill":
+            for item in self.billData.keys():
+                self.billData[item]=self.input.get(item)
+        else:
+            for item in self.shipData.keys():
+                self.shipData[item]=self.input.get(item)
+        
         for item in required:
             if not self.input.get(item[0],""):
                 errs.append("The '%s' field is required." % item[1])
-        if (self.input.get("countryCD")=="US") and not self.input.get("stateCD"):
+        if (self.input.get("countryCD")=="US") \
+        and not self.input.get("stateCD"):
             errs.append("A state is required for US orders")
         try:
-            ed = zikebase.ObjectEditor(zikebase.Contact)
+            ed = zikebase.ObjectEditor(zikebase.Contact, input=self.input)
             ed.do("update")
-            #@TODO: should let you edit data already there (eg, BACK button)
-            ed.object.save()
-        except ValueError, err:
-            errorMsg = ""
-            errs = errs + err[0]
+        except ValueError, valErrs:
+            errs.extend(valErrs[0])
         if errs:
             self.model["errors"] = map(lambda e: {"error":e}, errs)
             if context=='bill':
-                self.act_get_billing(0) # don't refresh data
+                self.next = "get_billing"
             else:
-                self.act_get_shipping(0) # don't refresh data
+                self.next = "get_shipping"
         else:
             if context=='bill':
                 self.data['bill_addressID']=ed.object.ID
@@ -128,15 +122,26 @@ class CheckoutApp(zikeshop.PublicApp):
             self.complain(errs)
             zebra.show("frm_card", self.model)
 
+
     def act_set_card(self):
         self.data['cardID'] = int(self.input['cardID'])
         self.redirect(action = "checkout")
 
+
     def act_get_card(self):
         import zebra, zdc, zikebase
-        addr = zikebase.Contact(ID=self.data["bill_addressID"])
-        self.model["number"]=""
-        self.model["name"]=addr.fname + " " + addr.lname
+
+        # make a guess at cardholder name unless they already told us:
+        if not self.cardData["name"]:
+            self.cardData["name"] = "%(fname)s %(lname)s" % self.billData
+
+        # this next bit is slightly redundant, but is done so you don't
+        # need to weblib.deNone on the form (probably inconsistent and
+        # should be removed though...)
+        if not self.cardData["number"]:
+            self.cardData["number"]=""
+            
+        self.consult(self.cardData)
         zebra.show("frm_card", self.model)
 
 
