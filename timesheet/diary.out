@@ -1,0 +1,11 @@
+# development diary for timesheet app
+
+* [0527.2002 03:59] goal
+I want to make a simple timesheet app WITHOUT using my 
+libraries. Then I will refactor. The hope is that I can
+see what is working and what is not.
+
+* [0527.2002 04:52] got it.
+A little less than an hour later, I've got a 100-line timesheet
+app, that lets you add, edit, and delete rows in a single table.
+I'll check this in to CVS now.
