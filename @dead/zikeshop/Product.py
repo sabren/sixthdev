@@ -63,16 +63,11 @@ class Product(zdc.RecordObject):
             self._pic.save()
             self.pictureID = self._pic.ID
 
-        # validation logic:
-        sql = "SELECT name FROM shop_product " \
-              "WHERE code='%s' " \
-              % (self.code)
+        # check for dulplicate codes:
+        where = "code = '%s'" % (self.code)
         if self.ID:
-            sql = sql + "AND ID != %i" % int(self.ID)
-
-        cur = self._table.dbc.cursor()
-        cur.execute(sql)
-        if cur.rowcount:
+            where = where + "AND ID != %i" % int(self.ID)
+        if zdc.find(zikeshop.Product, where):
             raise ValueError, "This code already exists!"
 
         self.__super.save(self)
