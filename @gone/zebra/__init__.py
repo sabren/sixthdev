@@ -4,8 +4,8 @@ Zebra: a text generation and reporting system
 $Id$
 """
 import string
-import zbr2xml
-import xml2mdl
+from zbr2xml import Z2X
+from xml2mdl import X2M
 from Bootstrap import Bootstrap
 
 
