@@ -23,7 +23,8 @@ class User(zikebase.Contact):
             zdc.Table(zikebase.dbc, "base_user"))
 
     def getEditableAttrs(self):
-        return self.__super.getEditableAttrs(self) + ['username', 'password']
+        return self.__super.getEditableAttrs(self) \
+               + ['username', 'password', 'uid']
         
     def _fetch(self, key=None, **kw):
         keys = kw.keys()
@@ -46,13 +47,19 @@ class User(zikebase.Contact):
                 zdc.Table(zikebase.dbc, "base_user"), ID=self.ID)
 
 
-    # we want to encrypt the passwords transparently.
+
+    def set_uid(self, value):
+        self._userRec['uid'] = value
+    def get_uid(self):
+        return self._userRec['uid']
+    
     def set_username(self, value):
         self._userRec['username'] = value
 
     def get_username(self, value):
         return self._userRec['username']
         
+    # we want to encrypt the passwords transparently.
     def get_password(self):
         """returns a zikebase.Password object for testing against plaintext."""
         return self.passwordClass(self._userRec["password"])
@@ -65,9 +72,9 @@ class User(zikebase.Contact):
         
     def save(self):
         self.__super.save(self)
-        if self._userRec.get("uid") is None:
+        if not self.uid:
             import weblib
-            self._userRec["uid"] = weblib.uid()
-        if self._userRec.get('userID') is None:
-            self._userRec['userID'] = 0
+            self.uid = weblib.uid()
+        if not self.userID:
+            self.userID = 0
         self._userRec.save()
