@@ -4,9 +4,9 @@ import unittest
 
 class AppTest(unittest.TestCase):
 
-    def test__chooseAction(self):
+    def test_chooseAction(self):
         def result_for(req):
-            return App(default="the_default")._chooseAction(Ctx(req=req))
+            return App(default="the_default").chooseAction(req)
         assert result_for({}) == "the_default"
         assert result_for({"action":"do this"}) == "do_this"
 

@@ -1,45 +1,50 @@
 from platonic import Intercept, Redirect
 
 class App(object):
+
     def __init__(self, tiles={}, default=None):
         self.tiles = tiles
-        self.default = default or "home"
+        self.defaultAction = default or "home"
         
     def __call__(self, ctx):
         self.dispatch(ctx)
 
-    def _chooseAction(self, ctx):
-        return ctx.req.get("action","").replace(" ","_") or self.default
+    def chooseAction(self, req):
+        return req.get("action","").replace(" ","_") or self.defaultAction
 
-    def dispatch(self, ctx):
-        m = self._chooseAction(ctx)
+    def findFeature(self, action):
+        """
+        returns the uninstantiated class for the feature
+        """
+        assert action in self.featureSet, "unknown action: %s" % action
+        return self.featureSet[action]
 
-        # perform the action if necessary:
-        if hasattr(self, "on_%s" % m):
-            meth = getattr(self, "on_%s" % m)
-            try:
-                meth(ctx)
-            except Redirect, e:
-                ctx.res.redirect(e.where)
-            except Intercept, e:
-                m = e.where
-                # @TODO: is this right? intercept doesnt call, but just shows the form?
-                # maybe that's what deny should do, and intercept should still do
-                # more processing.... 
+    def buildFeature(self, action):
+        """
+        returns an initialized feature instance
+        """
+        return self.findFeature(action)()
 
-        # if still here, show any associated templates
-        if self.tiles.get(m):
-            tile = self.tiles[m]() # call to clear the lambda
-            ctx.res.write(tile.render(ctx.model))
-        else:
-            raise Exception("no template defined for %s method." % m)
-        return ctx # for easy testing
-        
-    #@TODO: this part here implies a specific framework (mine). decouple.
-    def test(self, ctx, method, **kwargs):
-        if kwargs:
-            ctx.req = kwargs
-        getattr(self, "on_" + method)(ctx)
-        return ctx
-        
-        
+    def prepareModel(self,req):
+        return {}
+
+    # this is the main function that gets called from the
+    # app file
+    def dispatch(self, req, res=None):
+        a = self.chooseAction(req)
+        m = self.prepareModel(req)
+        f = self.buildFeature(a)
+        try:            
+            m.update(f.handle(req, res))
+        except platonic.Redirect, e:
+            raise weblib.Redirect(e.where)
+        except platonic.Intercept, e:
+            if e.data:
+                m.update(e.data)
+            f = self.buildFeature(e.where)
+            m.update(f.handle(req,res))
+        f.render(m, res)
+
+        # i thought about letting you chain intercepts and whatnot,
+        # but for the time being that's not possible... it wouldn't
+        # be hard... you'd just put that above stuff in a loop
