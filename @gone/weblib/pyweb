@@ -12,7 +12,7 @@
 # AddType application/python-script .py
 
 
-import os, sys, string, weblib, StringIO
+import os.path, sys, string, weblib, StringIO
 
     
 ## allow imports from script directory ###########################
@@ -27,6 +27,12 @@ sys.path.append(dir)
 ## print "content-type: text/plain"
 ## print
 ## sys.stderr = sys.stdout
+
+
+## run .weblib.py ################################################
+
+if os.path.exists(dir+"/.weblib.py"):
+    execfile(dir+"/.weblib.py")
 
 
 ## run the script ################################################
