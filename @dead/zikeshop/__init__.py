@@ -15,7 +15,6 @@ from Sale import Sale
 from Store import Store
 from Card import Card
 
-
 ### PICTURE ROUTINE #######################
 
 def showPicture(ID=None, size=None):
@@ -32,7 +31,9 @@ def showPicture(ID=None, size=None):
         size = int(weblib.request.get("size",0))
         
     picture = zikebase.Picture(ID=ID)
-    assert picture.siteID == zikeshop.siteID, "Not your image."
+    assert picture.siteID == zikeshop.siteID, \
+           "Not your image. (zikeshop.siteID: %i), (image.siteID: %i)" \
+           % (zikeshop.siteID, picture.siteID)
     weblib.response.contentType=picture.type
     if size:
         im = Image.open(cStringIO.StringIO(picture.picture))
