@@ -1,5 +1,8 @@
 
 *# timesheet entry editing form
+* exec:
+    from zebra.html import *
+  
 
 <form action="timesheet.app" method="POST">
   <table border="0">
@@ -8,6 +11,9 @@
       <td><input type="text" name="day" value="{:day:}"></td>
       <td>hours:</td>
       <td><input type="text" name="hours" value="{:hours:}"></td>
+    </tr>
+    <tr>
+        <td colspan="4">project: {:select("project", ["training","weblib","zebra"], project):}</td>
     </tr>
     <tr><td colspan="4">note:</td></tr>
     <tr>
