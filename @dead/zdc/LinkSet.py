@@ -27,16 +27,13 @@ class LinkSet(zdc.IdxDict):
 
 
     def load(self):
-        try:
-            lID = self.owner.ID
-            if lID is not None:
-                rows = self.rClass._table.select("%s=%i"
-                                                 % (self.lKey, int(lID)))
-                for row in rows:
-                    #@TODO: unhardcode primary key for right hand class
-                    self << self.rClass(ID=row["ID"])
-        except:
-            pass # to make a check_constructor work.. for now..
+        lID = getattr(self.owner, "ID", None)
+        if lID is not None:
+            rows = self.owner._ds.select(self.rClass._tablename, "%s=%i"
+                                         % (self.lKey, int(lID)))
+            for row in rows:
+                #@TODO: unhardcode primary key for right hand class
+                self << self.rClass(self.owner._ds, ID=row["ID"])
         self._loaded = 1
 
 
@@ -46,7 +43,7 @@ class LinkSet(zdc.IdxDict):
             item.save()
 
     def new(self):
-        return self.rClass()
+        return self.rClass(self.owner._ds)
 
     def __len__(self):
         if not self._loaded:
