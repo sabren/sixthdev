@@ -21,54 +21,51 @@ class Junction(zdc.IdxDict):
         self.__super.__init__(self)
         self.owner = owner
         self.rClass = rClass
-        self.tablename = tablename
+        self.table = zdc.Table(self.owner._table.dbc, tablename)
         self.lKey=lKey
         self.rKey=rKey
 
+
+    def clear(self):
+        self.__super.clear(self)
+        # if owner is saved, it may already be linked in db..
+        if self.owner.ID:
+            self.delete()
+
     def delete(self):
         """
-        delete nodes for this product. used internally.
+        Delete the records in the junction, breaking the *:* join.
         """
-        cur = self.owner._table.dbc.cursor()
-        sql =\
-            """
-            DELETE FROM %s
-            WHERE %s=%s
-            """ % (self.tablename, self.lKey, int(self.owner.ID))
-        cur.execute(sql)
-
+        for row in self._getRows():
+            row.delete()
+            
     def fetch(self):
-        if self.owner.ID:
-            cur = self.owner._table.dbc.cursor()
-            sql =\
-                """
-                SELECT %s
-                FROM %s 
-                WHERE %s=%s
-                ORDER BY nodeID
-                """ % (self.rKey, self.tablename, self.lKey,
-                       int(self.owner.ID))
-            cur.execute(sql)
+        """
+        load the junction data..
+        """
+        for obj in self._getRows():
+            self << obj
 
-            # cur.execute returns a tuple of tuples, eg ((1,), (2,) ...)
-            # we only want the first value (column) from each tuple.
-            for row in cur.fetchall():
-                self << self.rClass(ID=row[0])
+    def save(self):
+        """
+        Save the records in the junction.
+        """
+        self.delete()
+        for robj in self:
+            row = self.table.new()
+            row[self.lKey] = int(self.owner.ID)
+            row[self.rKey] = robj.ID
+            row.save()
 
     def IDs(self):
         #@TODO: do I really need .IDs? (maybe for the edit product form?)
         return tuple(map( lambda robj: robj.ID, self))
                 
-    def save(self):
-        # handle the nodes:
-        cur = self.owner._table.dbc.cursor()        
-        self.delete()
-        for robj in self:
-            sql =\
-                """
-                INSERT INTO %s (%s, %s)
-                VALUES (%s, %s)
-                """ % (self.tablename, self.lKey, self.rKey,
-                       int(self.owner.ID), robj.ID)
-            cur.execute(sql)
 
+    def _getRows(self):
+        if self.owner.ID:
+            res = self.table.select("%s=%s" % (self.lKey, int(self.owner.ID)))
+            #@TODO: #orderBy=self.rKey)
+        else:
+            res = []
+        return res
