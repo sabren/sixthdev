@@ -3,13 +3,13 @@ Misc handy routines
 """
 import whrandom
 
-def randpass(length=5):
+def randpass(length=5):    
     okay = "abcdefghijkmnopqrstuvwxyz2345678923456789"
     res = ""
     for i in range(length+1):
         res += okay[whrandom.randrange(0, len(okay))]
-        return res
-
+    return res
+    
 
 def sendmail(mail):
     import os
