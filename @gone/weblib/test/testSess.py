@@ -90,6 +90,10 @@ class SessTestCase(unittest.TestCase):
         self.sess.sid = "ABC"
         assert self.sess.url("http://x.com") == "http://x.com?sess=ABC", \
                "sess.url() doesn't encode correctly.."
+
+        assert self.sess.url("http://x.com?xyz=123") \
+               == "http://x.com?xyz=123&sess=ABC", \
+               "sess.url() doesn't encode correctly.."
         
 
     def check_getSid(self):

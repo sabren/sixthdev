@@ -77,8 +77,15 @@ class Sess:
         URL, else the URL is returned unmodified.
 
         """
-        # @TODO: make sess.url() handle urls with exsiting querystrings..
-        return oldurl + "?%s=%s" % (self.name, self.sid)
+        import string
+        
+        # if there's not already a querystring:
+        if string.find(oldurl, "?") == -1:
+            return oldurl + "?%s=%s" % (self.name, self.sid)
+        else:
+            return oldurl + "&%s=%s" % (self.name, self.sid)
+
+        #@TODO: have sess.url overwrite old sess ID's in querystring
 
 
     def stop(self):
