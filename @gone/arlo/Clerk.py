@@ -1,4 +1,4 @@
-from arlo import LinkInjector
+from arlo import LinkInjector, LinkSetInjector
 from pytypes import IdxDict
 from strongbox import attr
 
@@ -31,28 +31,24 @@ class Clerk:
         relevant_columns = self._attr_columns(klass, data_from_db)
         obj.update(**relevant_columns)
         return obj
-        
 
+    def match(self, klass, **where):
+        res = []
+        for row in self.storage.match(self._unmap_class(klass), **where):
+            attrs, othercols = self._attr_and_other_columns(klass, row)
+            obj = klass(**attrs)
+            self._add_injectors(obj, othercols)
+            res.append(obj)
+        return res
+   
     def fetch(self, klass, ID):
-        attrs, othercols = self._fetch_attr_and_other_columns(klass, ID)
-        obj = klass(**attrs)
-        for name,link in klass.__get_links__():
-            fclass, column = self._unmap_link(klass, link, name)
-            fID = othercols.get(column)
-            if fID:
-                inj = LinkInjector(obj, name, self, fclass, fID)
-        return obj
-
+        return self.match(klass, ID=ID)[0]
 
     def fetch_or_new(self, klass, ID):
         if ID:
             return self.fetch(klass, ID)
         else:
             return klass()
-
-    def match(self, klass, **where):
-        return [klass(**row) for row
-                in self.storage.match(self._unmap_class(klass), **where)]
 
     def delete(self, klass, ID):
         self.storage.delete(self._unmap_class(klass), ID)
@@ -68,6 +64,21 @@ class Clerk:
 
 
     ### private stuff ###############################################
+
+
+    def _add_injectors(self, obj, othercols):
+        klass = obj.__class__
+        ## linkinjectors:
+        for name,link in klass.__get_links__():
+            fclass, column = self._unmap_link(klass, link, name)
+            fID = othercols.get(column)
+            if fID:
+                inj = LinkInjector(obj, name, self, fclass, fID)
+        ## linksetinjectors:
+        for name,link in klass.__get_linksets__():
+            fclass, column = self._unmap_link(klass, link, name)
+            inj = LinkSetInjector(obj, name, self, fclass, column)
+
 
     def _unmap_class(self, klass):
         if klass in self.dbmap:
@@ -102,10 +113,6 @@ class Clerk:
             else:
                 others[item]=rec[item]
         return attrs, others
-
-    def _fetch_attr_and_other_columns(self, klass, ID):
-        rec = self.storage.fetch(self._unmap_class(klass), ID)
-        return self._attr_and_other_columns(klass, rec)
 
 
 
