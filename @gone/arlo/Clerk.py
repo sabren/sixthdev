@@ -4,7 +4,7 @@ from strongbox import attr
 
 class ClerkError(Exception): pass
 
-class Clerk:
+class Clerk(object):
     __ver__="$Id$"
     """
     Clerk is an object-relational mapper, responsible
