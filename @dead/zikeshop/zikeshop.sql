@@ -144,8 +144,8 @@ CREATE TABLE shop_product (
   siteID int(11),
   ts timestamp(14),
   weight decimal(5,2),
-  inStock int(11) DEFAULT '0',
-  onHold int(11) DEFAULT '0',
+  stock int(11) DEFAULT '0',
+  hold int(11) DEFAULT '0',
   class enum('product','style'),
   PRIMARY KEY (ID)
 );
