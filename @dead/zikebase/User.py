@@ -13,6 +13,10 @@ import zdc
 class User(zikebase.Contact):
     __super = zikebase.Contact
     passwordClass = zikebase.Password
+    _links = {
+        #@TODO: this doesn't seem to be working..
+        "contacts": [zdc.LinkSet, zikebase.Contact, "userID"],
+        }
         
     def _new(self):
         self.__super._new(self)
@@ -62,11 +66,15 @@ class User(zikebase.Contact):
         
     # we want to encrypt the passwords transparently.
     def get_password(self):
-        """returns a zikebase.Password object for testing against plaintext."""
+        """
+        returns a zikebase.Password object for testing against plaintext.
+        """
         return self.passwordClass(self._userRec["password"])
     
     def set_password(self, value):
-        "user.password = 'whatever'  # Transparently encrypt the password"
+        """
+        user.password = 'whatever'  # Transparently encrypt the password
+        """
         pw = self.passwordClass()
         pw.set(value)
         self._userRec["password"] = pw.crypted
