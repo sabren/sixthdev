@@ -65,9 +65,13 @@ class SqlSessPool:
         name varchar(32),
         sid varchar(64),
         sess blob,
-        tsUpdate timestamp,
+        tsUpdate bigint,
         primary key (name, sid)
     );
+
+
+    (tsUpdate is a bigint instead of a timestamp because
+     sqlite doesn't do timestamps...)
     """
 
     def __init__(self, dbc, table='web_sess'):
@@ -94,16 +98,20 @@ class SqlSessPool:
 
 
     def putSess(self, name, sid, frozensess):
-        import string
-        
+        import string, time       
 	frozen = string.replace(frozensess, "'", "''")
-
         cur = self.dbc.cursor()
-        sql = "REPLACE " + self.table + " " + \
-              "set sess='" + frozen + "', tsUpdate=now(), " + \
-              "name='" + name + "', sid='" + sid + "'"
-        cur.execute(sql)
-
+        sql =\
+            """
+            REPLACE INTO %s (sess, name, sid, tsUpdate)
+            VALUES ('%s', '%s', '%s', %s)
+            """ % (self.table, frozen, name, sid, time.time())
+        try:
+            cur.execute(sql)
+        except Exception, e:
+            raise Exception, "error storing session: %s \n SQL WAS:\n %s" \
+                  % (e, sql)
+    
 
     def drain(self, name, beforeWhen):
         cur = self.dbc.cursor()
