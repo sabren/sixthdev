@@ -86,6 +86,8 @@ class BankOfAmericaPayment(payment.AbstractPayment):
             if resdict["ioc_response_code"]=="0":
                 self.result = payment.APPROVED
                 self.authcode = resdict["ioc_authorization_code"]
+                self.authamount = resdict["ioc_authorization_amount"]
+                self.authid = resdict["ioc_order_id"]
                 self.error = None
             else:
                 self.error = resdict["ioc_reject_description"]
@@ -93,11 +95,14 @@ class BankOfAmericaPayment(payment.AbstractPayment):
                     self.result = payment.ERROR
                     errs = resdict["ioc_invalid_fields"].split(",")
                     for e in range(0, len(errs), 3):
-                        field, val, reason = errs[e:e+3]
-                        field = field[5:]
-                        reason = reason[:-1]
-                        self.details += "%s: %s (value was '%s')<br>" \
-                                      % (field, reason, val)
+                        try:
+                            field, val, reason = errs[e:e+3]
+                            field = field[5:]
+                            reason = reason[:-1]
+                            self.details += "%s: %s (value was '%s')<br>" \
+                                            % (field, reason, val)
+                        except:
+                            self.details += str(errs)
                 else:
                     self.result = payment.DENIED
 
