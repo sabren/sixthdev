@@ -28,14 +28,19 @@ useMessy = 0
 ###################################################
 
 class Engine:
+
     def __init__(self, generator=None):
         self.parser = Parser()
         if generator == None:
             self.generator = Generator()
         else:
             self.generator = generator
+
+    def parse(self, text):
+        return self.parser.parse(text)
+            
     def compile(self, text):
-        return self.generator.generate(self.parser.parse(text))
+        return self.generator.generate(self.parse(text))
 
 
 
@@ -44,6 +49,38 @@ class Engine:
 ###################################################
 
 class Parser (xmllib.XMLParser):
+    """zebra.Parser - extends xmllib.XMLParser
+
+    The whole point of this parser is to read in the zebra template
+    and create a data structure that can be passed to a code
+    generator. The data structure looks like this:
+
+        {'stripe' : self.stripe,      # a list of lists
+         'named' : self.named,        # a dict of named stripes
+         'skins' : self.skins,        # a dict of stripes
+         'queries' : self.queries,    # a dict of queries
+         'sources' : self.sources}    # a dict of data source definitions
+
+    xmllib.XMLParser is an event-based parser, so in order
+    to keep track of where we are, we maintain stacks. See
+    reset() for details.
+
+    Some of zebra's structures (reports, skins, etc) are made
+    of several pieces... These are stored collectively in
+    a dictionaries of various shapes. The current one should
+    always be made available through self.struct.
+
+    Likewise, the current stripe - a block of data between xml tags -
+    should always be made available via self.stripe.
+
+    At some point, it's very likely that much of this scheme will be
+    replaced by a DOM implementation so that more complex
+    transformations/etc can happen. These will mostly all be done by
+    the parser, and the current returned dict should remain intact
+    [though possibly extended] so as not to disturb the various
+    Generator subclasses.
+    
+    """
 
     ###############################################
 
@@ -51,7 +88,6 @@ class Parser (xmllib.XMLParser):
         xmllib.XMLParser.__init__(self)
 
     def reset(self):
-
         """Resets internal variables.
         called by XMLParser.__init__ and ZebraParser.parse"""
 
@@ -77,8 +113,10 @@ class Parser (xmllib.XMLParser):
         #it should work with show and exec as well..
         self.contextstack = []
 
-        self.named  = {} # named structures go in here
-        self.skins  = {} # skins go in here
+        self.named   = {} # named stripes go in here
+        self.skins   = {} # skins go in here
+        self.queries = {} # queries go in here
+        self.sources = {} # sources go in here
 
         self.struct  = {} # current structure (report, skin, etc)
         self.stripe  = [] # current stripe
@@ -88,10 +126,42 @@ class Parser (xmllib.XMLParser):
 
     ###############################################
 
-    def handle_data(self, data):
+    def popStruct(self):
+        """pops a struct off the datstack"""
+        self.struct = self.datstack[-1]
+        self.datstack = self.datstack[:-1]
 
+    def pushStruct(self):
+        self.datstack.append(self.struct)
+
+    def pushStripe(self):
+        self.datstack.append(self.stripe)
+
+    def popStripe(self):
+        """Pops a stripe/data off the datstack.."""
+        self.stripe = self.datstack[-1]
+        self.datstack = self.datstack[:-1]
+
+    ###############################################
+        
+    def handle_data(self, data):
         """this method adds text to the current stripe,
         unless we're in eval context. Then it adds it to 'eval'.."""
+
+
+        ## we strip the last newline, so that:
+        
+        ## * show
+        ## abcedefg
+        ## * show
+        ## hijklmnop
+
+        ## becomes 'abcdefghijklmnop'
+        ##
+        ## get the newline back just by adding another one.
+
+        if data[-1] == "\n":
+            data = data[:-1]
 
         if self.context == "eval":
             self.eval = self.eval + data
@@ -158,32 +228,74 @@ class Parser (xmllib.XMLParser):
 
     ###############################################
 
+    def start_source(self, attrs):
+        self.pushStruct()
+        self.pushStripe()
+        
+        self.struct = {
+            "class": attrs["class"] }        
+        self.sources[attrs["name"]] = self.struct
+
+        self.stripe = []
+        self.struct["connector"] = self.stripe
+
+    def end_source(self):
+        self.popStripe()
+        self.popStruct()
+    
+    ###############################################
+
+    def start_query(self, attrs):
+        self.pushStruct()
+        self.pushStripe()
+
+        self.struct = {
+            "source" : attrs["source"] }
+        self.queries[attrs["name"]] = self.struct
+
+        self.stripe = []
+        self.struct["query"] = self.stripe
+
+    def end_query(self):
+        self.popStripe()
+        self.popStruct()
+    
+    ###############################################
+
+    def start_report(self, attrs):
+        self.pushStruct()
+        self.struct = {
+            "tag"   : "report", # call flatten_report() instead of flatten()
+            "query" : attrs["query"], # the name of a query 
+            "head"  : [],
+            "body"  : [],
+            "foot"  : [],
+            "none"  : [],
+            "grouph": [], # group heads
+            "groupf": [], # group feet
+            "groups": [], # groups (fields)
+            "gdepth": 0}  # group depth
+
+    def end_report(self):
+        ## append the structure to the current stripe
+        self.stripe.append(self.struct)
+        self.popStruct()
+
+    ###############################################
+
     def unknown_starttag(self, tag, attrs):
 
         tag = string.replace (tag, "z:", "")
         self.tagstack.append(tag)
 
         if tag == "zebra":
-            ## @TODO: handle language attribute..
+            ## @TODO: handle language attribute.. (do i need one?)
             pass
-        elif tag == "report":
-            self.datstack.append(self.struct)
-            self.struct = {
-                "tag"  : tag,
-                "query": [],
-                "head" : [],
-                "body" : [],
-                "foot" : [],
-                "none" : [],
-                "grouph": [], # group heads
-                "groupf": [], # group feet
-                "groups": [], # groups (fields)
-                "gdepth": 0}  # group depth
         elif tag in ["query", "head", "body", "foot", "none"]:
             ## then start a new stripe!
             self.datstack.append(self.stripe)
             self.stripe = []
-            ## @TODO: fix this:
+            ## @TODO: fix this, but figure out what's wrong with it first. :)
             if tag=="query":
                 self.struct["source"]=attrs["source"]
         elif tag in ["stripe", "show", "exec", "if", "el", "ef"]:
@@ -244,7 +356,7 @@ class Parser (xmllib.XMLParser):
         elif tag == "insert":
             self.stripe.append("{!" + attrs["stripe"] + "}")
         else:
-            pass # <zebra>, or unknown tag
+            pass # ignore unknown tags
 
 
     ###############################################
@@ -258,17 +370,12 @@ class Parser (xmllib.XMLParser):
         if tag in ["query", "head", "foot", "body", "none"]:
             if parent == "group" and tag in ["head", "foot"]:
                 ## grouph will look like: [outer, middle, inner]
-                ## groupt will look like: [inner, middle, outer]
+                ## groupf will look like: [inner, middle, outer]
                 ## It's just easier that way.
                 self.struct["group" + tag[0]].append( self.stripe )
             else:
                 self.struct[tag] = self.stripe
             self.stripe = self.datstack[-1]
-            self.datstack = self.datstack[:-1]
-        elif tag in ["report"]:
-            ## append the structure to the current stripe
-            self.stripe.append(self.struct)
-            self.struct = self.datstack[-1]
             self.datstack = self.datstack[:-1]
         elif tag in ["skin"]:
             ## just pop the old struct off the stack.
@@ -289,12 +396,12 @@ class Parser (xmllib.XMLParser):
             ## doesn't, even out the stack(s) with an empty value
             if len(self.struct["grouph"]) < len(self.struct["groups"]):
                 self.struct["grouph"].append(None)
-            ## Remember, groupt is in backwards order from
+            ## Remember, groupf is in backwards order from
             ## grouph. It sounds strange, but that actually is what I want,
             ## because that's the order in which I'll need them.
-            ## so, grouph and groupt get processed the same here.
-            if len(self.struct["groupt"]) < len(self.struct["groups"]):
-                self.struct["groupt"].append(None)
+            ## so, grouph and groupf get processed the same here.
+            if len(self.struct["groupf"]) < len(self.struct["groups"]):
+                self.struct["groupf"].append(None)
         else:
             pass # </zebra>, or unknown tag
 
@@ -314,7 +421,9 @@ class Parser (xmllib.XMLParser):
         self.parsed = {
             "stripe" : self.stripe,
             "named"  : self.named,
-            "skins"  : self.skins,}
+            "skins"  : self.skins,
+            "queries": self.queries,
+            "sources": self.sources}
         return self.parsed
 
 
@@ -346,9 +455,13 @@ class Generator:
     def __init__(self):
         self.head = ""
         self.foot = ""
+        self.initialDepth = 0
     
     def generate(self, parsedict):
-        return self.head + self.flatten(parsedict["stripe"]) + self.foot
+        self.parsedict = parsedict
+        return self.head \
+               + self.flatten(parsedict["stripe"],self.initialDepth) \
+               + self.foot
 
     
     def flatten(self, stripeset, depth=0, context="show"):
@@ -386,6 +499,8 @@ if (useMessy):
 ###################################################
 
 if __name__ == "__main__":
+    from PyGenerator import PyGenerator
+    from PHPGenerator import PHPGenerator
 
     # read in the file, if supplied,
     if len (sys.argv) > 1:
@@ -396,6 +511,6 @@ if __name__ == "__main__":
         zbo = sys.stdin.read()
 
     # compile it and print the results
-    zEngine = Engine()
+    zEngine = Engine(PyGenerator())
     #print zEngine.parse(zbo)
     print zEngine.compile(zbo)
