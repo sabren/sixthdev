@@ -17,7 +17,7 @@ class ZSUserApp(zikebase.UserApp):
         next = "action=get_shipping"
         if self.input.get('isSame'):
             next = "action=set_shipping&use_billing=true"
-        weblib.response.redirect("checkout.py?%s" % next)
+        self.next = ("jump", next)
 
 
 ##     def act_login(self):

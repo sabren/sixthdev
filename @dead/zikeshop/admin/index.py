@@ -28,8 +28,8 @@ class ZikeShopAdminApp(zikebase.AdminApp):
     ## home page ########################################
 
     def act_(self):
-        print "zikeshop home page"
-
+        self.list_category()
+        
     ## category stuff ##################################
         
     def list_category(self):
@@ -40,6 +40,9 @@ class ZikeShopAdminApp(zikebase.AdminApp):
     ## product stuff ###################################
 
     def list_product(self):
+        # we want to see products in a particular node
+        # (or in no nodes at all)
+        #@TODO: fix this! it crashes when nodeID is used.
         self.model["nodeID"] = self.input.get("nodeID", 0)
         self.consult("mdl_product")
         self.consult("mdl_category")

@@ -6,6 +6,9 @@ __ver__ = "$Id$"
 import unittest
 import zikeshop
 
+import sys
+sys.path.append("../zikeshop/public")
+
 class CheckoutAppTestCase(unittest.TestCase):
     
     def setUp(self):
@@ -30,7 +33,7 @@ class CheckoutAppTestCase(unittest.TestCase):
         # create a product to buy
         prod = zikeshop.Product()
         prod.name='coconut'
-        prod.code='ccnut'
+        prod.code='coco'
         prod.siteID = zikeshop.siteID
         prod.save()
 

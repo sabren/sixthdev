@@ -13,7 +13,7 @@
 <b>weight:</b> {:weight:} lbs<br>
 <b>categories:</b><br>
 
-* for nodes:
+* for categories:
     <a href="index.py?action=lst_product&nodeID={:ID:}">{:path:}</a><br>
 * none:
     Not in any categories.<br>

@@ -1,5 +1,5 @@
 """
-An Event Detail.
+a Sale Detail.
 """
 __ver__="$Id$"
 

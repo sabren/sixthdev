@@ -1,8 +1,8 @@
 """
 customer authentication...
-
-$Id$
 """
+__ver__="$Id$"
+
 import zikeshop
 import zikebase
 zikebase.load("UserAuth")

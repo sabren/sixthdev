@@ -3,8 +3,7 @@ zikeshop.Sale - for representing Sale events
 """
 __ver__="$Id$"
 
-import zdc
-import zikeshop
+import zikeshop, zikebase, zdc
 
 class Sale(zdc.RecordObject):
     __super = zdc.RecordObject
@@ -23,8 +22,12 @@ class Sale(zdc.RecordObject):
         self.shiptypeID = 0
         self.cardID = 0 
         self.status = "new"
+
         self.subtotal = 0
+        self.shipping = 0
         self.salestax = 0
+        self.adjustment = 0
+        self.total = 0
 
         self.siteID = 0 #@TODO: remove this!
         
@@ -32,29 +35,40 @@ class Sale(zdc.RecordObject):
 
     #@TODO: replace all this crap with generic stuff from ZDC...
     def get_shipAddress(self):
-        return zikeshop.Address(ID=self.ship_addressID)
+        if self.ship_addressID:
+            return zikebase.Contact(ID=self.ship_addressID)
+        else:
+            return zikebase.Contact()
 
     def get_billAddress(self):
-        return zikeshop.Address(ID=self.bill_addressID)
+        if self.bill_addressID:
+            return zikebase.Contact(ID=self.bill_addressID)
+        else:
+            return zikebase.Contact()
 
     def get_customer(self):
-        return zikeshop.Customer(ID=self.customerID)
+        if self.customerID:
+            return zikeshop.Customer(ID=self.customerID)
+        else:
+            return zikeshop.Customer()
 
     def get_card(self):
-        return zikeshop.Card(ID=self.cardID)
+        if self.cardID:
+            return zikeshop.Card(ID=self.cardID)
+        else:
+            return zikeshop.Card()
    
-    def set_shipAddress(self):
-        raise "shipAddress is read only."
+    def set_shipAddress(self, value):
+        self.ship_addressID = value.ID
 
-    def set_billAddress(self):
-        raise "billAddress is read only."
+    def set_billAddress(self, value):
+        self.bill_addressID = value.ID
 
-    def set_customer(self):
-        raise "customer is read only."
+    def set_customer(self, value):
+        self.customerID = value.ID
 
-    def set_card(self):
-        raise "card is read only."
-
+    def set_card(self, value):
+        self.cardID = value.ID
 
 
     def set_status(self, value):
@@ -65,7 +79,7 @@ class Sale(zdc.RecordObject):
 
 
     def get_subtotal(self):
-        res = zikeshop.FixedPoint('0.00')
+        res = zdc.FixedPoint('0.00')
         for item in self.details:
             if item.productID:
                 if item.subtotal is not None:
@@ -73,22 +87,12 @@ class Sale(zdc.RecordObject):
         return res
 
     
-    def addDetail(self, det):
-        """
-        This method adds a detail to the event.
-        """
-        if type(det) == type(0):
-            det = zikeshop.Detail(ID=det)
-        if not det in self.details:
-            det.saleID = self.ID
-            self.details << det
-
     def save(self):
         doTS = not(self.ID)
 
         # @TODO: where should this go, and when should
         # it be updated?
-        self.total = zikeshop.FixedPoint('0.00') \
+        self.total = zdc.FixedPoint('0.00') \
                      + self.subtotal \
                      + self.shipping \
                      + self.salestax \

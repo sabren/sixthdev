@@ -7,11 +7,10 @@ import zikeshop
 class CartApp(zikeshop.PublicApp):
     __super = zikeshop.PublicApp
 
-    def enter(self):
+    def __init__(self):
+        self.__super.__init__(self)
         self.silent = 0
-        self.__super.enter(self)
         self.consult("lib_link")
-
 
     def act_(self):
         self.do("view")
@@ -32,7 +31,7 @@ class CartApp(zikeshop.PublicApp):
         quantity = self.input.get("quantity")
 
         self.cart.add(label, prod.price, quantity, link, extra)
-        self.do("view")
+        self.next = "view"
 
     def act_view(self):
         import zebra

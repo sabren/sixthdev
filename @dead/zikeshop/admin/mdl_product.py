@@ -15,7 +15,7 @@ if locals().get("nodeID"):
         cat = zikeshop.Category()
         cat.ID = 0
 
-    model["products"] = cat.q_products()
+    model["products"] = zdc.ObjectView(cat.products)
     model["path"] = cat.path
 else:
     products = []

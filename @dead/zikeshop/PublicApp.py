@@ -1,6 +1,7 @@
 """
 PublicApp - a base class for zikeshop's public AppActors.
 """
+__ver__="$Id$"
 
 import weblib, zikeshop
 

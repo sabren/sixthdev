@@ -4,14 +4,25 @@ checkout process for the cart (records the sale)
 __ver__="$Id$"
 
 import zikeshop
+zikeshop.siteID = 1 #@TODO: fix this!!!!!!!
+
+
+
 class CheckoutApp(zikeshop.PublicApp):
     __super = zikeshop.PublicApp
 
-    def __init__(self):
-        self.__super.__init__(self)
+    def __init__(self, cart=None, input=None):
+        self.__super.__init__(self, cart, input)
 
         import weblib
-        weblib.auth.check()
+        # get the customer?
+        try:
+            #@TODO: this is only "tried" for testing purposes.. clean up!
+            weblib.auth.check()
+            self.cust = weblib.auth.user
+        except AttributeError:
+            self.cust = zikeshop.Customer()
+            self.cust.ID = 0
 
         # internal data:
         #@TODO: why  won't weblib store a Sale object in the session?
@@ -21,7 +32,9 @@ class CheckoutApp(zikeshop.PublicApp):
 
         if not self.data.has_key('bill_addressID'):
             #@TODO: double check that .ID is correct
-            self.data['bill_addressID']=weblib.auth.user.ID
+            self.data['bill_addressID']=self.cust.ID
+
+            
         
     ## Actor methods ############################
     
@@ -31,11 +44,6 @@ class CheckoutApp(zikeshop.PublicApp):
         # @TODO: clean this up:
         if self.cart.isEmpty():
             raise Error, "Can't check out because cart is empty."
-
-        # get the customer?
-        weblib.auth.check()
-        self.cust = weblib.auth.user
-
 
     def exit(self):
         self.__super.exit(self)
@@ -57,9 +65,9 @@ class CheckoutApp(zikeshop.PublicApp):
         zebra.show('frm_billing', self.model)
 
     def act_set_billing(self):
-        self.data['bill_addressID']=self.data['addressID']
-        self.checkShipToBilling():
-        if self.data['shipping']:
+        self.data['bill_addressID']=self.input['addressID']
+        self.checkShipToBilling()
+        if self.data.get('ship_addressID'):
             self.next='get_card'
         else:
             self.next='get_shipping'
@@ -69,7 +77,7 @@ class CheckoutApp(zikeshop.PublicApp):
         zebra.show('frm_billing', self.model)
 
     def act_set_shipping(self):
-        self.checkShiptoBilling()
+        self.checkShipToBilling()
         self.next='get_card'
 
     def act_add_address(self):
@@ -112,7 +120,7 @@ class CheckoutApp(zikeshop.PublicApp):
 
     def act_get_card(self):
         import zebra, zdc
-        self.consult(zdc.ObjectView(weblib.auth.user))
+        self.consult(zdc.ObjectView(self.cust.user))
         zebra.show("frm_card", self.model)
 
 

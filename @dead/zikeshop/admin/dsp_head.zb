@@ -39,10 +39,7 @@ h1 {
        <a href="index.py?action=list&what=product">products</a> |
        <a href="index.py?action=list&what=sale">sales</a> |
        <a href="index.py?action=inventory">inventory</a> |
-       affiliates |
-       reports |
-       options |
-       zike |</font></td>
+       </font></td>
   </tr>
   <tr bgcolor="#FFFFFF"> 
     <td colspan="8"> 

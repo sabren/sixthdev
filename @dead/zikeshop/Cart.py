@@ -4,7 +4,7 @@ Cart.py - a cart class for zikeshop
 $Id$
 """
 
-import weblib
+import weblib, zdc
 
 class Cart:
 
@@ -136,11 +136,11 @@ class Cart:
     def calcWeight(self):
         """calculate order weight by summing product weights"""
         weight = 0
-        import weblib, zikeshop
+        import weblib, zikeshop, zdc
         for item in self.q_contents():
             weight = weight + \
-                     (zikeshop.FixedPoint(weblib.deNone(item["extra"]
-                                                        ["weight"],0))
+                     (zdc.FixedPoint(weblib.deNone(item["extra"]
+                                                   ["weight"],0))
                       * item["quantity"])
         return weight
 
@@ -148,10 +148,10 @@ class Cart:
 
     def q_contents(self):
         """Returns an editable copy of the cart's contents, plus subtotals"""
-        import copy, zikeshop
+        import copy, zikeshop, zdc
         res = copy.deepcopy(self._contents)
         for row in res:
-            row["subtotal"] = str(zikeshop.FixedPoint(row["price"]) \
+            row["subtotal"] = str(zdc.FixedPoint(row["price"]) \
                                   * row["quantity"])
         return res
 

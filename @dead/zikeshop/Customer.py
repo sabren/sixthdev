@@ -1,3 +1,7 @@
+"""
+Customer class for zikeshop
+"""
+__ver__="$Id$"
 
 import zdc
 import zikebase
@@ -16,18 +20,6 @@ class Customer(zikebase.User):
         self.uid = weblib.uid()
         self.siteID = getattr(zikeshop, "siteID", 0)
         self.username = ""
-
-
-    ## primary address:
-
-    def get_address(self):
-        """cart.address returns primary address"""
-        return zikeshop.Address(customerID=self.ID, isPrimary=1)
-
-    
-    def set_address(self, value):
-        """this makes the address attribute read-only"""
-        raise TypeError, ".address is readonly."
 
 
     ## addressbook:

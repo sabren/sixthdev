@@ -25,7 +25,7 @@ class Product(zdc.RecordObject):
     #
     # I need this to display the product page
     # (this product is in ...)
-    _tuples = ['nodes']
+    _tuples = ['categories']
     
     ### Magic RecordObject Methods ############################
 
@@ -37,6 +37,7 @@ class Product(zdc.RecordObject):
         self.__super._new(self)
         self._data['class'] = "product"
         self.price = 0
+        self.cost = 0
         self.retail = 0
         self.weight = 0
         self.parentID = 0
@@ -126,7 +127,14 @@ class Product(zdc.RecordObject):
         return self.inStock - self.onHold
 
     def get_price(self):
-        return zikeshop.FixedPoint(self._data.get('price', '0.00'))
+        return zdc.FixedPoint(self._data.get('price', '0.00'))
+
+    def get_cost(self):
+        return zdc.FixedPoint(self._data.get('cost', '0.00'))
+
+    def get_retail(self):
+        return zdc.FixedPoint(self._data.get('retail', '0.00'))
+
 
     def set_picture(self, blob):
         # on a multipart/form-data form,
@@ -151,6 +159,10 @@ class Product(zdc.RecordObject):
     def get_nodes(self):
         #@TODO: replace with a junction thingy..
         return map(lambda x: zikebase.Node(ID=x), self.nodeIDs)
+
+    def get_categories(self):
+        #@TODO: replace with a junction thingy..
+        return map(lambda x: zikeshop.Category(ID=x), self.nodeIDs)
 
     def get_styles(self):
         res = []

@@ -1,7 +1,13 @@
+"""
+test cases for zikeshop.Product
+"""
+__ver__="$Id$"
 
 import unittest
 import zikeshop
+import zikeshop.test
 import zikebase
+import zdc
 
 class ProductTestCase(unittest.TestCase):
 
@@ -14,6 +20,47 @@ class ProductTestCase(unittest.TestCase):
         zikeshop.siteID = -1
         self.cur.execute("INSERT INTO shop_product (code, name, siteID) "
                          "VALUES ('some01', 'something', -1)")
+
+
+    ## price, cost, and retail should all be FixedPoints ###############
+
+    def check_price(self):
+        assert isinstance(zikeshop.Product().price, zdc.FixedPoint), \
+               "price is wrong type!"
+
+    def check_cost(self):
+        assert isinstance(zikeshop.Product().cost, zdc.FixedPoint), \
+               "cost is wrong type!"
+
+    def check_retail(self):
+        assert isinstance(zikeshop.Product().retail, zdc.FixedPoint), \
+               "retail is wrong type!"
+
+
+    ## categories collection #########################################
+
+    def check_categories(self):
+        prod = zikeshop.Product()
+        assert prod.categories == [], \
+               "categories should be empty list by default"
+
+        node = zikebase.Node()
+        node.name="abc"
+        node.save()
+        node = zikebase.Node()
+        node.name="xyz"
+        node.save()
+        
+        prod = zikeshop.Product()
+        prod.code = 'some03'
+        prod.name = 'something else'
+        prod.nodeIDs = (1, 2)
+        prod.save()
+
+        cats = prod.categories
+        assert cats[0].name == "abc" and cats[1].name == "xyz", \
+               ".categories broke."
+
 
     def check_nodeIDs(self):
         prod = zikeshop.Product()
@@ -60,31 +107,6 @@ class ProductTestCase(unittest.TestCase):
             assert prod.nodeIDs == (1,), \
                    "product doesn't cope with single nodeID"
 
-
-
-    def check_nodes(self):
-        node = zikebase.Node()
-        node.name="abc"
-        node.save()
-        node = zikebase.Node()
-        node.name="xyz"
-        node.save()
-        
-        prod = zikeshop.Product()
-        prod.code = 'some03'
-        prod.name = 'something else'
-        prod.nodeIDs = (1, 2)
-        prod.save()
-
-        nodes = prod.nodes
-        assert nodes[0].name == "abc" and nodes[1].name == "xyz", \
-               "get_nodes broke."
-
-
-    def check_price(self):
-        assert isinstance(zikeshop.Product().price, zikeshop.FixedPoint), \
-               "price is wrong type!"
-       
 
     def check_validation(self):
         prod = zikeshop.Product()

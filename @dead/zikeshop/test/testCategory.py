@@ -13,6 +13,11 @@ class CategoryTestCase(unittest.TestCase):
 
 
     def check_products(self):
+
+        cat = zikeshop.Category()
+        assert cat.products == [], \
+               ".products should be empty list by default"
+        
         self.cur.execute("DELETE FROM base_node")
         self.cur.execute("DELETE FROM shop_product")
         self.cur.execute("DELETE FROM shop_product_node")

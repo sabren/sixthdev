@@ -6,27 +6,93 @@ __ver__="$Id$"
 import lecter
 from lecter import read, grab
 
+#@TODO: why do I have to do this:
+import weblib; weblib.sess = {}
+import zikeshop
+weblib.auth = zikeshop.CustomerAuth()
+weblib.request = weblib.Request()
+
 #############################
 
 class SaleTest(lecter.SystemTest):
 
     def plan(self):
         execfile("w:/zikeshop/test/fakedata.py")
-        self.score_category()
 
-    def score_category(self):
-        actual = grab("category.py")
-        goal = read("category.htm")
-        self.check("display corrrect category page", actual == goal)
+        #actual = grab("category.py")
+        #goal = read("category.htm")
+        #self.check("display corrrect category page", actual == goal)
 
-    def score_
+        # user browses, finds product
+        # ...
 
+        # user adds product to the cart...
+        import zikeshop.public.cart
+        app = zikeshop.public.cart.CartApp()
+        app.do("add", productID=1)
+        del app
+
+        # fills out the form on the user page...
+        # ...
+        
+        # and posts it to the checkout process..
+        import zikeshop.public.user
+        uApp = zikeshop.public.user.ZSUserApp()
+        uApp.do("create", fname='fred', lname='tempy', isSame='checked')
+
+        weblib.auth.check()
+        fred = weblib.auth.user
+        self.check("got right customer", fred.fname=='fred')
+        
+
+        #@TODO: fix the jump location..
+        #@TODO: actually, this should cause validation because no email..
+        self.check('redirect to correct page after new user',
+                   uApp.next == ("jump",
+                                 'checkout.py?set_billing&shipToBilling=1'))
+        del uApp
+
+
+        # set the billing + shipping addresses at once:
+        import zikeshop.public.checkout
+        cApp = zikeshop.public.checkout.CheckoutApp()
+        cApp.do("set_billing",
+                addressID=weblib.auth.user.ID,
+                shipToBilling="1")
+        self.check("card page after bill+ship",
+                   cApp.next=='get_card')
+
+
+        # fill out the card form
+        # ...
+
+        # post it, and get the receipt...
+        cApp.do("add_card",
+                name='FRED C TEMPY', number='1234',
+                expMonth='01', expYear='2022')
+
+
+        # now test that the sale is complete:
+        sale = zikeshop.Sale(ID=1)
+        self.check("got the product", sale.details[0].productID==1)
+        self.check("got the right subtotal", sale.subtotal==5)
+        self.check("got the right total", sale.total==5)
+
+        self.check("billed right person", sale.bill_addressID==fred.ID)
+        self.check("shipped to right person", sale.ship_addressID==fred.ID)
+        
 
 if __name__=="__main__":
     test = SaleTest()
     print "testing... "
     score = test.score()
+    print "-" * 55
     for line in test.results:
-        print line
-    print "score:", score
+        print "%51s " % line[0],
+        if line[1]:
+            print "OK"
+        else:
+            print ":("
+    print "-" * 55
+    print "%55s" % ("score: %s" % score)
 

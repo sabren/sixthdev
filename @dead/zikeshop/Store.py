@@ -3,8 +3,7 @@ class to represent the actual store
 """
 __ver__="$Id$"
 
-import zdc
-import zikeshop
+import zdc, zikeshop, zikebase
 
 class Store(zdc.RecordObject):
     __super = zdc.RecordObject
@@ -27,9 +26,9 @@ class Store(zdc.RecordObject):
         if self._address:
             return self._address
         elif self.addressID:
-            return zikeshop.Address(ID=self.addressID)
+            return zikebase.Contact(ID=self.addressID)
         else:
-            return zikeshop.Address()
+            return zikebase.Contact()
 
 
     ## collections ########################################
@@ -74,7 +73,7 @@ class Store(zdc.RecordObject):
         if weight > 0:
             ## ask ups for the price
             import zikeshop.UPS
-            res = zikeshop.FixedPoint(
+            res = zdc.FixedPoint(
                 zikeshop.UPS.getRate(fromZip, toZip, toCountryCD, weight))
 
             ## it also occasionally charges 6 grand for invalid
@@ -98,7 +97,7 @@ class Store(zdc.RecordObject):
         #for item in self._locations:
         #    if item.stateCD == stateCD:
         #        return 1
-        if self.address.stateCD == stateCD:
+        if stateCD and (self.address.stateCD == stateCD):
             return 1
 
 

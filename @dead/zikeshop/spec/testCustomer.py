@@ -18,3 +18,4 @@ class CustomerTestCase(unittest.TestCase):
         assert same.uid == cust.uid, \
                "customer.uid didn't save properly: %s != %s" \
                % (same.uid, cust.uid)
+

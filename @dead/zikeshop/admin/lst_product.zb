@@ -13,7 +13,8 @@ show products in...
     # problem is with keyword (blank)
     zres = zres + selectnode("nodeID", scope.get("nodeID"), blank=0)
     
-<input type="hidden" name="action" value="lst_product">
+<input type="hidden" name="action" value="list">
+<input type="hidden" name="what" value="product">
 <input type="submit" value="go">
 
 

@@ -10,5 +10,5 @@ class State(zdc.RecordObject):
 
 
     def get_salestax(self):
-        import zikeshop
-        return zikeshop.FixedPoint(self._data["salestax"])
+        import zdc
+        return zdc.FixedPoint(self._data["salestax"])
