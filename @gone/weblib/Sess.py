@@ -72,7 +72,6 @@ class Sess:
         self.clear()
 
 
-
     def url(oldurl):
         """ returns oldurl, but referencing the current session.
 
@@ -159,6 +158,7 @@ class Sess:
     def clear(self):
         self._warmData.clear()
         self._coldData.clear()
+        self._freeze()
 
     ## internal methods ####################
 
