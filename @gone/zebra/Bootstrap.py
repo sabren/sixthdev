@@ -96,6 +96,7 @@ class Bootstrap:
     def handle_for(self, model, attrs):
         res = zebra.trim(
             """
+            _ = 0
             __max__ = len(self.model["%s"])
             for _ in range(__max__):
                 #@TODO: take this out of the global namespace.
@@ -105,20 +106,26 @@ class Bootstrap:
             """ % (attrs["series"], attrs["series"]))
         res = res + zebra.indent(self.walk(model), 1)
 
-        # now handle the glue clause:
-        
+        ## glue ##
         if attrs.has_key("glue"):
             res = res + zebra.trim(
             """
             # glue:
                 if _ + 1 < __max__:
                     res = res + '%s'
-            """ % (zebra.escape(attrs["glue"])))
+            """ % (zebra.escape(attrs["glue"])))       
             
         res = res + zebra.trim(
             """
             del _
             """)
+        return res
+
+
+    ## <none> ##
+    def handle_none(self, model, attrs):
+        res = "if not __max__:\n"
+        res = res + zebra.indent(self.walk(model), 1)
         return res
 
 
@@ -134,11 +141,13 @@ class Bootstrap:
         res = res + zebra.indent(self.walk(model), 1)
         return res
 
+
     ## <ef> ##
     def handle_ef(self, model, attrs):
         res = "elif %s:\n" % attrs["condition"]
         res = res + zebra.indent(self.walk(model), 1)
         return res
+
 
     ## <el> ##
     def handle_el(self, model, attrs):
@@ -150,3 +159,4 @@ class Bootstrap:
     ## <br> ##
     def handle_br(self, model, attrs):
         return 'res = res + "\\n"\n'
+

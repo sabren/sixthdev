@@ -83,12 +83,41 @@ class BootstrapTestCase(unittest.TestCase):
             """)
         
         goal = "Argentina, Bolivia, Chile"
+       
+        actual = zebra.Bootstrap().toObject(zbx).fetch(model)
+        assert actual== goal, \
+               "if/el/ef don't work:\n---%s---" % actual
+
+
+        
+    def check_none(self):
+        model = {"emptylist": [],
+                 "fulllist": [{"a":"b"}]}
+        zbx = zebra.trim(
+            """
+            <?xml version="1.0"?>
+            <zebra>
+            <for series="emptylist">
+            THIS SHOULD NOT SHOW UP
+            </for>
+            <none>
+            Nothin's empty. 
+            </none>
+            <for series="fulllist">
+            Somethin's full.
+            </for>
+            <none>
+            THIS SHOULD NOT SHOW UP
+            </none>
+            </zebra>
+            """)
+
+        goal = "Nothin's empty. Somethin's full."
 
         #print '--------'
         #print zebra.Bootstrap().compile(zbx)
         #print '--------'
         
         actual = zebra.Bootstrap().toObject(zbx).fetch(model)
-        assert actual== goal, \
-               "if/el/ef don't work:\n---%s---" % actual
-
+        assert actual == goal, \
+               "none doesn't work:\n%s" % actual
