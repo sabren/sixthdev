@@ -85,7 +85,8 @@ class Sale(zdc.RecordObject):
 
     
     def save(self):
-        doTS = not(self.ID)
+        # @TODO: this is a rather crappy hack to move insert stamps to zdc:
+        self._record.insertStamps.append('tsSold')
 
         # @TODO: where should this go, and when should
         # it be updated?
@@ -97,9 +98,3 @@ class Sale(zdc.RecordObject):
 
         self.__super.save(self)
         self.details.save()
-
-        # @TODO: add support for timestamps to ZDC directly.
-        if doTS:
-            cur = self._table.dbc.cursor()
-            cur.execute("UPDATE shop_sale set tsSold=now() WHERE ID=%i" \
-                        % self.ID)
