@@ -5,16 +5,16 @@ __ver__ = "$Id$"
 
 #@TODO: subclass that uses Signature to pass values to act_XXX?
 
-class Actor(object):
+class App(object):
     """
-    Actor(input) where input=a dict, usually with a key called 'action'.
+    App(input) where input=a dict, usually with a key called 'action'.
     
     This class is designed to make it easy to write classes that can
     be called directly through a URL. It's just a base class, and only
     provides enough logic to handle dispatching actions right now.    
     
     The input dict should have a key called "action" that will tell the
-    actor what to do. The Actor subclass must have a method caled act_XXX
+    actor what to do. The App subclass must have a method caled act_XXX
     where XXX is whatever "action" mapped to.
     """
 
@@ -139,7 +139,7 @@ class Actor(object):
 
     def consult(self, model):
         """
-        updates the Actor's internal model based on the
+        updates the App's internal model based on the
         passed in model. model can be either a module
         name or a dict.
 
