@@ -6,7 +6,7 @@ $Id$
 
 import unittest
 import weblib
-import sqlTest
+import weblib.test
 
 #@TODO: there ought to be test cases for each type of SessPool
 
@@ -16,7 +16,7 @@ from weblib import SessPool
 class SessTestCase(unittest.TestCase):
 
     def setUp(self, sid=None):
-        self.sess = weblib.Sess(SessPool.SqlSessPool(sqlTest.dbc))
+        self.sess = weblib.Sess(SessPool.SqlSessPool(weblib.test.dbc))
         self.sess.start(sid)
 
     def check_engine(self):

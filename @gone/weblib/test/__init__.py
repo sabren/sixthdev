@@ -18,7 +18,7 @@ from testScript import *
 # sqlTest that defines a DB-API 2.0 compliant
 # connection object named dbc.
 
-from sqlTest import dbc 
+from sqlTest import dbc
 
 suites = {
     "request" : unittest.makeSuite(RequestTestCase, "check_"),
