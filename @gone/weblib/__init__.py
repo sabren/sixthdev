@@ -129,7 +129,7 @@ if not __builtin__.__dict__.get("__weblib__"):
         def __del__(self):
             import sys
             sys.stdout = self.stdout
-            print self.header
+            print self.getHeader()
             print self.buffer
 
     import sys

@@ -44,10 +44,20 @@ class Response:
     def write(self, data):
         self.buffer = self.buffer + data
 
+
+    def getHeader(self):
+        res = "Content-type: " + self.contentType + "\n"
+        for h in self.headers:
+            # each header is a (key, value) tuple
+            res = res + h[0] + ": " + h[1] + "\n"
+        return res
+
+
     def addHeader(self, key, value):
-        self.header = self.header + key + ": " + value + "\n"
+        self.headers = self.headers + [(key, value)]
 
 
+    # @TODO: actually populate the cookies list
     def addCookie(self, key, value):
         self.addHeader("Set-Cookie", key + "=" + value)
 
@@ -63,8 +73,10 @@ class Response:
 
 
     def clear(self):
-        """Clear the output buffer..."""
-        self.header = ""
+        """Clear the output buffer, headers, cookies, and reset content-type..."""
+        self.contentType = "text/html"
+        self.headers = []
+        self.cookies = []
         self.buffer = ""
         
 
@@ -77,7 +89,6 @@ class Response:
     # binaryWrite() - do we need this?
     # flush() - also for buffering.. could do someday
     #
-    # buffer - if true, buffer the output
     # cacheControl - the cache-control header
     # charSet - the charset header
     # contentType - the content-type header
