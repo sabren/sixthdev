@@ -8,7 +8,7 @@ import zikeshop
 
 def load():
     import zdc, zikeshop, zikebase
-    from sqlTest import dbc
+    from zikeshop.test import dbc
 
     ## clear out old data..
     dbc.cursor().execute("DELETE FROM base_contact")
@@ -38,19 +38,11 @@ def load():
 
     for n in ("toys", "books", "electronics", "games", "michal's stuff"):
         node = zikebase.Node()
-        node.name=n
         node.descript=""
+        node.name=n
+        if n=="games":
+            node.parentID=1
         node.save()
-
-
-    node = zikebase.Node(name="games")
-    node.parentID=1
-    node.save()
-
-
-    ## MY NODE ##################################
-    node = zikebase.Node(name="michal's stuff")
-    node.save()
 
 
     ## PRODUCTS#################################

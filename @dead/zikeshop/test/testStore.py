@@ -40,5 +40,9 @@ class StoreTestCase(unittest.TestCase):
                % (actual, goal)
         
 
+    def check_fakedata(self):
+        import fakedata
+        fakedata.load()
+
     def tearDown(self):
         self.store.delete()
