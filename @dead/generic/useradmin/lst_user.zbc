@@ -1,0 +1,99 @@
+class Report:
+
+    def show(self, model={}):
+        print self.fetch(model)
+
+    def fetch(self, model={}):
+        import copy   # used for pushing scope onto stack
+
+        scope = globals()
+        # This scope thing is so that we can generate
+        # code that says:
+        #
+        #         zres = zres + x
+        # *OR*
+        #         zres = zres + scope.get(x, '')
+        #
+        # It also actually does variable scoping,
+        # when combined with scope_stack, below.
+        #
+        # I wanted to use scope=locals(), but
+        # then the 'zres + x' wouldn't work.
+        # @TODO: is this scope scheme threadsafe?
+        
+        scope_stack = []
+
+        # scope.update(model), but model might be a UserDict:
+        for item in model.keys():
+            scope[item] = model[item]
+
+        # zres is the result (the output we're building)
+        zres = ""
+        zres = zres + '<'
+        zres = zres + 'h1'
+        zres = zres + '>'
+        zres = zres + 'users'
+        zres = zres + '<'
+        zres = zres + '/h1'
+        zres = zres + '>'
+        zres = zres + '\n['
+        zres = zres + '<'
+        zres = zres + 'a href=\"users.py?action=create'
+        zres = zres + '&'
+        zres = zres + 'what=user\"'
+        zres = zres + '>'
+        zres = zres + 'add new'
+        zres = zres + '<'
+        zres = zres + '/a'
+        zres = zres + '>'
+        zres = zres + ']'
+        _ = 0
+        _max_ = len(scope["list"])
+        for _ in range(_max_):
+            # handle scope inside the loop in case we have
+            # recursive names (eg, children->children->children)
+            scope_stack.append(copy.copy(scope))
+            
+            # can't do .update if it's a UserDict:
+            mdl = scope["list"][_]
+            for item in mdl.keys():
+                scope[item]=mdl[item]
+            if _ == 0:
+                zres = zres + '<'
+                zres = zres + 'ul'
+                zres = zres + '>'
+            zres = zres + '<'
+            zres = zres + 'li'
+            zres = zres + '>'
+            zres = zres + '<'
+            zres = zres + 'a href=\"users.py?action=edit'
+            zres = zres + '&'
+            zres = zres + 'what=user'
+            zres = zres + '&'
+            zres = zres + 'ID='
+            zres = zres + str(ID)
+            zres = zres + '\"'
+            zres = zres + '>'
+            zres = zres + str(username)
+            zres = zres + '<'
+            zres = zres + '/a'
+            zres = zres + '>'
+            zres = zres + '<'
+            zres = zres + '/li'
+            zres = zres + '>'
+            if _ + 1 == _max_:
+                zres = zres + '<'
+                zres = zres + '/ul'
+                zres = zres + '>'
+        #   ## close for-list loop ##########
+            globals().update(scope_stack.pop())
+        if not _max_:
+            zres = zres + 'none found.'
+# end of Report.fetch()
+        return zres
+
+def fetch(model={}):
+    return Report().fetch(model)
+    
+def show(model={}):
+    return Report().show(model)
