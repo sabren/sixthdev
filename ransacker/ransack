@@ -1,0 +1,28 @@
+#!/usr/bin/env python
+
+import ransacker
+import sys
+
+
+if sys.argv[2] not in ('search', 'index'):
+    print "Usage: ransack filename.rki [[search QUERY] | [index FILES]]"
+    sys.exit()
+
+
+
+idx = ransacker.Index(sys.argv[1])
+
+
+if sys.argv[2] == "search":
+    pass
+
+
+elif sys.argv[2] == "index":
+    print "indexing ",
+    for file in sys.argv[3:]:
+        sys.stdout.write(".")
+        sys.stdout.flush()
+        idx.index(file, open(file).read())
+        sys.exit()
+    print
+
