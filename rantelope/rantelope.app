@@ -6,6 +6,12 @@ licensed under the GNU GPL.
 """
 __ver__="$Id$"
 
+from Node import Node
+from strongbox import *
+import sixthday
+import zebra
+
+
 ### default template ################################
 
 plainXSLT =\
@@ -69,14 +75,7 @@ def transform(xml, xsl):
     return proc.run(xmlObj)
 
 
-#print transform(open("out/mychannel.rss").read(), plainXSLT)
-#raise SystemExit
-
-
 ### object model ####################################
-
-from strongbox import *
-import zebra
 
 
 class Story(Strongbox):
@@ -86,16 +85,17 @@ class Story(Strongbox):
     link = attr(str)
     description = attr(str)
     
-class Channel(Strongbox):
+class Channel(Node):
     ID = attr(long)
+    parentID = attr(long, default=0)
     title = attr(str)
     link = attr(str)
     description = attr(str)
-    rssfile = attr(str, okay=lambda x: "/" not in x and x.endswith(".rss"))
-    htmlfile = attr(str, okay=lambda x: "/" not in x and x.endswith(".html"))
+    rssfile = attr(str, okay="([^/]+.rss|^$)" )
+    htmlfile = attr(str, okay="([^/]+.html|^$)" )
     template = attr(str, default=plainXSLT)
     stories = linkset(Story)
-    path = attr(str, default="./out/") # hard-coded for now.
+    path = attr(str, default="./out/") # hard-coded for now.    
 
     def toRSS(self):
         return zebra.fetch("rss", BoxView(self))
@@ -106,14 +106,13 @@ class Channel(Strongbox):
 
     def writeFiles(self):
         rss = self.toRSS()
-        print >> open(self.path + self.rssfile, "w"), rss
-        if self.template:
+        if self.rssfile:
+            print >> open(self.path + self.rssfile, "w"), rss
+        if self.htmlfile and self.template:
             print >> open(self.path + self.htmlfile, "w"), self.toHTML(rss)
                 
 
 ### interface #######################################
-
-import sixthday
 
 class RantelApp(sixthday.AdminApp):
 
@@ -123,7 +122,7 @@ class RantelApp(sixthday.AdminApp):
     ## channels ########################
 
     def list_channel(self):
-        channels = [BoxView(c) for c in self.clerk.match(Channel)]
+        channels = [BoxView(c) for c in self.clerk.match(Channel, parentID=0)]
         self.generic_list(channels, "lst_channel")
 
     def create_channel(self):
@@ -133,7 +132,14 @@ class RantelApp(sixthday.AdminApp):
         self.generic_show(Channel, "frm_channel")
 
     def show_channel(self):
-        self.generic_show(Channel, "sho_channel")
+        chan = self.clerk.fetch(Channel, long(self.input["ID"]))
+        chan.clerk = self.clerk
+        model = {"errors":[]}
+        model.update(BoxView(chan))
+        model["kids"]= [BoxView(k) for k in chan.kids]
+        model["crumbs"]= [BoxView(k) for k in chan.crumbs]
+        print >> self, zebra.fetch("sho_channel", model)
+
 
     def save_channel(self):
         chan = self.generic_save(Channel)
@@ -173,10 +179,11 @@ if __name__=="__main__":
              Story: "rnt_story" }
     CLERK = arlo.Clerk(storage.MySQLStorage(sqlRantelope.dbc), dbmap)
 
-##     for c in CLERK.match(Channel):
-##         c.template = plainXSLT
-##         c.writeFiles()
-##         CLERK.store(c)
+    #ch = CLERK.fetch(Channel, 1)
+    #ch.clerk = CLERK
+    #print ch.kids
+    #ch.clerk = CLERK
+    #ch.add(Channel(title='my subchannel'))
     
     ## now just run the app!
     print >> RES, RantelApp(CLERK, REQ).act()
