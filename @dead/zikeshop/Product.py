@@ -1,27 +1,20 @@
 """
 Product.py - product object for zikeshop
-
-$Id$
 """
+__ver__="$Id$"
+
+#@TODO: get rid of nodeIDs, replace with a join object.
 
 import zdc
 import zikebase
 import zikeshop
 
 class Product(zdc.RecordObject):
+    __super = zdc.RecordObject
     _table = zdc.Table(zikeshop.dbc, "shop_product")
     _links = {
         #@TODO: we have a chicken and egg problem here...
         "styles": [zdc.LinkSet, None, "parentID"],
-        }
-    _defaults = {
-        "class":"product",
-        "price": 0,
-        "retail": 0,
-        "weight": 0,
-        "parentID": 0,
-        "inStock": 0,
-        "onHold" : 0,
         }
 
     # @TODO: fix this!!!!!! there should be no _tuples..
@@ -34,14 +27,22 @@ class Product(zdc.RecordObject):
     # (this product is in ...)
     _tuples = ['nodes']
     
-    #@TODO: this caching mechanism should probably go too..
-    _pic = None
-
     ### Magic RecordObject Methods ############################
 
     def _init(self):
         self.nodeIDs = ()
         self._pic = None            
+
+    def _new(self):
+        self.__super._new(self)
+        self._data['class'] = "product"
+        self.price = 0
+        self.retail = 0
+        self.weight = 0
+        self.parentID = 0
+        self.inStock = 0
+        self.onHold = 0
+
 
     def _fetch(self, **where):
 
@@ -60,14 +61,6 @@ class Product(zdc.RecordObject):
                 self.nodeIDs = tuple(
                     reduce(lambda x, y: x+[int(y[0])], cur.fetchall(), []))
                 
-
-    def get_price(self):
-        if self._data.get('price') is not None:
-            return zikeshop.FixedPoint(self._data['price'])
-        else:
-            return zikeshop.FixedPoint('0.00')
-
-
     def set_nodeIDs(self, value):
         msg = "Product.nodeIDs should be an int or sequence of ints."
         vals = []
@@ -83,29 +76,6 @@ class Product(zdc.RecordObject):
         self._data["nodeIDs"] = tuple(vals)
         
 
-    ### picture handling stufff #####################
-
-    def set_picture(self, blob):
-        # on a multipart/form-data form,
-        # if you don't upload a file, it still gives you
-        # a string field.. this "if" copes with that.
-        if type(blob) != type(""):
-            self.get_picture()
-            self._pic.picture = blob.value
-            import zikeshop
-            self._pic.siteID = zikeshop.siteID
-            self._pic.type = blob.type
-
-
-    def get_picture(self):
-        if not self._pic:
-            if self.pictureID:
-                self._pic = zikebase.Picture(ID=self.pictureID)
-            else:
-                self._pic = zikebase.Picture()
-        return self._pic
-
-
     ## Normal RecordObject Methods #######################################
 
     def getEditableAttrs(self):
@@ -113,7 +83,7 @@ class Product(zdc.RecordObject):
 
     def delete(self):
         #@TODO: decrease inventory
-        self.deleteNodes()
+        self._deleteNodes()
         for style in self.styles:
             style.delete()
         zdc.RecordObject.delete(self)
@@ -142,7 +112,7 @@ class Product(zdc.RecordObject):
 
         # handle the nodes:
         nodeIDs = self.nodeIDs
-        self.deleteNodes()
+        self._deleteNodes()
         self.nodeIDs = nodeIDs
         
         for id in self.nodeIDs:
@@ -150,37 +120,37 @@ class Product(zdc.RecordObject):
                         "VALUES (%s, %s)" % (id, int(self.ID)))
 
 
-    ## Queries ###############################################
+    ## accessors ###############################################
 
-    def q_nodes(self):
-        import zikebase, weblib
-        res = []
-        for nodeID in self.nodeIDs:
-            node = zikebase.Node(ID=nodeID)
-            res.append({"ID": nodeID, "name":node.name, "path":node.path,
-                        "encpath":weblib.urlEncode(node.path) })
-        return res
+    def get_available(self):
+        return self.inStock - self.onHold
 
+    def get_price(self):
+        return zikeshop.FixedPoint(self._data.get('price', '0.00'))
 
-    def q_styles(self):
-        """
-        Returns a list of dicts with ID, style, and instock amount
-        for the product's styles
-        """
-        res = []
-        for style in self.styles:
-            res.append({
-                "ID":style.ID,
-                "style":style.name,
-                "instock": 999, #@TODO: fix this!
-                })
-        return res
+    def set_picture(self, blob):
+        # on a multipart/form-data form,
+        # if you don't upload a file, it still gives you
+        # a string field.. this "if" copes with that.
+        if type(blob) != type(""):
+            self.get_picture()
+            self._pic.picture = blob.value
+            import zikeshop
+            self._pic.siteID = zikeshop.siteID
+            self._pic.type = blob.type
+
+    def get_picture(self):
+        if not self._pic:
+            if self.pictureID:
+                self._pic = zikebase.Picture(ID=self.pictureID)
+            else:
+                self._pic = zikebase.Picture()
+        return self._pic
 
 
     def get_nodes(self):
         #@TODO: replace with a junction thingy..
         return map(lambda x: zikebase.Node(ID=x), self.nodeIDs)
-
 
     def get_styles(self):
         res = []
@@ -192,25 +162,16 @@ class Product(zdc.RecordObject):
                 res.append(zikeshop.Product(ID=row[0]))
         return res
 
-    def get_available(self):
-        return self.inStock - self.onHold
-
-## @TODO: inStock/onHold/available should belong to the store,
-## @TODO: not the product. (or should they?)
-##
-## I don't have to worry about this until we
-## get more useful inventory management going though..
-##
-## maybe it doesn't even matter..
-##
-##     def get_instock(self):
-##         return zikeshop.Store(ID=zikeshop.siteID).calcInventory(self)
 
         
     ## Other stuff ############################################
 
-    def deleteNodes(self):
+    def _deleteNodes(self):
+        """
+        delete nodes for this product. used internally.
+        """
         cur = self._table.dbc.cursor()
         cur.execute("DELETE FROM shop_product_node WHERE productID=%s" \
                     % int(self.ID))
         self.nodeIDs = ()
+

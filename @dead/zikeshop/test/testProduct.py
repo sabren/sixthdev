@@ -62,7 +62,7 @@ class ProductTestCase(unittest.TestCase):
 
 
 
-    def check_q_nodes(self):
+    def check_nodes(self):
         node = zikebase.Node()
         node.name="abc"
         node.save()
@@ -76,9 +76,9 @@ class ProductTestCase(unittest.TestCase):
         prod.nodeIDs = (1, 2)
         prod.save()
 
-        nodes = prod.q_nodes()
-        assert nodes[0]["name"] == "abc" and nodes[1]["name"] == "xyz", \
-               "getNodes broke."
+        nodes = prod.nodes
+        assert nodes[0].name == "abc" and nodes[1].name == "xyz", \
+               "get_nodes broke."
 
 
     def check_price(self):

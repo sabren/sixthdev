@@ -1,8 +1,7 @@
 """
 tests for zikeshop.Category
-
-$Id$
 """
+__ver__="$Id$"
 
 import unittest
 import zikeshop
@@ -13,7 +12,7 @@ class CategoryTestCase(unittest.TestCase):
         self.cur = zikeshop.test.dbc.cursor()
 
 
-    def check_q_products(self):
+    def check_products(self):
         self.cur.execute("DELETE FROM base_node")
         self.cur.execute("DELETE FROM shop_product")
         self.cur.execute("DELETE FROM shop_product_node")
@@ -32,14 +31,14 @@ class CategoryTestCase(unittest.TestCase):
                          "VALUES (3, 1)")
 
         zikeshop.siteID = 1
-        prods = zikeshop.Category(ID=1).q_products()
+        prods = zikeshop.Category(ID=1).products
         assert len(prods) == 2, \
                "wrong number of categories (%s) shown on category page" \
                % len(prods)
 
 
         zikeshop.siteID = 2
-        prods = zikeshop.Category(ID=1).q_products()
+        prods = zikeshop.Category(ID=1).products
         assert len(prods) == 1, \
                "wrong number of categories (%s) shown on category page" \
                % len(prods)

@@ -1,10 +1,12 @@
 """
 Category - a Node with Products in it.
-
-$Id$
 """
-import zikeshop
-import zikebase
+__ver__="$Id$"
+
+#@TODO: make products into a *:* link...
+
+
+import zikeshop, zdc, zikebase
 zikebase.load("Node")
 
 class Category(zikebase.Node):
@@ -16,10 +18,10 @@ class Category(zikebase.Node):
         import zikeshop
         return map(lambda id: zikeshop.Product(ID=id),
                    map(lambda n: n["ID"],
-                       self.q_products()))
+                       self.__q_products()))
     
     # @TODO: get rid of all this q_xxx nonsense.. objectView is better
-    def q_products(self):
+    def __q_products(self):
         cur = self._table.dbc.cursor()
         cur.execute(
             """
@@ -38,22 +40,4 @@ class Category(zikebase.Node):
                         "price":row[3], "productID": row[4],
                         "pictureID":row[5], "descript":row[6]})
         return res
-
-
-
-    ### FIX THIS LATER (siteID reference) #######################
-    def q_children(self):
-        import weblib
-        res = []
-        cur = self._table.dbc.cursor()
-        if self.ID is not None:
-            cur.execute("select ID from base_node where parentID=%s"
-                        % self.ID)
-            for row in cur.fetchall():
-                node = Category(ID=row[0])
-                res.append( {"ID": node.ID, "name": node.name,
-                             "path": node.path,
-                             "encpath":weblib.urlEncode(node.path) } )
-        return res
-
 
