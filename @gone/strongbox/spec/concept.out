@@ -1,0 +1,69 @@
+0208.2002 Strongbox Concept
+
+Strongbox provides strongly-typed data objects for python.
+These objects can be stored transparently in a relational
+or object database.
+
+* Strongbox is a metaclass.
+Strongbox by itself doesn't do much. You subclass it,
+and then your subclasses have the following properties:
+
+** strong typing
+Strongboxes are strongly typed. They have a set number of slots,
+and each slot is associated with exactly one type of data.
+
+These types may or may not correspond with python types. (They
+could also be strings that match a regular expression, for 
+example, or be defined with a function)
+
+** magic getters and setters
+get_xxx and set_xxx are magically understood to be accessors 
+for the property xxx. There is no del_xxx because that
+would violate strong typing. :)
+
+All properties have getters and setters, even if you 
+don't define them.
+
+** observable
+getters, setters, relationship operations, and method calls 
+can all trigger events transparently.
+
+
+* Persistence
+
+** Clerk
+One type of Observer is called Clerk. Clerk connects
+to a Source and can give you a Strongbox, monitor
+that strongbox for changes, and commit it back to the
+source, either implicitly or explicitly.
+
+** Sources
+Sources provide low-level routines for loading and
+storing strongbox objects. Generally, these are simple
+adapters for existing storage solutions. 
+
+The only Source bundled with the first version of strongbox
+will be DBAPI2Source for relational databases.
+
+** Schemas
+Since relational databases store everything in tables,
+we need a way of mapping objects to tables. This is done
+with a simple Schema object.
+
+
+
+
+
+* future
+** lazy loading
+If we have a tree or network of Nodes, we don't want
+to have to load them all. Often - especially on the web -
+we only care about one Node at a time, but we may also need
+to get to some subset of their children.
+
+Actually, I'm not sure lazy loading is the best solution 
+for this. It might be simpler and faster to just load all
+the nodes at once with one query.
+
+** magic contracts
+before_method(), after_method(), and always()
