@@ -8,7 +8,7 @@ class Range(object):
 
     def __contains__(self, item):
         raise NotImplementedError(
-            "use InclusiveRange or ExclusiveRange instead")
+            "use a Range subclass instead")
 
 
 class ExclusiveRange(Range):
@@ -21,4 +21,8 @@ class InclusiveRange(Range):
 
     def __contains__(self, item):
         return self.left <= item <= self.right
+    
+class PythonicRange(Range):
+    def __contains__(self, item):
+        return self.left <= item < self.right
     
