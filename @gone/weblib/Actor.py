@@ -146,6 +146,20 @@ class Actor:
             for item in model.keys():
                 self.model[item] = model[item]
 
+    #@TODO: this replace (??) act_jump...
+    #@TODO: make a test case for this.
+    #@TODO: should this INSTANTLY redirect? what about nonbrowsers?
+    def redirect(self, url=None, action=None):
+        assert ((url is not None) ^ (action is not None)), \
+               "syntax: actor.redirect(url XOR action)"
+        if url:
+            self.where["gohere"]=url
+        else:
+            self.where["gohere"]="%s?action=%s" % \
+                                  (weblib.request.environ["REQUEST_URI"],
+                                   action)
+        self.next  = ("jump", {"where":"gohere"})
+
 
     def map_where(self, where):
         """
@@ -168,6 +182,8 @@ class Actor:
     def act_jump(self):
         """
         Jump to one of the urls defined in .where... expects where=xxx
+        in input from a browser...
+        Alternately, pass in the url from a script.
         """
         import weblib
         where = self.map_where(self.input["where"])
