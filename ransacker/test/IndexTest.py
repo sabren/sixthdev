@@ -23,6 +23,10 @@ class IndexTest(unittest.TestCase):
         assert not self.idx.contains("oaktree")
 
 
+    def check_remove(self):
+        self.idx.remove("cathat")
+        assert not self.idx.contains("cathat")
+
     def check_match(self):
         actual = self.idx.match('dog')
         assert ('onedog' in actual) and ('twodog' in actual), \
