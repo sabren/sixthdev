@@ -142,7 +142,7 @@ class Sess(UserDict.UserDict):
 
         # freeze the data stuff:
         self._pool.putSess(self.name, self.sid,
-                           dumps(self.data, 1)) # 1 for binary
+                           dumps(self.data, 0)) # 1=binary, 0=ascii
 
     def _thaw(self):
         """gets a frozen sess out of the sesspool and thaws it out"""
