@@ -87,20 +87,13 @@ class SqlSessPool:
     def putSess(self, name, sid, frozensess):
         import string
         
-        frozen = string.replace(frozensess, "'", "\\'")
+	frozen = string.replace(frozensess, "'", "\\'")
 
         cur = self.dbc.cursor()
-        sql = "update " + self.table + " " + \
-              "set sess='" + frozen + "', tsUpdate=now() " + \
-              "where name='" + name + "' and sid='" + sid + "'"
+        sql = "REPLACE " + self.table + " " + \
+              "set sess='" + frozen + "', tsUpdate=now(), " + \
+              "name='" + name + "' and sid='" + sid + "'"
         cur.execute(sql)
-        if cur.rowcount == 0:
-            cur.execute(
-                """
-                INSERT INTO %s (sid, name, sess, tsUpdate) 
-                VALUES ('%s', '%s', '%s', now())
-                """ % (self.table, sid, name, frozen))
-            
 
     def drain(self, name, beforeWhen):
         cur = self.dbc.cursor()

@@ -3,12 +3,10 @@
 # $Id$
 
 CREATE TABLE web_sess (
-  ID int(11) NOT NULL auto_increment,
   sid varchar(32) DEFAULT '' NOT NULL,
   name varchar(32) DEFAULT '' NOT NULL,
   sess text,
   tsUpdate datetime,
-  PRIMARY KEY (ID),
-  KEY name (name)
+  primary key (sid, name),
 );
 
