@@ -125,15 +125,23 @@ def save_password(username, server, cvsroot, password):
     # @TODO: allow "logout"
 
     # remove any old passwords for this key:
-    clean = [line[:-1] for line in open(cvspass_path(), "r").readlines()
-             if not line.startswith(cvspass_key(username, server, cvsroot))]
+
+    clean = []
+    
+    try:
+        file = open(cvspass_path(), "r")
+        clean = [line[:-1] for line in file.readlines()
+                 if not line.startswith(cvspass_key(username,server,cvsroot))]
+    except IOError, e:
+        print "couldn't read .cvspass (probably ok):\n    ", e
 
     # now save it with the new password
     file = open(cvspass_path(), "w")
     for line in clean:
-        file.write(line)
+        print >> file, line
     print >> file, cvspass_key(username, server, cvsroot), scramble(password)
     file.close()
+    print "password saved."
 
 
 def load_password(username, server, cvsroot):
@@ -152,9 +160,9 @@ def load_password(username, server, cvsroot):
         cvspass = open(cvspass_path(),"r")
         for line in cvspass.readlines():
             if line.startswith(cvspass_key(username, server, cvsroot)):
-                res = line.split(" ")[1] # the second field
-                res = res[1:-1]          # strip the 'A" and the newline
-                res = scramble(res)[1:]  # or unscramble it, really... :)
+                res = line.split(" ",1)[1] # ONLY 2 fields & we want the 2nd.
+                res = res[1:-1]            # strip the 'A" and the newline
+                res = scramble(res)[1:]    # or unscramble it, really... :)
                 raise "found!"
     finally:
         # there could either be an error for opening the file,
@@ -180,6 +188,7 @@ def client_thread(lock, sock):
     buffer = ""
     while not sys.stdin.closed:
         ch = sys.stdin.read(1)
+        #@TODO: hung on cvs diff here... maybe if ch is not None?
         if not ch:
             # stdin is closed, so we're all done.
             lock.release()
@@ -261,6 +270,7 @@ if __name__=="__main__":
     # load password from user's .cvspass file (or die trying):
     # note that "" is an okay password, but None isn't....
     password = load_password(username, server, cvsroot)
+
     ## debug("password is: " + password)
     if password is None:
         sys.stderr.write("No password found. Use 'cvssh login' first.\n")
