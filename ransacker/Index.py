@@ -38,14 +38,12 @@ class Index:
         """idx = ransacker.Index(rki, rkw=None)
 
         where:
-        
            rki is the name of the index file (must end in .rki)
            rkw is the name of the word index (.rkw)
 
         if rkw is None, Index will use a file with
         the same name as the .rki, but with an .rkw extension.
         """
-        
         assert rki[-4:]==".rki", "index filename must end in .rki"
         
         if rkw is None:
@@ -60,47 +58,48 @@ class Index:
     ## public methods ##############################################
 
 
-    #- 1: methods that deal with page keys (k:/i:) ----------------#
-
-    def hasPage(self, label):
+    def hasLabel(self, label):
         return self.rki.has_key("k:"+label)
+
+    def getLabel(self, pageID):
+        return self.rki["i:"+`pageID`]
 
 
     def addPage(self, label, text):
         """addPage(page, text) Add text to index under the given label"""
         assert type(label) == type(""), "label must be a string!"            
 
-        if self.hasPage(label):
+        if self.hasLabel(label):
             self.unlinkPage(label)
             pageID = self.getPageID(label)
         else:
             pageID = self.nextPageID()
             self.rki["i:"+`pageID`] = label
 
-        newWordIDs = []
+
+        wordIDs = []
         for word in ransacker.uniqueWords(text):
             wordID = self.wordHash.get(word)
-            self.linkPageIDToWordID(pageID, wordID)
-            newWordIDs.append(wordID)
+            wordIDs.append(wordID)
+            
+            pageIDs = []
+            if self.rki.has_key(str(wordID)):
+                pageIDs = self.pageIDsForWordID(wordID)
 
-        pageData = [pageID] + newWordIDs
-        self.rki["k:"+label] = ransacker.intListToStr(pageData)
+            pageIDs.append(pageID)
+            self.rki[str(wordID)] = ransacker.intListToStr(pageIDs)
+
+
+        self.rki["k:"+label] = ransacker.intListToStr([pageID] + wordIDs)
 
 
     def getPageID(self, label):
         return ransacker.strToIntList(self.rki["k:"+label])[0]
 
 
-    def getLabel(self, pageID):
-        return self.rki["i:"+`pageID`]
-
 
     def wordIDsOnPage(self, label):
         return ransacker.strToIntList(self.rki["k:"+label])[1:]
-
-
-
-    #- 2: methods that deal with wordID keys ----------------------#
 
 
     def unlinkPage(self, label):
@@ -113,23 +112,8 @@ class Index:
             self.rki[`wordID`]= ransacker.intListToStr(pageIDs)
 
 
-    def linkPageIDToWordID(self, pageID, wordID):
-
-        pageIDs = []
-        if self.rki.has_key(str(wordID)):
-            pageIDs = self.pageIDsForWordID(wordID)
-
-        pageIDs.append(pageID)
-        self.rki[str(wordID)] = ransacker.intListToStr(pageIDs)
-
-
-
     def pageIDsForWordID(self, wordID):
         return ransacker.strToIntList(self.rki[str(wordID)])
-
-
-
-    #- 3: methods that deal with other keys ------------------------#
 
 
     def nextPageID(self):
