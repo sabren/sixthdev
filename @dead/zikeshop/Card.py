@@ -56,6 +56,10 @@ def validate(number):
     # must be at least 13 digits:
     if len(str(number)) < 13:
         return 0
+
+    # can't be all zeros, even though this passes the check below
+    if long(number) == 0:
+        return 0
     
     ### check the digits: ###########
     # see http://www.beachnet.com/~hstiles/cardtype.html
