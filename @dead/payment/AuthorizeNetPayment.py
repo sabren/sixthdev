@@ -9,7 +9,7 @@ class AuthorizeNetPayment(payment.AbstractPayment):
     """
     
     __super = payment.AbstractPayment
-    __ver__="$Rev: AuthorizeNetPayment.py,v 1.6 2001/05/23 21:56:05 sabren Exp $"    
+    __ver__="$Revision$"    
     def __init__(self, **kwargs):
         self.__super.__init__(self, **kwargs)
         self._secureServer = "secure.authorize.net"
