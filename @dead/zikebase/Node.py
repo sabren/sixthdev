@@ -42,15 +42,17 @@ class Node(zdc.RecordObject):
         self._updatePaths(self.parent)
 
 
-    def set_parentID(self, value):
-
-        assert value != self.ID, \
-               "A node can't be its own parent!"
+    def set_ID(self, value):
+        # @TODO: use something like this for generic type checking?
+        self.__dict__["ID"] = int(value)
         
+
+    def set_parentID(self, value):
+        assert int(value) != self.ID, \
+               "A node can't be its own parent!"
         
         self.__dict__["parentID"]=int(value)
         self._updatePaths(self.parent)
-
         
 
     def get_parent(self):

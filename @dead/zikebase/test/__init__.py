@@ -6,11 +6,13 @@ from sqlTest import dbc
 
 from testContent import *
 from testNode import *
-from zdc.test.testObject import *  #@TODO: take this out?
+from testObjectEditor import *
+from testUser import *
 
 suites = {
-    "object" : unittest.makeSuite(ObjectTestCase, "check_"),
+    "objectEditor" : unittest.makeSuite(ObjectEditorTestCase, "check_"),
     "content" : unittest.makeSuite(ContentTestCase, "check_"),
+    "user": unittest.makeSuite(UserTestCase, "check_"),
     "node" : unittest.makeSuite(NodeTestCase, "check_"),
 }	
 
