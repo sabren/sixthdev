@@ -9,12 +9,6 @@ from weblib import trim
 
 class EngineTestCase(unittest.TestCase):
 
-    def setUp(self):
-        parts = ["request", "response"]
-        for part in parts:
-            if hasattr(weblib, part):
-                delattr(weblib, part)
-
 
     def check_request(self):
         import os
