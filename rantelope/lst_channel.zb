@@ -1,0 +1,28 @@
+*#
+*# This file is the zebra template for listing
+*# all defined channels.
+*# 
+*# $Id$ 
+
+* include header;
+
+<h2>channels</h2>
+
+* for each:
+    * head:
+        <ul>
+    * body:
+        <li>[<a href="rantelope.app?action=edit&what=channel&ID={:ID:}"
+               >edit</a>]&nbsp;
+            [<a href="{:rssfile:}">xml</a>]&nbsp;
+            <a href="rantelope.app?action=show&what=channel&ID={:ID:}"
+               >{:title:}</a>&nbsp;
+            
+        </li>
+    * foot:
+        </ul>
+    * none:
+        <p><i>No channels defined.</i></p>
+
+<p>[<a href="rantelope.app?action=create&what=channel"
+      >add channel</a>]</p>
