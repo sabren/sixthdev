@@ -10,8 +10,8 @@ import sixthday.spec
 from sixthday import ObjectEditor
 from sixthday import Node
 
-class TestObjectClass(zdc.Object):
-    __super = zdc.Object
+class TestObjectClass(zdc.RecordObject):
+    _tablename = "test_fish"
 
     def _init(self):
         self.isTrue=1
@@ -33,8 +33,8 @@ class TestObjectClass(zdc.Object):
 class ObjectEditorTest(unittest.TestCase):
 
     def setUp(self):
-        self.ds = sixthday.spec.dbc
-        self.cur = self.ds.cursor()
+        self.clerk = sixthday.spec.clerk
+        self.cur = sixthday.spec.dbc.cursor()
         self.cur.execute("delete from base_node")
 
     def check_simple(self):
@@ -42,7 +42,7 @@ class ObjectEditorTest(unittest.TestCase):
         can we save a single node to the database?
         """        
         req = {"action":"save"}
-        ed = ObjectEditor(Node, self.ds, req)
+        ed = ObjectEditor(Node, self.clerk, req)
         ed.act()
         assert isinstance(ed.object, Node), \
                "Didn't even create a simple node.."
@@ -59,12 +59,12 @@ class ObjectEditorTest(unittest.TestCase):
         turns out it had to do with the fact that
         on the web, the parentID is a string..
         """
-        node = Node(self.ds)
+        node = self.clerk.new(Node)
         node.name="fred"
         node.save()
 
         req = {"action":"save", "parentID":"1"}
-        ed = ObjectEditor(Node, self.ds, req, key=1)
+        ed = ObjectEditor(Node, self.clerk, req, key=1)
 
         try:
             gotError = 0
@@ -111,14 +111,14 @@ class ObjectEditorTest(unittest.TestCase):
 
         # case 1: single field is expected
         ed = OEd(TestObjectClass,
-                 self.ds,
+                 self.clerk,
                  input={"__expect__":"name:fred"})
         assert ed.expected() == {'name':'fred'}, \
                "expected() screws up w/ just one field"
 
         # case 2: multiple fields...
         ed = OEd(TestObjectClass,
-                 self.ds,
+                 self.clerk,
                  input={"__expect__":("fname:fred", "lname:tempy")})
         assert ed.expected() == {'fname':'fred', 'lname':'tempy'}, \
                "expected() screws up when __expect__ is a tuple"
@@ -127,7 +127,7 @@ class ObjectEditorTest(unittest.TestCase):
         # case 3: invalid format - single field:
         try:
             gotError = 0
-            ed = OEd(TestObjectClass, self.ds, input={"__expect__":"fred"})
+            ed = OEd(TestObjectClass, self.clerk, input={"__expect__":"fred"})
             ex = ed.expected()
         except ValueError:
             gotError = 1
@@ -137,7 +137,7 @@ class ObjectEditorTest(unittest.TestCase):
         # case 4: invalid format - tuple:
         try:
             gotError = 0
-            ed = OEd(TestObjectClass, self.ds,
+            ed = OEd(TestObjectClass, self.clerk,
                      input={"__expect__":("fname:fred", "lastname...?")})
             ex = ed.expected()
         except ValueError:
@@ -151,7 +151,7 @@ class ObjectEditorTest(unittest.TestCase):
         this just exercises the behaviour of objecteditor based
         on results from expected()..
         """
-        ed = ObjectEditor(TestObjectClass, self.ds, {})
+        ed = ObjectEditor(TestObjectClass, self.clerk, {})
         assert ed.object.isTrue, \
                "foo should be true by default!"
 
@@ -162,7 +162,7 @@ class ObjectEditorTest(unittest.TestCase):
         assert ed.object.isTrue == '0', \
                "that shoulda turned foo's isTrue field off."
         
-        ed = ObjectEditor(TestObjectClass, self.ds, {})
+        ed = ObjectEditor(TestObjectClass, self.clerk, {})
         ed.input = {"__expect__":"isTrue:0"}
         ed.act("save")
         assert ed.object.isTrue == '0', \
@@ -170,7 +170,7 @@ class ObjectEditorTest(unittest.TestCase):
 
         
         # now try testing two of 'em
-        ed = ObjectEditor(TestObjectClass, self.ds, {})
+        ed = ObjectEditor(TestObjectClass, self.clerk, {})
         ed.input = {"__expect__":("isTrue:0", "isAlsoTrue:0")}
         ed.act("save")
         assert ed.object.isTrue == '0', \
@@ -189,7 +189,7 @@ class ObjectEditorTest(unittest.TestCase):
 
         This test attemps to save a node and one subnode.
         """
-        node = Node(self.ds)
+        node = self.clerk.new(Node)
         node.name = 'general'
         node.save()
 
@@ -202,7 +202,7 @@ class ObjectEditorTest(unittest.TestCase):
             "children(+0|name)":'specific',
             }
         
-        ed = ObjectEditor(Node, self.ds, req, nodeID)
+        ed = ObjectEditor(Node, self.clerk, req, nodeID)
         ed.act()
 
         assert len(ed.object.children) == 1, \
@@ -212,7 +212,7 @@ class ObjectEditorTest(unittest.TestCase):
 
         # now check that it actually made it to the db..
         del ed
-        node = Node(self.ds, ID=nodeID)
+        node = self.clerk.load(Node, ID=nodeID)
         assert len(node.children) == 1, \
                "wrong length for node.children: %s" % len(node.children)
 

@@ -12,7 +12,7 @@ from sixthday import User
 class AdminAppTest(unittest.TestCase):
 
     def setUp(self):
-        self.app = AdminApp(sixthday.spec.dbc, {})
+        self.app = AdminApp(sixthday.spec.clerk, {})
 
         # set up some templates to play with:
         tpl = open("spec/frm_test.zb", "w")
@@ -42,6 +42,7 @@ class AdminAppTest(unittest.TestCase):
         generic_edit should show a form with a specific object's data
         """
         self.app.input["ID"]=1
+        self.app.generic_save(User)
         self.app.generic_show(User, "spec/frm_test")
         output = self.app.out.getvalue()
         assert output.startswith("ID is 1"), \

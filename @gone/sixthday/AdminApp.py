@@ -42,9 +42,9 @@ import zebra
 
 class AdminApp(sixthday.App):
 
-    def __init__(self, dbc, input):
+    def __init__(self, clerk, input):
         super(AdminApp, self).__init__(input)
-        self.dbc = dbc
+        self.clerk = clerk
 
     ## list ###################################################
     
@@ -68,10 +68,11 @@ class AdminApp(sixthday.App):
         self._dispatch("create")
 
     def generic_show(self, klass, template):
-        self._showObject(klass(self.dbc, ID=self.input.get("ID")), template)
+        self._showObject(self.clerk.load(klass, ID=self.input.get("ID")),
+                         template)
 
     def generic_create(self, klass, template):
-        self._showObject(klass(self.dbc), template)
+        self._showObject(self.clerk.new(klass), template)
 
     ## delete  ######################################################
             
@@ -117,6 +118,6 @@ class AdminApp(sixthday.App):
 
     def _objectEdit(self, klass, command):
         ed = sixthday.ObjectEditor(
-            klass, self.dbc, self.input, self.input.get("ID"))
+            klass, self.clerk, self.input, self.input.get("ID"))
         ed.do(command)
         return ed.object

@@ -24,7 +24,7 @@ class Node(zdc.RecordObject):
 
     def get_crumbs(self):
         #@TODO: how do i handle stuff like this????????????????
-        return [sixthday.Node(self._ds, ID=id) for id in
+        return [sixthday.Node(self._ds, "okfornow", ID=id) for id in
                 [n["ID"] for n in self.q_crumbs() ]]
 
     def get_children(self):
@@ -72,7 +72,7 @@ class Node(zdc.RecordObject):
 
     def get_parent(self):
         if self.parentID:
-            return Node(self._ds, ID=self.parentID)
+            return Node(self._ds, "ok", ID=self.parentID)
         else:
             return None
             
@@ -100,6 +100,6 @@ class Node(zdc.RecordObject):
         self.__super.save(self)
         
         for kid in self.q_children():
-            child = Node(self._ds, ID=kid["ID"])
+            child = Node(self._ds, "ok", ID=kid["ID"])
             child._updatePaths(parent=self)
             child.save()  

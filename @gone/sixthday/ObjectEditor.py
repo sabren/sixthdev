@@ -15,7 +15,7 @@ class ObjectEditor(sixthday.App):
 
     ## constructor #######################################
 
-    def __init__(self, what, ds, input=None, key=None):
+    def __init__(self, what, clerk, input=None, key=None):
         """
         ex: ed=ObjectEditor(Person, ds, input)
         or: ed=ObjectEditor(Person, ds, input, aKey)
@@ -37,10 +37,10 @@ class ObjectEditor(sixthday.App):
             if key:
                 # get the instance based on the key:
                 kFld = self.whatClass.__key__
-                self.object = ds.select(self.whatClass, **{kFld:key})[0]
+                self.object = clerk.load(self.whatClass, **{kFld:key})
             else:
                 # just make a new instance:
-                self.object = self.whatClass(ds=ds)
+                self.object = clerk.new(self.whatClass)
 
 
     ## public methods ####################################
@@ -164,7 +164,7 @@ class ObjectEditor(sixthday.App):
 
     def act_delete(self):
         self.object.delete()
-        self.object = self.whatClass(self.ds)
+        self.object = self.clerk.load(self.whatClass)
         
 
     def act_update(self):

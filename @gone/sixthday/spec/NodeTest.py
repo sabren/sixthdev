@@ -2,11 +2,12 @@
 import unittest
 import sixthday.spec
 from sixthday import Node
+from strongbox import Clerk
 
 class NodeTest(unittest.TestCase):
 
     def setUp(self):
-        self.ds = sixthday.spec.dbc
+        self.clerk = sixthday.spec.clerk
         self.cur = sixthday.spec.dbc.cursor()
 
         self.cur.execute("DELETE FROM base_node")
@@ -19,12 +20,12 @@ class NodeTest(unittest.TestCase):
 
 
     def check_crumbs(self):
-        node = Node(self.ds, ID=1)
+        node = self.clerk.load(Node, ID=1)
         goal = []
         assert node.crumbs == goal, \
                "Didn't get right crumbs for node 1."
 
-        node = Node(self.ds, ID=3)
+        node = self.clerk.load(Node, ID=3)
         goal = [{"ID": 1,  "name": "top",  "path": "top"},
                 {"ID": 2,  "name": "sub",  "path": "top/sub"}]
         assert len(node.crumbs) == len(goal), \
@@ -33,13 +34,13 @@ class NodeTest(unittest.TestCase):
 
 
     def check_q_children(self):
-        node = Node(self.ds, ID=1)
+        node = self.clerk.load(Node, ID=1)
         assert len(node.q_children()) == 1, \
                "wrong q_children"
     
 
     def check_path(self):
-        node = Node(self.ds, ID=2)
+        node = self.clerk.load(Node, ID=2)
         node.name="subnode"
         node.save()
 
@@ -49,7 +50,7 @@ class NodeTest(unittest.TestCase):
 
 
     def check_setPath(self):
-        node = Node(self.ds)
+        node = self.clerk.new(Node)
         try:
             gotError = 0
             node.path = "XXXX"
@@ -66,22 +67,22 @@ class NodeTest(unittest.TestCase):
         # locking... if a child is in memory, and you updatePaths,
         # it could be in conflict with the data in memory.. :/
 
-        node1 = Node(self.ds, ID=1)
+        node1 = self.clerk.load(Node, ID=1)
         node1.name="super"
         node1.save()
 
-        node2 = Node(self.ds, ID=2)
+        node2 = self.clerk.load(Node, ID=2)
         assert node2.path == "super/sub", \
                "wrong child after updatePaths: %s" % node2.path
 
-        node3 = Node(self.ds, ID=3)
+        node3 = self.clerk.load(Node, ID=3)
         assert node3.path == "super/sub/subsub", \
                "updatePaths doesn't update grandchildren properly."
 
         
 
     def check_parent(self):
-        node = Node(self.ds, ID=2)
+        node = self.clerk.load(Node, ID=2)
         assert isinstance(node.parent, Node), \
                ".parent doesn't return a Node"    
 
@@ -92,7 +93,7 @@ class NodeTest(unittest.TestCase):
         # because of the check for children, you can
         # never delete it! So, we want to prevent that.
 
-        node = Node(self.ds, ID=1)
+        node = self.clerk.load(Node, ID=1)
         try:
             gotError = 0
             node.parentID = 1
