@@ -21,6 +21,21 @@ class ObjectTestCase(unittest.TestCase):
         assert tobj._isLocked == 0, \
                "oh no! zdc.Object isn't unlocked by default!"
 
+    def check_locks(self):
+        "Locked attributes should be readonly"
+        class TestObj2(TestObj):
+            _locks = ["ABC"]
+        tobj = TestObj2()
+        tobj._lock()
+        tobj.ABC = 5
+        try:
+            gotError = 0
+            tobj.ABC = 6
+        except AttributeError:
+            gotError = 1
+
+        assert gotError, \
+               "Didn't get an AttributeError assigning to locked field."
 
     def check_getMethod(self):
         class GetClass(TestObj):
