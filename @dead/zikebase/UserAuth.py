@@ -9,9 +9,12 @@ import weblib
 
 class UserAuth(weblib.Auth):
 
+    zikebase.load("User")
+    userClass = zikebase.User
+
     def fetch(self, key):
         if key:
-            self.user = zikebase.User(ID=key)
+            self.user = self.userClass(ID=key)
         else:
             self.user = None
     
@@ -21,12 +24,12 @@ class UserAuth(weblib.Auth):
 
         if dict.has_key("username"):
             try:
-                user = zikebase.User(username=dict["username"])
+                user = self.userClass(username=dict["username"])
             except:
                 pass
         elif dict.has_key("email"):
             try:
-                user = zikebase.User(email=dict["email"])
+                user = self.userClass(email=dict["email"])
             except:
                 pass
 
