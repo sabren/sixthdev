@@ -5,6 +5,7 @@ __ver__="$Id$"
 
 import calendar
 import copy
+import time
 
 class Date:
     """
@@ -14,12 +15,15 @@ class Date:
         """
         Construct a Date from a string representation.
         """
-        if type(datestr) != type(""):
+        s = datestr
+        if type(s) != type(""):
             raise TypeError, "usage: Date(string)"
-        if " " in datestr:
-            date, time = datestr.split(" ")
+        if s == "today":
+            s = "%i-%i-%i" % time.localtime(time.time())[:3]
+        if " " in s:
+            date, timeofday = s.split(" ")
         else:
-            date, time = datestr, None
+            date, timetimeofday = s, None
         # US dates:
         if date.find("/") > -1:
             self.m, self.d, self.y = [int(x) for x in date.split("/")]

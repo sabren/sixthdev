@@ -28,3 +28,16 @@ class DateTestCase(unittest.TestCase):
                "end of month didn't work for february"
         assert Date("1/1/2002") - 1 == Date("12/31/2001"), \
                "new year didn't work."
+
+    def check_today(self):
+        """
+        temporarily set time.time() to return 10/19/2001
+        and test for today.
+        """
+        import time
+        _time = time.time
+        time.time = lambda: 1003539807.89
+        try:
+            assert Date("today") == Date("10/19/2001"), "wrong date"
+        finally:
+            time.time = _time
