@@ -41,7 +41,7 @@ class Date:
         return "%i-%i-%i" % (self.y, self.m, self.d)
 
     def toUS(self):
-        return "%i/%i/%i" % (self.m, self.d, self.y)        
+        return "%02i/%02i/%04i" % (self.m, self.d, self.y)        
 
     def __cmp__(self, other):
         if isinstance(other, Date):
@@ -55,7 +55,7 @@ class Date:
         """
         res = copy.deepcopy(self)
         res.d += days
-        if res.d > res.daysInMonth():
+        while res.d > res.daysInMonth():
             res.d = res.d - res.daysInMonth()
             res.m += 1
             if res.m > 12:
@@ -69,12 +69,12 @@ class Date:
         """
         res = copy.deepcopy(self)
         res.d -= days
-        if res.d < 1:
+        while res.d < 1:
             res.m -= 1
             if res.m < 1:
                 res.m = 12
                 res.y -= 1
-            res.d = res.daysInMonth()
+            res.d += res.daysInMonth()
         return res
 
     def __str__(self):
