@@ -138,6 +138,14 @@ class RequestTestCase(unittest.TestCase):
             Content-Disposition: form-data; name="action"
 
             upload
+            -----------------------------7d035c305e4
+            Content-Disposition: form-data; name="twovalues"
+
+            value1
+            -----------------------------7d035c305e4
+            Content-Disposition: form-data; name="twovalues"
+
+            value2
             -----------------------------7d035c305e4--
             """
             ))
@@ -150,4 +158,5 @@ class RequestTestCase(unittest.TestCase):
                "file uploads don't return FieldStorage objects"
 
 
-
+        assert request.form["twovalues"] == ("value1", "value2"), \
+               "multi-value fields break on multi-part forms."

@@ -126,11 +126,24 @@ class Request:
             
             storage = cgi.FieldStorage(StringIO.StringIO(self.content),
                                        environ=self.environ)
-            for field in storage.keys():
-                if storage[field].filename:
+            
+            for field in storage.keys():                
+                ## handle multiple values for one field:
+                if type(storage[field]) == type([]):
+                    self.form[field] = ()
+                    for item in storage[field]:
+                        if item.filename:
+                            self.form[field]=\
+                                self._tupleMerge(self.form[field], item)
+                        else:
+                            self.form[field]=\
+                                self._tupleMerge(self.form[field], item.value)
+                ## or a single value for the field:
+                elif storage[field].filename:
                     self.form[field]=storage[field]
                 else:
                     self.form[field]=storage[field].value
+                    
             del storage
 
 
@@ -201,5 +214,8 @@ class Request:
             if dict.has_key(key):
                 return 1
         return 0
-            
-            
+
+
+
+
+
