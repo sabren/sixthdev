@@ -11,29 +11,45 @@ class UserApp(weblib.Actor):
     userClass = zikebase.User
     editorClass = zikebase.ObjectEditor
 
-    def sendmail(self, mail):
-        zikebase.sendmail(mail)
-
     def act_(self):
         self.do("signup")
 
+    def enter(self):
+        self.model["errors"] = []
+
     ## signup process ##################################
-    ## signup --> create
+    ## signup --> save
 
     def act_signup(self):
-        self.consult(zdc.ObjectView(self.userClass()))
+        if self.input.get("action")!="save":
+            self.consult(zdc.ObjectView(self.userClass()))
         zebra.show("frm_signup", self.model)
 
-    def act_create(self):
-        # create the user:
-        ed = self.editorClass(self.userClass, input=self.input)
-        ed.do("save")
+    def act_save(self):
+        try:
+            ed = zikebase.ObjectEditor(self.userClass, input=self.input)
+            ed.do("save")
+        except ValueError, err:
+            #@TODO: clean up the type mess on ValueError
+            if type(err)==type([]):
+                self.errors = self.errors + err[0]
+            else:
+                self.errors.append(err.args[0])
+        if self.errors:
+            # complain:
+            self.consult(zdc.ObjectView(ed.object))
+            self.consult(self.input)
+            self.model["ID"]=ed.object.ID # security measure, just in case..
+            self.next = "signup"
+        else:
+            # now log in as that user:
+            import weblib
+            if hasattr(weblib, "auth"):
+                weblib.auth.login(ed.object.ID)
+            self.next = "on_signup"
 
-        # now log in as that user:
-        import weblib
-        if hasattr(weblib, "auth"):
-            weblib.auth.login(ed.object.ID)
-
+    def act_on_signup(self):
+        print 'welcome!'
 
     ## request password process ############################
     ## requestpass --> sendpass --> msg_sentpass
@@ -57,7 +73,7 @@ class UserApp(weblib.Actor):
         else:
             self.consult(zdc.ObjectView(user))
             msg = zebra.fetch("eml_sendpass", self.model)
-            self.sendmail(msg)
+            zikebase.sendmail(msg)
             self.msg_sentpass()
 
     def msg_sentpass(self):
@@ -81,9 +97,3 @@ class UserApp(weblib.Actor):
         self.consult(zdc.ObjectView(weblib.auth.user))
         zebra.show("frm_update", self.model)
 
-    def act_save(self):
-        # save the user:
-        ed = self.editorClass(self.userClass,
-                              self.input["ID"],
-                              input=self.input)
-        ed.do("save")

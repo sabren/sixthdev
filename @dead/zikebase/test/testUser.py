@@ -12,10 +12,17 @@ class UserTestCase(unittest.TestCase):
     def setUp(self):
         self.cur = zikebase.test.dbc.cursor()
         self.cur.execute("DELETE FROM base_user")
+        self.cur.execute("DELETE FROM base_contact")
         # username: username.. password: password
-        self.cur.execute("INSERT INTO base_user (username, password) "
-                         "VALUES ('username', '$1$pw$D/pJQB6/3vtfaOYajbG6l0')")
-        self.cur.execute("INSERT INTO base_contact (userID) values (0)")
+        self.cur.execute(
+            """
+            INSERT INTO base_user (ID, username, password) 
+            VALUES (1, 'username', '$1$pw$D/pJQB6/3vtfaOYajbG6l0')
+            """)
+        self.cur.execute(
+            """
+            INSERT INTO base_contact (ID, userID) values (1, 0)
+            """)
         
 
     def check_password(self):
@@ -27,8 +34,25 @@ class UserTestCase(unittest.TestCase):
 
         assert user.password == "password", \
                "user.password doesn't work right"
-        
-    
 
+
+    def check_save(self):
+        user = zikebase.User()
+        try:
+            user.save()
+            gotError = 0
+        except:
+            gotError = 1
+        assert gotError, "didn't get error trying to save usernameless User"
+
+        user.username ="elmer"
+        try:
+            user.save()
+            gotError = 0
+        except:
+            gotErrror = 1
+        assert not gotError, "got error after setting username!"
+            
+        
     def tearDown(self):
 	pass

@@ -37,22 +37,34 @@ class User(zikebase.Contact):
         elif (len(keys)==1) and (keys[0] in ['username', 'password']):
             # search by the detail record..
             table = zdc.Table(zikebase.dbc, "base_user")
-            self._userRec = table.fetch(key)
+            self._userRec = apply(table.fetch, (), kw)
             apply(self.__super._fetch, (self,), {"ID":self._userRec["ID"]})
 
         else:
             # search by the master record..
             apply(self.__super._fetch, (self,), kw)
             self._userRec = zdc.Table(zikebase.dbc, "base_user").fetch(self.ID)
-
+            
 
     def set_uid(self, value):
         self._userRec['uid'] = value
+
     def get_uid(self):
         return self._userRec['uid']
     
     def set_username(self, value):
+        if value != self.username:
+            # check for duplicates
+            try:
+                other = zikebase.User(username=value)
+            except LookupError:
+                other = None
+            if other:
+                raise ValueError, \
+                      "the username '%s' is already in use!" % value
+        # still here, so let's do it.
         self._userRec['username'] = value
+    
     def get_username(self):
         return self._userRec['username']
 
@@ -72,11 +84,11 @@ class User(zikebase.Contact):
         self._userRec["password"] = pw.crypted
         
     def save(self):
+        if not self.username:
+            raise ValueError, "username is requied."
         self.__super.save(self)
         self._userRec["ID"]=self.ID
         if not self.uid:
             import weblib
             self.uid = weblib.uid()
-        if not self.username:
-            self.username = ""
         self._userRec.save()

@@ -13,18 +13,21 @@ class UserAppTestCase(unittest.TestCase):
         self.cur.execute("delete from base_user")
         self.cur.execute("delete from base_contact")
 
-    def check_create(self):
+    def check_save(self):
+        #import pdb; pdb.set_trace()
         req = {
             'username':'fred',
             'password':'tempy',
             'email':'fred@tempyco.com',
             }
         app = zikebase.UserApp(input=req)
-        app.do("create")
-
+        app.do("save")
+        assert not app.errors, "got errors saving fred: %s" % str(app.errors)
+               
         #@TODO: I want to search by a field besides the key, but can't
         # until I finish refactoring zdc..
-        fred = zikebase.User(ID=1)
+        fred = zikebase.User(username='fred')
+
         assert fred.email == 'fred@tempyco.com', \
                "email is wrong: %s" % fred.email
         
