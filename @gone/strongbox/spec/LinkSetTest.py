@@ -17,7 +17,9 @@ class LinkSetTest(TestCase):
 
     def check_simple(self):
         p = Parent()
-        p.kids << Child(name="freddie jr")
+        c = Child(name="freddie jr")
+        p.kids << c
+        assert p.kids[0] == c
 
     def check_typing(self):
 
