@@ -1,4 +1,4 @@
-#!c:\program files\python\python
+#!c:\python20\python
 #
 # weblib.cgi : a wrapper script for weblib
 # inspired by http://www.webtechniques.com/archives/1998/02/kuchling/
@@ -16,10 +16,27 @@
 ## you can uncomment this temporarily if you need help 
 ## debugging Internal Server Errors..
 
-#import sys
-#print "content-type: text/plain"
-#print
-#sys.stderr = sys.stdout
+## import sys
+## print "content-type: text/plain"
+## print
+## sys.stderr = sys.stdout
+
+## profiling #####################################################
+## set this to 1 if you want profiling, 0 if you don't.
+doProfile = 0
+
+## email notifcation of errors ###################################
+## If uncaught exceptions occur, email will be sent to SITE_MAIL
+## with SITE_NAME in the subject line.
+## You can redefine these in .weblib.py if you like.
+##
+SITE_MAIL = None # eg, webmaster@yoursite.com
+SITE_NAME = None # eg, "bubbaCo intranet"
+
+
+###############################################################
+## you shouldn't have to edit anything below this line       ##
+###############################################################
 
 ## import required modules #######################################
 import os.path, sys, string, weblib, StringIO
@@ -40,8 +57,33 @@ if sys.platform=="win32":
     msvcrt.setmode(sys.__stdout__.fileno(), os.O_BINARY)
 
 ## build the engine ##############################################
-eng = weblib.Engine()
+if doProfile:
+    class ProfileEngine(weblib.Engine):
+        '''
+        an engine that profiles your script (and .weblib.py)
+        '''
+        __super=weblib.Engine
+        def __init__(self, script=None, pool=None, **kw):
+            apply(self.__super.__init__, (self, script, pool), kw)
+            import profile
+            self.prof = profile.Profile()
+        def _execute(self, script):
+            self.prof.runctx("exec(script, self.globals, self.locals)",
+                             globals(), locals())
+        def stop(self):
+            self.__super.stop(self)
+            import sys, cStringIO, pstats
+            stats = cStringIO.StringIO()
+            oldout, sys.stdout = sys.stdout, stats
+            pstats.Stats(self.prof).sort_stats('time').print_stats()
+            self.stats = stats.getvalue()
+            sys.stdout = oldout
+    eng = ProfileEngine()
+else:
+    eng = weblib.Engine()
 eng.start()
+eng.locals["SITE_MAIL"]=SITE_MAIL
+eng.locals["SITE_NAME"]=SITE_NAME
 
 ## run .weblib.py ################################################
 
@@ -66,12 +108,18 @@ if (eng.result is None) or (eng.result == eng.SUCCESS):
 
 ## close down shop and show the results  ########################
 eng.stop()
+SITE_MAIL=eng.locals["SITE_MAIL"]
+SITE_NAME=eng.locals["SITE_NAME"]
 
 if eng.result in (eng.SUCCESS, eng.EXIT):
     ## print the results
     print eng.response.getHeaders() + eng.response.buffer
-    
-    #print eng.response.getHeaders() + eng.response.buffer
+    if doProfile:
+        print '<br/>'
+        print '<pre style="color: black; background:#99ccff;' \
+              'border:solid black 1px;">'
+        print eng.stats
+        print "</pre>"
 else:
     ## print debug output
     print "Content-Type: text/html"
@@ -145,20 +193,15 @@ else:
     sys.stdout.flush()
 
     ## email error message ################################
-    if (eng.result == eng.EXCEPTION) \
-       and getattr(weblib, "OWNER_EMAIL", None):
-        #@TODO: remove dependency on zikebase
-        import zikebase
+    if (SITE_MAIL) and (eng.result==eng.EXCEPTION):
         hr = "-" * 50 + "\n"
-        site = getattr(weblib, "SITE_NAME", "unspecified site")
         msg = weblib.trim(
             """
             To: %s
             From: weblib.cgi <%s>
             Subject: uncaught exception in %s
 
-            """ % (weblib.OWNER_EMAIL, weblib.OWNER_EMAIL, site))
-
+            """ % (SITE_MAIL, SITE_MAIL, SITE_NAME))
         msg = msg + "uncaught exception in %s\n\n" % whichfile
         msg = msg + hr
         msg = msg + eng.error
@@ -168,15 +211,16 @@ else:
         msg = msg + "COOKIE: %s\n" % eng.request.cookie
         msg = msg + "SESSION DATA:\n"
         for item in eng.sess.keys():
-            msg = msg + item, ': '
+            msg = msg + item + ': '
             try:
                 msg = msg + eng.sess[item] + "\n"
             except:
-                msg = msg + '(can\'t unpickle)\n'
+                msg = msg + "(can't unpickle)\n"
         msg = msg + hr
         msg = msg + "OUTPUT:\n\n"
         msg = msg + eng.response.getHeaders() + "\n"
         msg = msg + eng.response.buffer + "\n"
         msg = msg + hr
 
-        zikebase.sendmail(msg)
+        from handy import sendmail
+        sendmail(msg)
