@@ -136,7 +136,7 @@ class App(object):
             self.errors.append(prob)
             self.model["errors"].append({"error":prob})
             if self.debug:
-                print "\n::>ERROR<::", prob
+                print >> self, "\n::<b>ERROR</b>::", prob
 
     def consult(self, model):
         """
