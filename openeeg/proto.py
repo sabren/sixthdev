@@ -29,7 +29,8 @@ import time
 
 def makeGradient():
     """
-    Returns a 160*10 Surface showing green-yellow-red gradient.
+    Returns an 163*10 Surface showing mirrored green-yellow-red
+    gradients with a blue line in between.
     """
     colors = []
     for i in range(0, 0xff, 0x22):
@@ -38,10 +39,22 @@ def makeGradient():
     for i in range(0xcc, -1, -0x22):
         colors.append((0xff, i, 0))
 
-    sprite = pygame.Surface((160, 10))
+    rcolors = colors
+    lcolors = colors[:]; lcolors.reverse()
+
+    center = 80
+
+    sprite = pygame.Surface((163, 10))
     for x in range(len(colors)):
-        pygame.draw.rect(sprite, colors[x],
-                         pygame.Rect(x*10, 0, 8, 10))
+        # left (red to green)
+        pygame.draw.rect(sprite, lcolors[x],
+                         pygame.Rect(x*5, 1, 4, 8))
+        
+        # right (green to red)
+        pygame.draw.rect(sprite, rcolors[x],
+                         pygame.Rect(center+2+(x*5), 1, 4, 8))
+
+    pygame.draw.line(sprite, (0xcc,0xcc,0xff), (center, 0), (center, 10))
     return sprite
 
 
@@ -120,7 +133,7 @@ def makeSpectrogram(slice):
     res = abs(FFT.real_fft(slice))[:-1] # discard 33rd slot (is this okay?)
     res = Numeric.floor(res) # round off to integers
     
-    assert len(res)==32, len(res)
+    assert len(res)==32, len(res)    
     return res
     
 
@@ -132,7 +145,7 @@ def main():
     screen = makeWindow(winsize=(200, 400))
     grad = makeGradient()
     
-    black = pygame.Surface((160,10))
+    black = pygame.Surface((80,10))
     black.fill((0,0,0))
 
     # the windowing array quiets down the edges of the sample
@@ -141,6 +154,8 @@ def main():
     
     session = fakeSession()
     t = 0
+    
+    center= 81 # same as in creating the graph @TODO: consolidate these
 
     while keepLooping():
 
@@ -153,11 +168,14 @@ def main():
         t += 64
         if t >= len(session):
             t = 0
-        
+
         # draw the gradient, then cover part of it up:
         for i in range(32):
-            screen.blit(grad, (20,         20+i*11))
-            screen.blit(black,(20+(graph[i]*20), 20+i*11))
+            screen.blit(grad, (20,         20+i*10))
+            # left is blank for now:
+            #screen.blit(black,(20 +(0       ), 20+i*10))
+            # right side shows the data:
+            screen.blit(black,(20+center+(graph[i]*10), 20+i*10))
 
 
 if __name__=="__main__":
