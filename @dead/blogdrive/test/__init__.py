@@ -21,16 +21,19 @@ class BlogDriveTestCase(unittest.TestCase):
 
         myRequest = weblib.Request(
             environ={"PATH_INFO":"add.py"},
-            querystring={}
-            form={
-                "title":"testSubject",
-                "content":"content",
-                }
+            querystring="auth_check_flag=1",
+            form={"auth_name":"username",
+                  "auth_pass":"password",
+                  "title":"testSubject",
+                  "content":"content",
+                  }
             )
 
         addPage = open(filename['addPage'], "r")
         
-        weblib.Engine(script=addPage, request=myRequest).run()
+        eng = weblib.Engine(script=addPage, request=myRequest)
+        eng.run()
+        print eng.response.buffer
 
         cur = dbc.cursor()
         cur.execute("select ID, title, content from base_content")
