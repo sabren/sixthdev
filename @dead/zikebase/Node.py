@@ -89,8 +89,7 @@ class Node(zdc.RecordObject):
         # save ourselves AND the children:
         self._updatePaths(self.parent)
         if self._kids is not None:
-            for child in self._kids:
-                child.save()
+            self._kids.save()
         
 
     def _updatePaths(self, parent=None):

@@ -23,7 +23,9 @@ class UserAppTestCase(unittest.TestCase):
         app = zikebase.UserApp(input=req)
         app.do("create")
 
-        fred = zikebase.User(username='fred')
+        #@TODO: I want to search by a field besides the key, but can't
+        # until I finish refactoring zdc..
+        fred = zikebase.User(ID=1)
         assert fred.email == 'fred@tempyco.com', \
                "email is wrong: %s" % fred.email
         

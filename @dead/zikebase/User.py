@@ -20,8 +20,7 @@ class User(zikebase.Contact):
         
     def _new(self):
         self.__super._new(self)
-        self._userRec = zdc.Record(
-            zdc.Table(zikebase.dbc, "base_user"))
+        self._userRec = zdc.Table(zikebase.dbc, "base_user").new()
 
     def getEditableAttrs(self):
         return self.__super.getEditableAttrs(self) \
@@ -38,15 +37,13 @@ class User(zikebase.Contact):
         elif (len(keys)==1) and (keys[0] in ['username', 'password']):
             # search by the detail record..
             table = zdc.Table(zikebase.dbc, "base_user")
-            self._userRec = apply(zdc.Record, (table,), kw)
+            self._userRec = table.fetch(key)
             apply(self.__super._fetch, (self,), {"ID":self._userRec["ID"]})
 
         else:
             # search by the master record..
             apply(self.__super._fetch, (self,), kw)
-            self._userRec = zdc.Record(
-                zdc.Table(zikebase.dbc, "base_user"), ID=self.ID)
-
+            self._userRec = zdc.Table(zikebase.dbc, "base_user").fetch(self.ID)
 
 
     def set_uid(self, value):

@@ -218,7 +218,3 @@ class ObjectEditorTestCase(unittest.TestCase):
         assert node.children[0].name=='specific', \
                "wrong name for child node: %s" % node.children[0].name
 
-
-    def check_prepare(self):
-        pass
-
