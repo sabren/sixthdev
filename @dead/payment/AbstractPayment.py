@@ -1,13 +1,16 @@
-"""
-base class / interface definition for payment objects
-"""
-__ver__="$Id$"
-
 
 class AbstractPayment:
-    """A base class for Payment objects.."""
+    """
+    An Abstract base class for Payment objects.
+    """
+    __ver__="$Id$"
     
     def __init__(self, **kwargs):
+        """
+        Your subclass should call this, and also set
+        self._secureServer (https://_____________/)
+        self._securePage (https://whatever/__________)
+        """
 
         self.card = "" # card number
         self.merchant = "" # merchant's ID
@@ -27,4 +30,51 @@ class AbstractPayment:
             setattr(self, key, kwargs[key])
             
 
+    def _submit(self, dict):
+        """
+        Given a dict of form variables, make the HTTPS POST.
+        """
+        data = urllib.urlencode(dict)
 
+        # @TODO: consolidate this code with the other Payment classes
+        h = httpslib.HTTPS(SSL.Context("sslv3"), self._secureServer)
+        h.putrequest('POST', "/" + self._securePage)
+        h.putheader('Content-type', 'application/x-www-form-urlencoded')
+        h.putheader('Content-length', '%d' % len(data))
+        h.endheaders()
+        h.send(data)
+
+        errcode, errmsg, headers = h.getreply()
+        assert errcode==200, \
+               "problem reading from %s: %s, %s" \
+               % (self._secureServer, errcode, errmsg)
+        fp = h.getfile()
+
+        content = ""
+        chunk = "start"
+        while len(chunk) != 0:
+            chunk = fp.read()
+            content += chunk
+        fp.close()
+
+        return content
+
+
+    def charge(self, amount, description=""):
+        """
+        Abstract method: define this to charge customers
+        """
+        raise NotImplementedError
+
+    def authorize(self):
+        """
+        Abstract method: define this to authorize charges
+        """
+        raise NotImplementedError
+
+    def credit(self, amount, description=""):
+        """
+        Abstract method: define this to refund charges
+        """
+        raise NotImplementedError
+        
