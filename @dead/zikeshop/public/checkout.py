@@ -133,6 +133,18 @@ class CheckoutApp(zikeshop.PublicApp):
         sale.save()
         self.data['saleID'] = sale.ID
 
+        # send the receipt ---- @TODO: clean this up!!!
+        if getattr(zikeshop, "SEND_EMAIL",0):
+            import zebra, zikebase
+            model = {}
+            view = zdc.ObjectView(sale)
+            for item in view.keys():
+                model[item] = view[item]  # ICK!
+            model["owner_email"] = getattr(zikeshop,"owner_email")
+            model["customer_email"] = sale.billAddress.email
+            zikebase.sendmail(zebra.fetch("eml_receipt", model))
+            zikebase.sendmail(zebra.fetch("eml_notify",  model))
+
         self.where = {"receipt":"checkout.py?action=show_receipt"}
         self.next  = ("jump", {"where":"receipt"})
         

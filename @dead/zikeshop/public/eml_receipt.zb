@@ -1,0 +1,13 @@
+*# email sent to customer..
+*# for now, these lines are significant.. 
+From: {:owner_email:}
+
+To: {:customer_email:}
+
+Subject: thank you for your order!
+
+Thank you for your order!
+
+* for details:
+
+    
