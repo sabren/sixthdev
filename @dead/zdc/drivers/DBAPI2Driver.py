@@ -162,6 +162,7 @@ class DBAPI2Driver:
             res = "now()"
         elif field.type == zdc.NUMBER:
             res = `value`
+            if res[-1]=="L": res = res[:-1]
             
         # binary, text, and string are all treated the same,
         # at least for now:

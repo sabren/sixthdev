@@ -16,6 +16,9 @@ class DBAPI2DriverTestCase(unittest.TestCase):
                "quoting failed for STRING"
         assert table.dbc.source._sqlQuote(table.name, "ID", 0) == "0",\
                "quotes failed for NUMBER"
+
+        assert table.dbc.source._sqlQuote(table.name, "ID", 1L) == "1",\
+               "quotes failed for long NUMBER"
         # @TODO: test BINARY .. but what should it do?
 
 
