@@ -4,7 +4,7 @@ Authentication based on rantelope Author class
 __ver__="$Id$"
 
 from sixthday import Auth
-from schema import Author
+from rantelope import Author
 
 class AuthorAuth(Auth):
 
