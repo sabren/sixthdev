@@ -157,5 +157,8 @@ class Product(zdc.RecordObject):
         for catID in vals:
             self.categories << zikeshop.Category(ID=catID)
 
-    def __str__(self):
+    def get_label(self):
         return self.name
+
+    def __str__(self):
+        return self.label

@@ -19,5 +19,5 @@ class Style(zikeshop.Product):
         else:
             return None
 
-    def __str__(self):
+    def get_label(self):
         return "%s [%s]" % (self.product.name, self.name)
