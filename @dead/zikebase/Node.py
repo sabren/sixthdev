@@ -25,19 +25,14 @@ class Node(zdc.RecordObject):
 
     def q_children(self):
         res = []
-        for node in self.getChildren(): # do I still need the old version?
-            res.append( {"ID": node.ID, "name": node.name, "path": node.path } )
-        return res
-
-    def getChildren(self):
-        res = []
         cur = self._table.dbc.cursor()
-        if self.ID:
+        if self.ID is not None:
             cur.execute("select ID from base_node where parentID=%s" % self.ID)
             for row in cur.fetchall():
-                res.append(Node(ID=row[0]))
+                node = Node(ID=row[0])
+                res.append( {"ID": node.ID, "name": node.name, "path": node.path } )
         return res
-        
+
 
     def set_path(self, value):
         raise TypeError, "path is read only."
@@ -62,7 +57,7 @@ class Node(zdc.RecordObject):
             
 
     def delete(self):
-        assert not self.getChildren(), \
+        assert not self.q_children(), \
                "Cannot delete a Node that has children."
         zdc.RecordObject.delete(self)
 
@@ -82,6 +77,7 @@ class Node(zdc.RecordObject):
 
         zdc.RecordObject.save(self)
         
-        for child in self.getChildren():
+        for kid in self.q_children():
+            child = Node(ID=kid["ID"]) # @TODO: maybe the object version IS better?
             child._updatePaths(parent=self)
             child.save()  
