@@ -1,0 +1,228 @@
+class Report:
+
+    def show(self, model={}):
+        print self.fetch(model)
+
+    def fetch(self, model={}):
+        import copy   # used for pushing scope onto stack
+
+        scope = globals()
+        # This scope thing is so that we can generate
+        # code that says:
+        #
+        #         zres = zres + x
+        # *OR*
+        #         zres = zres + scope.get(x, '')
+        #
+        # It also actually does variable scoping,
+        # when combined with scope_stack, below.
+        #
+        # I wanted to use scope=locals(), but
+        # then the 'zres + x' wouldn't work.
+        # @TODO: is this scope scheme threadsafe?
+        
+        scope_stack = []
+
+        # scope.update(model), but model might be a UserDict:
+        for item in model.keys():
+            scope[item] = model[item]
+
+        # zres is the result (the output we're building)
+        zres = ""
+        globals().update(scope)
+        from weblib import html
+        scope.update(globals())
+        scope.update(locals())
+        zres = zres + '<'
+        zres = zres + 'form action=\"users.py\"'
+        zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + 'input type=\"hidden\" name=\"what\" value=\"user\"'
+        zres = zres + '>'
+        if ID:
+            zres = zres + '<'
+            zres = zres + 'input type=\"hidden\" name=\"ID\" value=\"'
+            zres = zres + str(ID)
+            zres = zres + '\"'
+            zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + 'table'
+        zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + 'tr'
+        zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + 'td'
+        zres = zres + '>'
+        zres = zres + 'username:'
+        zres = zres + '<'
+        zres = zres + '/td'
+        zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + 'td'
+        zres = zres + '>'
+        zres = zres + str(html.text("username", username))
+        zres = zres + '<'
+        zres = zres + '/b'
+        zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + '/td'
+        zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + '/tr'
+        zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + 'tr'
+        zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + 'td'
+        zres = zres + '>'
+        zres = zres + 'fname:'
+        zres = zres + '<'
+        zres = zres + '/td'
+        zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + 'td'
+        zres = zres + '>'
+        zres = zres + str(html.text("fname", fname))
+        zres = zres + '<'
+        zres = zres + '/td'
+        zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + '/tr'
+        zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + 'tr'
+        zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + 'td'
+        zres = zres + '>'
+        zres = zres + 'lname:'
+        zres = zres + '<'
+        zres = zres + '/td'
+        zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + 'td'
+        zres = zres + '>'
+        zres = zres + str(html.text("lname", lname))
+        zres = zres + '<'
+        zres = zres + '/td'
+        zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + '/tr'
+        zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + 'tr'
+        zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + 'td'
+        zres = zres + '>'
+        zres = zres + 'email:'
+        zres = zres + '<'
+        zres = zres + '/td'
+        zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + 'td'
+        zres = zres + '>'
+        zres = zres + str(html.text("email", email))
+        zres = zres + '<'
+        zres = zres + '/td'
+        zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + '/tr'
+        zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + 'tr'
+        zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + 'td'
+        zres = zres + '>'
+        zres = zres + 'phone:'
+        zres = zres + '<'
+        zres = zres + '/td'
+        zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + 'td'
+        zres = zres + '>'
+        zres = zres + str(html.text("phone", phone))
+        zres = zres + '<'
+        zres = zres + '/td'
+        zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + '/tr'
+        zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + 'tr'
+        zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + 'td colspan=\"2\"'
+        zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + 'hr/'
+        zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + '/td'
+        zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + '/tr'
+        zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + 'tr'
+        zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + 'td'
+        zres = zres + '>'
+        zres = zres + 'new password:'
+        zres = zres + '<'
+        zres = zres + '/td'
+        zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + 'td'
+        zres = zres + '>'
+        zres = zres + str(html.password("new_password",""))
+        zres = zres + '<'
+        zres = zres + '/td'
+        zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + '/tr'
+        zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + 'tr'
+        zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + 'td colspan=\"2\"'
+        zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + 'hr/'
+        zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + '/td'
+        zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + '/tr'
+        zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + '/table'
+        zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + 'input type=\"submit\" name=\"action\" value=\"save\"'
+        zres = zres + '>'
+        if ID:
+            zres = zres + '&'
+            zres = zres + 'nbsp;'
+            zres = zres + '&'
+            zres = zres + 'nbsp;'
+            zres = zres + '<'
+            zres = zres + 'input type=\"submit\" name=\"action\" value=\"delete\"'
+            zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + '/form'
+        zres = zres + '>'
+# end of Report.fetch()
+        return zres
+
+def fetch(model={}):
+    return Report().fetch(model)
+    
+def show(model={}):
+    return Report().show(model)
