@@ -2,8 +2,7 @@
 Stealthbox: a strongbox that is not Observable
 """
 
-from strongbox import attr, link
-
+from strongbox import attr, link, StrongboxError
 
 class Accessorize(type):
     """
@@ -91,7 +90,14 @@ class Stealthbox(object):
             setattr(self, key, args[key])
 
     def __invalid(self, name):
-        raise AttributeError, \
+        # complain when attribute is invalid. Note that
+        # we can't use AttributeError because it breaks a
+        # nested exception. For example,
+        #     get_a(self): return self.b
+        # when self.b doesn't exist.. With AttributeError,
+        # it would give an error with "a" instead of with "b"
+        # and I found that confusing.
+        raise StrongboxError, \
               "'%s' is not a valid attribute for %s" \
               % (name, self.__class__.__name__)
 
@@ -106,7 +112,6 @@ class Stealthbox(object):
             self.__invalid(name)
 
     def __getattr__(self, name):
-        # attributes
         if self.__values__.has_key(name):
             return self.__values__[name]
         else:

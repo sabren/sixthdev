@@ -5,7 +5,7 @@ __ver__="$Id$"
 
 import unittest
 import types
-from strongbox import Strongbox, attr, link, linkset
+from strongbox import Strongbox, attr, link, linkset, StrongboxError
 from pytypes import Date
 
 class StealthboxTest(unittest.TestCase):
@@ -49,7 +49,7 @@ class StealthboxTest(unittest.TestCase):
         try:
            err = 0
            xinst.d = 4
-        except AttributeError:
+        except StrongboxError:
            err = 1
         assert err, "assigning to nonexistent slot d should have failed."
 
@@ -102,23 +102,22 @@ class StealthboxTest(unittest.TestCase):
     def check_nestedError(self):
         class NestedError(Strongbox):
             def get_a(self):
-                if self.b:
-                    return 1
+                return self.b
         ne = NestedError()
         try:
             a = ne.a
-        except AttributeError, e:
+        except StrongboxError, e:
             assert str(e) == "'b' is not a valid attribute for NestedError", \
                    "got wrong error: %s" % e
         else:
-            self.fail("Should have gotten an AttributeError!")
+            self.fail("Should have gotten an StrongboxError!")
 
 
     ## Private variables are explicitly private
 
     # All strongbox instances have a "private" namespace, which
     # lets them store private variables explicitly. (This is necessary
-    # because self.xxx = yyy would cause an AttributeError if xxx is
+    # because self.xxx = yyy would cause an StrongboxError if xxx is
     # not defined up front as an attrbute)
 
     def check_private(self):
