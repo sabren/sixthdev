@@ -12,6 +12,7 @@ __ver__="$Id$"
 def calcSalesTax(addressID, subtotal):
     import zikeshop    
 
+    #@TODO: decouple this from addressID, use State/Country or Address(??)
     #@TODO: put this somewhere else.. probably in the Sale object?
     #@TODO: Sale should have a reference to a "Store" object, and
     #@TODO: "Store" should have a .hasNexus(state) for sales tax..
@@ -321,3 +322,7 @@ class Cashier(zikeshop.Wizard):
         res["date"] = time.asctime(time.localtime(time.time()))[:10] \
                       + ", " + time.asctime(time.localtime(time.time()))[-4:]
         return res
+
+
+
+
