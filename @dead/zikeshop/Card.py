@@ -12,7 +12,7 @@ class Card(zdc.RecordObject):
 
 
     def getEditableAttrs(self):
-        return self.__super.getEditableAttrs(self) + ["masked"]
+        return self.__super.getEditableAttrs(self) + ["masked","issuer"]
     
     def _new(self):
         self.__super._new(self)
@@ -22,7 +22,8 @@ class Card(zdc.RecordObject):
         self.expMonth = nowMonth
         self.customerID = 0
         
-        self._data["issuer"] = "unknown" # semi-calculated field, not in db
+    def get_issuer(self):
+        return issuer(self.number)
 
     def get_masked(self):
         return ("x" * (len(self.number)-4)) + self.number[-4:]
@@ -51,9 +52,6 @@ class Card(zdc.RecordObject):
         for ch in str(value):
             if ch not in "- ":
                 num = num + ch
-
-        # figure out the issuer so we can check against that later.
-        self.issuer = issuer(num)
 
         # validate the card:
         if (self.issuer != "unknown") and checkLength(self.issuer, len(num)) \
