@@ -1,9 +1,10 @@
 <?xml version="1.0"?>
 <doc>
-<title>Installing Zikeshop</title>
+<title>Installing ZikeShop</title>
+<ver>$Id$</ver>
 
-<sec title="Zikeshop Components">
-   <p>Zikeshop requires the following components:</p>
+<sec title="ZikeShop Components">
+   <p>ZikeShop requires the following components:</p>
    <ul>
      <li><a href="http://www.python.org/">Python</a> 2.0 
           (1.52 should work, but may leak memory)</li>
@@ -16,7 +17,7 @@
           (for generating thumbnails)</li>
    </ul>
 
-   <p>Zikeshop itself consists of the following modules:</p>
+   <p>ZikeShop itself consists of the following modules:</p>
    <ul>
      <li><b>weblib</b> 
             (a high level wrapper for CGI)</li>
@@ -27,12 +28,15 @@
      <li><b>zikebase</b>
             (core web classes built using the libraries above)</li>
      <li><b>zikeshop</b>
-            (the zikeshop-specific application and libraries)</li>
+            (the ZikeShop-specific application and libraries)</li>
    </ul>
+   <p>These are all stored in their own directories, which should
+      be copied to a directory on the python path. <br/>
+      (eg, <code>c:\python20\lib</code>)</p>
 </sec>
 
 <sec title="Configuring the web server">
-  <p>Zikeshop is designed to run through the <code>weblib.cgi</code>
+  <p>ZikeShop is designed to run through the <code>weblib.cgi</code>
      wrapper script (included with weblib). This script coordinates
      persistent session handling, and provides an API for
      communicating with the web server.</p>
@@ -50,7 +54,7 @@
        <ul>
        <li><b>Executable</b> - the path to python, the path to 
            <code>weblib.cgi</code>, and the string " %s %s".
-           eg: "<code>c:/python20/python.exe&amp;nbsp;c:/python/weblib/weblib.cgi&amp;nbsp;%s&amp;nbsp;%s</code>"</li>
+           eg: "<code>c:/python20/python.exe c:/python/weblib/weblib.cgi %s %s</code>"</li>
        <li><b>Extension</b> - "<code>.py</code>"</li>
        <li><b>Method Exclusions</b> - this is really up to you, but
            in general, exclude PUT and DELETE.</li>
@@ -73,5 +77,49 @@
 </sec>
 
 <sec title="Configuring MySQL">
+  <sec title="Installing the MySQL Database">
+     <p>Download and install MySQL from 
+        <a href="http://www.mysql.com/downloads/"
+           >http://www.mysql.com/downloads/</a>.</p>
+     <p>Once installed, create a database called <code>zikeshop</code>.
+        On windows, this can be done via <code>winMysqlAdmin.exe</code>
+       (which is installed by default into <code>c:\mysql\bin</code>).</p>
+     <p>Change to the directory with <code>zikeshop.sql</code> and
+        run the following command to create the database:<br/>
+        <pre>
+        c:\mysql\bin\mysql zikeshop &lt; zikeshop.sql
+        </pre>
+     </p>
+  </sec>
+  <sec title="Installing MySQLdb">
+     <p>MySQLdb is the python module to connect to MySQL.</p>
+     <p>For unix, install from 
+        <a href="http://www.dustman.net/andy/python/"
+           >http://www.dustman.net/andy/python/</a></p>
+     <p>For Windows, install from 
+        <a href="http://highqualdev.com/">http://highqualdev.com/</a></p>
+     <p>Install with the command:  
+        <pre>
+        python setup.py install
+        </pre></p>
+  </sec>
+  <sec title="Creating the database connection">
+     <p>Update the <code>sqlZikeShop.py</code> file with the correct
+     connection information for your machine. It should look like this:</p>
+     <pre>
+     import MySQLdb
+     dbc = MySQLdb.connect(host="YOUR_MACHINE",db="zikeshop",
+                           user="MYSQL_USER",passwd="MYSQL_PASSWD")
+     </pre>
+  </sec>
 </sec>
+
+<sec title="Installing ZikeShop">
+  <p>Copy the <code>public</code> and <code>admin</code>
+     directories to wherever you want them to reside on
+     your server. </p>
+
+  <p>At this point, ZikeShop should now run.</p>
+</sec>
+
 </doc>

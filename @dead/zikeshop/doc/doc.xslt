@@ -8,6 +8,8 @@
       <body>
         <h1><xsl:value-of select="title"/></h1>
         <xsl:apply-templates select="sec"/>
+        <hr/>
+        <i><xsl:value-of select="ver"/></i>
       </body>
     </html>
   </xsl:template>
