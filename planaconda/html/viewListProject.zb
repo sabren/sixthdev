@@ -4,6 +4,12 @@
 <p><b>project list</b></p>
 
 * for projects:
-    {:name:}
+    * head:
+        <ul>
+    * body:
+        <li><a 
+           href="planaconda.app?action=viewNode&ID={:ID:}">{:name:}</a></li>
+    * foot:
+        </ul>
 * none:
     no projects found

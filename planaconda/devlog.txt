@@ -344,3 +344,28 @@ until next iteration.
 I know Steve McConnell warned about optimisim, but... 
 I think I can do this. 
 
+
+[0425.2004 09:24PM] since I'm off anyway, let's do the plate
+page. if I absolutely HAVE to cut something, I'd rather it
+be the split node form and tree page... those two things are
+the highest risk anyway. i can do split node manually if I
+need to for a while, and the tree page is just a convenience
+view for what I'm already providing through several pages.
+It's a "here's everything, say how many you want" order form,
+but I already have a shopping cart in the form of the "plate".
+
+Okay, so let's implement plate.
+
+[0425.2004 09:36PM] huh. logic for the sorted plate was easy.. 
+now to just make the html...
+
+[0425.2004 10:03PM] well that sucked. huge snag with the 
+root node. Clerk doesn't cope with "None" very well, and
+I had to code around it. I didn't fix Clerk though. I just
+added it to my grievances file. So now it's 10pm and the
+plate works (but there's no batch update) and you can 
+kind of move around in the tree, but it really needs work.
+
+I'm going to add comments now. Might stop and see if it's
+worth stealing them from Rantelope, but they're so simple
+it might not be worth the effort.

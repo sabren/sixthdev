@@ -2,6 +2,7 @@
 <p>[
   <a href="planaconda.app?action=viewListProject">projects</a>
 | <a href="planaconda.app?action=formEditNode">add node</a> 
+| <a href="planaconda.app?action=viewPlate">the plate</a> 
 ]</p>
 
 <hr>

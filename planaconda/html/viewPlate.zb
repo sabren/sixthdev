@@ -1,0 +1,14 @@
+
+* include head;
+
+<p><b>current plate:</b></p>
+
+* for nodes:
+    * head:
+        <ul>
+    * body:
+        <li>{:name:}</li>
+    * foot:
+        </ul>
+* none:
+    <i>The plate is empty.</i>

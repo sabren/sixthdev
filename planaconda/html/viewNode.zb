@@ -3,6 +3,30 @@
 
 <p><b>view node</b></p>
 
+
+<div>
+<a href="planaconda.app?action=viewNode&ID=0"> root </a> / 
+* for crumbs:
+    <a href="planaconda.app?action=viewNode&ID{:ID:}">{:name:}</a> /
+</div>
+
+
+
 <div class="node">
 <p>name: <b>{:name:}</b></p>
 </div>
+
+
+* for children:
+    * head:
+        children:
+        <ul>
+    * body:
+        <li>{:name:}</li>
+    * foot:
+        </ul>
+* none:
+    <i>no children</i>
+
+
+

@@ -35,3 +35,12 @@
   out... In fact, the only thing it DOES use is the generic_save
   which might make more sense as another ObjectEditor or BoxEditor
 
+
+- "crumbs" didn't show up from zebra. it shows up in BoxView 
+  on demand, but not in zebra's scope. igh... :/
+
+
+- I needed Node.ID=0 but there's no easy way to tie that 
+  in with arlo. Clerk should let me get a Ghost instance
+  like that, specifically for querying on None.
+
