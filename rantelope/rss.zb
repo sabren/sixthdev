@@ -11,7 +11,7 @@
         <item>
           <title>{:xmlEncode(title):}</title>
           <link>{:xmlEncode(url):}</link>
-          <description>{:xmlEncode(description):}</description>
+          <description>{:description:}</description>
         </item>
   </channel>
 </rss>
