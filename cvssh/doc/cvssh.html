@@ -1,0 +1,237 @@
+<html>
+<head>
+<title>cvssh: a secure ext-to-pserver bridge for cvs</title>
+</head>
+<style type="text/css">
+body { background: white; }
+p, td, th  { font-family: verdana, arial; font-size: 10pt }
+h1 { font-family: arial; font-size: 20pt; }
+h2 { font-family: arial; font-size: 16pt; 
+     display: block; 
+     background: gold; 
+     padding: 2px;
+     margin-top: 25px;
+   }
+li { margin-top: 4 px; }
+th { color: white; text-align: left; background: black; }
+table.chart td { background: #eeeeee; }
+code { color: #660000; }
+a:visited { color: purple }
+</style>
+<body>
+
+<a name="top"><br></a>
+<table align="center" width="600">
+<tr><td>
+<h1>
+   <i>cvssh:</i><br>
+   a secure bridge <br>
+   for cvs pservers
+</h1>
+<p>
+   by <a href="http://www.sabren.net/">Michal J Wallace</a><br/>
+   of <a href="http://www.sabren.com/">Sabren Enterprises, Inc</a><br/>
+   0121.2002<br/>
+</p>
+</td>
+
+<td valign="top" align="right">
+<a href="#glance">cvssh at a glance</a><br>
+<a href="#background">background</a><br>
+<a href="#howitworks">how it works</a><br>
+<a href="#download"><b>download</b></a><br>
+<a href="#helpwanted">help wanted</a><br>
+<a href="#license">license</a><br>
+<a href="#links">links</a><br>
+</td>
+</tr>
+
+<tr><td colspan="2">
+
+<a name="glance"><br></a>
+
+<h2>cvssh at a glance</h2>
+
+<p align="center">
+<img src="flowchart.gif" alt="Diagram showing how cvssh works.">
+</p>
+
+<p>The <code>cvs pserver</code> option is a useful but insecure tool
+   for managing cvs repositories. Most approaches to securing cvs
+   either involve <code>ssh</code> tunneling or avoid <code>pserver</code>
+   altogether. The <code>cvssh</code> program offers a third alternative,
+   which combines the simplicity of <code>ext</code> on the client
+   with the flexibility of a <code>pserver</code>-based repository.
+</p>
+
+
+<a href="#top" title="back to top">^</a>
+<a name="background"><br></a>
+
+<h2>background</h2>
+
+<p>This all started while I was researching cvs security for my company's
+   <a href="http://www.cornerhost.com/cvs/">cvs hosting plans</a>. I
+   decided to use a secure <code>pserver</code>, or password authenticating
+   server. I like <code>pserver</code> because it lets each 
+   repository have its own set of users, and those users don't need 
+   to have their own shell accounts on the server.
+</p>
+
+<p>There are actually several other ways to access cvs:</p>
+
+   <table class="chart" align="center" width="500" 
+          cellspacing="1" cellpadding="2">
+     <tr>
+       <th>method</th>
+       <th>pros</th>
+       <th>cons</th>
+     </tr>
+     <tr>
+       <td valign="top"><code>pserver</code></td>
+       <td valign="top">easy to manage</td>
+       <td valign="top">horribly insecure</td>
+     </tr>
+     <tr>
+       <td valign="top">chrooted <code>pserver</code> + ssh</td>
+       <td valign="top">can be fairly secure</td>
+       <td valign="top">complex setup</td>
+     </tr>
+     <tr>
+       <td valign="top"><code>ext</code> (CVS_RSH=ssh)</td>
+       <td valign="top">security through ssh</td>
+       <td valign="top">requires shell accounts</td>
+     </tr>
+     <tr>
+       <td valign="top"><code>kserver/gserver</code></td>
+       <td valign="top">kerberos security</td>
+       <td valign="top">no win32 support (??)</td>
+     </tr>
+   </table>
+
+<p>The <code>ext</code> method is interesting, because it 
+   lets you specify an external program for connecting to
+   the repository. By default, that program is RSH (remote
+   shell), but usually, people change this to <code>ssh</code> (secure shell)
+   because it encrypts your data as it moves across the net.
+</p>
+
+<p>A basic <code>pserver</code> setup has no encryption, which is 
+   one reason it's insecure. Most schemes to secure <code>pserver</code>
+   involve setting up <code>ssh</code> to listen on the local cvspserver port (2401)
+   and securely forward connections to the cvspserver port on the
+   real server. This is called tunnelling.
+</p>
+
+<p>The tunnelling concept is a good one, but it can be somewhat
+   confusing for users to set up, and it still requires at
+   least one shell account to work.
+</p>
+
+<p>I wanted something that would be simpler for my customers to
+   set up, so I came up with my own tunnelling scheme that 
+   does not rely on <code>ssh</code> port forwarding.
+</p>
+
+
+<a href="#top" title="back to top">^</a>
+<a name="howitworks"><br></a>
+
+<h2>how it works</h2>
+
+<p align="center">
+<img src="flowchart.gif" alt="Here's that diagram again.">
+</p>
+
+<p>The <code>cvssh</code> concept is pretty simple. In fact,
+the initial implementation took less than 200 lines of python
+code - most of it comments. Here's an step-by-step walkthrough
+of the system, following the above diagram from left to right:</p>
+
+<b>a 12-step program for outsmarting cvs</b>
+<ol>
+<li>The developer sets his or her <code>CVS_RSH</code> 
+    environment variable to <code>cvssh</code> and runs
+    <code>cvs&nbsp;-d:ext:user@remotesystem:/cvsroot&nbsp;(command)</code>
+</li>
+<li><code>cvs</code> starts "<code>cvssh&nbsp;-l&nbsp;user&nbsp;remotesystem&nbsp;cvs&nbsp;server</code>" as a child process
+</li>
+<li><code>cvssh</code> pretends to be a remote shell, and
+    prompts the developer for a password.
+</li>
+<li><code>cvs</code>, duped into thinking it has connected
+    to a real <code>cvs server</code> instance, sends
+    <code>cvssh</code> the command <code>Root /cvsroot</code>.
+</li>
+<li>At this point, <code>cvssh</code> has everything it needs
+    to connect to a pserver. It now opens an SSL connection to
+    <code>remotesystem</code> on a predetermined port (2402 for now,
+    but this isn't official)
+</li>
+<li>The remote machine has <code>stunnel</code> listening on that port.
+</li>
+<li>When <code>stunnel</code> receives the connection, it runs
+    <code>cvs pserver</code> and connects its input and output
+    to the socket connection from the developer's machine.</li>
+</li>
+<li><code>cvssh</code> can now talk securely to the <code>pserver process</code></li>
+<li><code>cvssh</code> sends the <code>pserver</code> login information
+    as if the developer had actually typed <code>-d:pserver:...</code> instead
+    of <code>-d:ext:...</code></li>
+<li>The <code>pserver</code> either accepts or rejects the credentials.</li>
+<li>If the credentials are rejected, <code>cvssh</code> terminates with
+    an "ACCESS DENIED" message.</li>
+<li>Otherwise, the developer's <code>cvs</code> instance and the
+    remote <code>cvs pserver</code> instance can now communicate
+    freely. <code>cvssh</code> simply relays their messages until
+    the transaction is complete.</li>
+</ol>
+
+
+
+<a href="#top" title="back to top">^</a>
+<a name="download"><br></a>
+<h2>download</h2>
+
+<p>The initial implementation is written in python and runs only
+   on win32. (The win32 dependency is only in the password prompt,
+   so it should be VERY easy to port - see the 
+   <a href="#helpwanted">help wanted</a> section, below)</p>
+
+<p>For whatever reason, <code>cvs -d:ext:</code> requires that
+   whatever you set <code>CVS_RSH</code> to be an <code>*.exe</code>.
+   At least, my version did... So the distribution includes a
+   precompiled <code>cvssh.exe</code> made with <code>py2exe</code>.
+   (It's in dist/cvssh but don't try to run it yourself because
+   you're not <code>cvs</code>!)
+</p>
+
+<p><a href="cvssh_0.1.zip">download cvssh-0.1.zip</a></p>
+
+<a href="#top" title="back to top">^</a>
+
+<a name="helpwanted"><br></a>
+<h2>help wanted</h2>
+
+
+
+<a href="#top" title="back to top">^</a>
+<a name="license"><br></a>
+<h2>license</h2>
+
+
+<a href="#top" title="back to top">^</a>
+<a name="links"><br></a>
+<h2>links</h2>
+
+cvs protocol:
+http://www.loria.fr/~molli/cvs/doc/cvsclient_toc.html
+<a href="http://www.stunnel.org/">stunnel</a>
+
+<a href="#top" title="back to top">^</a>
+
+<p>&nbsp;</p>
+<hr style="color:gold">
+(c) 2002 
+</td></tr>
+</table>
