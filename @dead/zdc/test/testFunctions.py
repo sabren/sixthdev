@@ -3,7 +3,8 @@ test cases for various utility functions in ZDC
 """
 __ver__="$Id$"
 
-import unittest, zdc
+import unittest
+import zdc
 
 class FunctionsTestCase(unittest.TestCase):
 
@@ -19,3 +20,7 @@ class FunctionsTestCase(unittest.TestCase):
         assert actual=='<users><user name="fred"/></users>', \
                "wrong simple view: %s" % actual
 
+
+    def check_dateRange(self):
+        range = zdc.dateRange("1/1/2001", "1/10/2001")
+        assert len(range) == len([1,2,3,4,5,6,7,8,9,10]), "wrong length"
