@@ -6,6 +6,7 @@ __ver__="$Id$"
 import weblib
 import string
 import sys
+import os
 
 class Response:
     """
@@ -23,7 +24,7 @@ class Response:
 
     ## constructor #######################################
 
-    def __init__(self, engine=weblib, out=None):
+    def __init__(self, engine=None, out=None):
 
         self.engine = engine
         self.out = out
@@ -83,7 +84,7 @@ class Response:
     def redirect(self, url):
         # http://ppewww.ph.gla.ac.uk/~flavell/www/post-redirect.html
         # except it doesn't work with IIS, so:
-        server = self.engine.request.environ.get('SERVER_SOFTWARE', '')
+        server = os.environ.get('SERVER_SOFTWARE', '')
         if string.find(server, 'Microsoft')<>-1:
             self.clear()
             self.write(weblib.trim(
