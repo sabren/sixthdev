@@ -27,12 +27,3 @@ suites = {
     "DBAPI2Driver": unittest.makeSuite(DBAPI2DriverTestCase, "check_"),
     }
 
-import zikebase.test
-import zikeshop.test
-suites.update(zikebase.test.suites)
-suites.update(zikeshop.test.suites)
-
-
-#@TODO: why not have some sort of scheme where if suite=="ALL"
-#@TODO: it just magically loops through all the tests in __all__ ?
-#@TODO: and applies makeSuite for "check_"...?
