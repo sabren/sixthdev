@@ -38,12 +38,12 @@ class Object:
     ### Abstract Protected Methods ##########################
 
     def _new(self):
-        raise NotImplementedError
+        raise NotImplementedError, "Object._new()"
 
 
 
     def _fetch(self, key=None, **kw):
-        raise NotImplementedError
+        raise NotImplementedError, "Object._fetch()"
 
 
 
@@ -54,11 +54,11 @@ class Object:
     ### Abstract Public Methods ############################
 
     def save(self):
-        raise NotImplementedError
+        raise NotImplementedError, "Object.save()"
 
 
     def delete(self):
-        raise NotImplementedError
+        raise NotImplementedError, "Object.delete()"
 
 
     ### private Methods ####################################
