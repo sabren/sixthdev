@@ -5,23 +5,25 @@ __ver__="$Id$"
 
 import zdc
 class ObjectView:
+
     def __init__(self,object):
         self.object = object
+
     def __getitem__(self, name):
-        notfound = "**NOTFOUND**"
-        res = getattr(self.object, name, notfound)
-        if res is notfound:
-            raise KeyError, name
+        # this used to have a try..except block, but it made it
+        # very hard to debug!
+        res = getattr(self.object, name)
+        if (type(res) == type([])) or isinstance(res, zdc.LinkSet):
+            lst = []
+            for item in res:
+                lst.append(zdc.ObjectView(item))
+            return lst
         else:
-            if (type(res) == type([])) or isinstance(res, zdc.LinkSet):
-                lst = []
-                for item in res:
-                    lst.append(zdc.ObjectView(item))
-                return lst
-            else:
-                return res
+            return res
+
     def get(self, name, default=None):
         return getattr(self.object, name, default)
+
     def keys(self):
         #@TODO: ObjectView.keys() only works with RecordObjects
         #map(lambda fld: fld.name, self.object._table.fields) \
