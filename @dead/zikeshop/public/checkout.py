@@ -54,7 +54,8 @@ class CheckoutApp(zikeshop.PublicApp):
     def act_get_billing(self):
         import zebra
         self.consult(self.billData)
-        self.model['shipToBilling']=(self.billData==self.shipData)
+        self.model['shipToBilling']=self.input.get('shipToBilling') \
+                                     or (self.billData==self.shipData)
         zebra.show('frm_billing', self.model)
 
 
@@ -132,10 +133,7 @@ class CheckoutApp(zikeshop.PublicApp):
             #@TODO: REQUIRE input for objectEditor, model for zebra. (reduce errors!)
             ed = zikebase.ObjectEditor(zikeshop.Card, input=self.input)
             ed.do("update")
-            #@TODO: ought to check expiration date... (prolly in Card.py)
             #@TODO: resolve - cards with secondary billing addresses?
-            #self.redirect(action="confirm")
-            self.next = "checkout"
         except ValueError, valErrs:
             #@TODO: SERIOUSLY - clean up this error junk.
             #@TODO: make a central place to configure these error messages.
@@ -149,7 +147,7 @@ class CheckoutApp(zikeshop.PublicApp):
             self.model["errors"] = map(lambda e: {"error":e}, errs)
             self.next = "get_card"
         else:
-            self.redirect(action = "checkout")
+            self.redirect(action = "confirm")
 
 
 ##     def act_set_card(self):
@@ -206,10 +204,10 @@ class CheckoutApp(zikeshop.PublicApp):
         self.model["shipContact"] = [zdc.ObjectView(sale.shipAddress)]
         zebra.show("dsp_receipt", self.model)
 
-        # clear the session info:
-        self.billData = None
-        self.shipData = None
-        self.cardData = None
+        # clear the session info: @TODO - this is duplicated above.
+        self.billData = zikebase.Contact()._data.copy()
+        self.shipData = zikebase.Contact()._data.copy()
+        self.cardData = zikeshop.Card()._data.copy()
         self.cart.empty()
 
         # but remember the last sale in case they refresh..
