@@ -5,6 +5,7 @@ from strongbox import attr
 class ClerkError(Exception): pass
 
 class Clerk:
+    __ver__="$Id$"
     """
     Clerk is an object-relational mapper, responsible
     for storing strongbox-style objects in storage
