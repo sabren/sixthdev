@@ -27,7 +27,7 @@ class AdminAppTest(unittest.TestCase):
         tpl = open("spec/lst_test.zb", "w")
         tpl.write(
             "*# zebra to print a dot for each user:\n"
-            "* for list:\n" 
+            "* for each:\n" 
             "    {:x:}\n")
         tpl.close()
         
@@ -59,7 +59,7 @@ class AdminAppTest(unittest.TestCase):
         view = [{"x":"a"}, {"x":"b"}]
         self.app.generic_list(view, "spec/lst_test")
         output = self.app.out.getvalue()
-        assert output.startswith("ab"), \
+        assert output.startswith("a\nb"), \
                "generic_list didn't populate the form correctly:\n%s" \
                % output
 
