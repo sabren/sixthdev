@@ -1,8 +1,8 @@
 """
 test framework for weblib
-
-$Id$
 """
+
+__ver__="$Id$"
 
 from testActor import *
 from testRequest import *
@@ -12,13 +12,6 @@ from testAuth import *
 from testEngine import *
 from testScript import *
 from testTools import *
-#from testUser import *
-
-# you should have a module called
-# sqlTest that defines a DB-API 2.0 compliant
-# connection object named dbc.
-
-from sqlTest import dbc
 
 suites = {
     "actor" : unittest.makeSuite(ActorTestCase, "check_"),
