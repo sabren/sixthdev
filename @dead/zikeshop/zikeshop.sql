@@ -1,14 +1,44 @@
-# MySQL dump 5.10
+# MySQL dump 8.8
 #
-# Host: db6.pair.com    Database: zike_zike
+# Host: localhost    Database: zike_test
 #--------------------------------------------------------
-# Server version	3.22.30-log
+# Server version	3.23.23-beta
+
+#
+# Table structure for table 'base_contact'
+#
+
+CREATE TABLE base_contact (
+  ID int(11) NOT NULL auto_increment,
+  userID int(11) DEFAULT '0' NOT NULL,
+  fname varchar(20),
+  lname varchar(20),
+  email varchar(50),
+  address1 varchar(50),
+  address2 varchar(50),
+  address3 varchar(50),
+  city varchar(30),
+  stateCD char(2),
+  postal varchar(12),
+  countryCD char(2),
+  phone varchar(15),
+  PRIMARY KEY (ID)
+);
+
+#
+# Dumping data for table 'base_contact'
+#
+
+INSERT INTO base_contact VALUES (1,0,NULL,NULL,'username',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+INSERT INTO base_contact VALUES (2,0,NULL,NULL,'michal@sabren.com',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+INSERT INTO base_contact VALUES (3,0,NULL,NULL,'fred@tempy.com',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 
 #
 # Table structure for table 'base_content'
 #
+
 CREATE TABLE base_content (
-  ID int(11) DEFAULT '0' NOT NULL auto_increment,
+  ID int(11) NOT NULL auto_increment,
   userID int(11) DEFAULT '0' NOT NULL,
   title varchar(255),
   keywords varchar(255),
@@ -20,10 +50,17 @@ CREATE TABLE base_content (
 );
 
 #
+# Dumping data for table 'base_content'
+#
+
+INSERT INTO base_content VALUES (1,0,'a simple test',NULL,NULL,NULL,NULL);
+
+#
 # Table structure for table 'base_node'
 #
+
 CREATE TABLE base_node (
-  ID int(11) DEFAULT '0' NOT NULL auto_increment,
+  ID int(11) NOT NULL auto_increment,
   parentID int(11) DEFAULT '0' NOT NULL,
   name varchar(50) DEFAULT '' NOT NULL,
   descript varchar(255),
@@ -36,10 +73,16 @@ CREATE TABLE base_node (
 );
 
 #
+# Dumping data for table 'base_node'
+#
+
+
+#
 # Table structure for table 'base_picture'
 #
+
 CREATE TABLE base_picture (
-  ID int(11) DEFAULT '0' NOT NULL auto_increment,
+  ID int(11) NOT NULL auto_increment,
   siteID int(11),
   picture mediumblob,
   type varchar(32),
@@ -47,46 +90,36 @@ CREATE TABLE base_picture (
 );
 
 #
+# Dumping data for table 'base_picture'
+#
+
+
+#
 # Table structure for table 'base_user'
 #
+
 CREATE TABLE base_user (
-  ID int(11) DEFAULT '0' NOT NULL auto_increment,
+  ID int(11) NOT NULL auto_increment,
   uid varchar(32) DEFAULT '' NOT NULL,
-  email varchar(128) DEFAULT '' NOT NULL,
   username varchar(32) DEFAULT '' NOT NULL,
-  cryptedpass varchar(32),
+  password varchar(32),
   siteID int(11),
   PRIMARY KEY (ID),
   UNIQUE uid (uid)
 );
 
 #
-# Table structure for table 'hertel_quick'
+# Dumping data for table 'base_user'
 #
-CREATE TABLE hertel_quick (
-  ID int(11) DEFAULT '0' NOT NULL auto_increment,
-  name varchar(50),
-  email varchar(50),
-  phone varchar(20),
-  address1 varchar(100),
-  address2 varchar(100),
-  city varchar(50),
-  state char(2),
-  postal varchar(10),
-  country varchar(50),
-  cardnum varchar(20),
-  cardexp_month char(2),
-  cardexp_year char(2),
-  message text,
-  time_stamp datetime,
-  comments text,
-  status varchar(50),
-  PRIMARY KEY (ID)
-);
+
+INSERT INTO base_user VALUES (1,'username','username','$1$pw$D/pJQB6/3vtfaOYajbG6l0',1);
+INSERT INTO base_user VALUES (2,'michal@sabren.com','michal@sabren.com','$1$pw$WHVw3m116CdEewcolX2jo/',-1);
+INSERT INTO base_user VALUES (3,'3312e5d8e392d159b7b00886e23feeb0','fred','ehshf',0);
 
 #
 # Table structure for table 'ref_state'
 #
+
 CREATE TABLE ref_state (
   CD char(2) DEFAULT '' NOT NULL,
   name varchar(30),
@@ -95,65 +128,60 @@ CREATE TABLE ref_state (
 );
 
 #
-# Table structure for table 'shop_address'
+# Dumping data for table 'ref_state'
 #
-CREATE TABLE shop_address (
-  ID int(11) DEFAULT '0' NOT NULL auto_increment,
-  customerID int(11) DEFAULT '0' NOT NULL,
-  fname varchar(20),
-  lname varchar(20),
-  address1 varchar(50),
-  address2 varchar(50),
-  address3 varchar(50),
-  city varchar(30),
-  stateCD char(2),
-  postal varchar(12),
-  countryCD char(2),
-  phone varchar(15),
-  isPrimary tinyint(1) DEFAULT '0' NOT NULL,
-  PRIMARY KEY (ID)
-);
+
+INSERT INTO ref_state VALUES ('CA','california',8.250);
+INSERT INTO ref_state VALUES ('TX','texas',5.000);
 
 #
 # Table structure for table 'shop_card'
 #
+
 CREATE TABLE shop_card (
-  ID int(11) DEFAULT '0' NOT NULL auto_increment,
+  ID int(11) NOT NULL auto_increment,
   customerID int(11) DEFAULT '0' NOT NULL,
   name varchar(50),
   number varchar(32),
   expMonth tinyint(4),
   expYear mediumint(9),
-  addressID int(11) DEFAULT '0' NOT NULL,
   PRIMARY KEY (ID)
 );
 
 #
-# Table structure for table 'shop_inventory'
+# Dumping data for table 'shop_card'
 #
-CREATE TABLE shop_inventory (
-  ID int(11) DEFAULT '0' NOT NULL auto_increment,
-  locationID int(11) DEFAULT '0' NOT NULL,
-  styleID int(11),
-  amount int(11),
-  PRIMARY KEY (ID)
+
+
+#
+# Table structure for table 'shop_detail'
+#
+
+CREATE TABLE shop_detail (
+  ID int(11) NOT NULL auto_increment,
+  saleID int(11) DEFAULT '0' NOT NULL,
+  productID int(11) DEFAULT '0' NOT NULL,
+  quantity int(11) DEFAULT '0' NOT NULL,
+  subtotal decimal(8,3),
+  PRIMARY KEY (ID),
+  KEY saleID (saleID),
+  KEY productID (productID)
 );
 
 #
-# Table structure for table 'shop_location'
+# Dumping data for table 'shop_detail'
 #
-CREATE TABLE shop_location (
-  ID int(11) DEFAULT '0' NOT NULL auto_increment,
-  name varchar(32),
-  siteID int(11),
-  PRIMARY KEY (ID)
-);
+
+INSERT INTO shop_detail VALUES (1,1,1,1,NULL);
+INSERT INTO shop_detail VALUES (2,2,2,0,NULL);
 
 #
 # Table structure for table 'shop_product'
 #
+
 CREATE TABLE shop_product (
-  ID int(11) DEFAULT '0' NOT NULL auto_increment,
+  ID int(11) NOT NULL auto_increment,
+  parentID int(11) DEFAULT '0' NOT NULL,
   code varchar(32) DEFAULT '' NOT NULL,
   name varchar(50),
   price decimal(8,2),
@@ -167,22 +195,41 @@ CREATE TABLE shop_product (
   siteID int(11),
   ts timestamp(14),
   weight decimal(5,2),
+  inStock int(11) DEFAULT '0',
+  onHold int(11) DEFAULT '0',
+  class enum('product','style'),
   PRIMARY KEY (ID)
 );
 
 #
+# Dumping data for table 'shop_product'
+#
+
+INSERT INTO shop_product VALUES (1,0,'some01','something',NULL,NULL,NULL,NULL,NULL,0,NULL,NULL,-1,20001123124344,NULL,0,0,NULL);
+INSERT INTO shop_product VALUES (2,0,'XXX','X RAY GLASSES',0.00,NULL,0.00,NULL,NULL,NULL,NULL,NULL,NULL,20001123124344,0.00,0,0,'product');
+
+#
 # Table structure for table 'shop_product_node'
 #
+
 CREATE TABLE shop_product_node (
+  ID int(11) NOT NULL auto_increment,
   productID int(11) DEFAULT '0' NOT NULL,
-  nodeID int(11) DEFAULT '0' NOT NULL
+  nodeID int(11) DEFAULT '0' NOT NULL,
+  PRIMARY KEY (ID)
 );
+
+#
+# Dumping data for table 'shop_product_node'
+#
+
 
 #
 # Table structure for table 'shop_sale'
 #
+
 CREATE TABLE shop_sale (
-  ID int(11) DEFAULT '0' NOT NULL auto_increment,
+  ID int(11) NOT NULL auto_increment,
   customerID int(11) DEFAULT '0' NOT NULL,
   ship_addressID int(11) DEFAULT '0' NOT NULL,
   bill_addressID int(11) DEFAULT '0' NOT NULL,
@@ -194,30 +241,25 @@ CREATE TABLE shop_sale (
   total decimal(8,2),
   shiptypeID int(11),
   tsSold datetime,
-  statusID int(11) DEFAULT '0' NOT NULL,
+  status enum('new','complete','cancelled','pending'),
   comments text,
   siteID int(11) DEFAULT '1' NOT NULL,
   PRIMARY KEY (ID)
 );
 
 #
-# Table structure for table 'shop_sale_item'
+# Dumping data for table 'shop_sale'
 #
-CREATE TABLE shop_sale_item (
-  ID int(11) DEFAULT '0' NOT NULL auto_increment,
-  saleID int(11) DEFAULT '0' NOT NULL,
-  styleID int(11) DEFAULT '0' NOT NULL,
-  item varchar(75),
-  quantity int(11) DEFAULT '0' NOT NULL,
-  price decimal(8,2),
-  PRIMARY KEY (ID)
-);
+
+INSERT INTO shop_sale VALUES (1,0,0,0,0,0.00,NULL,NULL,NULL,NULL,0,'2000-11-23 12:43:44','new',NULL,0);
+INSERT INTO shop_sale VALUES (2,0,0,0,0,0.00,NULL,NULL,NULL,NULL,0,'2000-11-23 12:43:44','new',NULL,0);
 
 #
 # Table structure for table 'shop_state'
 #
+
 CREATE TABLE shop_state (
-  ID int(11) DEFAULT '0' NOT NULL auto_increment,
+  ID int(11) NOT NULL auto_increment,
   storeID int(11) DEFAULT '0' NOT NULL,
   stateCD char(2),
   rate decimal(8,2),
@@ -225,19 +267,16 @@ CREATE TABLE shop_state (
 );
 
 #
-# Table structure for table 'shop_status'
+# Dumping data for table 'shop_state'
 #
-CREATE TABLE shop_status (
-  ID int(11) DEFAULT '0' NOT NULL auto_increment,
-  status varchar(50),
-  PRIMARY KEY (ID)
-);
+
 
 #
 # Table structure for table 'shop_store'
 #
+
 CREATE TABLE shop_store (
-  ID int(11) DEFAULT '0' NOT NULL auto_increment,
+  ID int(11) NOT NULL auto_increment,
   siteID int(11) DEFAULT '0' NOT NULL,
   name varchar(50),
   addressID int(11),
@@ -246,20 +285,67 @@ CREATE TABLE shop_store (
 );
 
 #
-# Table structure for table 'shop_style'
+# Dumping data for table 'shop_store'
 #
-CREATE TABLE shop_style (
-  ID int(11) DEFAULT '0' NOT NULL auto_increment,
-  productID int(11) DEFAULT '0' NOT NULL,
-  style varchar(50),
+
+INSERT INTO shop_store VALUES (1,1,'test store',1,NULL);
+
+#
+# Table structure for table 'test_enum'
+#
+
+CREATE TABLE test_enum (
+  ID int(11) NOT NULL auto_increment,
+  bubba enum('red','white','blue'),
   PRIMARY KEY (ID)
 );
 
 #
+# Dumping data for table 'test_enum'
+#
+
+
+#
+# Table structure for table 'test_fish'
+#
+
+CREATE TABLE test_fish (
+  ID int(11) NOT NULL auto_increment,
+  fish varchar(32),
+  PRIMARY KEY (ID)
+);
+
+#
+# Dumping data for table 'test_fish'
+#
+
+INSERT INTO test_fish VALUES (1,'squid');
+
+#
+# Table structure for table 'test_types'
+#
+
+CREATE TABLE test_types (
+  ID int(11) NOT NULL auto_increment,
+  f_int int(11),
+  f_string varchar(255),
+  f_blob blob,
+  f_text text,
+  sometime datetime,
+  PRIMARY KEY (ID)
+);
+
+#
+# Dumping data for table 'test_types'
+#
+
+
+#
 # Table structure for table 'web_sess'
 #
+
 CREATE TABLE web_sess (
-  ID int(11) DEFAULT '0' NOT NULL auto_increment,
+  ID int(11) NOT NULL auto_increment,
   sid varchar(32) DEFAULT '' NOT NULL,
   name varchar(32) DEFAULT '' NOT NULL,
   sess text,
@@ -269,20 +355,38 @@ CREATE TABLE web_sess (
 );
 
 #
+# Dumping data for table 'web_sess'
+#
+
+
+#
 # Table structure for table 'zike_site'
 #
+
 CREATE TABLE zike_site (
-  ID int(11) DEFAULT '0' NOT NULL auto_increment,
+  ID int(11) NOT NULL auto_increment,
   site varchar(30),
   PRIMARY KEY (ID)
 );
 
 #
+# Dumping data for table 'zike_site'
+#
+
+
+#
 # Table structure for table 'zike_zuser'
 #
+
 CREATE TABLE zike_zuser (
-  ID int(11) DEFAULT '0' NOT NULL auto_increment,
+  ID int(11) NOT NULL auto_increment,
   userID int(11) DEFAULT '0' NOT NULL,
   PRIMARY KEY (ID)
 );
+
+#
+# Dumping data for table 'zike_zuser'
+#
+
+INSERT INTO zike_zuser VALUES (1,1);
 

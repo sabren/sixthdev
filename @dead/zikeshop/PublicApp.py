@@ -17,6 +17,7 @@ class PublicApp(zikebase.AppActor):
 
 
     def enter(self):
+        self.__super.enter(self)
         self.cart.start()
 
 
