@@ -15,8 +15,8 @@
         <li><small>
             [<a href="rantelope.app?action=show&what=channel&ID={:ID:}"
                >config</a>]&nbsp;
-            [<a href="blog.app?channel={:ID:}">html</a>]&nbsp;
-            [<a href="blog.app?channel={:ID:}&as=xml">xml</a>]&nbsp;
+            [<a href="blog.app?channelID={:ID:}">html</a>]&nbsp;
+            [<a href="blog.app?channelID={:ID:}&as=xml">xml</a>]&nbsp;
             </small>
             <b>
             <a href="rantelope.app?action=create&what=story&channelID={:ID:}"
