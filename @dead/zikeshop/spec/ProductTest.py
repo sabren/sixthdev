@@ -3,10 +3,10 @@ test cases for zikeshop.Product
 """
 __ver__="$Id$"
 
+import sixthday
 import unittest
 import zikeshop
 import zikeshop.test
-import zikebase
 import zdc
 
 #@TODO: test picture attribute
@@ -96,11 +96,11 @@ class ProductTestCase(unittest.TestCase):
         assert len(prod.categories)==0, \
                "categories should be empty list by default"
 
-        nodeA = zikebase.Node(self.ds)
+        nodeA = sixthday.Node(self.ds)
         nodeA.name="abc"
         nodeA.save()
         
-        nodeB = zikebase.Node(self.ds)
+        nodeB = sixthday.Node(self.ds)
         nodeB.name="xyz"
         nodeB.save()
         
@@ -126,8 +126,8 @@ class ProductTestCase(unittest.TestCase):
                          "WHERE productID=2 "
                          "ORDER by nodeID ")
 
-        actual = self.cur.fetchall()
-        assert actual == [(1,),(2,),(3,),(4,)], \
+        actual = [int(row[0]) for row in self.cur.fetchall()]
+        assert actual == [1,2,3,4], \
                "Product doesn't save nodeIDs properly: %s" % str(actual)
 
         #@TODO: do I really need this?
@@ -149,8 +149,8 @@ class ProductTestCase(unittest.TestCase):
                          "ORDER BY nodeID")
 
         actual = self.cur.fetchall()
-        assert actual == [(1,),(2,)], \
-               "Product doesn't update nodeIDs properly: %s" % actual
+        assert actual == ((1,),(2,)), \
+               "Product doesn't update nodeIDs properly: %s" % str(actual)
 
         assert prod.categories.IDs() == (1, 2), \
                "Product doesn't return nodeIDs properly after an update"

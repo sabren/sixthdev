@@ -4,7 +4,11 @@ test cases for zikeshop.Store
 __ver__ = "$Id$"
 
 import unittest
-import zikeshop, zikebase
+import zdc
+import zikeshop
+from zikeshop import Contact
+
+
 
 class StoreTestCase(unittest.TestCase):
 
@@ -23,17 +27,10 @@ class StoreTestCase(unittest.TestCase):
         except:
             pass
 
-##     def check_address(self):
-##         assert isinstance(self.store.address, zikebase.Contact), \
-##                "Invalid address: %s" % self.store.address
-        
 
     def check_salesTax(self):
 
-##         self.store.address = zikebase.Contact()
-##         self.store.address.stateCD = 'TX'
-
-        addr = zikebase.Contact(self.ds)
+        addr = Contact(self.ds)
         addr.stateCD = 'NY'
         addr.postal = '123456'
 
@@ -41,11 +38,12 @@ class StoreTestCase(unittest.TestCase):
         assert actual == 0, \
                "shouldn't have sales tax because no nexus in NY"
 
-        addr = zikebase.Contact(self.ds)
+        addr = Contact(self.ds)
         addr.stateCD = 'CA'
 
         actual = self.store.calcSalesTax(addr, 10)
-        goal = (zikeshop.State(self.ds, CD="CA").salestax * 10) / 100
+        goal = (zdc.FixedPoint(zikeshop.State(self.ds, CD="CA").salestax)
+                * 10) / 100.0
         assert actual == goal, \
                "wrong sales tax after nexus established: %s vs %s" \
                % (actual, goal)

@@ -3,11 +3,13 @@ A Node with Products in it.
 """
 __ver__="$Id$"
 
-import zikeshop, zdc, zikebase
-zikebase.load("Node")
+import sixthday
+import zikeshop
+import zdc
 
-class Category(zikebase.Node):
-    __super = zikebase.Node
+
+class Category(sixthday.Node):
+    __super = sixthday.Node
     _tuples = ["crumbs", "children", "products"] # @TODO: clean this up!
 
     def get_products(self):

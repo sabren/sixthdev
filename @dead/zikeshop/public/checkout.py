@@ -3,7 +3,13 @@ checkout process for the cart (records the sale)
 """
 __ver__="$Id$"
 
-import zikeshop, zikebase, weblib
+import sixthday
+import zdc
+import zebra
+import zikeshop
+from handy import sendmail
+from zikeshop import Contact
+
 
 class CheckoutApp(zikeshop.PublicApp):
     __super = zikeshop.PublicApp
@@ -27,9 +33,9 @@ class CheckoutApp(zikeshop.PublicApp):
         # internal data (basically a bunch of dicts until checkout)
         self.data = self.sess.get("__checkout__",{})
         self.billData = self.data.get("billData",
-                                      zikebase.Contact(self.ds)._data.copy())
+                                      Contact(self.ds)._data.copy())
         self.shipData = self.data.get("shipData",
-                                      zikebase.Contact(self.ds)._data.copy())
+                                      Contact(self.ds)._data.copy())
         self.cardData = self.data.get("cardData",
                                       zikeshop.Card(self.ds)._data.copy())
         self.comments = self.data.get("comments", "")
@@ -70,9 +76,7 @@ class CheckoutApp(zikeshop.PublicApp):
 
     def act_add_address(self):
         #@TODO: this is a lot like userapp..
-        import zikebase
         self.do("set_comments")
-        zikebase.load("Contact")
         context = self.input.get('context','bill')
         errs = []
         required=[
@@ -100,7 +104,7 @@ class CheckoutApp(zikeshop.PublicApp):
             errs.append("A state is required for US orders")
 
         try:
-            ed = zikebase.ObjectEditor(zikebase.Contact,
+            ed = sixthday.ObjectEditor(Contact,
                                        self.ds, input=self.input)
             ed.do("update")
         except ValueError, valErrs:
@@ -125,7 +129,6 @@ class CheckoutApp(zikeshop.PublicApp):
                 self.redirect(action='get_card')
 
     def act_add_card(self):
-        import zikebase, zikeshop, zebra
         self.do("set_comments")
         errs = []
 
@@ -134,7 +137,7 @@ class CheckoutApp(zikeshop.PublicApp):
 
         try:
             #@TODO: REQUIRE input for objectEditor, model for zebra.
-            ed = zikebase.ObjectEditor(zikeshop.Card, self.ds,
+            ed = sixthday.ObjectEditor(zikeshop.Card, self.ds,
                                        input=self.input)
             ed.do("update")
             #@TODO: resolve - cards with secondary billing addresses?
@@ -167,14 +170,12 @@ class CheckoutApp(zikeshop.PublicApp):
 
 
     def act_get_card(self):
-        import zebra, zdc, zikebase
-
         # make a guess at cardholder name unless they already told us:
         if not self.cardData["name"]:
             self.cardData["name"] = "%(fname)s %(lname)s" % self.billData
 
         # this next bit is slightly redundant, but is done so you don't
-        # need to weblib.deNone on the form (probably inconsistent and
+        # need to deNone on the form (probably inconsistent and
         # should be removed though...)
         if not self.cardData["number"]:
             self.cardData["number"]=""
@@ -190,8 +191,8 @@ class CheckoutApp(zikeshop.PublicApp):
         #@TODO: make a .fromDict or .consult for zdc.RecordObjects
         # for now, we'll assume this is okay, since the classes have
         # already validated everything in here:
-        bill = zikebase.Contact(self.ds); bill._data = self.billData
-        ship = zikebase.Contact(self.ds); ship._data = self.shipData
+        bill = Contact(self.ds); bill._data = self.billData
+        ship = Contact(self.ds); ship._data = self.shipData
         card = zikeshop.Card(self.ds); card._data = self.cardData
 
         #@TODO: lots of duplicate logic here.. clean up
@@ -219,8 +220,8 @@ class CheckoutApp(zikeshop.PublicApp):
         self.write(zebra.fetch("dsp_receipt", self.model))
 
         # clear the session info: @TODO - this is duplicated above.
-        self.billData = zikebase.Contact(self.ds)._data.copy()
-        self.shipData = zikebase.Contact(self.ds)._data.copy()
+        self.billData = Contact(self.ds)._data.copy()
+        self.shipData = Contact(self.ds)._data.copy()
         self.cardData = zikeshop.Card(self.ds)._data.copy()
         self.comments = ""
         self.cart.empty()
@@ -240,15 +241,14 @@ class CheckoutApp(zikeshop.PublicApp):
 
 
     def act_checkout(self):
-        import zikebase
         sale = zikeshop.Sale(self.ds)
         shop = zikeshop.Store(self.ds)
 
         #@TODO: update test suite to ensure cardID <> 0 if it shouldn't be.
         #@TODO: this was just yanked from confirm area..
-        bill = zikebase.Contact(self.ds);
+        bill = Contact(self.ds);
         bill._data = self.billData; bill.userID = 0; bill.save()
-        ship = zikebase.Contact(self.ds);
+        ship = Contact(self.ds);
         ship._data = self.shipData; ship.userID = 0; ship.save()
         card = zikeshop.Card(self.ds);
         card._data = self.cardData; card.customerID= 0; card.save()
@@ -282,7 +282,6 @@ class CheckoutApp(zikeshop.PublicApp):
 
         # send the receipt ---- @TODO: clean this up!!!
         if getattr(zikeshop, "SEND_EMAIL",0):
-            import zebra, zikebase
             model = {}
             view = zdc.ObjectView(sale)
             for item in view.keys():
@@ -292,8 +291,8 @@ class CheckoutApp(zikeshop.PublicApp):
             model["card"] = [zdc.ObjectView(sale.card)]
             model["owner_email"] = getattr(zikeshop,"owner_email")
             model["customer_email"] = sale.billAddress.email
-            zikebase.sendmail(zebra.fetch("eml_receipt", model))
-            zikebase.sendmail(zebra.fetch("eml_notify",  model))
+            sendmail(zebra.fetch("eml_receipt", model))
+            sendmail(zebra.fetch("eml_notify",  model))
             
         self.redirect("checkout.py?action=show_receipt")
         

@@ -4,8 +4,8 @@ Product.py - product object for zikeshop
 __ver__="$Id$"
 
 import zdc
-import zikebase
 import zikeshop
+from zikeshop import Picture
 
 class Product(zdc.RecordObject):
     __super = zdc.RecordObject
@@ -113,9 +113,9 @@ class Product(zdc.RecordObject):
     def get_picture(self):
         if not self._pic:
             if self.pictureID:
-                self._pic = zikebase.Picture(self._ds, ID=self.pictureID)
+                self._pic = Picture(self._ds, ID=self.pictureID)
             else:
-                self._pic = zikebase.Picture(self._ds)
+                self._pic = Picture(self._ds)
         return self._pic
 
 

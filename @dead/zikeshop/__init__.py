@@ -1,5 +1,7 @@
 
 #@TODO: lazy module loading..
+from Picture import Picture
+from Contact import Contact
 from Product import Product
 from Cart import Cart
 from Style import Style
@@ -15,16 +17,16 @@ from State import State
 ### PICTURE ROUTINE #######################
 
 def showPicture(DBC, RES, ID=None, size=0):
-    """shows the specified picture.. Should be the only thing called
-    on the page."""
-
-    import weblib
-    import zikebase, zikeshop
-    import Image, cStringIO
+    """
+    shows the specified picture.. Should be the only thing called
+    on the page.
+    """
+    import Image
+    import cStringIO
 
     assert ID is not None
 
-    picture = zikebase.Picture(DBC, ID=ID)
+    picture = Picture(DBC, ID=ID)
     RES.contentType=picture.type
     if size:
         im = Image.open(cStringIO.StringIO(picture.picture))

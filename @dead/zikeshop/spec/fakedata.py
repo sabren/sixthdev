@@ -1,13 +1,15 @@
 """
 fake data for testing Zikeshop
-
-$Id$
 """
-import zikebase, zikebase.config
+__ver__="$Id$"
+
+import sixthday
 import zikeshop
+from sixthday import User
+import zdc
+
 
 def load():
-    import zdc, zikeshop, zikebase
     from zikeshop.test import dbc
 
     ## clear out old data..
@@ -20,20 +22,20 @@ def load():
     dbc.delete("shop_detail")
     dbc.delete("shop_product_node")
 
-    user = zikebase.User(dbc)
+    user = User(dbc)
     user.username=user.uid="username"
     user.email="user@schmoop.com"
     user.password="password"
     user.save()
 
-    user = zikebase.User(dbc)
+    user = User(dbc)
     user.username=user.uid=user.email="michal@sabren.com"
     user.password="michal"
     user.save()
 
     nodeIDs={}
     for n in ("toys", "books", "electronics", "games"):
-        node = zikebase.Node(dbc)
+        node = sixthday.Node(dbc)
         node.descript=""
         node.name=n
         if n=="games":

@@ -1,8 +1,8 @@
 """
 Cart.py - a cart class for zikeshop
-
-$Id$
 """
+__ver__="$Id$"
+
 
 import weblib, zdc
 
@@ -118,11 +118,10 @@ class Cart:
     def calcWeight(self):
         """calculate order weight by summing product weights"""
         weight = 0
-        import weblib, zikeshop, zdc
+        import zdc
         for item in self.q_contents():
             weight = weight + \
-                     (zdc.FixedPoint(weblib.deNone(item["extra"]
-                                                   ["weight"],0))
+                     (zdc.FixedPoint(item["extra"]["weight"] or "",0)
                       * item["quantity"])
         return weight
 

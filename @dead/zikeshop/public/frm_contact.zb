@@ -270,7 +270,7 @@
     ("ZM", "Zambia"),
     ("ZW", "Zimbabwe"),)
 
-    from weblib import html
+    from zebra import html
     countryCDfield = html.select("countryCD", opts, countryCD)
 
 <tr><td align="right">Country: </td>

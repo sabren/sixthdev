@@ -3,18 +3,18 @@ PublicApp - a base class for zikeshop's public AppActors.
 """
 __ver__="$Id$"
 
-import weblib, zikeshop
+import sixthday
+import zikeshop
 
-class PublicApp(weblib.Actor):
-    __super = weblib.Actor
+class PublicApp(sixthday.App):
 
     def __init__(self, input, cart, ds):
-        self.__super.__init__(self, input)
+        super(PublicApp, self).__init__(input)
         self.ds = ds
         self.cart = cart
 
     def enter(self):
-        self.__super.enter(self)
+        super(PublicApp, self).enter()
         self.cart.start()
 
     def exit(self):

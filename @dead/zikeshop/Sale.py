@@ -3,7 +3,9 @@ zikeshop.Sale - for representing Sale events
 """
 __ver__="$Id$"
 
-import zikeshop, zikebase, zdc
+import zdc
+import zikeshop
+from zikeshop import Contact
 
 class Sale(zdc.RecordObject):
     __super = zdc.RecordObject
@@ -34,21 +36,21 @@ class Sale(zdc.RecordObject):
     #@TODO: replace all this crap with generic stuff from ZDC...
     def get_shipAddress(self):
         if self.ship_addressID:
-            return zikebase.Contact(self._ds, ID=self.ship_addressID)
+            return Contact(self._ds, ID=self.ship_addressID)
         else:
-            return zikebase.Contact(self._ds)
+            return Contact(self._ds)
 
     def get_billAddress(self):
         if self.bill_addressID:
-            return zikebase.Contact(self._ds, ID=self.bill_addressID)
+            return Contact(self._ds, ID=self.bill_addressID)
         else:
-            return zikebase.Contact(self._ds)
+            return Contact(self._ds)
 
     def get_customer(self):
         if self.customerID:
-            return zikebase.Contact(self._ds, ID=self.customerID)
+            return Contact(self._ds, ID=self.customerID)
         else:
-            return zikebase.Contact(self._ds)
+            return Contact(self._ds)
 
     def get_card(self):
         if self.cardID:

@@ -5,6 +5,7 @@ __ver__ = "$Id$"
 
 import unittest
 import zikeshop
+import weblib
 
 import sys, os
 from zikeshop.public.checkout import CheckoutApp
@@ -31,8 +32,6 @@ class CheckoutAppTestCase(unittest.TestCase):
     def check_checkout(self):
         ## THIS IS ONE *LONG* TEST...............
         
-        import zikebase,zikebase.config
-        zikebase.dbc = zikebase.config.test_dbc
         import zikeshop
         from zikeshop.public.checkout import CheckoutApp
 
@@ -70,22 +69,22 @@ class CheckoutAppTestCase(unittest.TestCase):
             "countryCD":"US",
             "postal":"76126",
             }
+
         app.do("add_address")
         assert app.model["errors"], \
                "didn't get errors with invalid email: %s" \
                % str(app.model["errors"])
-        
         assert app.next=="get_billing", "didn't redirect to billing page"
 
         # fix the error, try again:
         app.model["errors"] = []
         app.input["email"]="sabren@manifestation.com"
-        app.do("add_address")
+        self.assertRaises(weblib.Redirect, app.do, "add_address")
         assert not app.model["errors"], \
                "STILL got error: %s" % str(app.model["errors"])
-        assert app.where['gohere'][:20]=="?action=get_shipping",\
+        assert app.next=="get_shipping", \
                "didn't redirect to shipping page when no shipToBilling: %s" \
-               % app.where['gohere'][:20]
+               % app.next
 
         # try showing the get_shipping form:
         # @TODO: compare this to an expected version..
@@ -93,10 +92,10 @@ class CheckoutAppTestCase(unittest.TestCase):
 
         # ship to billing box..
         app.input["shipToBilling"]="1"
-        app.do("add_address")
-        assert app.where['gohere'][:16]=="?action=get_card",\
+        self.assertRaises(weblib.Redirect, app.do, "add_address")
+        assert app.next=="get_card", \
                "didn't redirect to card page when shipToBilling: %s" \
-               % app.where['gohere'][:16]
+               % app.next
         assert app.billData == app.shipData, "didn't copy billing data"
         assert app.shipData["fname"]=="michal", \
                "REALLY didn't copy billing data"
@@ -107,12 +106,12 @@ class CheckoutAppTestCase(unittest.TestCase):
         app.input["fname"]="cathy" 
         app.input["city"]="benbrook"
         app.input["stateCD"]="TX"
-        app.do("add_address")
+        self.assertRaises(weblib.Redirect, app.do, "add_address")
         assert app.shipData["fname"]=="cathy", "didn't set ship data"
         assert app.billData["fname"]=="michal", "overwrote bill data"
-        assert app.where['gohere'][:16]=="?action=get_card",\
+        assert app.next=="get_card",\
                "didn't redirect to card page after shipping: %s" \
-               % app.where['gohere'][:16]
+               % app.next
 
         # credit card form
         # @TODO: compare this to an expected version..
@@ -157,12 +156,12 @@ class CheckoutAppTestCase(unittest.TestCase):
         # finally, get it all right...
         app.model["errors"]=[]
         app.input["expYear"]=nowYear+1
-        app.do("add_card")
+        self.assertRaises(weblib.Redirect, app.do, "add_card")
         assert app.model["errors"]==[], \
                "STILL got error after everything is right"
-        assert app.where["gohere"][:15]=="?action=confirm", \
+        assert app.next=="confirm", \
                "didn't redirect to confirmation page: %s" \
-               % app.where["gohere"][:15]
+               % app.next
 
 
         # show the confirmation page

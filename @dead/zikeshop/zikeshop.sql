@@ -25,6 +25,7 @@ CREATE TABLE base_contact (
   PRIMARY KEY (ID)
 );
 
+
 #
 # Table structure for table 'base_content'
 #
@@ -42,6 +43,11 @@ CREATE TABLE base_content (
 );
 
 #
+# Dumping data for table 'base_content'
+#
+
+
+#
 # Table structure for table 'base_node'
 #
 
@@ -57,6 +63,7 @@ CREATE TABLE base_node (
   KEY parentID (parentID),
   KEY path (path)
 );
+
 
 #
 # Table structure for table 'base_picture'
@@ -84,6 +91,7 @@ CREATE TABLE base_user (
   UNIQUE uid (uid)
 );
 
+
 #
 # Table structure for table 'ref_state'
 #
@@ -94,6 +102,13 @@ CREATE TABLE ref_state (
   salestax decimal(5,3),
   PRIMARY KEY (CD)
 );
+
+#
+# Dumping data for table 'ref_state'
+#
+
+INSERT INTO ref_state VALUES ('CA','california',8.250);
+INSERT INTO ref_state VALUES ('TX','texas',5.000);
 
 #
 # Table structure for table 'shop_card'
@@ -108,6 +123,11 @@ CREATE TABLE shop_card (
   expYear mediumint(9),
   PRIMARY KEY (ID)
 );
+
+#
+# Dumping data for table 'shop_card'
+#
+
 
 #
 # Table structure for table 'shop_detail'
@@ -133,11 +153,11 @@ CREATE TABLE shop_product (
   parentID int(11) DEFAULT '0' NOT NULL,
   code varchar(32) DEFAULT '' NOT NULL,
   name varchar(50),
-  brief varchar(255),
-  descript text,
   price decimal(8,2),
   cost decimal(8,2),
   retail decimal(8,2),
+  descSize varchar(50),
+  descript text,
   isHidden tinyint(1) DEFAULT '0',
   pictureID int(11),
   warn int(11) DEFAULT '0',
@@ -149,6 +169,7 @@ CREATE TABLE shop_product (
   class enum('product','style'),
   PRIMARY KEY (ID)
 );
+
 
 #
 # Table structure for table 'shop_product_node'
@@ -184,6 +205,7 @@ CREATE TABLE shop_sale (
   PRIMARY KEY (ID)
 );
 
+
 #
 # Table structure for table 'shop_state'
 #
@@ -195,6 +217,11 @@ CREATE TABLE shop_state (
   rate decimal(8,2),
   PRIMARY KEY (ID)
 );
+
+#
+# Dumping data for table 'shop_state'
+#
+
 
 #
 # Table structure for table 'shop_store'
@@ -210,6 +237,11 @@ CREATE TABLE shop_store (
 );
 
 #
+# Dumping data for table 'shop_store'
+#
+
+
+#
 # Table structure for table 'web_sess'
 #
 
@@ -223,12 +255,3 @@ CREATE TABLE web_sess (
   KEY name (name)
 );
 
-#
-# Table structure for table 'zike_site'
-#
-
-CREATE TABLE zike_site (
-  ID int(11) NOT NULL auto_increment,
-  site varchar(30),
-  PRIMARY KEY (ID)
-);

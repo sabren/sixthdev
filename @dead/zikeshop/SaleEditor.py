@@ -3,11 +3,11 @@ SaleEditor - an ObjectEditor with special magic for sales.
 """
 __ver__="$Id$"
 
-import zikebase
-zikebase.load("ObjectEditor")
+import sixthday
 
-class SaleEditor(zikebase.ObjectEditor):
-    __super = zikebase.ObjectEditor
+
+class SaleEditor(sixthday.ObjectEditor):
+    __super = sixthday.ObjectEditor
     
     def mergeCollections(self):
         """

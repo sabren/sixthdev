@@ -3,11 +3,11 @@ class to represent the actual store
 """
 __ver__="$Id$"
 
-import zdc, zikeshop, zikebase
+import zdc
+import zikeshop
 
 class Store(zdc.Object): #(zdc.RecordObject):
     __super = zdc.Object
-    #_table = zdc.Table(zikeshop.dbc, "shop_store")
 
     ## zdc init  ##########################################
 
@@ -18,21 +18,6 @@ class Store(zdc.Object): #(zdc.RecordObject):
     def _init(self):
         self._onHold = {}
         self._address = None
-
-
-    ## magic zdc properties ###############################
-
-##     def set_address(self, value):
-##         self._address = value
-##        
-##     def get_address(self):
-##         # @TODO: allow getting the address without saving first
-##         if self._address:
-##             return self._address
-##         elif self.addressID:
-##             return zikebase.Contact(ID=self.addressID)
-##         else:
-##             return zikebase.Contact()
 
 
     ## collections ########################################

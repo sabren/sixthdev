@@ -1,7 +1,9 @@
 import unittest
 import zdc.test
-import zikebase.test
-from zikebase.test import dbc
+
+import zdc, zdc.drivers.DBAPI2Driver, sqlTest
+dbc = zdc.Connection(zdc.drivers.DBAPI2Driver.DBAPI2Driver(sqlTest.dbc))
+
 
 from testCard import *
 from testCart import *
@@ -14,14 +16,9 @@ from testSale import *
 from testSaleEditor import *
 from testStore import *
 from testStyle import *
+from testContact import *
+
 suites = {}
-
-## suites = zdc.test.suites
-##
-## # merge the lists
-## for item in zikebase.test.suites.keys():
-##     suites[item] = zikebase.test.suites[item]
-
 suites['Card'] = unittest.makeSuite(CardTestCase, "check_")
 suites['Cart'] = unittest.makeSuite(CartTestCase, "check_")
 suites['Category'] = unittest.makeSuite(CategoryTestCase, "check_")
