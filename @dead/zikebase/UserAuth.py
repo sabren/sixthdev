@@ -21,7 +21,7 @@ class UserAuth(weblib.Auth):
         You should overwrite this!"""
 
         self.engine.response.write("""
-        <h1>%s</h1>
+        <h1>UserAuth: %s</h1>
         <form action="%s" method="post">
         username: <input type="text" name="auth_username"><br>
         password: <input type="password" name="auth_password"><br>
@@ -48,7 +48,7 @@ class UserAuth(weblib.Auth):
             
         if user and (user.password == dict.get("password")):
             key = user.ID
-        
+
         return key
 
 
