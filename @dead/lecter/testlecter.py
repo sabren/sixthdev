@@ -8,7 +8,7 @@ import unittest
 import weblib.uid
 import re, string
 import lecter
-
+from lecter import Hannibal
 
 def stripuid (uidString):
     """utility for comparing strings with embedded UID's"""
@@ -91,11 +91,11 @@ class lecterTestCase(unittest.TestCase):
 
         assert output==goal, showdiff(output, goal)
 
-    def nocheckComplexDeLectify(self):
+    def checkComplexDeLectify(self):
         """does it strip comments and consolidate multi-line statements?"""
 
-        output = lecter.deLectify("""
-        print 'keep this # comment'
+        output = lecter.deLectify(trim('''
+        print \'keep this # comment\'
         print ")#look#a-Testwith\\nEmacs\\\\Cruft\\"andEscapes!"
         
         set = [1, 2,
@@ -103,16 +103,16 @@ class lecterTestCase(unittest.TestCase):
         for y in set:
             print "this is a
                 split line"
-            print "and so " \
+            print "and so " \\
               + "is this"
-        """) #"# <- more cruft
+        '''))
 
         goal = [
             'print \'keep this # comment\'',
             'print ")#look#a-Testwith\\nEmacs\\\\Cruft\\"andEscapes!"',
             'set = [1, 2, 3, 4]',
             'for y in set:',
-            '    print "this is a \\n        split line"',
+            '    print "this is a\\n        split line"',
             '    print "and so " + "is this"']
 
         assert output == goal, showdiff(output, goal)
@@ -143,8 +143,8 @@ class lecterTestCase(unittest.TestCase):
 
 
     ## makes sure lecter handles the basic syntax for ?:
-    ##@TOODO: turn this back on
-    def scheckSimpleIIF(self):
+    ##@TODO: turn this back on
+    def notyet_checkSimpleIIF(self):
         result = stripuid(Hannibal.eat("""
         catlover = 1
         pet = catlover ? "cat" : "dog"
@@ -163,6 +163,8 @@ class lecterTestCase(unittest.TestCase):
     ## @TODO: Can Lecter handle """x = (test ? 5 : (4)) + 5""" ??
     def checkComplexIIF(self):
         pass
+
+    ## 
 
 
     ## is lecter a BadAss? :)

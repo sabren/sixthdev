@@ -51,7 +51,7 @@ lecter - a python preprocessor
 
 import string, re
 
-_indent = 0
+## _indent = 0
 
 def stripUselessLines(lcCode):
     """remove all comment-lines and blank lines from lecter source.
@@ -77,7 +77,22 @@ def deLectify(lcCode):
     """Strip comments, turn curlies into python equivalents,
     make all statements single-lined, and otherwise clean up shop.
     Returns a list lines..."""
-    global _indent
+
+    ### NOTE: deLectify() was my first attempt at parsing
+    ### python-style syntax. It's pretty messy, and will
+    ### eventually go away. BUT: it does let you use 
+    ### turn evil curlies into python block syntax
+    ### (it still relies on whitespace for actual meaning,
+    ### but whatever replaces this code should fix that).
+    ###
+    ### This will probably mostly be replaced by the
+    ### pyoplex module, which will eventually be
+    ### able to reconfigure itself based on lecter's
+    ### differetn "be" commands.. Then "be messy" will
+    ### turn on evil curly support, "be careful" will
+    ### do eiffel-style assertions, etc..
+
+    ## global _indent
 
     # first, simplify the code a bit...
     lcCode = deTabify(stripUselessLines(lcCode))
@@ -92,11 +107,18 @@ def deLectify(lcCode):
               ")" : "(",
               "}" : "{"}
     inString = 0
+    wasInString = 0
     
-    tokOperators = ('in', 'is', '=', '==', '!=', '<>',
-                    '>', '<', '<=', '>=', '%', '+', '-',
-                    '*', '/', '+=', '-=', '*=', '/=',
-                    '<<', '>>') # did I miss any?
+
+    tokOperators = [
+        'in', 'is', 'or', 'and', '=', '==', '!=', '<>',
+        '>', '<', '<=', '>=', '%', '+', '-',
+        '*', '/'] # did I miss any?
+    # lecter operators:
+    tokOperators.extend([
+        '+=', '-=', '*=', '/=',
+        '<<', '>>', '++', '--', '?' ])
+    
 
     for lpos in range(len(oldLines)):
         line = oldLines[lpos]
@@ -218,25 +240,38 @@ def deLectify(lcCode):
                 
                 # might be a single or double quoted string,
                 # so just compare the last value on openstack:
-                if (c == openStack[-1]) and (p != '\''):
+                if (c == openStack[-1]) and (p != '\\'):
                     inString = 0
                     openStack.pop()
                 
             p = c # c becomes the "previous" character
 
+
+
+        # we may have been in a string but closed just 
+        # closed it off... that's why we compare against
+        # wasInString instead of inString.
+
         # if we've blanked it out (like if it's a "}")
         #just move on to the next one:
-        if string.strip(line) == "":
+        if (string.strip(line) == "") and not wasInString:
             break        
 
         # continuations:
         if isContinued:
-            newLines[-1] = newLines[-1] + string.lstrip(line)
-
+            if wasInString: 
+                newLines[-1] = newLines[-1] + '\\n' + line
+            else:
+                newLines[-1] = string.rstrip(newLines[-1]) \
+                               + ' ' + string.lstrip(line)
+                
         wasContinued = isContinued
+        wasInString = inString
 
-        if line[-1] == "\\":
+        if (line[-1] == "\\"):
             line = line[:-1]
+            isContinued = 1
+        elif (openStack[-1] not in ('',':')):
             isContinued = 1
         else:
             isContinued = 0
@@ -254,24 +289,28 @@ def deLectify(lcCode):
     return newLines
 
 
-def delistify(lcLines):
-    global _indent
-    """Turn a list of lines back into a python program..."""
-    lcCode = ""
-    for i in range(len(lcLines)):
-        lcCode = lcCode + " " * indent + lcLines[i]
-    return lcCode
+## def delistify(lcLines):
+##     global _indent
+##     """Turn a list of lines back into a python program..."""
+##     lcCode = ""
+##     for i in range(len(lcLines)):
+##         lcCode = lcCode + (" " * indent) + lcLines[i]
+##     return lcCode
 
 
-def handleIIF(lcCode):
-    pyCode = lcCode
-    return pyCode
-
+def handleIIF(lcLines):
+    newLines = []
+    for line in lcLines:
+        if line == "":
+            pass
+    return lcLines
 
 class LecterEngine:
-    def eat(self, pyCode):
-        pyCode = handleIIF(pyCode)
-        return pyCode
+    def eat(self, lcCode):
+        """eat(lecterCode) -> pythonCode"""
+        lcLines = deLectify(lcCode)
+        lcLines = handleIIF(lcLines)
+        return string.join(lcLines, "\n")
 
 
 ## instantiate the compiler:
