@@ -59,7 +59,7 @@ class Bootstrap:
                 if item and item[-1]=="\n": item = item[:-1]
 
                 if item:
-                    res = res + "res = res + '%s'\n" \
+                    res = res + "zres = zres + '%s'\n" \
                           % zebra.escape(item)
             
             else:
@@ -81,13 +81,13 @@ class Bootstrap:
 
                 def fetch(self, model=[]):
                     self.model = model
-                    res = ""
+                    zres = ""
             """)
         res = res + zebra.indent(self.walk(model), 2)
         res = res + zebra.trim(
             """
             # end of fetch()
-                    return res
+                    return zres
             """)
         return res
 
@@ -121,7 +121,7 @@ class Bootstrap:
 
     ## <var> ##
     def handle_var(self, model, attrs):
-        res = "res = res + %s\n" % model[0]
+        res = "zres = zres + %s\n" % model[0]
         return res
 
 
@@ -148,7 +148,7 @@ class Bootstrap:
 
     ## <br> ##
     def handle_br(self, model, attrs):
-        return 'res = res + "\\n"\n'
+        return 'zres = zres + "\\n"\n'
 
 
     ## <head> ##
