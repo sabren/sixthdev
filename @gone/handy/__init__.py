@@ -5,7 +5,7 @@ Misc handy routines
 
 def sendmail(mail):
     import os
-    sender = os.popen("sendmail -t", "w")
+    sender = os.popen("/usr/sbin/sendmail -t", "w")
     sender.write(mail)
     sender.close()
 
