@@ -1,6 +1,9 @@
-# zdc.Record
-#
-# makes it easy to edit records in a database.
+"""
+zdc.Record -  makes it easy to edit records in a database.
+
+$Id$
+"""
+
 
 from IdxDict import IdxDict
 
