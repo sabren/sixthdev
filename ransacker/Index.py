@@ -14,6 +14,7 @@ class Index(object):
 
        __init__
        _storeFreq
+       _getPageID
        score
        contains
        remove
@@ -23,21 +24,27 @@ class Index(object):
     def __init__(self):
         self.data = {}
 
-    def addDocument(self, pageName, text):
+    def _getPageID(self, name):
+        return name
+
+    def addDocument(self, name, text):
         """
         add a document to the database and index its contents.
         """
-        if self.contains(pageName):
-            self.remove(pageName)
+        if self.contains(name):
+            self.remove(name)
+            
+        # fetch pageID only once for speed
+        pageID = self._getPageID(name)
         for chunk, count in ransacker.wordFreqs(text).items():
-            self._storeFreq(pageName, chunk, count)
+            self._storeFreq(pageID, chunk, count)
 
-    def _storeFreq(self, pageName, word, count):
+    def _storeFreq(self, name, word, count):
         """
-        stores the number of word-occurances for the pageName
+        stores the number of word-occurances for the name
         """
-        self.data.setdefault(pageName, {})
-        self.data[pageName][word] = count
+        self.data.setdefault(name, {})
+        self.data[name][word] = count
 
     def score(self, word):
         """
@@ -53,11 +60,11 @@ class Index(object):
         return tuple(res)
         
 
-    def contains(self, pageName):
-	return self.data.has_key(pageName)
+    def contains(self, name):
+	return self.data.has_key(name)
 
-    def remove(self, pageName):
-        del self.data[pageName]
+    def remove(self, name):
+        del self.data[name]
     
     
     def match(self, word):

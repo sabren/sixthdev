@@ -55,7 +55,7 @@ class SQLiteIndex(ransacker.Index):
             """)
         self.dbc.commit()
         
-    def _storeFreq(self, name, word, count):
+    def _storeFreq(self, pageID, word, count):
         self.cur.execute(
             """
             INSERT OR IGNORE INTO idx_word (word) VALUES ('%s')
@@ -63,12 +63,12 @@ class SQLiteIndex(ransacker.Index):
         self.cur.execute(
             """
             INSERT INTO idx_freq (pageID, wordID, count)
-            VALUES ((SELECT ID FROM idx_page WHERE page='%s'),
+            VALUES (%s,
                     (SELECT ID FROM idx_word WHERE word='%s'),
                     %s)
-            """ % (esc(name), esc(word), count))
+            """ % (pageID, esc(word), count))
 
-    def getPageID(self, name):
+    def _getPageID(self, name):
         self.cur.execute("SELECT ID FROM idx_page WHERE page='%s'"
                          % esc(name))
         res = self.cur.fetchone()
@@ -78,11 +78,9 @@ class SQLiteIndex(ransacker.Index):
             return None
         
         
-        
-
     def remove(self, name):
         self.cur.execute("DELETE FROM idx_freq where pageID=%s"
-                         % self.getPageID(name))
+                         % self._getPageID(name))
 
     def score(self, word):        
         sql =(
@@ -101,10 +99,9 @@ class SQLiteIndex(ransacker.Index):
         return tuple(self.cur.fetchall())
    
 
-    def contains(self, page):
-        self.cur.execute("select page from idx_page where page='%s'"
-                         % esc(page))
-        return self.cur.fetchone() is not None
+    def contains(self, name):
+        return self._getPageID(name) is not None
+
 
     def close(self):
 ##         self.cur.execute("select * from idx_word")
