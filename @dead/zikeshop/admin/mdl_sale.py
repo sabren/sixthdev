@@ -25,7 +25,7 @@ if not includeFilled:
 # @TODO: clean this whole query thing up!
 # kids, don't try this at home.
 ick=[]
-for sale in zikeshop.dbc.select(zikeshop.Sale, where, orderBy="tsSold"):
+for sale in zikeshop.dbc.select(zikeshop.Sale, where, orderBy="status,tsSold"):
     #@TODO: searching by names is gonna get SLOW! fix it!
     if name:
         names = [sale.billAddress.lname,
@@ -43,6 +43,7 @@ for sale in zikeshop.dbc.select(zikeshop.Sale, where, orderBy="tsSold"):
         "lname" : sale.billAddress.lname,
         "subtotal" : sale.subtotal,
         "total" : sale.total,
+        "status": sale.status,
         })
 
 model = {}

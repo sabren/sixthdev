@@ -53,7 +53,7 @@
   <tr><td colspan="2" align="right">
       <table border="0" width="100%" cellpading="2" cellspacing="0">
       <tr><td>{:weblib.html.checkbox("includeFilled", includeFilled):}
-          include filled orders </td>
+          include filled/cancelled orders </td>
           <td align="right">
               <input type="submit" value="search"></td></tr>
       </table></td></tr>
@@ -75,6 +75,7 @@ Jump to order #: <input type="text" name="ID" size="5">
 
 * exec:
     toggle = 1
+    prevStatus = ""
 * for sales:
     * head:
         <table border="0" cellpadding="2" cellspacing="0" width="100%"
@@ -86,12 +87,17 @@ Jump to order #: <input type="text" name="ID" size="5">
     * exec:
         toggle = not toggle
         style = ("even", "odd")[toggle]
+    * if status != prevStatus:
+        <tr><td style="background:#666;color:white" colspan="5">
+            <b>status: {:status:}&nbsp;</b></td></tr>
     <tr><td class="{:style:}">
             <a href="index.py?action=show&what=sale&ID={:ID:}">{:ID:}</a></td>
         <td class="{:style:}">{:tsSold:}</td>
         <td class="{:style:}">{:lname:}, {:fname:}</td>
         <td class="{:style:}">{:subtotal:}</td>
         <td class="{:style:}">{:total:}</tr>
+    * exec:
+        prevStatus = status
     * foot:
         </table>
         <br>&nbsp;<br>
