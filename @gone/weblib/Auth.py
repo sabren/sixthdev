@@ -34,6 +34,7 @@ class Auth:
     ## public methods #########################
 
     def check(self):
+
         """Makes sure the user is authenticated. If not, prompts for credentials."""
         
         if self.engine.request.query.has_key('auth_logout_flag'):
@@ -51,7 +52,7 @@ class Auth:
                 self.engine.response.end()
 
         else:
-            self.fetch(self.key)
+            self.fetch(self.key) 
     
 
     def login(self, key):
@@ -103,7 +104,6 @@ class Auth:
         </form>
         """ % (message, action, hidden))
         
-        self.engine.response.end()
 
 
     def transform(self, field, value):
@@ -158,11 +158,21 @@ class Auth:
         import weblib
 
         # start with a basic url (no query string)
-        # PATH_INFO MUST be here. if it's not, you need to build it
+        # Either PATH_INFO (for wrapper) or SCRIPT_NAME (for CGI)
+        # MUST be here. if it's not, you need to build it
         # into the environ for the current Engine.
         # can't even use a blank as default, because it'll
         # screw up in some browsers.. (eg, lynx)
-        res = self.engine.request.environ["PATH_INFO"]
+        #
+        # note: SCRIPT_NAME should always be there, but if you use the
+        # wrapper, it will be the path to the wrapper..
+
+        res = self.engine.request.environ.get("PATH_INFO", 
+            self.engine.request.environ.get("SCRIPT_NAME", None))
+
+        assert res is not None, \
+               "You must set SCRIPT_NAME or PATH_INFO in the environment to use Auth."
+        
 
         # add in a query string of our own:
         res = res + "?auth_check_flag=1"
