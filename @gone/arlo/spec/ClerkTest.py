@@ -31,13 +31,11 @@ class ClerkTest(unittest.TestCase):
 
 
     def test_store(self):
-        """
-        When we store a record, the attrs get
-        stored but the links do not.. 
-        """
         self.clerk.store(Record())
         actual = self.storage.match("Record")
-        assert actual == [{"ID":1, "val":"", "nextID":None}], actual
+        assert actual == [{"ID":1, "val":"", "nextID":0}], actual
+        r = self.clerk.fetch(Record, 1)
+        assert r.next is None
 
     def test_store_again(self):
         self.clerk.store(Record())

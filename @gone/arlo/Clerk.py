@@ -40,7 +40,7 @@ class Clerk(object):
                     ref = self.store(ref)
                 d[column] = ref.ID
             else:
-                d[column] = None
+                d[column] = 0
 
         # now we update obj because of db-generated values
         # (such as autonumbers or timestamps)
