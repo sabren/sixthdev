@@ -23,7 +23,7 @@ class Connection:
 
     def select(self, tableOrClass , where=None, **wdict):
         import types
-        if type(tableOrClass ) == types.ClassType:
+        if type(tableOrClass) in (types.ClassType, types.TypeType):
             tablename = tableOrClass._tablename
             res =  [tableOrClass (self, ID=row["ID"])
                     for row in self.source.select(tablename, where, **wdict)]
