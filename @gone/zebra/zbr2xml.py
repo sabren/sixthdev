@@ -67,8 +67,8 @@ class Z2X:
                     isBlock = 0
                 else:
                     raise SyntaxError, \
-                          "* tag without ':' or ';' on line %i" \
-                          % (lineNo)
+                          "* tag without ':' or ';' on line %i\n[%s]" \
+                          % (lineNo, line)
                 line = line[:-1]
                 
                 ## get the tokens after *:
