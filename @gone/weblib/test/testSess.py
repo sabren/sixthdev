@@ -94,6 +94,10 @@ class SessTestCase(unittest.TestCase):
         assert self.sess.url("http://x.com?xyz=123") \
                == "http://x.com?xyz=123&sess=ABC", \
                "sess.url() doesn't encode correctly.."
+
+        assert self.sess.url("checkout.py?auth_checkout_flag=1") \
+               == "checkout.py?auth_checkout_flag=1&sess=ABC", \
+               "sess.url() doesn't encode correctly.."
         
 
     def check_getSid(self):
