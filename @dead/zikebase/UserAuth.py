@@ -13,15 +13,16 @@ class UserAuth(weblib.Auth):
     zikebase.load("User")
     userClass = zikebase.User
 
-    def __init__(self, sess):
+    def __init__(self, sess, ds):
         """
         usage: auth=UserAuth(sess)
         """
         self._sess = sess
+        self._ds = ds
 
     def fetch(self, key):
         if key:
-            self.user = self.userClass(ID=key)
+            self.user = self.userClass(self._ds, ID=key)
         else:
             self.user = None
     
@@ -31,12 +32,12 @@ class UserAuth(weblib.Auth):
 
         if dict.has_key("username"):
             try:
-                user = self.userClass(username=dict["username"])
+                user = self.userClass(self._ds, username=dict["username"])
             except:
                 pass
         elif dict.has_key("email"):
             try:
-                user = self.userClass(email=dict["email"])
+                user = self.userClass(self._ds, email=dict["email"])
             except:
                 pass
 

@@ -11,6 +11,7 @@ import zikebase.test
 class UserAuthTestCase(unittest.TestCase):
 
     def setUp(self):
+        self.ds = zikebase.test.dbc
         self.cur = zikebase.test.dbc.cursor()
         self.myReq = weblib.Request(environ={"PATH_INFO":"dummy.py"})
 
@@ -20,7 +21,7 @@ class UserAuthTestCase(unittest.TestCase):
         sess = weblib.Sess(weblib.SessPool.InMemorySessPool(),
                            self.myReq,
                            wres)
-        auth = zikebase.UserAuth(sess)
+        auth = zikebase.UserAuth(sess, self.ds)
         try:
             auth.check()
             gotExit=0

@@ -2,9 +2,9 @@
 import zdc, zdc.drivers.DBAPI2Driver, sqlExpress
 dbc = zdc.Connection(zdc.drivers.DBAPI2Driver.DBAPI2Driver(sqlExpress.dbc))
 
-#import zike
-#import sqlTest
-#dbc = zdc.Connection(zike.MultiBaseDriver(sqlTest.dbc, DB=1))
+import zike
+import sqlTest
+dbc = zdc.Connection(zike.MultiBaseDriver(sqlTest.dbc, DB=1))
 
 # since this is my development environment, test==production
 # *****************************************
@@ -16,4 +16,7 @@ dbc = zdc.Connection(zdc.drivers.DBAPI2Driver.DBAPI2Driver(sqlExpress.dbc))
 #
 # *****************************************
 # *****************************************
-test_dbc = dbc
+#import sqlExpress
+sqlExpress = sqlTest
+test_dbc = zdc.Connection(zdc.drivers.DBAPI2Driver.DBAPI2Driver(sqlExpress.dbc))
+

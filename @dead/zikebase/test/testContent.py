@@ -9,11 +9,12 @@ from zikebase import Content
 class ContentTestCase(unittest.TestCase):
 
     def setUp(self):
+        self.ds = zikebase.test.dbc
         self.cur = zikebase.test.dbc.cursor()
         self.cur.execute("DELETE FROM base_content")
 
     def check_add(self):
-        cont = Content()
+        cont = Content(self.ds)
         cont.title = "a simple test"
         cont.save()
         del cont

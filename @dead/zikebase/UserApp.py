@@ -8,8 +8,14 @@ zikebase.load("User")
 zikebase.load("ObjectEditor")
 
 class UserApp(weblib.Actor):
+    __super = weblib.Actor
     userClass = zikebase.User
     editorClass = zikebase.ObjectEditor
+
+    def __init__(self, ds, input=None):
+        self.ds = ds
+        self.__super.__init__(self, input)
+        
 
     def act_(self):
         self.do("signup")
@@ -27,7 +33,9 @@ class UserApp(weblib.Actor):
 
     def act_save(self):
         try:
-            ed = zikebase.ObjectEditor(self.userClass, input=self.input)
+            ed = zikebase.ObjectEditor(self.userClass,
+                                       self.ds,
+                                       input=self.input)
             ed.do("save")
         except ValueError, err:
             #@TODO: clean up the type mess on ValueError

@@ -16,16 +16,16 @@ class ObjectEditor(weblib.Actor):
 
     ## constructor #######################################
 
-    def __init__(self, what, key=None, input=None):
+    def __init__(self, what, ds, key=None, input=None):
         """
-        ex: ed=ObjectEditor(Person, aKey)
-        or: ed=ObjectEditor(Person)
+        ex: ed=ObjectEditor(Person, ds, aKey)
+        or: ed=ObjectEditor(Person, ds)
         or: ed=ObjectEditor(aParticularPersonInstance)
 
         In the first case, if aKey is None, a new object is created.
         This makes it handy for doing something like:
 
-        ed = ObjectEditor(Person, weblib.request.get('ID'))
+        ed = ObjectEditor(Person, ds, weblib.request.get('ID'))
         """
         weblib.Actor.__init__(self, input)
         import types
@@ -37,10 +37,10 @@ class ObjectEditor(weblib.Actor):
             if key:
                 # get the instance based on the key:
                 kFld = self.whatClass.__key__
-                self.object = apply(self.whatClass, (), {kFld:key})
+                self.object = self.whatClass(ds, **{kFld:key})
             else:
                 # just make a new instance:
-                self.object = self.whatClass()
+                self.object = self.whatClass(ds)
 
 
     ## public methods ####################################
@@ -163,7 +163,7 @@ class ObjectEditor(weblib.Actor):
 
     def act_delete(self):
         self.object.delete()
-        self.object = self.whatClass()
+        self.object = self.whatClass(self.ds)
         
 
     def act_update(self):

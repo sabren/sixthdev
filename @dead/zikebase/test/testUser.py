@@ -10,6 +10,7 @@ import zikebase
 class UserTestCase(unittest.TestCase):
 
     def setUp(self):
+        self.ds = zikebase.test.dbc
         self.cur = zikebase.test.dbc.cursor()
         self.cur.execute("DELETE FROM base_user")
         self.cur.execute("DELETE FROM base_contact")
@@ -26,7 +27,7 @@ class UserTestCase(unittest.TestCase):
         
 
     def check_password(self):
-        user = zikebase.User(ID=1)
+        user = zikebase.User(self.ds, ID=1)
 
         zikebase.load("Password")
         assert isinstance(user.password, zikebase.Password), \
@@ -37,7 +38,7 @@ class UserTestCase(unittest.TestCase):
 
 
     def check_save(self):
-        user = zikebase.User()
+        user = zikebase.User(self.ds)
         try:
             user.save()
             gotError = 0
@@ -55,7 +56,7 @@ class UserTestCase(unittest.TestCase):
         assert not gotError, \
                "got error after setting username!"
 
-        user2 = zikebase.User()
+        user2 = zikebase.User(self.ds)
         try:
             user2.username = "elmer"
             gotError = 0

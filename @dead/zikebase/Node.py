@@ -8,7 +8,7 @@ import zikebase
 
 class Node(zdc.RecordObject):
     __super = zdc.RecordObject
-    _table = zdc.Table(zikebase.dbc, "base_node")
+    _tablename = "base_node"
     _tuples = ["crumbs", "children"] # @TODO: clean this up!
 
     def _init(self):
@@ -25,7 +25,7 @@ class Node(zdc.RecordObject):
     def get_crumbs(self):
         #@TODO: how do i handle stuff like this????????????????
         import zikebase
-        return map(lambda id: zikebase.Node(ID=id),
+        return map(lambda id: zikebase.Node(self._ds, ID=id),
                    map(lambda n: n["ID"],
                        self.q_crumbs()))
 
@@ -74,7 +74,7 @@ class Node(zdc.RecordObject):
 
     def get_parent(self):
         if self.parentID:
-            return Node(ID=self.parentID)
+            return Node(self._ds, ID=self.parentID)
         else:
             return None
             
@@ -102,6 +102,6 @@ class Node(zdc.RecordObject):
         self.__super.save(self)
         
         for kid in self.q_children():
-            child = Node(ID=kid["ID"]) # @TODO: maybe the object version IS better?
+            child = Node(self._ds, ID=kid["ID"])
             child._updatePaths(parent=self)
             child.save()  

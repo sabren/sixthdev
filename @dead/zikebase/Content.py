@@ -3,5 +3,9 @@ import zikebase
 import zdc
 
 class Content(zdc.RecordObject):
-    _table = zdc.Table(zikebase.dbc, "base_content")
-    _defaults = {"userID": 0}   
+    __super = zdc.RecordObject
+    _tablename = "base_content"
+
+    def _new(self):
+        self.__super._new(self)
+        self.userID = 0

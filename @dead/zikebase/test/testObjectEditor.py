@@ -36,6 +36,7 @@ class TestObjectClass(zdc.Object):
 class ObjectEditorTestCase(unittest.TestCase):
 
     def setUp(self):
+        self.ds = zikebase.test.dbc
         self.cur = zikebase.test.dbc.cursor()
         self.cur.execute("delete from base_node")
 
@@ -44,7 +45,7 @@ class ObjectEditorTestCase(unittest.TestCase):
         can we save a single node to the database?
         """        
         req = {"action":"save"}
-        ed = zikebase.ObjectEditor(zikebase.Node, input=req)
+        ed = zikebase.ObjectEditor(zikebase.Node, self.ds, input=req)
         ed.act()
         assert isinstance(ed.object, zikebase.Node), \
                "Didn't even create a simple node.."
@@ -61,12 +62,12 @@ class ObjectEditorTestCase(unittest.TestCase):
         turns out it had to do with the fact that
         on the web, the parentID is a string..
         """
-        node = zikebase.Node()
+        node = zikebase.Node(self.ds)
         node.name="fred"
         node.save()
 
         req = {"action":"save", "parentID":"1"}
-        ed = zikebase.ObjectEditor(zikebase.Node, 1, input = req)
+        ed = zikebase.ObjectEditor(zikebase.Node, self.ds, 1, input = req)
 
         try:
             gotError = 0
@@ -112,12 +113,15 @@ class ObjectEditorTestCase(unittest.TestCase):
         OEd = zikebase.ObjectEditor
 
         # case 1: single field is expected
-        ed = OEd(TestObjectClass, input={"__expect__":"name:fred"})
+        ed = OEd(TestObjectClass,
+                 self.ds,
+                 input={"__expect__":"name:fred"})
         assert ed.expected() == {'name':'fred'}, \
                "expected() screws up w/ just one field"
 
         # case 2: multiple fields...
         ed = OEd(TestObjectClass,
+                 self.ds,
                  input={"__expect__":("fname:fred", "lname:tempy")})
         assert ed.expected() == {'fname':'fred', 'lname':'tempy'}, \
                "expected() screws up when __expect__ is a tuple"
@@ -126,7 +130,7 @@ class ObjectEditorTestCase(unittest.TestCase):
         # case 3: invalid format - single field:
         try:
             gotError = 0
-            ed = OEd(TestObjectClass, input={"__expect__":"fred"})
+            ed = OEd(TestObjectClass, self.ds, input={"__expect__":"fred"})
             ex = ed.expected()
         except ValueError:
             gotError = 1
@@ -136,7 +140,7 @@ class ObjectEditorTestCase(unittest.TestCase):
         # case 4: invalid format - tuple:
         try:
             gotError = 0
-            ed = OEd(TestObjectClass,
+            ed = OEd(TestObjectClass, self.ds,
                      input={"__expect__":("fname:fred", "lastname...?")})
             ex = ed.expected()
         except ValueError:
@@ -150,7 +154,7 @@ class ObjectEditorTestCase(unittest.TestCase):
         this just exercises the behaviour of objecteditor based
         on results from expected()..
         """
-        ed = zikebase.ObjectEditor(TestObjectClass)
+        ed = zikebase.ObjectEditor(TestObjectClass, self.ds)
         assert ed.object.isTrue, \
                "foo should be true by default!"
 
@@ -161,7 +165,7 @@ class ObjectEditorTestCase(unittest.TestCase):
         assert ed.object.isTrue == '0', \
                "that shoulda turned foo's isTrue field off."
         
-        ed = zikebase.ObjectEditor(TestObjectClass)
+        ed = zikebase.ObjectEditor(TestObjectClass, self.ds)
         ed.input = {"__expect__":"isTrue:0"}
         ed.act("save")
         assert ed.object.isTrue == '0', \
@@ -169,7 +173,7 @@ class ObjectEditorTestCase(unittest.TestCase):
 
         
         # now try testing two of 'em
-        ed = zikebase.ObjectEditor(TestObjectClass)
+        ed = zikebase.ObjectEditor(TestObjectClass, self.ds)
         ed.input = {"__expect__":("isTrue:0", "isAlsoTrue:0")}
         ed.act("save")
         assert ed.object.isTrue == '0', \
@@ -188,7 +192,7 @@ class ObjectEditorTestCase(unittest.TestCase):
 
         This test attemps to save a node and one subnode.
         """
-        node = zikebase.Node()
+        node = zikebase.Node(self.ds)
         node.name = 'general'
         node.save()
 
@@ -201,7 +205,7 @@ class ObjectEditorTestCase(unittest.TestCase):
             "children(+0|name)":'specific',
             }
         
-        ed = zikebase.ObjectEditor(zikebase.Node, nodeID, input=req)
+        ed = zikebase.ObjectEditor(zikebase.Node, self.ds, nodeID, input=req)
         ed.act()
 
         assert len(ed.object.children) == 1, \
@@ -211,10 +215,11 @@ class ObjectEditorTestCase(unittest.TestCase):
 
         # now check that it actually made it to the db..
         del ed
-        node = zikebase.Node(ID=nodeID)
+        node = zikebase.Node(self.ds, ID=nodeID)
         assert len(node.children) == 1, \
                "wrong length for node.children: %s" % len(node.children)
 
         assert node.children[0].name=='specific', \
                "wrong name for child node: %s" % node.children[0].name
+
 

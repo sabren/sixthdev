@@ -20,7 +20,7 @@ class User(zikebase.Contact):
         
     def _new(self):
         self.__super._new(self)
-        self._userRec = zdc.Table(zikebase.dbc, "base_user").new()
+        self._userRec = zdc.Table(self._ds, "base_user").new()
 
     def getEditableAttrs(self):
         return self.__super.getEditableAttrs(self) \
@@ -36,14 +36,14 @@ class User(zikebase.Contact):
 
         elif (len(keys)==1) and (keys[0] in ['username', 'password']):
             # search by the detail record..
-            table = zdc.Table(zikebase.dbc, "base_user")
+            table = zdc.Table(self._ds, "base_user")
             self._userRec = apply(table.fetch, (), kw)
             apply(self.__super._fetch, (self,), {"ID":self._userRec["ID"]})
 
         else:
             # search by the master record..
             apply(self.__super._fetch, (self,), kw)
-            self._userRec = zdc.Table(zikebase.dbc, "base_user").fetch(self.ID)
+            self._userRec = zdc.Table(self._ds, "base_user").fetch(self.ID)
             
 
     def set_uid(self, value):
@@ -56,7 +56,7 @@ class User(zikebase.Contact):
         if value != self.username:
             # check for duplicates
             try:
-                other = zikebase.User(username=value)
+                other = zikebase.User(self._ds, username=value)
             except LookupError:
                 other = None
             if other:

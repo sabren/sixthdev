@@ -29,9 +29,6 @@ load() function lets us do that. For example:
 
 """
 
-import zdc
-dbc=zdc.Connection()
-
 __objs=(
     'Contact',
     'Content',

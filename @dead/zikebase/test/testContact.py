@@ -10,7 +10,7 @@ import zikebase
 class ContactTestCase(unittest.TestCase):
 
     def check_email(self):
-        ctact = zikebase.Contact()
+        ctact = zikebase.Contact(zikebase.test.dbc)
         try:
             ctact.email="@sadf@@"
             gotError =0

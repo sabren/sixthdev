@@ -8,7 +8,7 @@ import zdc
 
 class Contact(zdc.RecordObject):
     __super = zdc.RecordObject
-    _table = zdc.Table(zikebase.dbc, "base_contact")
+    _tablename = "base_contact"
 
     def _new(self):
         self.__super._new(self)
