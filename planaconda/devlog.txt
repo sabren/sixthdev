@@ -245,3 +245,17 @@ go. Easy.
 web server where i can test this.. I need to check this little bit
 of code in in and move development to my web server.
 
+[0425.2004 06:35PM] okay... moved over to hydrogen here.
+One passing test. Woohoo. Okay. What's next? I want a .app
+file. That's not easy to test so it's just going to call
+the PlanApp, get the model, and show the appropriate template.
+no test cases, but I should be able to see it in the browser.
+
+
+[0425.2004 06:53PM] great! one hour into development and now
+I have a working web page that doesn't do crap. I haven't 
+even introduced Node yet. I'm worried. Things are in place 
+though, so let's see how adding Node goes.
+
+
+
