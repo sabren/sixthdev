@@ -116,8 +116,8 @@ def edit(s):
     return open(fn).read()
 
 
-def sum(series):
-    return reduce(operator.add, series)
+def sum(series, initial=None):
+    return reduce(operator.add, series, 0)
 
 
 if __name__=="__main__":
