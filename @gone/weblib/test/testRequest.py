@@ -62,10 +62,72 @@ class RequestTestCase(unittest.TestCase):
 
 
 
-
-
     def check_encoding(self):
         request = weblib.Request(content="a=<>")
 
         assert request.form["a"] == "<>", "doesn't handle <> correctly"
 
+
+
+    def check_content(self):
+        request = weblib.Request()
+        assert request.content is None, \
+               "request.content doesnt default to None"
+        
+        request = weblib.Request(content="abcdefg")
+        assert request.content == "abcdefg", \
+               "request doesn't store content correctly."
+        
+        assert request.contentType == "application/x-www-form-urlencoded", \
+               "request.contentType doesn't default to application/x-www-form-urlencoded"
+
+        assert request.contentLength == 7, \
+               "request.contentLength isn't calculated correctly for passed-in content."
+
+
+
+    def check_contentType(self):
+        request=weblib.Request()
+        assert request.contentType == None, \
+               "request.contentType doesn't default to application/x-www-form-urlencoded"
+
+
+        request=weblib.Request(environ={"CONTENT_TYPE":"text/plain"}, content="")
+        assert request.contentType == "text/plain", \
+               "request.contentType doesn't read contentType from environment"
+
+        request=weblib.Request(contentType="text/xml")
+        assert request.contentType=="text/xml", \
+               "request.contentType didn't get set based on init's parameter"
+    
+
+
+    def check_multipart(self):
+        request = weblib.Request(
+
+            contentType=
+            "multipart/form-data; boundary=---------------------------7d035c305e4",
+
+            content=weblib.trim(
+            """
+            -----------------------------7d035c305e4
+            Content-Disposition: form-data; name="upfile"; filename="C:\mimetest.txt"
+            Content-Type: text/plain
+
+            THIS IS A TEST
+            THIS IS ONLY A TEST
+
+            -----------------------------7d035c305e4
+            Content-Disposition: form-data; name="action"
+
+            upload
+            -----------------------------7d035c305e4--
+            """
+            ))
+
+        assert request.form.get("action")=="upload", \
+               "form values don't work on multipart forms."
+
+
+        assert request.form["upfile"].filename == "C:\mimetest.txt", \
+               "file uploads don't return FieldStorage objects"

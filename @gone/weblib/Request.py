@@ -14,104 +14,143 @@ get lumped together. Plus it's old and crufty. :) .. but it also
 # @TODO: request["x"] should look at all 3 sources
 # @TODO: figure out how to treat file uploads
 
-import os
 import string
 import weblib
 
 
-def tupleMerge(head, tail):
-    """tupleMerge(head, tail)
-    converts head and tail into tuples (if they're not) and merges them"""
-
-    if type(head) != type(()):
-        head = (head,)
-
-    if type(tail) != type(()):
-        tail = (tail,)
-
-    return head + tail
-
-
 class Request:
+
+    ## constructor ###################################################
     
-    def __init__(self, querystring=None, form=None, environ=None,
-                 cookie=None, engine=weblib, content=None):
+    def __init__(self, querystring=None, form=None, environ=None, method=None,
+                 cookie=None, engine=weblib, content=None, contentType=None):
 
         self.engine = engine
         if self.engine is weblib:
-            weblib.request = self
+            weblib.request = self  # do I still need this?
 
         ## environment
+        self.environ = environ
         if environ is None:
-            self.environ = os.environ
-        else:
-            self.environ = environ
+            ## os.environ.copy() actually shares
+            ## data with os.environ .. I suppose
+            ## because it's an object.. Anyway,
+            ## that's bad for us because it makes environ
+            ## global, and that's NOT what we want. so
+            ## we do the following instead:
+            import os
+            self.environ = {}
+            for item in os.environ.keys():
+                self.environ[item] = os.environ[item]
+            del os
         
-
         ## querystring:
-        ## @TODO: handle urlencoding/decoding
-        if querystring is not None:
-            self.querystring = querystring
-        elif self.environ.has_key("QUERY_STRING"):
-            self.querystring = self.environ["QUERY_STRING"]
-        else:
-            self.querystring = ""
+        self.querystring = querystring
+        if querystring is None:
+            self.querystring = self.environ.get("QUERY_STRING", "")
 
-        ## query, a hash of the querystring
-        self.query = {}
-        for pair in string.split(weblib.urlDecode(self.querystring), "&"):
-            l = string.split(pair, "=", 1)
-            k = l[0]
-            if len(l) > 1:
-                v = l[1]
-            else:
-                v = ''
-            if self.query.has_key(k):
-                self.query[k] = tupleMerge(self.query[k], v)
-            else:
-                self.query[k]=v
+        ## query, a hash of the querystring:
+        self.query = self.parse(weblib.urlDecode(self.querystring))
 
 
         ## cookie:
         ## @TODO: get some real cookie parsing abilities...
         self.cookie = cookie
         if cookie is None:
-            self.cookie = {}
-            try:
-                for pair in string.split(os.environ["HTTP_COOKIE"], "; "):
-                    l = string.split(pair, "=", 1)
-                    k = l[0]
-                    if len(l) > 1:
-                        v = l[1]
-                    else:
-                        v = ''
-                    self.cookie[k] = v
-            except:
-                pass # no cookies
+            self.cookie = self.parse(self.environ.get("HTTP_COOKIE", ""), splitter=";")
+
+
+        ## content & contentLength:
+        self.content = content
+        if content is None:
+            self.contentLength = int(self.environ.get("CONTENT_LENGTH", 0)) or None
+            if self.contentLength is not None:
+                import sys
+                self.content = sys.stdin.read(self.contentLength)
+        else:
+            self.contentLength = len(content)
+
+
+        ## contentType:
+        self.contentType = contentType
+        if (content is not None) and (contentType is None):
+            self.contentType=self.environ.get("CONTENT_TYPE")
+            if self.contentType is None:
+                self.contentType = "application/x-www-form-urlencoded"
+                
+        self.environ["CONTENT_TYPE"] = self.contentType
+
+            
+        ## method
+        self.method = method
+        if method is None:
+            self.method = self.environ.get("REQUEST_METHOD")
+            if self.method is None: # still
+                if self.content:
+                    self.method = "POST"
+                else:
+                    self.method = "GET"
+                self.environ["REQUEST_METHOD"] = self.method
 
         ## form:
-        ## @TODO: genericize this split stuff..
-        ## @TODO: handle FILE uploads/multipart encoding
         self.form = form
-        if not form:
-            self.form = {}
-            try:
-                if content is None:
-                    contentLength = int(os.environ["CONTENT_LENGTH"])
-                    import sys
-                    self.content = sys.stdin.read(contentLength)
+        if form is None:
+            if self.contentType == "application/x-www-form-urlencoded":
+                self.form = self.parse(weblib.urlDecode(self.content))
+            else:
+                self.form = {}
+
+
+        ## multipart/form-data (file upload forms):
+        ## @TODO: lots of stuff! probably best to just rewrite this
+        ## rather than try to yank stuff out of FieldStorage..
+
+        if (self.method=="POST") and (self.contentType[:10]=='multipart/'):
+
+            import cgi, StringIO
+
+            # pretend we're a file (FieldStorage requires this)
+            # on the web, this would usually be stdin, which IS a file,
+            # but if we assume that, we can't assign to content..
+            # perhaps content should be a file-like pointer anyway?
+            
+            storage = cgi.FieldStorage(StringIO.StringIO(self.content),
+                                       environ=self.environ)
+            for field in storage.keys():
+                if storage[field].filename:
+                    self.form[field]=storage[field]
                 else:
-                    self.content = content
-                for pair in string.split(weblib.urlDecode(self.content), "&"):
-                    l = string.split(pair, "=", 1)
-                    k = l[0]
-                    if len(l) > 1:
-                        v = l[1]
-                    else:
-                        v = ''
-                    self.form[k]=v
-            except:
-                pass
+                    self.form[field]=storage[field].value
+            del storage
+
+
+    ## private methods #################################################
+
+    def _tupleMerge(self, head, tail):
+        """converts head and tail into tuples (if they're not) and merges them"""
+
+        if type(head) != type(()):
+            head = (head,)
+        if type(tail) != type(()):
+            tail = (tail,)
+        return head + tail
+
+
+    def parse(self, what, splitter="&"):
+        res = {}
+        for pair in string.split(what, "&"):
+            l = string.split(pair, "=", 1)
+            k = l[0]
+            if len(l) > 1:
+                v = l[1]
+            else:
+                v = ''
+            if res.has_key(k):
+                res[k] = self._tupleMerge(res[k], v)
+            else:
+                res[k]=v
+        return res
+
 
 
     ## Dictionary Methods @TODO: more of them ##########################
@@ -126,8 +165,7 @@ class Request:
                 if res is None:
                     res = dict[key]
                 else:
-                    res = tupleMerge(res, dict[key])
-
+                    res = self._tupleMerge(res, dict[key])
         if res is None:
             raise KeyError, key
 
@@ -136,7 +174,6 @@ class Request:
 
 
     def get(self, key, failobj=None):
-        
         try:
             return self[key]
         except KeyError:
