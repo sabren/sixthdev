@@ -8,3 +8,7 @@
 
 <a href="index.py?action=list&what=status">status</a>
 
+|
+
+<a href="users.py">users</a>
+

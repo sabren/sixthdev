@@ -1,0 +1,16 @@
+*# generic page for listing users
+*# $Id$
+
+<h1>users</h1>
+
+[<a href="users.py?action=create&what=user">add new</a>]
+
+* for list:
+    * head:
+        <ul>
+    <li><a href="users.py?action=edit&what=user&ID={:ID:}">
+        {:username:}</a></li>
+    * foot:
+        </ul>
+* none:
+    none found.
