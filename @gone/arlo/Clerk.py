@@ -120,75 +120,106 @@ class Clerk(object):
         
         # so we always return same instance for same row:
         # @TODO: WeakValueDictionary() doesn't work with strongbox. Why?!
-        self.cache = {} 
+        self.cache = {}
 
     ## public interface ##############################################
         
     def store(self, obj):
-        # we do this the first time to prevent recursion
-        obj.private.isDirty = 0
+        """
+        This traverses the object graph recursively,
+        storing changed objects. 
+        """
+        self._seen = {}
+        return self._recursive_store(obj)
 
+    def _recursive_store(self, obj):
+
+        # this ensures that we process each object only once
+        # while we traverse the object graph
+        if obj in self._seen:
+            return obj
+        self._seen[obj] = True
+
+        # this just gets data about the object. @TODO: might be out of date
         insp = BoxInspector(obj)
-                
         vals = insp.plainValues()
         klass = obj.__class__
 
-##         print
-##         print "storing %s" % obj.__class__.__name__
-##         print "1: %s" % vals.keys()
+        #if hasattr(self, "DEBUG"):
+        #    print "storing %s(ID=%s)" % (klass.__name__, obj.ID)
 
         # we need to save links first, because we depend on them:
         for name, lnk in insp.linkNames():
             column = self.schema.columnForLink(lnk)
             ref = getattr(obj, name)
             if (ref):
-                if ref.private.isDirty:
-                    ref = self.store(ref)
-                vals[column] = ref.ID
+                # here is where we traverse the links:
+                vals[column] = self._recursive_store(ref).ID
             else:
                 vals[column] = 0
-
-##         print "2. %s" % vals.keys()
 
         # now we update obj because of db-generated values
         # (such as autonumbers or timestamps)
         if hasattr(obj, "ID"): old_id = obj.ID
-        data_from_db = self.storage.store(self.schema.tableForClass(klass), **vals)
-        relevant_columns = self._attr_columns(klass, data_from_db)
-        obj.update(**relevant_columns)
+        if obj.private.isDirty:
+            # then store the data:
+            data_from_db = self.storage.store(self.schema.tableForClass(klass), **vals)
+            relevant_columns = self._attr_columns(klass, data_from_db)
+            obj.update(**relevant_columns)
         id_has_changed = hasattr(obj,"ID") and (obj.ID != old_id)
 
+        # this next bit is tricky.
+        #
+        # dont_need_injectors is there so that stubs can
+        # live happily in the cache and can be updated by
+        # rowToInstance without getting yet another set of
+        # injectors added on. However, fresh objects that
+        # have never been stored should ALSO not have
+        # injectors (because all their data will be fresh
+        # or already processed by the clerk)... Since there's
+        # no other place to detect fresh objects, I put this
+        # here. I have a hunch that changing this to
+        # .need_injectors instead might simplify the logic
+        # considerably but this is working and at the moment
+        # I don't feel like changing it. :)
+        # @TODO: .dont_need_injectors => .need_injectors
+        if id_has_changed:
+            obj.private.dont_need_injectors = True
+            
         # we've got the clean data, but we called update
         # with the new primary key,  so we need to reset
         # isDirty. We have to do it before linkset stuff
         # to prevent infinite recursion on cyclic data
         # structures.
-        obj.private.isDirty = 0
+        obj.private.isDirty = False
 
         # linkSETS, on the other hand, depend on us, so they go last:
         for name, ls in getSlotsOfType(klass,linkset):
             column = self.schema.columnForLinkSet(ls)
             for item in getattr(obj.private, name):
-                if id_has_changed or item.private.isDirty:
+                if id_has_changed:
+                    item.private.isDirty = True
                     assert getattr(item, ls.back) is obj, \
-                           "getattr(%s, %s) was not (this) %s" \
-                           % (item.__class__.__name__,
-                              ls.back,
-                              obj.__class__.__name__)
-                    self.store(item)
+                       "getattr(%s, %s) was not (this) %s" \
+                       % (item.__class__.__name__, ls.back, obj.__class__.__name__)
+                self._recursive_store(item)
 
-        self._makeMemo(obj)
+        self._put_memo(obj)
         return obj
 
 
     def rowToInstance(self, row, klass):
         attrs, othercols = self._attr_and_other_columns(klass, row)
         obj = self._get_memo(klass, attrs.get("ID"))
-        if not obj:
+        if obj:
+            # refresh data, but don't break the cache:
+            obj.update(**attrs)
+        else:
             obj = klass(**attrs)
+        if not hasattr(obj.private, "dont_need_injectors"):
             self.addInjectors(obj, othercols)
-            obj.private.isDirty = 0
-            self._makeMemo(obj)
+        self._put_memo(obj)
+        obj.private.isDirty = 0
         return obj
 
 
@@ -214,7 +245,7 @@ class Clerk(object):
         else:
             return self.matchOne(klass, **kw)
 
-    def delete(self, klass, ID):
+    def delete(self, klass, ID): #@TODO: ick!!
         self.storage.delete(self.schema.tableForClass(klass), ID)
         return None
 
@@ -225,7 +256,7 @@ class Clerk(object):
         uid = (klass, key)
         return self.cache.get(uid)
 
-    def _makeMemo(self, obj):
+    def _put_memo(self, obj):
         if hasattr(obj, "ID"):
             self.cache[(obj.__class__, obj.ID)]=obj
         else:
@@ -233,6 +264,7 @@ class Clerk(object):
 
 
     def addInjectors(self, obj, othercols):
+        obj.private.dont_need_injectors = True
         klass = obj.__class__
         ## linkinjectors:
         for name,lnk in getSlotsOfType(klass,link):
@@ -240,10 +272,15 @@ class Clerk(object):
             column = self.schema.columnForLink(lnk)
             fID = othercols.get(column)
             if fID:
-                stub = fclass(ID = fID)
-                stub.private.isDirty = 0
-                setattr(obj, name, stub)
-                stub.addInjector(LinkInjector(self, fclass, fID).inject)
+                memo = self._get_memo(fclass, fID)
+                if memo:
+                    setattr(obj, name, memo)
+                else:
+                    stub = fclass(ID = fID)
+                    stub.private.isDirty = 0
+                    stub.addInjector(LinkInjector(self, fclass, fID).inject)
+                    setattr(obj, name, stub)
+                    self._put_memo(stub)
 
         ## linksetinjectors:
         for name,ls in getSlotsOfType(klass,linkset):

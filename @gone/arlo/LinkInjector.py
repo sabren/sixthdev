@@ -37,17 +37,12 @@ class LinkInjector:
 
             # we call fetch so we get stubs for all the
             # new object's dependents
-            data = self.clerk.fetch(self.fclass, self.fID)
+            new = self.clerk.fetch(self.fclass, self.fID).private
 
             # inject the data:
-            stub.private = data.private
-
-            # that wiped out pretty much everything,
-            # but just in case, we'll preserve observers:
-            stub.private.observers.extend(old.observers)
-            
-            # and injectors, even though we should be the only one:
-            stub.private.injectors.extend(old.injectors)
+            for slot in self.fclass.__attrs__:
+                setattr(old, slot, getattr(new, slot))
+            old.isDirty = False
 
             # since we might have observers, we'll
             # let them know:

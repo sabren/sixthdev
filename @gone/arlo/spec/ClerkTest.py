@@ -38,6 +38,7 @@ class ClerkTest(unittest.TestCase):
         assert actual == [{"ID":1, "val":"", "nextID":0}], actual
         r = self.clerk.fetch(Record, 1)
         assert r.next is None
+        
 
     def test_store_again(self):
         self.clerk.store(Record())
@@ -82,10 +83,13 @@ class ClerkTest(unittest.TestCase):
         n1.kids << Node(data="ab")
         n1.kids[1].kids << Node(data="aba")
         self.clerk.store(n1)
+        assert len(n1.kids)== 2, [(k.ID, k.data) for k in n1.kids]        
         
         n = self.clerk.fetch(Node, data="a")
+        assert len(n1.kids)== 2, "fetch corrupted kids: %s" % [(k.ID, k.data) for k in n1.kids]
+        
         assert n.ID == 1, "didn't save parent of linkset first!"
-        assert len(n.kids)== 2, "didn't store the linkset: %s" % n.kids
+        assert len(n.kids)== 2, "didn't store the linkset: %s" % [(k.ID, k.data) for k in n.kids]
         assert n.kids[0].data=="aa", "didn't store link correctly"
         assert n.kids[1].data=="ab", "didn't store link correctly"
         assert n.kids[1].kids[0].data=="aba", "didn't store link correctly"
@@ -222,8 +226,21 @@ class ClerkTest(unittest.TestCase):
         rec1a = self.clerk.fetch(Record, 1)
         rec1b = self.clerk.fetch(Record, 1)
         assert rec1a is rec1b
-        
 
+        n = Record()
+        r = Record(next=n)        
+        assert self.clerk.store(r) is r
+        assert self.clerk.cache[(Record, r.ID)] is r
+        assert self.clerk.cache[(Record, n.ID)] is n
+        assert self.clerk.cache[(Record, n.ID)] is r.next
+
+    def test_stub(self):
+        self.clerk.store(Record(val="a", next=Record(val="b")))
+        self.clerk.cache.clear()
+        recA = self.clerk.fetch(Record, val="a")
+        recB = self.clerk.fetch(Record, val="b")
+        assert recA.next.ID == recB.ID
+        assert recA.next is recB
 
     def test_match(self):
         self.clerk.store(Record(val="one"))

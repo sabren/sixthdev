@@ -16,12 +16,13 @@ class _regression_Test(unittest.TestCase):
         In other words, the injector wasn't working.
 
         Turns out the problem was that the sub.account
-        stub didn't have injectors on IT'S dependent
+        stub didn't have injectors on ITS dependent
         objects. That's why I now replace .private
         in LinkInjector.inject()
         """
         class Evt(Strongbox):
             ID = attr(long)
+            evt = attr(str)
             acc = link(forward)
         class Sub(Strongbox):
             ID = attr(long)
@@ -44,23 +45,33 @@ class _regression_Test(unittest.TestCase):
 
         # store an account with two events and one sub:
         a = Acc()
-        a.evts << Evt()
-        a.evts << Evt()
+        a.evts << Evt(evt="1")
+        a.evts << Evt(evt="2")
+        assert a.private.isDirty
         a.subs << Sub()
+        c1.DEBUG = 1
         c1.store(a)
 
         # new clerk, new cache:
         c2 = Clerk(st, schema)
 
-        # add more events while s.acc is a stub:
+        # add more events while s.acc is a stub
         s = c2.fetch(Sub, ID=1)
-        s.acc.evts << Evt()
-        c2.store(s)        
-        a = c2.fetch(Acc, ID=1)
+        assert not s.private.isDirty
+        #@TODO: maybe len() should trigger the lazyload...
+        assert len(s.acc.evts) == 0, [e.evt for e in s.acc.evts]
+        s.acc.evts << Evt(evt="3")
+        #assert len(s.acc.evts) == 1, [e.evt for e in s.acc.evts]
+        assert len(s.acc.evts) == 3, [e.evt for e in s.acc.evts]
+        c2.DEBUG = 0
+        c2.store(s)
+        a2 = c2.fetch(Acc, ID=a.ID)
+
+        assert a is not a2
 
         # we should now have all three events,
         # but we were getting only the third one:
-        assert len(a.evts) == 3, a.evts
+        assert len(a2.evts) == 3, [e.evt for e in a2.evts]
     
 
     def test_complex_recursion(self):
