@@ -12,9 +12,9 @@ def link_product(code):
 def link_picture(ID, size=None):
     'return a link to a picture, optionally thumbnailed'
     if size:
-        return "picture.py?ID=%s" % ID
-    else:
         return "picture.py?ID=%s&size=%s" % (ID, size)
+    else:
+        return "picture.py?ID=%s" % ID
 
 #@TODO: consolidate all these three:
 
