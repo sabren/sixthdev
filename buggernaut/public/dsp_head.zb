@@ -19,7 +19,7 @@ tr th.high {background: gold; color:black;}
 tr th.medium {background: #66cc33;  color:black;}
 tr th.low {background: #3399cc; color:black;}
 
-table.tasks td.detail { 
+table.tasks td.description { 
     color: #333; 
     padding-left: 20px; 
     font-family: arial;  

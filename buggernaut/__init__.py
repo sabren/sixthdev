@@ -4,9 +4,6 @@ ZikePlan: zike planning system.
 __ver__="$Id$"
 
 ## data objects .. 
-from Goal import Goal
+from Area import Area
 from Task import Task
-#from Status import Status
-from Note import Note
-from Type import Type
-
+from TrackerApp import TrackerApp

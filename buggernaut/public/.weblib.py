@@ -1,8 +1,31 @@
-print "content-type: text/plain"
-print 
 import sys
-sys.stderr = sys.stdout
+#print "content-type: text/plain"
+#print 
+#sys.stderr = sys.stdout
+sys.path.extend(["/home/sabren/lib","/home/sabren/work/"])
+from sqlGuru import dbc
+from strongbox import *
 
-from sqlBugs import dbc, CLERK
-import sys
-sys.path.append("/home/sei/web/rantelope.org/")
+class Story(Strongbox):
+    ID = attr(int)
+    summary = attr(str)
+    detail = attr(str)
+    area = attr(str)
+    type = attr(str, default='story')
+    target = attr(str, default='new')
+    status = attr(str, default='devel')
+    risk = attr(int, okay=range(1,10))
+    worth = attr(int, okay=range(1,10))
+    hrsOrig = attr(int)
+    hrsCurr = attr(int)
+    hrsElapsed = attr(int)
+
+from buggernaut import Task
+
+dbmap = {
+    Story: "plan_story",
+    Task: "proj_task",
+    }
+import arlo, storage
+CLERK = arlo.Clerk(storage.MySQLStorage(dbc), dbmap)
+

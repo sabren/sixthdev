@@ -1,7 +1,6 @@
 * include dsp_head;
 * exec:
-    from weblib import html
-    from buggernaut import date
+    from zebra import html
     #project = scope.get("project","[any]")
     #owner = scope.get("owner","[any]")
     #status = scope.get("status","[any]")
@@ -14,9 +13,9 @@
 <tr>
    <td><h1>task list</h1></td>
    <td>
-   project:&nbsp;{:html.select("project",('[any]',) + opt_project, project):}&nbsp;
-   owner:&nbsp;{:html.select("owner",('[any]',) + opt_owner, owner):}&nbsp;
-   status:&nbsp;{:html.select("status",('[any]',) + opt_status, status):}&nbsp;
+   project:&nbsp;{:html.select("project", ["any"]+ opt_project, project):}&nbsp;
+   owner:&nbsp;{:html.select("owner",['[any]'] + opt_owner, owner):}&nbsp;
+   status:&nbsp;{:html.select("status",['[any]'] + opt_status, status):}&nbsp;
    target:&nbsp;{:html.text("targetDate", targetDate, 'size="10"'):}&nbsp;
 
        <input type="submit" value="go">
@@ -30,7 +29,7 @@
         <table class="tasks" width="100%" cellspacing="0" cellpadding="2">
         <tr>
           <th width="5">&nbsp;</th>
-          <th width="*">summary</th>
+          <th width="*">task</th>
           <th class="numeric" width="50">Curr</th>
           <th class="numeric" width="50">Elap</th>
           <th class="numeric" width="50">Left</th>
@@ -39,17 +38,19 @@
     <tr class="{:status:}">
       <th width="5" class="{:priority:}">{:owner[0]:}</td>
       <td width="*">
-          <a href="tasks.py?action=edit&what=task&ID={:ID:}">{:summary:}</a>
+          <a href="tasks.py?action=edit&what=task&ID={:ID:}">{:task:}</a>
       </td>
       <td class="numeric" width="50">{:hrsCurr:}</td>
       <td class="numeric" width="50">{:hrsElap:}</td>
+      * exec:
+          hrsLeft = (hrsCurr or 0) - (hrsElap or 0)
       <td class="numeric" width="50">{:hrsLeft:}</td>
-      <td width="50">{:date.sql2us(targetDate):}</td>
+      <td width="50">{:targetDate:}</td>
     </tr>
-    * if detail and status != 'closed':
+    * if description and status != 'closed':
         <tr>
         <th class="{:priority:}">&nbsp;</td>
-        <td class="detail" colspan="5">{:detail:}</td>
+        <td class="description" colspan="5">{:description:}</td>
         </tr>
     * foot:
         </table>

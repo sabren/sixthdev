@@ -51,7 +51,8 @@ class TaskAdminApp(sixthday.AdminApp):
                   % date.us2sql(self.model["targetDate"])
             
         whereClause = wc
-        return map(BoxView, self.clerk.match(Task))
+        self.model["list"] = map(BoxView, self.clerk.match(Task))
+        print >> RES, zebra.fetch("lst_task", self.model)
 
 if __name__=="__main__":
     print >> RES, TaskAdminApp(CLERK, REQ).act()
