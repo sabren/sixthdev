@@ -1,8 +1,7 @@
 """
 test suite for zikebase.UserApp
-
-$Id$
 """
+__ver__="$Id$"
 
 import unittest
 import zikebase
