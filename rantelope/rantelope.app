@@ -78,12 +78,21 @@ def transform(xml, xsl):
 ### object model ####################################
 
 
+class Comment(Strongbox):
+    ID = attr(long)
+    storyID = attr(long)
+    name = attr(str)
+    mail = attr(str)
+    link = attr(str)
+    note = attr(str)   
+
 class Story(Strongbox):
     ID = attr(long)
     channelID = attr(long)
     title = attr(str)
     link = attr(str)
     description = attr(str)
+    comments = linkset(Comment)
     
 class Channel(Node):
     ID = attr(long)
@@ -167,6 +176,15 @@ class RantelApp(sixthday.AdminApp):
         self.redirect(action='show&what=channel&ID='
                             + str(story.channelID))
         
+    def show_story(self):
+        self.generic_show(Story, "sho_story")
+
+    ## comments ########################
+        
+    def save_comment(self):
+        cmt = self.generic_save(Comment)
+        self.redirect(action='show&what=story&ID='
+                            + str(cmt.storyID))
 
 
 ### main code #######################################
@@ -176,14 +194,10 @@ if __name__=="__main__":
     import arlo, storage, sqlRantelope
     dbmap = {Channel: "rnt_channel",
              Channel.__attrs__["stories"]: (Story, "channelID"),
-             Story: "rnt_story" }
+             Story: "rnt_story",
+             Story.__attrs__["comments"]: (Comment, "storyID"),
+             Comment: "rnt_comment"}
     CLERK = arlo.Clerk(storage.MySQLStorage(sqlRantelope.dbc), dbmap)
-
-    #ch = CLERK.fetch(Channel, 1)
-    #ch.clerk = CLERK
-    #print ch.kids
-    #ch.clerk = CLERK
-    #ch.add(Channel(title='my subchannel'))
     
     ## now just run the app!
     print >> RES, RantelApp(CLERK, REQ).act()

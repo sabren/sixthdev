@@ -1,0 +1,42 @@
+*#
+*# This file shows a story and its comments.
+*#
+*# $Id$
+
+* include header;
+
+* exec:
+    from zebra import html
+
+
+<h2>{:title:}</h2>
+
+{:description:}
+
+<hr/>
+
+* for comments:
+  <p class="comment"><b><a href="{:link:}">{:name:}</a>:</b><br/>
+     {:note:}
+  </p>
+
+<hr/>
+
+<form action="rantelope.app" method="POST">
+  <input type="hidden" name="what" value="comment">
+  {:html.hidden("storyID", ID):}
+  <b>add a comment:</b>
+
+  <table border="0">
+    <tr><th>your name:</th>
+        <td>{:html.text("name",""):}</td></tr>
+    <tr><th>your email:</th>
+        <td>{:html.text("mail",""):}</td></tr>
+    <tr><th>your page:</th>
+        <td>{:html.text("link",""):}</td></tr>
+    <tr><td colspan="2"><textarea name="note"
+            rows="7" cols="40"></textarea></td></tr>
+  </table>
+  <br/>
+  <input name="action" value="save" type="submit">
+</form>

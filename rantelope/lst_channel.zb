@@ -15,6 +15,7 @@
         <li>[<a href="rantelope.app?action=edit&what=channel&ID={:ID:}"
                >edit</a>]&nbsp;
             [<a href="{:path+rssfile:}">xml</a>]&nbsp;
+            [<a href="{:path+htmlfile:}">html</a>]&nbsp;
             <a href="rantelope.app?action=show&what=channel&ID={:ID:}"
                >{:title:}</a>&nbsp;
             

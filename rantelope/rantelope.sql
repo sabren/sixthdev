@@ -24,6 +24,15 @@ CREATE TABLE rnt_channel (
     path enum('./out/')
 );
 
+CREATE TABLE rnt_comment (
+    ID int not null auto_increment primary key,
+    storyID int not null,
+    name varchar(50),
+    mail varchar(50),
+    link varchar(255),
+    note text
+);
+
 /**
  *  This table was for testing purposes only. You
  *  can use it if you want to play around with the

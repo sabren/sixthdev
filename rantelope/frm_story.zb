@@ -16,6 +16,8 @@
 * if ID:
     <b>edit this story:</b>
     <input type="hidden" name="ID" value="{:ID:}">
+    &nbsp;&nbsp;
+    [<a href="rantelope.app?action=show&what=story&ID={:ID:}">comments</a>]
 * el:
     <b>add a new story:</b>
 
