@@ -2,6 +2,10 @@
 plan.py - zikeplan
 """
 import sys
+print "content-type: text/plain"
+print
+sys.stderr = sys.stdout
+#sys.stdout = RES
 
 # note: for both of the following, get the latest CVS versions,
 # NOT the snapshots, because they're too old.
@@ -17,21 +21,27 @@ import zikebase  # http://sourceforge.net/projects/zikebase/
 ## if you're not using MySQL, your best bet is to probably
 ## override zikebase.ObjectEditor.act_save()
 ##
-import sqlBugs, zdc.drivers.DBAPI2Driver
-dbc=zdc.Connection(zdc.drivers.DBAPI2Driver.DBAPI2Driver(sqlBugs.dbc))
+from sqlBugs import dbc
+from strongbox import *
 
-class Story(zdc.RecordObject):
-    _table = zdc.Table(dbc, "plan_story")
-    _defaults = {
-        "summary" : '',
-        "detail" : '',
-        "area" : '',
-        "type" : 'story',
-        "target" : 'new',
-        "status" : 'devel',
-        "hrsOrig" : None,
-        "hrsCurr" : None,
-        "hrsElapsed": None }
+
+class Story(Strongbox):
+    ID = attr(int)
+    summary = attr(str)
+    detail = attr(str)
+    area = attr(str)
+    type = attr(str, default='story')
+    target = attr(str, default='new')
+    status = attr(str, default='devel')
+    hrsOrig = attr(int)
+    hrsCurr = attr(int)
+    hrsElapsed = attr(int)
+
+
+dbmap = {
+    Story: "plan_story",
+    }
+
 
 
 def showForm(story):
@@ -214,15 +224,14 @@ if __name__=="__main__":
 
     print "<h1>zikeplan</h1>"
 
-    if weblib.request.get("action"):
-        weblib.auth.check()
+    if REQ.get("action"):
+        AUTH.check()
 
-    ed = zikebase.ObjectEditor(Story, weblib.request.get("ID"))
-    ed.act()
 
+    
     print '<b><a href="plan.py">add new</a></b><br>'
     print '<table><tr><td style="background: #cccccc">'
-    showForm(ed.object)
+    showForm(Story())
     print '</td></tr></table>'
 
     print '<hr>'

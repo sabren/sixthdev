@@ -3,41 +3,35 @@ task administrator
 """
 __ver__="$Id$"
 
-import weblib, zebra, zikebase, zikeplan
-zikebase.load("AdminApp")
+import weblib, zebra
+import sixthday
 
-class TaskAdminApp(zikebase.AdminApp):
-    __super = zikebase.AdminApp
+from strongbox import BoxView
+from buggernaut import Task
 
-    ## constructor page ##################################
-    
-    def __init__(self, input=None):
-        self.__super.__init__(self, input)
-        self.what = {
-            "task":zikeplan.Task
-            }
-
+class TaskAdminApp(sixthday.AdminApp):
 
     ## home page ########################################
 
     def act_(self):
-        self.do("list", what="task")
+        self.list_task()
 
     def enter(self):
-        task = zikeplan.Task()
-        self.model["opt_status"]=task.opt_status()
-        self.model["opt_priority"]=task.opt_priority()
-        self.model["opt_risk"]=task.opt_risk()
-        self.model["opt_owner"]=task.opt_owner()
-        self.model["opt_project"]=task.opt_project()
+        task = Task()
+        self.model["opt_status"]=Task.__attrs__["status"].okay
+        self.model["opt_priority"]=Task.__attrs__["status"].okay
+        self.model["opt_risk"]=Task.__attrs__["risk"].okay
+        self.model["opt_owner"]=Task.__attrs__["owner"].okay
+        self.model["opt_project"]=Task.__attrs__["project"].okay
         
     def exit(self):
+        global RES
         if self.errors:
-            print self.errors
+            print >> RES, self.errors
 
     ## actions ##########################################
 
-    def qry_task(self):
+    def list_task(self):
         self.model["project"]=self.input.get("project")
         self.model["status"]=self.input.get("status","open")
         self.model["owner"]=self.input.get("owner")
@@ -45,23 +39,19 @@ class TaskAdminApp(zikebase.AdminApp):
 
         wc = "1=1 "
         if self.model["project"] in self.model["opt_project"]:
-            wc = wc + "AND project='%s' " % self.model["project"]
+            wc += "AND project='%s' " % self.model["project"]
         if self.model["status"] in self.model["opt_status"]:
-            wc = wc + "AND status='%s' " % self.model["status"]
+            wc += "AND status='%s' " % self.model["status"]
         if self.model["owner"] in self.model["opt_owner"]:
-            wc = wc + "AND owner='%s' " % self.model["owner"]
+            wc += "AND owner='%s' " % self.model["owner"]
 
         # @TODO: validate targetdate is real date..
         if self.model["targetDate"]:
-            from buggernaut import date
-            wc = wc + "AND targetDate<='%s' " % date.us2sql(self.model["targetDate"])
+            wc += "AND targetDate<='%s' " \
+                  % date.us2sql(self.model["targetDate"])
             
         whereClause = wc
-        return map(zdc.ObjectView,
-                   zikebase.dbc.select(zikeplan.Task,
-                                       where=whereClause,
-                                       orderBy="isnull(targetDate), targetDate, " \
-                                              +"priority DESC, risk DESC"))
+        return map(BoxView, self.clerk.match(Task))
 
 if __name__=="__main__":
-    TaskAdminApp().act()
+    print >> RES, TaskAdminApp(CLERK, REQ).act()

@@ -3,11 +3,8 @@ Goals to be achieved.
 """
 __ver__="$Id$"
 
-import zdc
-import zikebase
-zikebase.load("Node")
-class Goal(zikebase.Node):
-    __super = zikebase.Node
-    _table = zdc.Table(zikebase.dbc, "plan_goal")
+from strongbox import *
 
-    # @TODO: should goals also have target and create dates? I think so.
+class Goal(Strongbox):
+    name = attr(str)
+    description = attr(str)

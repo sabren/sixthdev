@@ -1,2 +1,3 @@
-Action python-script /cgi-bin/weblib.cgi
+#Action python-script /cgi-bin/weblib.cgi
+Addtype webapp .py
 DirectoryIndex plan.py

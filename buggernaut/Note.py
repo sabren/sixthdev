@@ -3,15 +3,13 @@ Notes about a particular task.
 """
 __ver__="$Id$"
 
-import zdc, zikebase
-zikebase.load("Content")
+from strongbox import *
+from pytypes import *
 
-class Note(zikebase.Content):
-    __super = zikebase.Content
-    _table = zdc.Table(zikebase.dbc, "plan_task_note")
-
-    ## RecordObject constructors ###########################
-
-    def _new(self):
-        self.__super._new(self)
-        self._data['taskID'] = 0
+class Note(Strongbox):
+    userID  = attr(int, default=0)    
+    taskID  = attr(int, default=0)
+    content = attr(str)    
+    tsCreate = attr(DateTime, default="now")
+    tsUpdate = attr(DateTime, default="now")
+    
