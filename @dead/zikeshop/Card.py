@@ -8,7 +8,7 @@ import zikeshop
 
 class Card(zdc.RecordObject):
     __super = zdc.RecordObject
-    _table = zdc.Table(zikeshop.dbc, "shop_card")
+    _tablename = "shop_card"
 
 
     def getEditableAttrs(self):
@@ -68,7 +68,7 @@ def issuer(number):
     """
     res = "unknown"
     num = str(number)
-    if num[0]=="4":
+    if num[:1]=="4":
         res = "Visa"
     elif num[:2] in ("34","37"):
         res = "American Express"

@@ -2,8 +2,8 @@
 display a single sale for zikeshop
 
 this should be in zebra, but it isn't because of bad stuff...
-
 """
+
 import string
 import weblib
 import zikebase
@@ -19,8 +19,9 @@ sale = zikeshop.Sale(ID=saleID)
 # @TODO: move comments off into the content table. (??)
 # @TODO: explicitly track partially filled orders.
 
-print '<a href="index.py?action=list&what=sale">back to sales list</a>'
-print '<h2>Sale #%s</h2>' % int(sale.ID)
+print '<a href="index.py?action=list&what=sale">back to sales list</a><br><br>'
+print '<DIV CLASS="adminheading">Sale #%s</DIV>' % int(sale.ID)
+
 
 if sale.billAddress:
     rec = sale.billAddress._record
@@ -29,76 +30,98 @@ if sale.billAddress:
         print """
         <p><b>customer: <A href="mailto:%(email)s">%(email)s</a></b></p>
         """ % sale.billAddress._record
-
+        
     #@TODO: store organization? or should that be address line 1?
     #@TODO: logic for hiding state if not in US
 
     ## BILLING INFO
     rec = sale.billAddress._record
-    print """
-    <pre><b>Billing Info</b>
-    %(fname)s %(lname)s""" % rec
+    import weblib
+    print weblib.trim(
+        """
+        <pre class="contentcopy"><b>Billing Info</b>
+        %(fname)s %(lname)s""" % rec)
+        
+        
+    if sale.billAddress.company:
+        print sale.billAddress.company      
 
     ## hide empty address lines
-    import weblib
     for line in range(3):
         if string.strip(weblib.deNone(rec.get("address%i" % (line+1),""))) != "":
             print rec["address%i" % (line+1)]
 
-    print """%(city)s, %(stateCD)s, %(postal)s
-    %(countryCD)s
-    phone: %(phone)s
-    </pre>
-    """ % rec
+    print weblib.trim(
+        """
+        %(city)s, %(stateCD)s, %(postal)s
+        %(countryCD)s
+        phone: %(phone)s</pre>
+        """ % rec)
+
+    if sale.shipAddress.isCompany:
+       print 'Commercial Address'
+    else:
+       print 'Residential Address'
+
 
     ## SHIPPING INFO (cut and pasted from above)
     rec = sale.shipAddress._record
-    print """
-    <pre><b>Shipping Info</b>
-    %(fname)s %(lname)s""" % rec
+    print weblib.trim(
+        """
+        <pre class="contentcopy"><b>Shipping Info</b>
+        %(fname)s %(lname)s""" % rec)
 
     ## hide empty address lines
     for line in range(3):
         if string.strip(weblib.deNone(rec.get("address%i" % (line+1),""))) != "":
             print rec["address%i" % (line+1)]
 
-    print """%(city)s, %(stateCD)s, %(postal)s
-    %(countryCD)s
-    phone: %(phone)s
-    </pre>
-    """ % rec
+    if sale.shipAddress.company:
+        print sale.shipAddress.company      
 
+    print weblib.trim(
+        """
+        %(city)s, %(stateCD)s, %(postal)s
+        %(countryCD)s
+        phone: %(phone)s</pre>
+        """ % rec)
 
+    if sale.shipAddress.isCompany:
+       print 'Commercial Address'
+    else:
+       print 'Residential Address'
+   
     #@TODO: handle non-credit card sales
 
-    print """
-    <pre><b>Credit Card:</b>
-    name on card: %(name)s
-    number: %(number)s
-    expiration: %(expMonth)s/%(expYear)s</pre>
-    """ % sale.card._record
+    print weblib.trim(
+        """
+        <pre class="contentcopy"><b>Credit Card:</b>
+        name on card: %(name)s
+        number: %(number)s
+        expiration: %(expMonth)s/%(expYear)s</pre>
+        """ % sale.card._record)
 
 else:
     print '<h3>manual sale: %s EST</h3>' % sale.tsSold
 
 
 ## @TODO: abstract this into a "view" class
-print '<table border="1"><tr>'
-print '<td>code</td>'
-print '<td>item</td>'
-print '<td>quantity</td>'
-print '<td>price</td>'
-print '<td>subtotal</td>'
+print '<table class="admintablebg" border="0"  CELLSPACING="1" CELLPADDING="2"><tr>'
+print '<td class="admintablefield">code</td>'
+print '<td class="admintablefield">item</td>'
+print '<td class="admintablefield">quantity</td>'
+print '<td class="admintablefield">price</td>'
+print '<td class="admintablefield">subtotal</td>'
 print '</tr>'
 
 
 for det in sale.details:
     print '<tr>'
-    print '<td>%s</td>' % det.product.code
-    print '<td>%s</td>' % det.product.label
-    print '<td>%s</td>' % det.quantity
-    print '<td>%s</td>' % det.product.price # @TODO: olap for prices?
-    print '<td>%s</td>' % det.subtotal
+    print '<td class="admintablecellodd">%s</td>' % det.product.code
+    print '<td class="admintablecellodd">%s</td>' % det.product.label
+    print '<td class="admintablecellodd">%s</td>' % det.quantity
+    print '<td class="admintablecellodd">%s</td>' % det.product.price # @TODO: olap for prices?
+    print '<td class="admintablecellodd">%s</td>' % det.subtotal
     print '</tr>'
 print '</table>'
 

@@ -7,7 +7,7 @@ import zikeshop, zikebase, zdc
 
 class Sale(zdc.RecordObject):
     __super = zdc.RecordObject
-    _table = zdc.Table(zikeshop.dbc, "shop_sale")
+    _tablename = "shop_sale"
     _links = {
         "details": [zdc.LinkSet, zikeshop.Detail, "saleID"],
         }
@@ -22,7 +22,8 @@ class Sale(zdc.RecordObject):
         self.shiptypeID = 0
         self.cardID = 0 
         self.status = "new"
-
+        self.tsSold = zdc.TIMESTAMP
+        
         self.subtotal = 0
         self.shipping = 0
         self.salestax = 0
@@ -33,27 +34,27 @@ class Sale(zdc.RecordObject):
     #@TODO: replace all this crap with generic stuff from ZDC...
     def get_shipAddress(self):
         if self.ship_addressID:
-            return zikebase.Contact(ID=self.ship_addressID)
+            return zikebase.Contact(self._ds, ID=self.ship_addressID)
         else:
-            return zikebase.Contact()
+            return zikebase.Contact(self._ds)
 
     def get_billAddress(self):
         if self.bill_addressID:
-            return zikebase.Contact(ID=self.bill_addressID)
+            return zikebase.Contact(self._ds, ID=self.bill_addressID)
         else:
-            return zikebase.Contact()
+            return zikebase.Contact(self._ds)
 
     def get_customer(self):
         if self.customerID:
-            return zikebase.Contact(ID=self.customerID)
+            return zikebase.Contact(self._ds, ID=self.customerID)
         else:
-            return zikebase.Contact()
+            return zikebase.Contact(self._ds)
 
     def get_card(self):
         if self.cardID:
-            return zikeshop.Card(ID=self.cardID)
+            return zikeshop.Card(self._ds, ID=self.cardID)
         else:
-            return zikeshop.Card()
+            return zikeshop.Card(self._ds)
    
     def set_shipAddress(self, value):
         self.ship_addressID = value.ID
@@ -85,9 +86,7 @@ class Sale(zdc.RecordObject):
 
     
     def save(self):
-        # @TODO: this is a rather crappy hack to move insert stamps to zdc:
-        self._record.insertStamps.append('tsSold')
-
+        
         # @TODO: where should this go, and when should
         # it be updated?
         self.total = zdc.FixedPoint('0.00') \

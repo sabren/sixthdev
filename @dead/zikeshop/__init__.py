@@ -1,5 +1,3 @@
-import zikebase
-from zikebase import dbc
 
 #@TODO: lazy module loading..
 from Product import Product
@@ -16,7 +14,7 @@ from State import State
 
 ### PICTURE ROUTINE #######################
 
-def showPicture(ID=None, size=None):
+def showPicture(ds, ID=None, size=None):
     """shows the specified picture.. Should be the only thing called
     on the page."""
 
@@ -29,7 +27,7 @@ def showPicture(ID=None, size=None):
     if size is None:
         size = int(weblib.request.get("size",0))
         
-    picture = zikebase.Picture(ID=ID)
+    picture = zikebase.Picture(ds, ID=ID)
     weblib.response.contentType=picture.type
     if size:
         im = Image.open(cStringIO.StringIO(picture.picture))

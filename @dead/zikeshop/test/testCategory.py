@@ -9,12 +9,13 @@ import zikeshop
 class CategoryTestCase(unittest.TestCase):
 
     def setUp(self):
+        self.ds = zikeshop.test.dbc
         self.cur = zikeshop.test.dbc.cursor()
 
 
     def check_products(self):
 
-        cat = zikeshop.Category()
+        cat = zikeshop.Category(self.ds)
         assert len(cat.products) == 0, \
                ".products should be empty list by default"
         
@@ -35,17 +36,17 @@ class CategoryTestCase(unittest.TestCase):
         self.cur.execute("INSERT INTO shop_product_node (productID, nodeID) "
                          "VALUES (3, 1)")
 
-        prods = zikeshop.Category(ID=1).products
+        prods = zikeshop.Category(self.ds, ID=1).products
         assert len(prods) == 3, \
                "wrong number of categories (%s) shown on category page" \
                % len(prods)
 
 
     def check_delete(self):
-        cat = zikeshop.Category()
+        cat = zikeshop.Category(self.ds)
         cat.name = "stuff"
 
-        prod = zikeshop.Product()
+        prod = zikeshop.Product(self.ds)
         prod.name = "ASDF"
         prod.code = "ASFD"
         cat.products << prod

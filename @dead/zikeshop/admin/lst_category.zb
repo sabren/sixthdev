@@ -3,7 +3,8 @@
 <b>categories</b>&nbsp;&nbsp;&nbsp;
 <a class="action" href="index.py?action=create&what=category">[add new]</a>
 
-<br>&nbsp;<br>
+<p>
+</p>
 
 * for categories:
     <A HREF="index.py?action=edit&what=category&ID={:ID:}">{:path:}</a><br>

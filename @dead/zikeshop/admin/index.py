@@ -2,6 +2,9 @@ import weblib, zebra
 import zikebase
 zikebase.load("AdminApp")
 
+def popupHelp(msg):
+    res = '<a href="#" onclick="alert(\'%s\')">[?]</a>' % msg
+    return res
 
 class ZikeShopAdminApp(zikebase.AdminApp):
     __super = zikebase.AdminApp
@@ -12,10 +15,11 @@ class ZikeShopAdminApp(zikebase.AdminApp):
         self.list_category()
 
     def enter(self):
-        zebra.show("dsp_head")
+        self.model["popupHelp"] = popupHelp
+        zebra.show("dsp_head",self.model)
 
     def exit(self):
-        zebra.show("dsp_foot")
+        zebra.show("dsp_foot",self.model)
         
     ## category stuff ##################################
         

@@ -12,6 +12,7 @@ import zdc
 class ProductTestCase(unittest.TestCase):
 
     def setUp(self):
+        self.ds = zikeshop.test.dbc
         self.cur = zikeshop.test.dbc.cursor()
         self.cur.execute("delete from base_node")
         self.cur.execute("delete from shop_product")
@@ -29,21 +30,21 @@ class ProductTestCase(unittest.TestCase):
     ## price, cost, and retail should all be FixedPoints ###############
 
     def check_price(self):
-        assert isinstance(zikeshop.Product().price, zdc.FixedPoint), \
+        assert isinstance(zikeshop.Product(self.ds).price, zdc.FixedPoint), \
                "price is wrong type!"
 
     def check_cost(self):
-        assert isinstance(zikeshop.Product().cost, zdc.FixedPoint), \
+        assert isinstance(zikeshop.Product(self.ds).cost, zdc.FixedPoint), \
                "cost is wrong type!"
 
     def check_retail(self):
-        assert isinstance(zikeshop.Product().retail, zdc.FixedPoint), \
+        assert isinstance(zikeshop.Product(self.ds).retail, zdc.FixedPoint), \
                "retail is wrong type!"
 
     ## inventory checking ############################################
 
     def check_available(self):
-        prod = zikeshop.Product()
+        prod = zikeshop.Product(self.ds)
         assert prod.available == 0, \
                "products shouldn't be available by default."
 
@@ -66,7 +67,7 @@ class ProductTestCase(unittest.TestCase):
     ## styles collection #############################################
     def check_styles(self):
 
-        prod = zikeshop.Product()
+        prod = zikeshop.Product(self.ds)
         assert len(prod.styles) == 0, \
                "shouldn't be any styles by default."
         style = prod.styles.new()
@@ -76,7 +77,7 @@ class ProductTestCase(unittest.TestCase):
                "didn't add style in memory.."
 
 
-        prod = zikeshop.Product()
+        prod = zikeshop.Product(self.ds)
         prod.name = prod.code ="abc"
         prod.save()
         style = prod.styles.new()
@@ -89,19 +90,19 @@ class ProductTestCase(unittest.TestCase):
     ## categories collection #########################################
 
     def check_categories(self):
-        prod = zikeshop.Product()
+        prod = zikeshop.Product(self.ds)
         assert len(prod.categories)==0, \
                "categories should be empty list by default"
 
-        nodeA = zikebase.Node()
+        nodeA = zikebase.Node(self.ds)
         nodeA.name="abc"
         nodeA.save()
         
-        nodeB = zikebase.Node()
+        nodeB = zikebase.Node(self.ds)
         nodeB.name="xyz"
         nodeB.save()
         
-        prod = zikeshop.Product()
+        prod = zikeshop.Product(self.ds)
         prod.code = 'some03'
         prod.name = 'something else'
         prod.categories = (nodeA.ID, nodeB.ID)
@@ -113,7 +114,7 @@ class ProductTestCase(unittest.TestCase):
 
 
     def check_categories_some_more(self):
-        prod = zikeshop.Product()
+        prod = zikeshop.Product(self.ds)
         prod.code = 'some02'
         prod.name = 'something else'
         prod.categories = (1, 2, 3, 4)
@@ -138,6 +139,7 @@ class ProductTestCase(unittest.TestCase):
         assert prod.ID == 2, "???"
         prod.categories = (1, 2)
         assert prod.categories.IDs() == (1, 2)
+        assert prod.ID == 2, "???"
         prod.save()
         
         self.cur.execute("SELECT nodeID FROM shop_product_node "
@@ -154,7 +156,7 @@ class ProductTestCase(unittest.TestCase):
 
 
     def check_single_nodeID(self):
-        prod = zikeshop.Product()
+        prod = zikeshop.Product(self.ds)
         prod.categories = 1
         prod.code =""
         try:
@@ -165,7 +167,7 @@ class ProductTestCase(unittest.TestCase):
 
 
     def check_validation(self):
-        prod = zikeshop.Product()
+        prod = zikeshop.Product(self.ds)
         prod.code = "some01"
         try:
             prod.save()

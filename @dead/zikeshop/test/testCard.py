@@ -11,13 +11,15 @@ class CardTestCase(unittest.TestCase):
     #@TODO: really test the validation stuff!
 
     def setUp(self):
+        self.ds = zikeshop.test.dbc
+        
         # a little game of good card, bad card...
         # this card is unlikely, but passes the mod10 check:
         self.GOODCARD = '4111111111111111'
         self.BADCARD  = '4111111111111119' 
     
     def check_masked(self):
-        card = zikeshop.Card() 
+        card = zikeshop.Card(self.ds)
         card.number = self.GOODCARD
         assert card.masked == 'xxxxxxxxxxxx1111', \
                "masking doesn't work: %s" % card.masked
@@ -26,7 +28,7 @@ class CardTestCase(unittest.TestCase):
         """
         check the checker..
         """
-        card = zikeshop.Card()
+        card = zikeshop.Card(self.ds)
         assert card.checkdigits(self.GOODCARD) == 1, \
                "check of good card failed..."
 

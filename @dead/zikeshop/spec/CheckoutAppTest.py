@@ -12,6 +12,7 @@ import sys, os
 class CheckoutAppTestCase(unittest.TestCase):
     
     def setUp(self):
+        self.ds = zikeshop.test.dbc
         from zikeshop.public.checkout import CheckoutApp
 
         # a hack to make the storage thing work.
@@ -24,7 +25,7 @@ class CheckoutAppTestCase(unittest.TestCase):
         self.cur.execute("DELETE FROM shop_sale")
         self.cur.execute("DELETE FROM shop_detail")
 
-        self.app = CheckoutApp(zikeshop.Cart({}))
+        self.app = CheckoutApp(zikeshop.Cart({}), self.ds)
         self.cwd = os.getcwd()
         os.chdir("public")
         
@@ -47,7 +48,7 @@ class CheckoutAppTestCase(unittest.TestCase):
         myCart = zikeshop.Cart({})
         myCart.add("super-evil-destructo-ray")
 
-        app = CheckoutApp(cart=myCart)
+        app = CheckoutApp(myCart, self.ds)
 
         # check for xxxData
         app.enter()

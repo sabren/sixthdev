@@ -3,12 +3,12 @@ fake data for testing Zikeshop
 
 $Id$
 """
-
+import zikebase, zikebase.config
 import zikeshop
 
 def load():
     import zdc, zikeshop, zikebase
-    from zikeshop import dbc
+    from zikeshop.test import dbc
 
     ## clear out old data..
     dbc.delete("base_contact")
@@ -20,20 +20,20 @@ def load():
     dbc.delete("shop_detail")
     dbc.delete("shop_product_node")
 
-    user = zikebase.User()
+    user = zikebase.User(dbc)
     user.username=user.uid="username"
     user.email="user@schmoop.com"
     user.password="password"
     user.save()
 
-    user = zikebase.User()
+    user = zikebase.User(dbc)
     user.username=user.uid=user.email="michal@sabren.com"
     user.password="michal"
     user.save()
 
     nodeIDs={}
     for n in ("toys", "books", "electronics", "games"):
-        node = zikebase.Node()
+        node = zikebase.Node(dbc)
         node.descript=""
         node.name=n
         if n=="games":
@@ -51,7 +51,7 @@ def load():
               ("GAM02", "chess", "an ancient game", ("games",)),
               ("PDA00", "palm pilot", "stores stuff", ("electronics",))):
 
-        prod = zikeshop.Product()
+        prod = zikeshop.Product(dbc)
         prod.code=p[0]
         prod.name=p[1]
         prod.price=5.00 # everything's five bucks!
@@ -64,14 +64,14 @@ def load():
         ## set up 10 of each product in inventory..
         if prod.name == "dictionary":
             # dictionary has two styles:
-            style = zikeshop.Style()
+            style = zikeshop.Style(dbc)
             #@TODO: clean up this linking bit (use prod.styles << )
             style.parentID = prod.ID
             style.code = "DICTWEB"
             style.name = "Websters"
             style.save()
 
-            style = zikeshop.Style()
+            style = zikeshop.Style(dbc)
             style.code = "DICTOXF"
             style.name = "Oxford"
             style.parentID=prod.ID
@@ -87,14 +87,12 @@ def load():
 
 
     ## SALES #######################
-    sale = zikeshop.Sale()
-    det = zikeshop.Detail()
-    det.productID = zikeshop.Product(code="GAM02").ID # chess
+    sale = zikeshop.Sale(dbc)
+    det = zikeshop.Detail(dbc)
+    det.productID = zikeshop.Product(dbc, code="GAM02").ID # chess
     sale.status = "new"
     sale.details << det
     sale.save()
 
 if __name__=="__main__":
     load()
-
-

@@ -11,6 +11,10 @@ class Store(zdc.Object): #(zdc.RecordObject):
 
     ## zdc init  ##########################################
 
+    def __init__(self, ds):
+        self.__super.__init__(self)
+        self.__dict__['ds'] = ds
+
     def _init(self):
         self._onHold = {}
         self._address = None
@@ -35,9 +39,9 @@ class Store(zdc.Object): #(zdc.RecordObject):
 
     def get_products(self):
         #@TODO: get rid of this?
-        return zikeshop.dbc.select(zikeshop.Product,
-                                   "class='product'",
-                                   orderBy="code")
+        return self.ds.select(zikeshop.Product,
+                              "class='product'",
+                              orderBy="code")
 
     ## calculations #######################################
 
@@ -71,7 +75,7 @@ class Store(zdc.Object): #(zdc.RecordObject):
     def calcSalesTax(self, addr, amount):
         import zikeshop
         if self.hasNexus(addr.stateCD):
-            state = zikeshop.State(CD=addr.stateCD)
+            state = zikeshop.State(self._ds, CD=addr.stateCD)
             return (state.salestax * amount) / 100
         else:
             return 0
@@ -84,7 +88,7 @@ class Store(zdc.Object): #(zdc.RecordObject):
         #        return 1
         #@TODO: this is a really crappy function, since it's duplicated above.
         try:
-            s = zikeshop.State(CD=stateCD)
+            s = zikeshop.State(self._ds, CD=stateCD)
             foundIt = 1
         except:
             foundIt = 0

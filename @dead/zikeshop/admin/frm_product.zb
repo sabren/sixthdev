@@ -75,6 +75,7 @@ long description:<br>
 </td></tr>
 <tr><td>
 upload a new picture:<br>
+(pictures must be less than 75k in size)<br>
 <input name="picture" type="file"><br/>
 </td></tr>
 </table>

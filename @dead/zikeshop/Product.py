@@ -9,7 +9,7 @@ import zikeshop
 
 class Product(zdc.RecordObject):
     __super = zdc.RecordObject
-    _table = zdc.Table(zikeshop.dbc, "shop_product")
+    _tablename = "shop_product"
 
     # @TODO: fix this!!!!!! there should be no _tuples..
     # or should there be? I DO need to tell ObjectView
@@ -76,7 +76,7 @@ class Product(zdc.RecordObject):
         where = "code = '%s'" % (self.code)
         if self.ID:
             where = where + "AND ID != %i" % int(self.ID)
-        if zikeshop.dbc.select(zikeshop.Product._table.name, where):
+        if self._ds.select(self._tablename, where):
             raise ValueError, "This code already exists!"
 
         self.__super.save(self)
@@ -155,7 +155,7 @@ class Product(zdc.RecordObject):
 
         self.categories.clear()
         for catID in vals:
-            self.categories << zikeshop.Category(ID=catID)
+            self.categories << zikeshop.Category(self._ds, ID=catID)
 
     def get_label(self):
         return self.name

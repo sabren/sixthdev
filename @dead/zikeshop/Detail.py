@@ -8,7 +8,7 @@ import zikeshop
 
 class Detail(zdc.RecordObject):
     __super = zdc.RecordObject
-    _table = zdc.Table(zikeshop.dbc, "shop_detail")
+    _tablename = "shop_detail"
     _tuples = ["product"]
 
     def _new(self):
@@ -30,9 +30,9 @@ class Detail(zdc.RecordObject):
             return self._prod
         elif self.productID:
             #@TODO: this is a HORRIBLE way to do this:
-            res = zikeshop.Product(ID=self.productID)
+            res = zikeshop.Product(self._ds, ID=self.productID)
             if res._data["class"]=="style":
-                res = zikeshop.Style(ID=self.productID)
+                res = zikeshop.Style(self._ds, ID=self.productID)
         return res
 
     ### subtotal calculation #######################################

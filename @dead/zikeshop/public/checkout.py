@@ -7,8 +7,12 @@ import zikeshop, zikebase, weblib
 
 class CheckoutApp(zikeshop.PublicApp):
     __super = zikeshop.PublicApp
-        
+
     ## Actor methods ############################
+
+    def __init__(self, cart, ds, input=None):
+        self.__super.__init__(self, cart, input)
+        self.ds = ds
 
     def enter(self):
         self.__super.enter(self)
@@ -23,11 +27,11 @@ class CheckoutApp(zikeshop.PublicApp):
         # internal data (basically a bunch of dicts until checkout)
         self.data = weblib.sess.get("__checkout__",{})
         self.billData = self.data.get("billData",
-                                      zikebase.Contact()._data.copy())
+                                      zikebase.Contact(self.ds)._data.copy())
         self.shipData = self.data.get("shipData",
-                                      zikebase.Contact()._data.copy())
+                                      zikebase.Contact(self.ds)._data.copy())
         self.cardData = self.data.get("cardData",
-                                      zikeshop.Card()._data.copy())
+                                      zikeshop.Card(self.ds)._data.copy())
         self.comments = self.data.get("comments", "")
         self.model["comments"]=self.comments
 
@@ -97,7 +101,8 @@ class CheckoutApp(zikeshop.PublicApp):
             errs.append("A state is required for US orders")
 
         try:
-            ed = zikebase.ObjectEditor(zikebase.Contact, input=self.input)
+            ed = zikebase.ObjectEditor(zikebase.Contact,
+                                       self.ds, input=self.input)
             ed.do("update")
         except ValueError, valErrs:
             errs.extend(valErrs[0])
@@ -110,7 +115,8 @@ class CheckoutApp(zikeshop.PublicApp):
                 self.next = "get_shipping"
         else:
             if context=='bill':
-                self.data['shipToBilling'] = int(self.input.get('shipToBilling',0))
+                self.data['shipToBilling'] = int(
+                    self.input.get('shipToBilling',0))
                 if self.input.get('shipToBilling'):
                     self.shipData = self.billData.copy()
                     self.redirect(action='get_card')
@@ -129,7 +135,8 @@ class CheckoutApp(zikeshop.PublicApp):
 
         try:
             #@TODO: REQUIRE input for objectEditor, model for zebra.
-            ed = zikebase.ObjectEditor(zikeshop.Card, input=self.input)
+            ed = zikebase.ObjectEditor(zikeshop.Card, self.ds,
+                                       input=self.input)
             ed.do("update")
             #@TODO: resolve - cards with secondary billing addresses?
         except ValueError, valErrs:
@@ -184,12 +191,12 @@ class CheckoutApp(zikeshop.PublicApp):
         #@TODO: make a .fromDict or .consult for zdc.RecordObjects
         # for now, we'll assume this is okay, since the classes have
         # already validated everything in here:
-        bill = zikebase.Contact(); bill._data = self.billData
-        ship = zikebase.Contact(); ship._data = self.shipData
-        card = zikeshop.Card(); card._data = self.cardData
+        bill = zikebase.Contact(self.ds); bill._data = self.billData
+        ship = zikebase.Contact(self.ds); ship._data = self.shipData
+        card = zikeshop.Card(self.ds); card._data = self.cardData
 
         #@TODO: lots of duplicate logic here.. clean up
-        store = zikeshop.Store()
+        store = zikeshop.Store(self.ds)
         self.model["details"] = self.cart.q_contents()
         self.model["grandsubtotal"] = self.cart.subtotal()
         self.model["salestax"] = store.calcSalesTax(ship,self.cart.subtotal())
@@ -235,8 +242,8 @@ class CheckoutApp(zikeshop.PublicApp):
 
     def act_checkout(self):
         import zikebase
-        sale = zikeshop.Sale()
-        shop = zikeshop.Store()
+        sale = zikeshop.Sale(self.ds)
+        shop = zikeshop.Store(self.ds)
 
         #@TODO: update test suite to ensure cardID <> 0 if it shouldn't be.
         #@TODO: this was just yanked from confirm area..
@@ -290,5 +297,5 @@ class CheckoutApp(zikeshop.PublicApp):
         
         
 if __name__=="__main__":
-    CheckoutApp(zikeshop.Cart(sess)).act()
+    CheckoutApp(zikeshop.Cart(sess), ds).act()
     sess.stop()
