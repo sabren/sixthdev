@@ -167,10 +167,8 @@ class Request:
 
 
     def __getitem__(self, key):
-
         res = None
-
-        for dict in [self.query, self.form, self.cookie, self.environ]:
+        for dict in [self.query, self.form, self.cookie]:
             if dict.has_key(key):
                 if res is None:
                     res = dict[key]
@@ -178,7 +176,6 @@ class Request:
                     res = self._tupleMerge(res, dict[key])
         if res is None:
             raise KeyError, key
-
         return res
 
 
@@ -190,8 +187,17 @@ class Request:
             return failobj
 
 
+    def keys(self):
+        res = {}
+        for dict in [self.query, self.form, self.cookie]:
+            for key in dict.keys():
+                res[key] = 1
+                
+        return res.keys()
+
+
     def has_key(self, key):
-        for dict in [self.query, self.form, self.cookie, self.environ]:
+        for dict in [self.query, self.form, self.cookie]:
             if dict.has_key(key):
                 return 1
         return 0

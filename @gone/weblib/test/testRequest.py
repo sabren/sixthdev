@@ -37,13 +37,30 @@ class RequestTestCase(unittest.TestCase):
         assert request["aa"] == ("2", "3"), "getitem screws up on multiple values"
         assert request["b"] == "2", "getitem screws up on forms"
         assert request["c"] == "3", "getitem screws up on cookies"
-        assert request["e"] == "mc2", "getitem screws up on environ"
+
 
         # it should fetch things in this order:
         assert request["z1"][0] == "querystring", "getitem goes in wrong order (z1)"
         assert request["z2"][0] == "form", "getitem goes in wrong order (z2)"
-        assert request["z3"][0] == "cookie", "getitem goes in wrong order (z3)"
-        assert request["z4"] == "environ", "getitem goes in wrong order (z4)"
+        assert request["z3"] == "cookie", "getitem goes in wrong order (z3)"
+
+        # environ is not part of the dictionary interface:
+        assert (request.get("e") is None) and (request.get("z4") is None), \
+               "request.__getitem__ should not access environ."
+
+
+
+    def check_keys(self):
+        req = weblib.Request(querystring="querystring=1",
+                             form={"form":"1"},
+                             cookie={"cookie":"1"},
+                             environ={"environ":"1"})
+        keys = req.keys()
+        keys.sort()
+
+        assert keys== ['cookie','form','querystring'], \
+               "request.keys() doesn't work."
+
 
 
 
@@ -58,7 +75,7 @@ class RequestTestCase(unittest.TestCase):
     def check_environ(self):
         myenv = {"A":"B"}
         eng = weblib.Engine(request=weblib.Request(environ=myenv))
-        assert eng.request["A"] == "B", "request has wrong passed-in environ"
+        assert eng.request.environ["A"] == "B", "request has wrong passed-in environ"
 
 
 
@@ -131,3 +148,6 @@ class RequestTestCase(unittest.TestCase):
 
         assert request.form["upfile"].filename == "C:\mimetest.txt", \
                "file uploads don't return FieldStorage objects"
+
+
+
