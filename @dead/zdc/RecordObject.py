@@ -13,6 +13,7 @@ class RecordObject(Strongbox):
 
     _tablename = None
     _tuples = []
+    _links = {}
     __key__ = "ID"
 
 
@@ -46,6 +47,7 @@ class RecordObject(Strongbox):
             self.__dict__['_data'] = self.__values__
             self.__dict__['_record'] = None
 
+        self._init()
         if where:
             self._fetch(**where)
         else:
@@ -112,6 +114,9 @@ class RecordObject(Strongbox):
         
 
     ## private methods ###############################################
+
+    def _init(self):
+        pass
 
     def _new(self):
         """
