@@ -5,17 +5,32 @@
  * $Id$
 /*/
 
+CREATE TABLE rnt_author (
+    ID integer not null auto_increment primary key,
+    username varchar(32),
+    password varchar(32),
+    fname varchar(32),
+    lname varchar(32),
+    email varchar(32),
+    homepage varchar(64)
+);
+
+/* initial admin/admin user */
+INSERT INTO rnt_author (username, password)
+     VALUES ('admin', 'xxiz1FI3TBLPs');
+
+
 CREATE TABLE rnt_story (
-    ID int not null auto_increment primary key,
-    channelID int not null,
-    categoryID int,
+    ID integer not null auto_increment primary key,
+    channelID integer not null,
+    categoryID integer,
     title varchar(255),
     link varchar(255),
     description text
 );
 
 CREATE TABLE rnt_channel (
-    ID int not null auto_increment primary key,
+    ID integer not null auto_increment primary key,
     title varchar(255),
     link varchar(255),
     rssfile varchar(32),
@@ -26,18 +41,26 @@ CREATE TABLE rnt_channel (
 );
 
 CREATE TABLE rnt_category (
-    ID int not null auto_increment primary key,
-    channelID int not null,
+    ID integer not null auto_increment primary key,
+    channelID integer not null,
     name varchar(50)
 );
 
 CREATE TABLE rnt_comment (
-    ID int not null auto_increment primary key,
-    storyID int not null,
+    ID integer not null auto_increment primary key,
+    storyID integer not null,
     name varchar(50),
     mail varchar(50),
     link varchar(255),
     note text
+);
+
+CREATE TABLE web_sess (
+    name varchar(32),
+    sid varchar(64),
+    sess blob,
+    tsUpdate timestamp,
+    primary key (name, sid)
 );
 
 /**
@@ -46,8 +69,8 @@ CREATE TABLE rnt_comment (
  *  code in Node.py
 **/
 -- CREATE TABLE rnt_node (
---     ID int not null auto_increment primary key,
---     parentID int not null,
+--     ID integer not null auto_increment primary key,
+--     parentID integer not null,
 --     name varchar(64),
 --     note varchar(255),
 -- );
