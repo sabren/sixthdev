@@ -7,6 +7,24 @@ $Id$
 # start with some utility functions... 
 
 
+#### selectBox() ####################################################
+
+
+def selectBox(name, rows, blank=None, extra=''):
+    """rows should be a sequence of (real value, displayed value, isSelected)"""
+    res = '<select name="%s" %s>\n' % (name, extra)
+    if blank is not None:
+        res = res + '<OPTION value="%s">&nbsp;</OPTION>\n' % blank
+    for row in rows:
+        res = res + '<OPTION value="%s"' % row[0]
+        if row[2]:
+            res = res + " SELECTED"
+        res = res + '>%s</OPTION>\n' % row[1]
+    res = res + '</select>'
+    return res
+
+
+
 #### trim() for saving bandwith while making code look nice ####
 
 def trim(s):
