@@ -43,17 +43,28 @@ my copy. Instead, I had my accountant dump it to a text file:</p>
 
 # http://www.intuit.com/support/quicken/2003/win/1178.html
 # http://www.intuit.com/support/quicken/2003/win/1181.html
+import sys
 from pytypes import FixedPoint
 
 class Transaction(object):
-    pass
+    def __init__(self):
+        self.number = None
+        self.split = []
 class SplitLine(object):
     pass
 
 
+try:
+    textData = open(sys.argv[1]).read().split("\n")[4:]
+except:
+    print "usage: txt2qif.py fileName"
+    sys.exit()
+
+
+autoNumber = 0
 transactions = []
 trans = None
-for line in open("seibofa.txt").read().split("\n")[4:]:
+for line in textData:
     if not line.strip(): continue
     if line.startswith("\t"):
         _1, category, memo, payment, _2, deposit  =  line.split("\t")
@@ -64,18 +75,26 @@ for line in open("seibofa.txt").read().split("\n")[4:]:
         assert (payment and not deposit) or (deposit and not payment) # xor :(
         split.amount = FixedPoint((payment or deposit).replace(",",""))
         #print "%7s  %-20s %-20s" % (split.amount, split.category, split.memo)
+        trans.split.append(split)
     else:
-        date, number, payee, account, memo, payment, c, deposit, balance = line.split("\t")
+        date, number, payee, account, memo, payment, c, deposit, balance \
+              = line.split("\t")
         transactions.append(Transaction())
         trans = transactions[-1]
         trans.date = date
-        trans.number = number
+
+        if number in ["", "d","debit","Debit","s","D","10000","10001"]:
+            trans.memo = memo
+        else:
+            trans.memo = "#%s: %s" % (number, memo)
+
+            
+        autoNumber += 1
+        trans.number = autoNumber
+            
         trans.payee = payee
         trans.category = account
-        trans.memo = memo
 
-        if account == "-split-":
-            trans.split = []
 
         # cleared flag: 
         if c == "X":
@@ -83,7 +102,7 @@ for line in open("seibofa.txt").read().split("\n")[4:]:
         elif c =="":
             trans.c = ""
         else:
-            raise Exception("don't know how to handle cleared value of [%s]" % c)
+            raise Exception("unrecognized cleared value: [%s]" % c)
 
         # amount:
         if deposit:
@@ -95,20 +114,20 @@ for line in open("seibofa.txt").read().split("\n")[4:]:
             assert memo.count("VOID")
 
 
-out = open("seibofa.qif","w")
-print >> out, "!Type:Bank"
+print "!Type:Bank"
 for t in transactions:
-    print >> out, "D%s" % t.date
-    print >> out, "N%s" % t.number
-    print >> out, "P%s" % t.payee
-    print >> out, "L%s" % t.category
-    print >> out, "M%s" % t.memo
+    print "%s || %s" % (t.number, t.memo)
+    continue
+    print "D%s" % t.date
+    print "N%s" % t.number
+    print "P%s" % t.payee
+    print "L%s" % t.category
+    print "M%s" % t.memo
     if t.amount is not None: # handle VOIDs
-        print >> out, "U%s" % t.amount
-    print >> out, "CR" # status in "cleared column */R etc
-    if hasattr(t, "split"):
-        for s in t.split:
-            print >> out, "S%s" % s.category
-            print >> out, "E%s" % s.memo
-            print >> out, "$%s" % s.amount
-    print >> out, "^"
+        print "U%s" % t.amount
+    print "CR" # status in "cleared column */R etc
+    for s in t.split:
+        print "S%s" % s.category
+        print "E%s" % s.memo
+        print "$%s" % s.amount
+    print "^"
