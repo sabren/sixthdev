@@ -70,4 +70,6 @@ class Interpreter:
 
         elif action==".":     # assertion
             self.knowledge.setdefault(key,{})[args] = TRUE
+        else:
+            raise SyntaxError, "unknown action: %s" % code
 
