@@ -10,10 +10,9 @@ from zikeshop import Product
 from zikeshop import PublicApp
 
 class ShopApp(zikeshop.PublicApp):
-    __super = zikeshop.PublicApp
 
     def enter(self):
-        self.__super.enter(self)
+        super(ShopApp,self).enter()
         # grab functions that define urls for the system:
         self.consult("lib_link")
         

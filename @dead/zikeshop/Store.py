@@ -7,12 +7,11 @@ import zdc
 import zikeshop
 
 class Store(zdc.Object): #(zdc.RecordObject):
-    __super = zdc.Object
 
     ## zdc init  ##########################################
 
     def __init__(self, clerk):
-        self.__super.__init__(self)
+        super(Store, self).__init__()
         self.__dict__['clerk'] = clerk
 
     def _init(self):

@@ -8,7 +8,6 @@ import zikeshop
 from zikeshop import Contact
 
 class Sale(zdc.RecordObject):
-    __super = zdc.RecordObject
     _tablename = "shop_sale"
     _links = {
         "details": [zdc.LinkSet, zikeshop.Detail, "saleID"],
@@ -16,7 +15,7 @@ class Sale(zdc.RecordObject):
     _tuples = ['details']
 
     def _new(self):
-        self.__super._new(self)
+        super(Sale,self)._new()
 
         self.customerID = 0
         self.ship_addressID = 0
@@ -97,5 +96,5 @@ class Sale(zdc.RecordObject):
                      + self.salestax \
                      + self.adjustment
 
-        self.__super.save(self)
+        super(Sale,self).save()
         self.details.save()

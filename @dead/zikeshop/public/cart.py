@@ -5,10 +5,9 @@ Cart app for zikeshop.
 import zikeshop
 
 class CartApp(zikeshop.PublicApp):
-    __super = zikeshop.PublicApp
 
     def __init__(self, cart, ds, input=None):
-        self.__super.__init__(self, cart, ds, input)
+        super(CartApp,self).__init__(cart, ds, input)
         self.silent = 0
         self.consult("lib_link")
 

@@ -7,7 +7,6 @@ import sixthday
 
 
 class SaleEditor(sixthday.ObjectEditor):
-    __super = sixthday.ObjectEditor
     
     def mergeCollections(self):
         """

@@ -3,20 +3,18 @@
 """
 __ver__="$Id$"
 
+import time
 import zdc
 import zikeshop
 
 class Card(zdc.RecordObject):
-    __super = zdc.RecordObject
     _tablename = "shop_card"
 
-
     def getEditableAttrs(self):
-        return self.__super.getEditableAttrs(self) + ["masked","issuer"]
+        return super(Card, self).getEditableAttrs() + ["masked","issuer"]
     
     def _new(self):
-        self.__super._new(self)
-        import time
+        super(Card,self)._new()
         nowYear, nowMonth = time.localtime(time.time())[0:2]
         self.expYear  = nowYear
         self.expMonth = nowMonth

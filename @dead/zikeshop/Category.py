@@ -9,7 +9,6 @@ import zdc
 
 
 class Category(sixthday.Node):
-    __super = sixthday.Node
     _tuples = ["crumbs", "children", "products"] # @TODO: clean this up!
 
     def get_products(self):
@@ -24,4 +23,4 @@ class Category(sixthday.Node):
     def delete(self):
         assert len(self.products)==0, \
                "Cannot delete a category that has products in it."
-        self.__super.delete(self)
+        super(Category,self).delete()

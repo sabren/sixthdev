@@ -7,11 +7,10 @@ __ver__="$Id$"
 import zdc
 
 class Contact(zdc.RecordObject):
-    __super = zdc.RecordObject
     _tablename = "base_contact"
 
     def _new(self):
-        self.__super._new(self)
+        super(Contact,self)._new()
         self._data["userID"]=0
         self._data["fname"]=""
         self._data["lname"]=""

@@ -7,7 +7,6 @@ def popupHelp(msg):
     return res
 
 class ZikeShopAdminApp(zikebase.AdminApp):
-    __super = zikebase.AdminApp
        
     ## home page ########################################
 

@@ -8,7 +8,6 @@ import zikeshop
 from zikeshop import Picture
 
 class Product(zdc.RecordObject):
-    __super = zdc.RecordObject
     _tablename = "shop_product"
 
     # @TODO: fix this!!!!!! there should be no _tuples..
@@ -28,7 +27,7 @@ class Product(zdc.RecordObject):
         self._pic = None            
 
     def _new(self):
-        self.__super._new(self)
+        super(Product,self)._new()
         self._data['class'] = "product"
         self.code = ""
         self.name = ""
@@ -48,7 +47,7 @@ class Product(zdc.RecordObject):
 
 
     def _fetch(self, **where):
-        apply(self.__super._fetch, (self,), where)
+        super(Product, self)._fetch(**where)
         self.categories.fetch()
 
     ## Normal RecordObject Methods #######################################
@@ -56,14 +55,14 @@ class Product(zdc.RecordObject):
     def getEditableAttrs(self):
         #@TODO: this model is really straining: available isn't editable..
         #(but I need it here for now so ObjectView can find available..)
-        return self.__super.getEditableAttrs(self) + ['picture','available']
+        return super(Product,self).getEditableAttrs() + ['picture','available']
 
     def delete(self):
         self.categories.delete()
         #@TODO: clean this up:
         for style in self.styles:
             style.delete()
-        self.__super.delete(self)
+        super(Product,self).delete()
 
 
     def save(self):
@@ -78,7 +77,7 @@ class Product(zdc.RecordObject):
         if self._ds.select(self._tablename, where):
             raise ValueError, "This code already exists!"
 
-        self.__super.save(self)
+        super(Product,self).save()
         self.categories.save()
 
 

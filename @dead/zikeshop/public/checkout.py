@@ -13,16 +13,15 @@ from zikeshop import Card
 
 
 class CheckoutApp(zikeshop.PublicApp):
-    __super = zikeshop.PublicApp
 
     ## Actor methods ############################
 
     def __init__(self, input, cart, clerk, sess):
-        self.__super.__init__(self, input, cart, clerk)
+        super(CheckoutApp,self).__init__(input, cart, clerk)
         self.sess = sess
 
     def enter(self):
-        self.__super.enter(self)
+        super(CheckoutApp,self).enter()
 
         # @TODO: clean this up:
         # once they checkout (or before they go shopping,
@@ -44,7 +43,7 @@ class CheckoutApp(zikeshop.PublicApp):
 
 
     def exit(self):
-        self.__super.exit(self)
+        super(CheckoutApp,self).exit()
         self.data["billData"] = self.billData
         self.data["shipData"] = self.shipData
         self.data["cardData"] = self.cardData

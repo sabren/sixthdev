@@ -7,10 +7,9 @@ import zdc
 import zikeshop
 
 class Style(zikeshop.Product):
-    __super = zikeshop.Product
 
     def _new(self):
-        self.__super._new(self)
+        super(Style,self)._new()
         self._data['class'] = "style"
     
     def get_product(self):
