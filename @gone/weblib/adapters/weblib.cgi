@@ -42,11 +42,10 @@ if __name__=="__main__":
     try:  
         import weblib
         fixWin32BinaryIssue()
-
-        tmp = os.environ["PATH_TRANSLATED"].split(os.sep)
-        path = os.sep.join(tmp[:-1])
+        
+        path, filename = os.path.split(os.environ["PATH_TRANSLATED"])
         os.chdir(path)
-        script = open(tmp[-1]).read()
+        script = open(filename).read()
         
         req = weblib.RequestBuilder().build()
         eng = weblib.Engine(script, req, SITE_MAIL, SITE_NAME)
@@ -56,7 +55,8 @@ if __name__=="__main__":
         eng.runDotWeblibPy()
         eng.runScript()
         eng.stop()        
-        eng.printFullResponse()
+        eng.printFullResponse() # ick!
+        
 
     except Exception, e:
         print "content-type: text/plain\n"
