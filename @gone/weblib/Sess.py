@@ -7,8 +7,6 @@ $Id$
 """
 
 import weblib
-import UserDict
-
 
 try:
     from cPickle import loads, dumps
