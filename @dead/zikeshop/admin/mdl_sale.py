@@ -12,7 +12,7 @@ cur = zikeshop.dbc.cursor()
 dmin = weblib.request.get("dmin", "")
 dmax = weblib.request.get("dmax", "")
 ## affiliateID = 0
-includeFilled = weblib.request.get("includeFilled") == "on"
+includeFilled = weblib.request.get("includeFilled") == "1"
 name = weblib.request.get("name", "")
 isSearch = weblib.request.get("is_search")
 
@@ -29,7 +29,7 @@ sql =\
 ## build the where clause
 
 if (dmin): sql = sql + " s.tsSold >= '%s' AND " % dmin
-if (dmax): sql = sql + " s.tsSold <= '%s' AND " % dmax
+if (dmax): sql = sql + " s.tsSold <= '%s 23:59:59' AND " % dmax
 if (name): sql = sql + " (bc.fname LIKE '%%%s%%' OR " \
                  " bc.lname LIKE '%%%s%%' OR " \
                  " sc.fname LIKE '%%%s%%' OR " \
