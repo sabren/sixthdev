@@ -74,6 +74,14 @@ class MockStorageTest(unittest.TestCase):
         self.s.store("test_person", **row)
         assert self.wholedb() == [{"ID":1, "name":"frood"},
                                   {"ID":2, "name":"wanda"}]        
+    def check_store_update_longs(self):
+        # same as above but with lnogs
+        self.populate()
+        row = self.s.fetch("test_person", 1L)
+        row["name"] = "frood"
+        self.s.store("test_person", **row)
+        assert self.wholedb() == [{"ID":1, "name":"frood"},
+                                  {"ID":2, "name":"wanda"}]        
 
     def check_match(self):
         assert self.wholedb() == []
@@ -91,10 +99,16 @@ class MockStorageTest(unittest.TestCase):
         self.s.delete("test_person", 1)
         people = self.s.match("test_person")
         assert people == [{"ID":2, "name":"wanda"}]
-        self.s.delete("test_person", ID=2)
+        self.s.delete("test_person", 2)
         people = self.s.match("test_person")
         assert people == []
 
     def check_delete_with_long_id(self):
+        # same as above but with longs
         self.check_store_insert()
         self.s.delete("test_person", 1L)
+        people = self.s.match("test_person")
+        assert people == [{"ID":2, "name":"wanda"}]
+        self.s.delete("test_person", 2L)
+        people = self.s.match("test_person")
+        assert people == []

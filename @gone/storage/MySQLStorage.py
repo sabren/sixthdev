@@ -76,10 +76,7 @@ class MySQLStorage(Storage):
         
 
     def _match(self, table, where=None, orderBy=None):
-        # RICK: building query not needed with QueryBuilder obj
         sql = ["SELECT * FROM %s" % table]
-        
-        # RICK: changed to use QueryBuilder obj
         if where is not None:
             sql.append(" WHERE %s" % str(where))
         if orderBy is not None:
@@ -89,12 +86,11 @@ class MySQLStorage(Storage):
         return self._dictify(self.cur)
         
 
-    def delete(self, table, ID):
-        # RICK: allows deleting by criteria or ID
-        if type(ID) == int:
-            self._execute("DELETE FROM %s WHERE ID=%s" % (table, ID))
+    def delete(self, table, where):
+        if type(where) in (int, long):
+            self._execute("DELETE FROM %s WHERE ID=%s" % (table, where))
         else:
-            self._execute("DELETE FROM %s WHERE %s" % (table, str(ID)))
+            self._execute("DELETE FROM %s WHERE %s" % (table, str(where)))
 
     def _execute(self, sql):
         try:
