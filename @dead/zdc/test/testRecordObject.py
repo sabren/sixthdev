@@ -5,14 +5,15 @@ $Id$
 """
 
 import unittest
+import zdc.test
 import zdc
-import sqlTest
+
 
 class RecordObjectTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.table = zdc.Table(sqlTest.dbc, "test_fish")
-        self.cur = sqlTest.dbc.cursor()
+        self.table = zdc.Table(zdc.test.dbc, "test_fish")
+        self.cur = zdc.test.dbc.cursor()
         self.cur.execute("delete from test_fish")
         
 
@@ -25,7 +26,7 @@ class RecordObjectTestCase(unittest.TestCase):
 
         ## part2: table from __class__.table
         class Fish(zdc.RecordObject):
-            _table=zdc.Table(sqlTest.dbc, "test_fish")
+            _table=zdc.Table(zdc.test.dbc, "test_fish")
 
         robj = Fish()
         assert robj._table.name == "test_fish", "__class__.table didn't work."

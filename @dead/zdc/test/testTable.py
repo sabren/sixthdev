@@ -5,15 +5,16 @@ $Id$
 """
 
 import unittest
+import zdc.test
 import zdc
-import sqlTest
+
 
 class TableTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.cur = sqlTest.dbc.cursor()
+        self.cur = zdc.test.dbc.cursor()
         self.cur.execute("delete from test_fish")
-        self.table = zdc.Table(sqlTest.dbc, "test_fish")
+        self.table = zdc.Table(zdc.test.dbc, "test_fish")
 
     def check_fields(self):
         assert (self.table.fields[0].name,

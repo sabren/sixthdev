@@ -2,16 +2,16 @@
 # testRecord.py - test cases for zdc.Record
 
 import unittest
-import sqlTest
+import zdc.test
 import zdc
 
 
 class RecordTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.cur = sqlTest.dbc.cursor()
+        self.cur = zdc.test.dbc.cursor()
         self.cur.execute("delete from test_fish")
-        self.table = zdc.Table(sqlTest.dbc, "test_fish")
+        self.table = zdc.Table(zdc.test.dbc, "test_fish")
 
 
     def check_quotes(self):
