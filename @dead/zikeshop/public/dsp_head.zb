@@ -1,7 +1,23 @@
 <html>
 <head>
+<style type="text/css">
+h1 {
+  font-family: Impact;
+  font-size: 24pt; font-weight: normal;
+  padding-bottom: 2px
+  }
+body, td, p {
+  font-face: verdana, arial
+  font-size: 10px;
+}
+</style>
 <title>{?title?}</title>
 </head>
-<body bgcolor="#ccccff">
+<body bgcolor="#cccccc">
+<table width="500" align="center">
+<tr><td style="color: white; background: black">
+<h1>DefaultShop</h1></td></tr>
+<tr><td style="background: white">
 * if error:
     <h4>error: <span style="color:red">{:error:}</span></h4>
+
