@@ -68,6 +68,10 @@ class Object:
         raise NotImplementedError, "Object.getEditableAttrs()"
 
 
+    def getEditableTuples(self):
+        raise NotImplementedError, "Object.getEditableTuples()"
+
+
     ### private Methods ####################################
 
 

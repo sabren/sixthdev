@@ -17,6 +17,7 @@ class RecordObject(zdc.Object):
     _table = None
     _defaults = {} # perhaps just check whether __class__.attr is defined?
     _record = None
+    _tuples = []
 
 
     ## constructor ##################################################
@@ -69,6 +70,11 @@ class RecordObject(zdc.Object):
         for f in self._table.fields:
             res.append(f.name)
         return res
+
+
+    def getEditableTuples(self):
+        return self._tuples
+        
 
     ## private methods ###############################################
 
