@@ -178,7 +178,8 @@ class Record:
         # chop off those last commas:
         sql = sql[:-1] + ") VALUES (" + vals[:-1] + ")"
 
-        self.table.dbc.cursor().execute(sql)                    
+        cur = self.table.dbc.cursor()
+        cur.execute(sql)
 
         # get the auto-generated ID, if any:
         # NOTE: THIS -ONLY- WORKS WITH MYSQL!!!
@@ -188,7 +189,13 @@ class Record:
         # again later.. (or come up with an alternative)
        
         if self.table.rowid is not None:
-            self.key = int(self.table.dbc.insert_id())
+            # first use the newer mysql scheme:
+            self.key = int(getattr(cur, "_insert_id", 0))
+            if not self.key:
+                try:
+                    self.key = int(self.table.dbc.insert_id())
+                except:
+                    raise "don't yet know how to do autonumbers except MySQL"
             self[self.table.rowid] = self.key
             self._where[self.table.rowid] = self.key
 
