@@ -2,75 +2,73 @@
 # testRecord.py - test cases for zdc.Record
 
 import unittest
-import test
+import sqlTest
 import zdc
 
 
 class RecordTestCase(unittest.TestCase):
 
-    ## module: zdc.Record
-
-    def win32check_ModuleGuess(self):
-        import winODBCdb
-        conn = winODBCdb.connect("testzdc")
-        rec = zdc.Record(conn, "testzdc_fish")
-        assert rec.dbcModule == winODBCdb, "dbcModule failed for winODBCdb"
-
-
-    def win32check_ModuleTell(self):
-        # check that TELLING it which module to use works..
-        import ODBC.Windows
-        conn = ODBC.Windows.connect("testzdc")
-        raisedAnError = 0
-        try:
-            rec = zdc.Record(conn, "testzdc_fish")
-        except:
-            raisedAnError = 1
-        # note: this test would fail if ODBC.Windows ever got a .__class__
-        assert raisedAnError, "dbcModule shoulda given an error for ODBC.Windows"
-
-        # now test the proper use:
-        rec = zdc.Record(conn, "fish", module=ODBC.Windows)
-
-
     def setUp(self):
-        cur = test.dbc.cursor()
-        try:
-            cur.execute("DROP TABLE fish")
-        except:
-            pass
-        cur.execute("""
-           CREATE TABLE fish (
-              ID INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-              fish VARCHAR(32)
-           )
-           """)
-
-    def check_fields(self):
-        rec = zdc.Record(test.dbc, "fish")
-        assert rec.fields[0].name == "ID", "ID not first field"
-        assert rec.fields[1].name == "fish", "fish not second field"
+        self.cur = sqlTest.dbc.cursor()
+        self.cur.execute("delete from test_fish")
+        self.table = zdc.Table(sqlTest.dbc, "test_fish")
 
 
     def check_quotes(self):
-        rec = zdc.Record(test.dbc, "fish")
-        assert rec._sqlQuote(rec.fields["fish"], "foo'fish") == "'foo''fish'", \
+        rec = zdc.Record(self.table)
+        assert rec._sqlQuote(rec.table.fields["fish"], "foo'fish") == "'foo''fish'", \
                "quoting failed for STRING"
         rec.quoteEscape = '\\'
-        assert rec._sqlQuote(rec.fields["fish"], "foo'fish") == "'foo\\'fish'", \
+        assert rec._sqlQuote(rec.table.fields["fish"], "foo'fish") == "'foo\\'fish'", \
                "quoteEscape failed"
-        assert rec._sqlQuote(rec.fields["ID"], 0) == "0",\
+        assert rec._sqlQuote(rec.table.fields["ID"], 0) == "0",\
                "quotes failed for NUMBER"
         # @TODO: test BINARY .. but what should it do?
 
 
+    def check_fetch(self):
+        self.cur.execute("INSERT INTO test_fish (fish) VALUES ('pufferfish')")
+        rec = zdc.Record(self.table, ID=1)
+
+        assert rec["fish"] == 'pufferfish', \
+               "didn't fetch correct record!"
+        
     def check_insert(self):
-        rec = zdc.Record(test.dbc, "fish")
-        rec.new()
+        rec = zdc.Record(self.table)
         rec['fish'] = 'salmon'
         rec.save()
-        assert rec['ID'] is not None, "didn't get an ID"
 
+        self.cur.execute('select count(*) from test_fish')
+        assert self.cur.fetchone() == (1,), "didn't insert record!"
+
+    def check_autonum(self):
+        rec = zdc.Record(self.table)
+        rec['fish'] = 'seahorse'
+        rec.save()
+
+        assert rec['ID'] == 1, "didn't get an ID"
+
+
+    def check_update(self):
+        self.cur.execute("INSERT INTO test_fish (fish) VALUES ('glo_fish')")
+        rec = zdc.Record(self.table, ID=1)
+        rec["fish"] = "glowfish"
+        rec.save()
+        
+        self.cur.execute("SELECT fish FROM test_fish WHERE ID=1")
+        assert self.cur.fetchone() == ('glowfish',), \
+               "didn't update correctly!"
+
+
+    def check_isNew(self):
+        rec = zdc.Record(self.table)
+        assert rec.isNew, "New record doesn't have true .isNew"
+
+        self.cur.execute("INSERT INTO test_fish (fish) VALUES ('silverfish [ugh!]')")
+        rec = zdc.Record(self.table, ID=1)
+        assert (not rec.isNew), "existing record is considered new!"
+        
 
     def tearDown(self):
         pass
+

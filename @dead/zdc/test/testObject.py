@@ -16,4 +16,3 @@ class ObjectTestCase(unittest.TestCase):
 
         lobj = LockObj()
         assert lobj._isLocked == 0, "oh no! zdc.Object isn't unlocked by default!"
-

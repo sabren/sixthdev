@@ -2,62 +2,41 @@
 #
 # makes it easy to edit records in a database.
 
-import IdxDict
+from IdxDict import IdxDict
+
+# @TODO: much of this ought to be moved to the 'Table' class..
 
 class Record:
 
-    def __init__(self, dbc, table, module=None, autoNum='ID'):
-        self.dbc = dbc
-        self.table = table
-        self.autoNum = autoNum  # this is the 'autoNumber' field, if any (MYSQL ONLY!)
-        self.key = None     # either a numeric value for an "autoNum" field, or a dict
-        self.fields = self._getFields()
-        self.values = IdxDict.IdxDict()
-        for f in self.fields:
-            self.values[f.name] = None
-            
-        self.quoteEscape = "'"
-        if module:
-            self.dbcModule = module
+    ## attributes ################################################
+
+    table = None
+    values = IdxDict()
+    isNew = 0
+    
+    quoteEscape = "'"  #@TODO: put this somewhere else? does the DB-API do this?
+    _where = {}
+
+
+    ## constructor ###############################################
+
+    def __init__(self, table=None, **where):
+
+        ## A record's table can be passed in the constructor or
+        ## defined a subclass's definition... Most likely, you won't
+        ## create records directly, but call someTable.getRecord()
+               
+        if table:
+            self.table = table
+        assert self.table is not None, "Record must have an associated Table!"
+
+        if where:
+            apply (self._fetch, (), where)
         else:
-            try:
-                module = dbc.__class__.__module__
-                exec('import ' + module)
-                self.dbcModule = eval(module)
-            except:
-                raise "Couldn't guess DB-API module. Pass module as 3rd parameter to Record()"
-
- 
-    ##############################
-    # PUBLIC METHODS             #
-    ##############################
-
-    def fetch(self, keyID=None, **hash):
-        if keyID:
-            self.key = keyID
-        else:
-            self.key = hash
-
-        sql = "SELECT * FROM " + self.table + \
-              self._whereClause()
-
-        cur = self.dbc.cursor()
-        cur.execute(sql)
-        row = cur.fetchone()
-
-        if row is None:
-            raise KeyError, "invalid key for '" + self.table + "' table : " + `self.key`
-
-        for f in range(len(row)):
-            self[self.fields[f].name]=row[f]
+            self._new()
 
 
-    def new(self):
-        """Prepare to add a new record."""
-        self.key = None
-        for f in self.fields:
-            self.values[f.name] = f.default
-
+    ## public methods ###############################################
 
     def delete(self, key=None):
         """Deletes the specified (default is current) record. """
@@ -69,20 +48,49 @@ class Record:
         # and delete it
         sql = "DELETE FROM  " + self.table + \
               self._whereClause()
-        self.dbc.cursor().execute(sql)
+        self.table.dbc.cursor().execute(sql)
 
 
     def save(self):
         """Inserts or Updates the record."""
-        if self.key is None:
+        if self.isNew:
             self._insert()
         else:
             self._update()
 
 
-    ##############################
-    # PRIVATE METHODS            #
-    ##############################
+    ## private methods #################################################
+
+    def _fetch(self, **where):
+        if not where:
+            raise "don't know which record to fetch"
+        else:
+            for k in where.keys():
+                if not self.table.fields.has_key(k):
+                    raise "no field called ", k
+
+        self.isNew = 0
+        self._where = where
+        sql = "SELECT * FROM " + self.table.name + self._whereClause()
+
+        cur = self.table.dbc.cursor()
+        cur.execute(sql)
+        row = cur.fetchone()
+
+        if row is None:
+            raise KeyError, "invalid key for '" + self.table + "' table : " + `self.key`
+
+        for f in range(len(row)):
+            self[self.table.fields[f].name]=row[f]
+
+
+    def _new(self):
+        """Prepare to add a new record. This is called by default."""
+        self.isNew = 1
+        for f in self.table.fields:
+            self.values[f.name] = f.default
+
+
 
     def _sqlQuote(self, field, value=None):
         """Figures out whether to put '' around a value or not.
@@ -99,7 +107,7 @@ class Record:
             res = "NULL"
         
         #@TODO: handle BINARY/DATE types explicitly
-        elif field.type == self.dbcModule.NUMBER:
+        elif field.type == self.table.dbc_module.NUMBER:
             res = `value`
         else: # should be elif ... STRING
             res = "'"
@@ -116,64 +124,38 @@ class Record:
 
 
     def _whereClause(self):
-        import types
-
-        res = ""
+        """Given a dictionary of fieldname:value pairs, creates a SQL where clause"""
         
-        if type(self.key) == types.DictType:
-            for f in self.key.keys():
-                res = res + "AND (" + f + "=" + \
-                      self._sqlQuote(self.fields[f], self.key[f]) + ")"
-                res = res[4:] # strip first AND
-        else:
-            try:
-                res = self.autoNum + "=" + `int(self.key)`
-            except:
-                raise TypeError, "Can't assign " + `self.key` + " to an autonumber."
-            
+        res = ""      
+        for f in self._where.keys():
+            res = res + "AND (" + f + "=" + \
+                  self._sqlQuote(self.table.fields[f], self._where[f]) + ")"
+
+        res = res[4:] # strip first AND           
         return " WHERE (" + res + ")"
 
 
 
 
-    def _getFields(self):
-        """Called internally to create .fields"""
-        import Field
-        flds = IdxDict.IdxDict()
-        # select a blank record:
-        # @TODO: more sophisticated schema checking to get defaults, keys, etc?
-        cur = self.dbc.cursor()
-        cur.execute("SELECT * FROM " + self.table + " WHERE 1=0")
-        for f in cur.description:
-            flds[f[0]] = Field.Field(f[0],               # name
-                                     f[1],  #@TODO: make typeCode a string
-                                     f[2],               # displaySize
-                                     f[3],               # internalSize
-                                     f[4],               # precision
-                                     f[5],               # scale
-                                     f[6],               # allowNull
-                                     None)               # default
-        return flds
-
     def _update(self):
-        sql = "UPDATE " + self.table + " SET "
-        for f in self.fields:
-            if f.name != self.autoNum:
+        sql = "UPDATE " + self.table.name + " SET "
+        for f in self.table.fields:
+            if not f.isGenerated:
                 sql = sql + f.name + "=" + self._sqlQuote(f) + ","
         sql = sql[:-1] + self._whereClause()
 
-        cur = self.dbc.cursor()
+        cur = self.table.dbc.cursor()
         cur.execute(sql)
 
 
+
     def _insert(self):
-        sql = "INSERT INTO " + self.table + " ("
+        sql = "INSERT INTO " + self.table.name + " ("
 
         vals = ''
         # .. and the fieldnames :
-        for f in self.fields:
-            # if autoNum is none, all columns show up:
-            if f.name != self.autoNum:
+        for f in self.table.fields:
+            if not f.isGenerated:
                 sql = sql + f.name + ","
                 # let's do fields and values at once
                 vals = vals + self._sqlQuote(f) + ","
@@ -181,19 +163,22 @@ class Record:
         # chop off those last commas:
         sql = sql[:-1] + ") VALUES (" + vals[:-1] + ")"
 
-        cur = self.dbc.cursor()
-        cur.execute(sql)                    
+        self.table.dbc.cursor().execute(sql)                    
 
         # get the auto-generated ID, if any:
-        # NOTE: THIS ONLY WORKS WITH MYSQL!!!
-        if self.autoNum:
-            self.key = self.dbc.insert_id()
-            self[self.autoNum] = self.key
+        # NOTE: THIS -ONLY- WORKS WITH MYSQL!!!
+        #
+        # I didn't have much luck trying to get the DB-SIG
+        # to incorporate autonumbers.. I'll have to try
+        # again later.. (or come up with an alternative)
+       
+        if self.table.rowid is not None:
+            self.key = self.table.dbc.insert_id()
+            self[self.table.rowid] = self.key
 
 
-    ##############################
-    # DICTIONARY METHODS         #
-    ##############################
+
+    ### dictionary methods ######################################
 
     def __getitem__(self, fld):
         return self.values[fld]

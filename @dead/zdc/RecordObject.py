@@ -1,78 +1,85 @@
-## zdc.RecordObject 
+"""
+zdc.RecordObject - a simple Object that uses only one record for its data
+
+$Id$
+"""
 
 import zdc.Object
 
+#@TODO: there ought to be a validateKey method, for passing in keywords as keys..
+#@TODO: maybe we don't need the concept of a 'key' parameter at all..
+
+
 class RecordObject(zdc.Object):
 
-    table = None
-    defaults = {}
+    ## attributes ###################################################
 
-    def __init__(self, dbc, key=None, table=None, defaults=None):
+    _table = None
+    _defaults = {} # perhaps just check whether __class__.attr is defined?
+    _record = None
 
-        # you can do obj = RecordObject(dbc, sometable)
+
+    ## constructor ##################################################
+
+    def __init__(self, _table=None, _defaults=None, **where):
+        # you can do obj = RecordObject(table)
         #
         # OR you can define a class:
         #
-        # class Person(dbc):
-        #    table = "mas_person"
+        # class Person(zdc.RecordObject):
+        #    _table = "mas_person"
         
-        if table:
-            self.table = table
-        else:
-            self.table = self.__class__.table
+        if _table:
+            self._table = _table
+        assert self._table is not None, "RecordObjects must have a table."
 
-        assert self.table is not None, "RecordObjects must have a table."
-
-
-        # same thing with the defaults, except they're optional
-        
-        if defaults:
-            self.defaults = defaults
-        else:
-            self.defaults = self.__class__.defaults
-
+        # same thing with the defaults, except they're optional       
+        if _defaults:
+            self._defaults = _defaults
 
         # if all's well, go ahead with the init:
-        zdc.Object.__init__(self, dbc, key)
+        apply (zdc.Object.__init__, (self, self._table.dbc), where)
 
+
+    ## public methods ################################################
+            
+    def save(self):
+        # save the data in our record:
+        for f in self._table.fields:
+            self._record[f.name] = getattr(self, f.name)
+        self._record.save()
+
+        # some fields may be calculated, so update our attributes:
+        for f in self._table.fields:
+            setattr(self, f.name, self._record[f.name])
+
+
+    #@TODO: test delete(), too...
+    
+    def delete(self):
+        if self.isNew:
+            pass # nothing to delete
+        else:
+            self._record.delete()
+
+
+    ## private methods ###############################################
 
     def _new(self):
-        rec = zdc.Record(self.dbc, self.table)
-        for f in rec.fields:
-            if self.defaults.has_key(f.name):
-                setattr(self, f.name, self.defaults[f.name])
+        self._record = zdc.Record(self._table)
+        for f in self._record.table.fields:
+            if self._defaults.has_key(f.name):
+                setattr(self, f.name, self._defaults[f.name])
             else:
                 setattr(self, f.name, None)
 
 
     #@TODO: TEST THIS - it was just an off-the-top-of-my-head thing
 
-    def _fetch(self, key):
-        self.key = key
-        rec = zdc.Record(self.dbc, self.table)
-        rec.fetch(key)
-        for f in rec.fields:
-            setattr(self, f.name, rec[f.name])
-
-            
-    def save(self):
-        rec = zdc.Record(self.dbc, self.table)
-        for f in rec.fields:
-            rec[f.name] = getattr(self, f.name)
-        rec.save()
-        for f in rec.fields:
-            setattr(self, f.name, rec[f.name])
-
-
-    #@TODO: test this, too...
-    
-    def delete(self):
-        if self.key:
-            rec = zdc.Record(self.dbc, self.table)
-            rec.fetch(self.key)
-            rec.delete()
-        else:
-            pass # nothing to delete
+    def _fetch(self, **where):
+        self._record = apply(zdc.Record, (self._table,), where)
+        for f in self._record.table.fields:
+            setattr(self, f.name, self._record[f.name])
 
 
 

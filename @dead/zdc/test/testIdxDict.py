@@ -2,14 +2,13 @@
 # testIdxDict.py - test cases for zdc.IdxDict
 
 import unittest
-import zdc.IdxDict
+import zdc
 
 
 class IdxDictTestCase(unittest.TestCase):
 
     def check_IdxDict(self):
-        import IdxDict
-        idx = IdxDict.IdxDict()
+        idx = zdc.IdxDict()
         idx["a"] = 1
         idx["b"] = 2
         idx["c"] = 2

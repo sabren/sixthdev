@@ -7,12 +7,14 @@ from testIdxDict import *
 from testRecord import *
 from testObject import *
 from testRecordObject import *
+from testTable import *
 
 suites = {
     "IdxDict": unittest.makeSuite(IdxDictTestCase, "check_"),
     "Record": unittest.makeSuite(RecordTestCase, "check_"),
     "Object": unittest.makeSuite(ObjectTestCase, "check_"),
-    "RecordObject" : unittest.makeSuite(RecordObjectTestCase, "check_")
+    "RecordObject" : unittest.makeSuite(RecordObjectTestCase, "check_"),
+    "Table": unittest.makeSuite(TableTestCase, "check_"),
     }
 
 

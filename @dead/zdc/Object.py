@@ -16,17 +16,19 @@ class Object:
     """
 
     locks = []
+    isNew = 0
     
-    
-    def __init__(self, dbc, key=None, **kw):
+    def __init__(self, dbc, key=None, **where):
         """Don't override this. override _new() or _fetch() instead."""
 
         self._locks = self.__class__.locks[:]
         self.dbc = dbc
-        
+
+        self.isNew = not ((key) or (where))
+
         if key is None:
-            if kw:
-                apply(self.fetch, (), kw)
+            if where:
+                apply(self._fetch, (), where)
             else:
                 self._new()
         else:
