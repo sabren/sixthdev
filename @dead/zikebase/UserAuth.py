@@ -5,7 +5,7 @@ $Id$
 """
 
 import zikebase
-import weblib.Auth
+import weblib
 
 class UserAuth(weblib.Auth):
 
