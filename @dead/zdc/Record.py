@@ -90,22 +90,23 @@ class Record:
         res = ''
         if value is None:
             value = self[field.name]
+
+        # but if it's STILL None, use a null..
+        if value is None:
+            res = "NULL"
         
         #@TODO: handle BINARY/DATE types explicitly
-        if field.type == self.dbcModule.NUMBER:
+        elif field.type == self.dbcModule.NUMBER:
             res = `value`
         else: # should be elif ... STRING
-            if value is None:
-                res = "NULL"
-            else:
-                res = "'"
-                for c in value:
-                    # escape quotes:
-                    if c == "'":
-                        res = res + self.quoteEscape + c
-                    else:
-                        res = res + c
-                res = res + "'"
+            res = "'"
+            for c in value:
+                # escape quotes:
+                if c == "'":
+                    res = res + self.quoteEscape + c
+                else:
+                    res = res + c
+            res = res + "'"
         
         return res
 
