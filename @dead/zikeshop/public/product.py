@@ -3,8 +3,9 @@ import weblib
 import zikeshop
 from zikeshop import dbc
 
+assert weblib.request.has_key('code'), "Must supply a product code."
 
-prod = zikeshop.Product(dbc, key={'code': weblib.request.get('code')})
+prod = zikeshop.Product(code=weblib.request['code'])
 
 print "<h1>Product:%s</h1>" % prod.product
 print "<p>%s</p>" % prod.descLong

@@ -33,7 +33,16 @@ class Cart:
         if code:
             if amt is None:
                 amt = 1
-            self.contents.append((code,opts,amt))
+
+            # if the item is already in the cart with the
+            # same options, just increase the amount..
+            for item in self.contents:
+                if (code == item[0]) and (opts==item[1]):
+                    item[2] = item[2] + amt
+                    return
+            
+            # if we're still here, just add it in
+            self.contents.append([code,opts,amt])
         else:
             pass # nothing to add
 
@@ -46,8 +55,9 @@ class Cart:
 cart = Cart()
 cart.start()
 cart.act()
+cart.stop()
 
-print "<h1>CART PAGE</h1>"
+print "<h1>Cart Page</h1>"
 
 print "<h4>contents of cart:</h4>"
 print cart.contents
@@ -56,12 +66,5 @@ print cart.contents
 print "<h4>contents of sess:</h4>"
 print weblib.sess.keys()
 
-print "<h4>contents of __cart:</h4>"
-print weblib.sess["__cart"]
-
 print "<hr>"
 print "zikeshop alpha (c)2000 zike interactive, inc"
-
-print "<hr>"
-
-cart.stop()
