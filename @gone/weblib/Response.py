@@ -15,20 +15,31 @@ class Response:
         self._headerSent = 0
 
         import StringIO
-        self.webout = StringIO.StringIO()
+        self._webout = StringIO.StringIO()
 
 
-    def __del__(self):
-        normalPrint()
-
+    def __getattr__(self, name):
+        res = None
+        
+        if name == "buffer":
+            if not self._headerSent:
+                self._sendHeader()
+            res = self._webout.getvalue()
+        elif name in self.__dict__.keys():
+            res = self.__dict__[name]
+        else:
+            raise AttributeError
+            
+        return res
+        
 
     #### PRIVATE METHODS ###################
     
     def _sendHeader(self):
         #@TODO: allow changing the content-type..
-        self.webout.write("content-Type: text/html\n")
-        self.webout.write(self._headers)
-        self.webout.write("\n")
+        self._webout.write("content-Type: text/html\n")
+        self._webout.write(self._headers)
+        self._webout.write("\n")
         self._headerSent = 1
     
 
@@ -37,7 +48,7 @@ class Response:
     def write(self, data):
         if not self._headerSent:
             self._sendHeader()
-        self.webout.write(data)
+        self._webout.write(data)
 
 
     def addHeader(self, key, value):
@@ -53,8 +64,8 @@ class Response:
 
 
     def redirect(self, url):
-        self.webout.write("content-type: text/html\n")
-        self.webout.write("Location: " + url + "\n\n")
+        self._webout.write("content-type: text/html\n")
+        self._webout.write("Location: " + url + "\n\n")
         self.end()
     
 
@@ -79,20 +90,4 @@ class Response:
     # Status - HTTP response code.. can i change this?!?
     #
     # Cookies - replaced by addCookie()
-
-
-
-
-response = Response()
-
-### assign print to Response ##########
-
-import sys
-stdout = sys.stdout
-sys.stdout = response
-
-### but allow the old behavior, if needed ######
-
-def normalPrint():
-    sys.stdout = stdout
 
