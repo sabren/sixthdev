@@ -1,14 +1,16 @@
 """
-SessPool.py : for holding frozen Sesses :)
-
-$Id$
+SessPool.py : classes for holding frozen Sesses :)
 """
+__ver__="$Id$"
 
-class DbmSessPool:
-
-    """The default SessPool uses an anydbm file.
+class SessPool:
+    """
+    The default SessPool uses an anydbm file.
     You should subclass this, or just build your own object with the
-    same interface (getSess(), setSess(), and drain())..."""
+    same interface (getSess(), setSess(), and drain())...
+    """
+
+    #@TODO: this isn't backed up with test cases..
     
     def __init__(self, filename):
         import anydbm
@@ -33,8 +35,9 @@ class DbmSessPool:
 
 
 class SqlSessPool:
-    """This class uses a DB-API 2.0 compliant Connection object."""
-
+    """
+    This uses a DB-API 2.0 compliant Connection object to store Sessions.
+    """
 
     def __init__(self, dbc, table='web_sess'):
         self.dbc = dbc
@@ -70,14 +73,18 @@ class SqlSessPool:
               "where name='" + name + "' and sid='" + sid + "'"
         cur.execute(sql)
         if cur.rowcount == 0:
-            cur.execute("insert into " + self.table + " (sid, name, sess, tsUpdate) " + \
-                        "values ('" + sid + "', '" + name + "', '" + \
-                        frozen + "', now())")
+            cur.execute(
+                """
+                INSERT INTO %s (sid, name, sess, tsUpdate) 
+                VALUES ('%s', '%s', '%s', now())
+                """ % (self.table, sid, name, frozen))
             
 
     def drain(self, name, beforeWhen):
         cur = self.dbc.cursor()
         #@TODO: cleanup beforeWhen (garbage collection)
-        sql = "delete from " + self.table + \
-              " where name='" + name + "' and tsUpdate < '" + `beforeWhen` + "'"
+        sql =\
+            """
+            DELETE FROM %s WHERE name='%s' and tsUpdate < ''
+            """ % (self.table, name, `beforeWhen`)
         cur.execute(sql)

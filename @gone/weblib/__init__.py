@@ -1,11 +1,9 @@
 """
-Classes for easy server-side web scripting in Python.
-
-$Id$
+weblib: Classes for easy server-side web scripting in Python.
 """
+__ver__="$Id$"
 
 # start with some utility functions... 
-
 
 #### selectBox() ####################################################
 

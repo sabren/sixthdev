@@ -1,10 +1,7 @@
 """
 Sess.py : emulates PHPLIB's session support in python
-
-$Id$
-
-@TODO: python-style license lingo
 """
+__ver__="$Id$"
 
 import weblib
 
@@ -48,7 +45,8 @@ class Sess:
     ## public methods ########################
 
     def start(self, sid=None):
-        """starts the session. call at the top of the page.
+        """
+        starts the session. call at the top of the page.
 
         Not really sure why you'd ever want to pass
         the sid variable in.. except possibly for testing..
@@ -65,17 +63,19 @@ class Sess:
 
 
     def abandon(self):
-        """abandons the session"""
+        """
+        abandons the session
+        """
         self.clear()
         self.sid = ""
 
 
     def url(self, oldurl):
-        """ returns oldurl, but referencing the current session.
+        """
+        returns oldurl, but referencing the current session.
 
         If in get mode, the current session id is attached to this
         URL, else the URL is returned unmodified.
-
         """
         import string
         
@@ -89,6 +89,9 @@ class Sess:
 
 
     def stop(self):
+        """
+        Call at end of page to stop the session. (it calls _freeze)
+        """
         self._freeze()
 
 
@@ -115,14 +118,17 @@ class Sess:
     
 
     def has_key(self, name):
+        "dictionary interface"
         return self._warmData.has_key(name) or self._coldData.has_key(name)
 
 
     def __setitem__(self, key, value):
+        "dictionary interface"
         self._warmData[key] = value
 
 
     def __getitem__(self, key):
+        "dictionary interface"
         if self._warmData.has_key(key):
             return self._warmData[key]
         
@@ -135,7 +141,7 @@ class Sess:
 
 
     def __delitem__(self, key):
-
+        "dictionary interface"
         if self.has_key(key):
             if self._warmData.has_key(key): del self._warmData[key]
             if self._coldData.has_key(key): del self._coldData[key]
@@ -144,6 +150,7 @@ class Sess:
 
 
     def keys(self):
+        "dictionary interface"
         # this might be faster if i used a dictionary..
         allKeys = self._coldData.keys()
         for key in self._warmData.keys():
@@ -154,6 +161,7 @@ class Sess:
     
 
     def get(self, key, failObj = None):
+        "dictionary interface"
         try:
             return self[key]
         except KeyError:
@@ -161,6 +169,7 @@ class Sess:
 
             
     def clear(self):
+        "dictionary interface"
         self._warmData.clear()
         self._coldData.clear()
         self._freeze()
@@ -211,13 +220,13 @@ class Sess:
         """freezes sess and dumps it into the sesspool. call at end of page"""
 
         # first, merge warm and cool data:
-
         for key in self._warmData.keys():
             self._coldData[key] = dumps(self._warmData[key], 1)
 
-        # now, freeze the cold stuff
-        
-        self._pool.putSess(self.name, self.sid, dumps(self._coldData, 1)) # 1 for binary
+        # now, freeze the cold stuff:
+        self._pool.putSess(self.name, self.sid,
+                           dumps(self._coldData, 1)) # 1 for binary
+
 
 
 

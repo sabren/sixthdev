@@ -1,18 +1,19 @@
 """
 Auth.py - generic authentication framework for python cgi.
           loosely based on Auth.inc from PHPLIB...
-
-$Id$
-
-@TODO: license, etc..
 """
+__ver__ = "$Id$"
 
+#@TODO: license, etc..
 import weblib
-
 
 ## Auth class #################################
 
 class Auth:
+    """
+    Generic Authentication class for the web. This is loosely
+    based on Auth.inc from PHPLIB.
+    """
 
     LOGINFAILED = 'Login failed.'
     PLEASELOGIN = 'Please log in.'
@@ -29,7 +30,9 @@ class Auth:
     ## public methods #########################
 
     def start(self, key=None):
-        """Must be called after the engine's session has started"""
+        """
+        Must be called after the engine's session has started
+        """
 
         self._isStarted = 1
         self.isLoggedIn = 1 # assume the best
@@ -148,10 +151,17 @@ class Auth:
     ## events (overwritable) ##################
 
     def onLogin(self):
+        """
+        overwritable onLogin event.
+        """
         pass
 
     def onLogout(self):
+        """
+        overwritable onLogout event.
+        """
         pass
+
     
     ## internal methods #######################
     
@@ -168,7 +178,8 @@ class Auth:
         
         for item in self.engine.request.keys():
             if item[:5] == "auth_":
-                dict[item[5:]] = self.transform(item[5:], self.engine.request[item])
+                dict[item[5:]] = self.transform(item[5:],
+                                                self.engine.request[item])
 
         # now pass it to validate() and see if we get in:
         self.key = self.validate(dict)
@@ -250,7 +261,3 @@ class Auth:
                           '">\n'
 
         return res
-
-
-if __name__ == "__main__":
-    pass

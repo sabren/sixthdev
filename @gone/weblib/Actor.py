@@ -1,13 +1,13 @@
 """
 A base class for web pages that act differently based on a parameter.
-
-$Id$
 """
+__ver__ = "$Id$"
 
-#@TODO: Impressionist/Relay/whatever class that uses Signature and can publish any object?
+#@TODO: subclass that uses Signature to pass values to act_XXX?
 
 class Actor:
-    """Actor(input) #input=None or a dict with a key called 'action'.
+    """
+    Actor(input) #input=None or a dict with a key called 'action'.
     
     This class is designed to make it easy to write classes that can
     be called directly through a URL. It's just a base class, and only
