@@ -4,9 +4,25 @@ import zikebase
 
 class Node(zdc.RecordObject):
     _table = zdc.Table(zikebase.dbc, "base_node")
+    _tuples = ["crumbs", "children"] # @TODO: clean this up!
     _defaults = {"parentID" : 0,
                  "path" : ""}
 
+
+    def get_crumbs(self):
+        #@TODO: how do i handle stuff like this????????????????
+        import zikebase
+        return map(lambda id: zikebase.Node(ID=id),
+                   map(lambda n: n["ID"],
+                       self.q_crumbs()))
+
+    def get_children(self):
+        #@TODO: clean this junk up and make it a LinkSet!!!!
+        import zikebase
+        return map(lambda id: zikebase.Node(ID=id),
+                   map(lambda n: n["ID"],
+                       self.q_children()))
+    
 
     def q_crumbs(self):
         """Returns a list of dicts containing the data for the nodes leading
