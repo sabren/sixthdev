@@ -44,17 +44,15 @@ class RequestData(dict):
 import os
 class RequestBuilder(object):
     def build(self, method=None, querystring=None, form=None, cookie=None,
-              environ=None, content=None, contentType=None):
+              environ=None, content=None):
         env = environ or self.buildEnviron()
         if content and not method: method = "POST"
-        ctype=contentType or env.get("CONTENT_TYPE","application/x-www-form-urlencoded")
         return Request(method= method or env.get("REQUEST_METHOD", "GET"),
                        query=RequestData(querystring or env.get("QUERY_STRING", "")),
                        form=form,
                        cookie=SimpleCookie(cookie or env.get("HTTP_COOKIE", "")),
                        environ= env,
-                       content=content,
-                       contentType=ctype)
+                       content=content)
     def fetchContent(self):
         raise hell # @TODO: fetch content from stdin
     def buildEnviron(self):
@@ -71,7 +69,7 @@ class Request(object):
     """
     A read-only dictionary that represents an HTTP reqeust
     """
-    def __init__(self, method, query, form, cookie, environ, content, contentType):
+    def __init__(self, method, query, form, cookie, environ, content):
         self.method = method
         self.environ = environ
         self.query = query
