@@ -46,11 +46,12 @@ class InMemorySessPool(SessPool):
     local to a single python interpreter, and apache wants to have
     several...
     """
+    pool = {}
     def __init__(self, dict=None):
         if dict:
             self.storage = dict
         else:
-            self.storage = {}
+            self.storage = self.pool
 
     def done(self):
         pass
