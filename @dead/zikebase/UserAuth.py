@@ -14,22 +14,6 @@ class UserAuth(weblib.Auth):
             self.user = zikebase.User(ID=key)
         else:
             self.user = None
-
-
-    def prompt(self, message, action, hidden):
-        """This should show an HTML prompt and call response.end().
-        You should overwrite this!"""
-
-        self.engine.response.write("""
-        <h1>UserAuth: %s</h1>
-        <form action="%s" method="post">
-        username: <input type="text" name="auth_username"><br>
-        password: <input type="password" name="auth_password"><br>
-        <input type="submit">
-        %s
-        </form>
-        """ % (message, action, hidden))
-
     
     def validate(self, dict):
         key = None
@@ -45,7 +29,7 @@ class UserAuth(weblib.Auth):
                 user = zikebase.User(email=dict["email"])
             except:
                 pass
-            
+
         if user and (user.password == dict.get("password")):
             key = user.ID
 
