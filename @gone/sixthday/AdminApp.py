@@ -36,11 +36,11 @@ class WidgetAdminActor(AdminActor):
 """
 __ver__="$Id$"
 
-import sixthday
-import zdc
+from sixthday import App
+from strongbox import BoxView
 import zebra
 
-class AdminApp(sixthday.App):
+class AdminApp(App):
 
     def __init__(self, clerk, input):
         super(AdminApp, self).__init__(input)
@@ -68,20 +68,20 @@ class AdminApp(sixthday.App):
         self._dispatch("create")
 
     def generic_show(self, klass, template):
-        self._showObject(self.clerk.load(klass, ID=self.input.get("ID")),
-                         template)
+        self._showObject(self._getInstance(klass), template)
 
     def generic_create(self, klass, template):
-        self._showObject(self.clerk.new(klass), template)
+        self._showObject(klass(), template)
 
     ## delete  ######################################################
             
     def act_delete(self):
         self._dispatch("delete")
 
-    def generic_delete(self, klass, nextAction):
-        self._objectEdit(klass, "delete")
-        self.redirect(action=nextAction)
+    def generic_delete(self, klass, nextAction=None):
+        self.clerk.delete(klass, self.input["ID"])
+        if nextAction:
+            self.redirect(action=nextAction)
 
 
     ## save ########################################################
@@ -90,11 +90,23 @@ class AdminApp(sixthday.App):
         self._dispatch("save")
 
     def generic_save(self, klass):
-        return self._objectEdit(klass, "save")
+        obj = self._getInstance(klass)
+        return self.clerk.store(obj)
 
 
     ###[ private methods ]###########################################
 
+
+    def _getInstance(self, klass):
+        if self.input.get("ID"):
+            obj = self.clerk.fetch(klass, self.input["ID"])
+        else:
+            obj = klass()
+        for item in obj.__attrs__:
+            if self.input.has_key(item):
+                setattr(obj, item, self.input[item])
+        return obj
+        
     def _dispatch(self, action):
         what = self.input.get("what", "")
         meth = getattr(self, "%s_%s" % (action, what), None)
@@ -112,12 +124,7 @@ class AdminApp(sixthday.App):
 
 
     def _showObject(self, obj, template):
-        self.consult(zdc.ObjectView(obj))
+        self.consult(BoxView(obj))
         self.consult(self.input) # so we can pre-populate via url
         self._runZebra(template)
 
-    def _objectEdit(self, klass, command):
-        ed = sixthday.ObjectEditor(
-            klass, self.clerk, self.input, self.input.get("ID"))
-        ed.do(command)
-        return ed.object
