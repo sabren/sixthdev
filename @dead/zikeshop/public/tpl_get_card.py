@@ -9,6 +9,8 @@ class Report:
         scope = model
         scope_stack = []
         zres = ""
+        import tpl_head
+        zres = zres+ tpl_head.fetch(scope)
         zres = zres + '<'
         zres = zres + 'h1'
         zres = zres + '>'
@@ -16,6 +18,20 @@ class Report:
         zres = zres + '<'
         zres = zres + '/h1'
         zres = zres + '>'
+        if scope.get('error',''):
+            zres = zres + '<'
+            zres = zres + 'h2'
+            zres = zres + '>'
+            zres = zres + '<'
+            zres = zres + 'font color=\"red\"'
+            zres = zres + '>'
+            zres = zres + str(scope.get('error',''))
+            zres = zres + '<'
+            zres = zres + '/font'
+            zres = zres + '>'
+            zres = zres + '<'
+            zres = zres + '/h2'
+            zres = zres + '>'
         _ = 0
         _max_ = len(self.model["creditcards"])
         scope_stack.append(scope)
@@ -93,14 +109,14 @@ class Report:
         zres = zres + '<'
         zres = zres + 'br'
         zres = zres + '>'
-        zres = zres + 'card number: '
+        zres = zres + '\ncard number: '
         zres = zres + '<'
         zres = zres + 'input type=\"text\" name=\"number\"'
         zres = zres + '>'
         zres = zres + '<'
         zres = zres + 'br'
         zres = zres + '>'
-        zres = zres + '\nexpiration month:'
+        zres = zres + '\n\nexpiration month:'
         zres = zres + '<'
         zres = zres + 'select name=\"expMonth\"'
         zres = zres + '>'
@@ -191,7 +207,7 @@ class Report:
         zres = zres + '<'
         zres = zres + '/select'
         zres = zres + '>'
-        zres = zres + '\nyear:'
+        zres = zres + '\n\nyear:'
         zres = zres + '<'
         zres = zres + 'select name=\"expYear\"'
         zres = zres + '>'
@@ -269,6 +285,8 @@ class Report:
         zres = zres + '<'
         zres = zres + '/form'
         zres = zres + '>'
+        import tpl_foot
+        zres = zres+ tpl_foot.fetch(scope)
 # end of Report.fetch()
         return zres
 

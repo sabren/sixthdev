@@ -6,6 +6,7 @@ import weblib
 import zikebase
 import zikeshop
 
+weblib.auth.check()
 saleID = weblib.request.get("saleID")
 
 assert saleID is not None, \
@@ -16,8 +17,8 @@ try:
 except:
     assert 0, "invalid saleID"
 
-assert sale.siteID == zikeshop.siteID, \
-       "invalid saleID."
+assert sale.siteID == weblib.auth.user.siteID, \
+       "this is not your sale to view."
 
 
 cur = zikeshop.dbc.cursor()
@@ -35,58 +36,64 @@ if weblib.request.has_key("action"):
 
 print '<a href="sales.py">back to sales list</a>'
 print '<h2>Sale #%(ID)s</h2>' % sale._record
-print """
-<p><b>customer: <A href="mailto:%(email)s">%(email)s</a></b></p>
-""" % sale.customer._record
 
-#@TODO: store organization? or should that be address line 1?
-#@TODO: logic for hiding state if not in US
+if sale.customerID != 0:
 
-## BILLING INFO
-rec = sale.billAddress._record
-print """
-<pre><b>Billing Info</b>
-%(fname)s %(lname)s""" % rec
+    print """
+    <p><b>customer: <A href="mailto:%(email)s">%(email)s</a></b></p>
+    """ % sale.customer._record
 
-## hide empty address lines
-for line in range(3):
-    if string.strip(rec["address%i" % (line+1)]) != "":
-        print (line+1), rec["address%i" % (line+1)]
+    #@TODO: store organization? or should that be address line 1?
+    #@TODO: logic for hiding state if not in US
 
-print """%(city)s, %(stateCD)s, %(postal)s
-%(countryCD)s
-phone: %(phone)s
-</pre>
-""" % rec
+    ## BILLING INFO
+    rec = sale.billAddress._record
+    print """
+    <pre><b>Billing Info</b>
+    %(fname)s %(lname)s""" % rec
 
-## SHIPPING INFO (cut and pasted from above)
-rec = sale.billAddress._record
-print """
-<pre><b>Shipping Info</b>
-%(fname)s %(lname)s""" % rec
+    ## hide empty address lines
+    for line in range(3):
+        if string.strip(rec["address%i" % (line+1)]) != "":
+            print (line+1), rec["address%i" % (line+1)]
 
-## hide empty address lines
-for line in range(3):
-    if string.strip(rec["address%i" % (line+1)]) != "":
-        print (line+1), rec["address%i" % (line+1)]
+    print """%(city)s, %(stateCD)s, %(postal)s
+    %(countryCD)s
+    phone: %(phone)s
+    </pre>
+    """ % rec
 
-print """%(city)s, %(stateCD)s, %(postal)s
-%(countryCD)s
-phone: %(phone)s
-</pre>
-""" % rec
+    ## SHIPPING INFO (cut and pasted from above)
+    rec = sale.billAddress._record
+    print """
+    <pre><b>Shipping Info</b>
+    %(fname)s %(lname)s""" % rec
 
+    ## hide empty address lines
+    for line in range(3):
+        if string.strip(rec["address%i" % (line+1)]) != "":
+            print (line+1), rec["address%i" % (line+1)]
 
-#@TODO: handle non-credit card sales
-
-print """
-<pre><b>Credit Card:</b>
-name on card: %(name)s
-number: %(number)s
-expiration: %(expMonth)02i/%(expYear)04i</pre>
-""" % sale.card._record
+    print """%(city)s, %(stateCD)s, %(postal)s
+    %(countryCD)s
+    phone: %(phone)s
+    </pre>
+    """ % rec
 
 
+    #@TODO: handle non-credit card sales
+
+    print """
+    <pre><b>Credit Card:</b>
+    name on card: %(name)s
+    number: %(number)s
+    expiration: %(expMonth)02i/%(expYear)04i</pre>
+    """ % sale.card._record
+
+else:
+    print '<h3>manual sale: %s EST</h3>' % sale.tsSold
+
+    
 cur.execute(
     """
     SELECT item, quantity, price, price * quantity AS subtotal
@@ -111,7 +118,12 @@ print '</table>'
 
 
 
-print "<b>subtotal:</b> %s" % sale.subtotal
+print "<b>subtotal:</b> %s<br>" % sale.subtotal
+print "<b>salestax:</b> %s<br>" % sale.salestax
+print "<b>shipping:</b> %s<br>" % sale.shipping
+print "<b>adjustment:</b> %s<br>" % sale.adjustment
+print "<b>total:</b> %s<br>" % sale.total
+
 
 """
   print "TAX: "; 
@@ -144,7 +156,7 @@ for row in cur.fetchall():
           % (row[0], selected, row[1])
     
 print """
-</status>
+</select>
 <input type="submit" name="action" value="save">
 </form>
 """

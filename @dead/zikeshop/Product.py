@@ -103,7 +103,7 @@ class Product(zdc.RecordObject):
               "WHERE code='%s' AND siteID=%i " \
               % (self.code, zikeshop.siteID)
         if self.ID:
-            sql = sql + "AND ID != %i" % self.ID
+            sql = sql + "AND ID != %i" % int(self.ID)
 
         cur = self._table.dbc.cursor()        
         cur.execute(sql)

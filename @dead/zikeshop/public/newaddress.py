@@ -17,8 +17,11 @@ ed.act()
 if weblib.request.get("context") == "checkout":
     assert weblib.request.has_key("whichone"), \
            "checkout context requires a whichone item.."
+
     cash = zikeshop.Cashier(zikeshop.Cart(), weblib.auth.user)
-    setattr(cash, weblib.request("whichone")+'AddressID', ed.object.ID,
-            input = {})
+
+    #@TODO: clean this up:
+    weblib.request.form["action"]="update"
+    weblib.request.form[weblib.request["whichone"]+'AddressID'] = ed.object.ID
     cash.act()
     

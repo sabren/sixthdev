@@ -1,6 +1,9 @@
 # just a header
 
-import weblib
+import weblib, zikeshop
+weblib.auth.check()
+zikeshop.siteID = weblib.auth.user.siteID
+
 
 print weblib.trim(
     """
@@ -9,6 +12,8 @@ print weblib.trim(
     <td>[<a href="l_product.py">products</a>]</td>
     <td>[<a href="l_location.py">locations</a>]</td>
     <td>[<a href="sales.py">sales</a>]</td>
+    <td>[<a href="newsale.py">POS</a>]</td>
+    <td>[<a href="templates.py">templates</a>]</td>
     <td>[<a href="l_category.py?auth_logout_flag=1">logout</a>]</td>
     </tr></table><br>
     """)

@@ -17,7 +17,6 @@ def showForm(prod):
         print "<b>edit this product:</b>"
     else:
         print "<b>add a new product:</b>"
-        prod.descriptLong = ''
         prod.name = ''
         prod.code = ''
 
@@ -122,7 +121,7 @@ if __name__=="__main__":
     # meanwhile:
     # <kludge>
     if weblib.request.get("action"):
-        for item in ("instock_warn", "price", "retail"):
+        for item in ("instock_warn", "price", "retail", "weight"):
             if weblib.request.form.get(item) == "":
                 del weblib.request.form[item]
                 setattr(ed.object, item, None)

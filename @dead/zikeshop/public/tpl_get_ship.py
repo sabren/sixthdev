@@ -9,6 +9,8 @@ class Report:
         scope = model
         scope_stack = []
         zres = ""
+        import tpl_head
+        zres = zres+ tpl_head.fetch(scope)
         zres = zres + '<'
         zres = zres + 'h1'
         zres = zres + '>'
@@ -179,6 +181,8 @@ class Report:
         zres = zres + '<'
         zres = zres + '/form'
         zres = zres + '>'
+        import tpl_foot
+        zres = zres+ tpl_foot.fetch(scope)
 # end of Report.fetch()
         return zres
 

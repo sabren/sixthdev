@@ -65,14 +65,13 @@ class AdminPagesTestCase(unittest.TestCase):
                                                    {"action": "save",
                                                     "code": "XY001",
                                                     "name": "Xylaphone",
-                                                    "descriptLong":
-                                                             "makes music"}
+                                                    }
                                                    ))
         eng.run()
-        self.cur.execute("SELECT code, name, descriptLong " \
+        self.cur.execute("SELECT code, name " \
                          "FROM shop_product WHERE ID=1")
 
-        assert self.cur.fetchone() == ("XY001", "Xylaphone", "makes music"), \
+        assert self.cur.fetchone() == ("XY001", "Xylaphone" ), \
                "Product admin page doesn't add products!!"
         
 
@@ -88,17 +87,16 @@ class AdminPagesTestCase(unittest.TestCase):
                                                     "code": "XY001",
                                                     "name": "Xylaphone",
                                                     "nodeIDs": ("1","2"),
-                                                    "descriptLong":
-                                                          "makes music" }))
+                                                    }))
         eng.run()
 
         assert eng.result == eng.SUCCESS, \
                "got error trying to update product:\n%s" \
                % eng.error
         
-        self.cur.execute("SELECT code, name, descriptLong "\
+        self.cur.execute("SELECT code, name "\
                          "FROM shop_product WHERE ID=1")
-        assert self.cur.fetchone() == ("XY001", "Xylaphone", "makes music"), \
+        assert self.cur.fetchone() == ("XY001", "Xylaphone"), \
                "Product admin page doesn't update products correctly!!"
 
         self.cur.execute("SELECT nodeID FROM shop_product_node "\

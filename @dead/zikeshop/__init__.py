@@ -15,10 +15,6 @@ from Sale import Sale
 from Store import Store
 from Card import Card
 
-###################
-## FIX THIS #######
-###################
-siteID = 1
 
 ### PICTURE ROUTINE #######################
 
@@ -50,12 +46,9 @@ def showPicture(ID=None, size=None):
 
 def sendmail(fromaddr, toaddr, subj, msg):
     """utility routine to make it easy to send mail.."""
-    #@TODO: figure out why zikeshop.sendmail ignores the adresses..
-    import smtplib
-    smtp = smtplib.SMTP()
-    smtp.connect()
-    mail = "From: %s\nTo: %s\nSubject: %s\n\n%s\n" \
-           % (fromaddr, toaddr, subj, msg)
-    smtp.sendmail(fromaddr, [toaddr], msg)
-    smtp.quit()
-
+    import os
+    mail = os.popen("sendmail %s" % toaddr, "w")
+    mail.write("From:%s\nTo: %s\nSubject: %s\n\n%s\n" \
+               % (fromaddr, toaddr, subj, msg))
+    mail.close()
+    

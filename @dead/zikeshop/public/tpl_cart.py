@@ -44,6 +44,11 @@ class Report:
             zres = zres + 'li'
             zres = zres + '>'
             zres = zres + '<'
+            zres = zres + 'input name=\"remove_'
+            zres = zres + str(scope.get('_',''))
+            zres = zres + '\" type=\"checkbox\"/'
+            zres = zres + '>'
+            zres = zres + '<'
             zres = zres + 'a href=\"'
             zres = zres + str(scope.get('link',''))
             zres = zres + '\"'
@@ -53,7 +58,7 @@ class Report:
             zres = zres + '/a'
             zres = zres + '>'
             zres = zres + '&'
-            zres = zres + 'nbsp;'
+            zres = zres + 'nbsp;'
             zres = zres + '<'
             zres = zres + 'input name=\"quantity_'
             zres = zres + str(scope.get('_',''))
@@ -68,6 +73,11 @@ class Report:
                 zres = zres + '<'
                 zres = zres + 'input type=\"submit\" name=\"action\" value=\"update\"'
                 zres = zres + '>'
+                zres = zres + ' amounts, or'
+                zres = zres + '<'
+                zres = zres + 'input type=\"submit\" name=\"action\" value=\"remove\"'
+                zres = zres + '>'
+                zres = zres + ' checked items.'
                 zres = zres + '<'
                 zres = zres + '/form'
                 zres = zres + '>'

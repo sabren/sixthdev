@@ -14,7 +14,7 @@ class Category(zikebase.Node):
         cur = self._table.dbc.cursor()
         cur.execute(
             """
-            SELECT ID, code, name FROM shop_product p
+            SELECT ID, code, name, productID FROM shop_product p
             LEFT JOIN shop_product_node pn on p.ID=pn.productID
             WHERE nodeID=%s and siteID=%s
             ORDER BY code
@@ -24,7 +24,8 @@ class Category(zikebase.Node):
         res = []
         for row in cur.fetchall():
             #@TODO: fetchall to recordset should be automatic
-            res.append({"ID": row[0], "code": row[1], "name":row[2]})
+            res.append({"ID": row[0], "code": row[1], "name":row[2],
+                        "productID": row[3]})
         return res
 
 

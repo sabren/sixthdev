@@ -1,3 +1,4 @@
+* import tpl_head:
 <h1>Billing Address</h1>
 
 * for addressbook:
@@ -34,4 +35,5 @@ phone: <input type="text" name="phone" value=""><br>
 <input type="submit" name="action" value="save">
 </form>
     
+* import tpl_foot:
 

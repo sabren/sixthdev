@@ -1,6 +1,7 @@
 """
 list sales in zikeshop
 """
+__ver__="$Id$"
 import header
 import weblib
 import zikeshop
@@ -16,7 +17,7 @@ name = weblib.request.get("name", "")
 isSearch = weblib.request.get("action") == "search"
 
 print '''
-<h2>Orders</h2>
+<h2>Sales</h2>
 
 <form action="sales.py" method="post">
 <input type="hidden" name="isSubmission" value="1">
