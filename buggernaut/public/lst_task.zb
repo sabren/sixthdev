@@ -1,0 +1,52 @@
+* include dsp_head;
+* exec:
+    from weblib import html
+    project = scope.get("project","[all]")
+
+<br/>
+<form action="tasks.py">
+<input type="hidden" name="action" value="list"/>
+<input type="hidden" name="what" value="task"/>
+<table width="100%" border="0">
+<tr>
+   <td><h1>task list</h1></td>
+   <td>project: &nbsp;
+        {:html.select("project",('[all]',) + opt_project, project):}
+         &nbsp;
+       <input type="submit" value="go">
+   </td>
+</tr>
+</table>
+</form>
+
+* for list:
+    * head:
+        <table width="100%" cellspacing="0">
+        <tr>
+          <th>&nbsp;</th>
+          <th width="*">summary</th>
+          <th class="numeric" width="50">Curr</th>
+          <th class="numeric" width="50">Elap</th>
+          <th class="numeric" width="50">Left</th>
+          <th width="50">Target</th>
+        </tr>
+    <tr class="{:status:}">
+      <th class="{:priority:}">&nbsp;</td>
+      <td width="*">
+          <a href="tasks.py?action=edit&what=task&ID={:ID:}">{:summary:}</a>
+      </td>
+      <td class="numeric" width="50">{:hrsCurr:}</td>
+      <td class="numeric" width="50">{:hrsElap:}</td>
+      <td class="numeric" width="50">{:hrsLeft:}</td>
+      <td width="50">{:targetDate:}</td>
+    </tr>
+    * if detail and status != 'closed':
+        <tr>
+        <th class="{:priority:}">&nbsp;</td>
+        <td style="padding-left: 20px" colspan="5">{:detail:}</td>
+        </tr>
+    * foot:
+        </table>
+* none:
+    no tasks found.
+

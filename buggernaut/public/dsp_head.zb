@@ -1,0 +1,26 @@
+<html>
+<title>zikeplan</title>
+<style class="text/css">
+body, td, th {
+    font-size: 10pt;
+    font-family: verdana;
+    background: white;
+}
+th { background: black;
+     color:white;
+     text-align: left;
+     border-right: solid black 1px;
+}
+
+tr th.critical {background: red}
+tr th.high {background: gold;}
+tr th.medium {background: #66cc33; }
+tr th.low {background: blue;}
+
+tr.closed td {background: #cccccc; }
+</style>
+</html>
+
+[<a href="tasks.py?action=list&what=task">list tasks</a>]&nbsp;
+[<a href="tasks.py?action=create&what=task">new task</a>]
+<br/>
