@@ -1,0 +1,67 @@
+* import tpl_head:
+<h1>Credit Card</h1>
+
+* if error:
+    <h2><font color="red">{error}</font></h2>
+
+
+* for creditcards:
+    * head:
+        <form action="checkout.py" method="POST">
+        <h3>Select a credit card from the list below...</h3>
+        <select name="cardID">
+
+    <option value="{ID}">{maskedNumber}</option>
+    * foot:
+        </select>
+        <input type="hidden" name="action" value="update">
+        <input type="submit" value="submit">
+        </form>
+
+    <h3>... or enter a new card below:</h3>
+* none:
+    <h3>enter your credit card info below:</h3>
+
+<form action="checkout.py" method="post">
+<b>name on card:</b>
+<input type="text" name="name" value=""><br>
+card number: <input type="text" name="number"><br>
+
+expiration month:
+<select name="expMonth">
+    <option>01</option>
+    <option>02</option>
+    <option>03</option>
+    <option>04</option>
+    <option>05</option>
+    <option>06</option>
+    <option>07</option>
+    <option>08</option>
+    <option>09</option>
+    <option>10</option>
+    <option>11</option>
+    <option>12</option>
+</select>
+
+year:
+<select name="expYear">
+    <option>2000</option>
+    <option>2001</option>
+    <option>2002</option>
+    <option>2003</option>
+    <option>2004</option>
+    <option>2005</option>
+    <option>2006</option>
+    <option>2007</option>
+</select>
+
+<br>
+<input type="hidden" name="context" value="checkout">
+<input type="hidden" name="action" value="addcard">
+<input type="submit" value="submit">
+</form>
+
+* import tpl_foot:
+
+
+

@@ -9,12 +9,15 @@ class Report:
         scope = model
         scope_stack = []
         zres = ""
-        import tpl_sslhead
-        zres = zres+ tpl_sslhead.fetch(scope)
-        import receipt
-        zres = zres+ receipt.fetch(scope)
-        import tpl_ssslfoot
-        zres = zres+ tpl_ssslfoot.fetch(scope)
+        zres = zres + '<'
+        zres = zres + '/font'
+        zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + '/body'
+        zres = zres + '>'
+        zres = zres + '<'
+        zres = zres + '/html'
+        zres = zres + '>'
 # end of Report.fetch()
         return zres
 

@@ -1,0 +1,38 @@
+* import tpl_head:
+<h1>{message}</h1>
+
+<h3>You may enter existing account info:</h3>
+<form action="{action}" method="post">
+{hidden}
+email: <input type="text" name="auth_email"><br>
+password: <input type="password" name="auth_password"><br>
+<input type="submit">
+[<a href="password.py">forgot your password?</a>]
+</form>
+         
+
+<h3>...or create a new account:</h3>
+
+<form action="newcustomer.py" method="post">
+email: <input type="text" name="email" value=""><br>
+create a password:
+<input type="password" name="password" value=""><br>
+<hr>
+<b>name:</b>
+first: <input type="text" name="fname" value="">
+last: <input type="text" name="lname" value=""><br>
+address 1: <input type="text" name="address1" value=""><br>
+address 2: <input type="text" name="address2" value=""><br>
+address 3: <input type="text" name="address3" value=""><br>
+city: <input type="text" name="city" value=""><br>
+state: <input type="text" size="2" name="stateCD" value=""><br>
+zip/postal code: <input type="text" name="postal" value="">
+country: <input type="text" name="countryCD" value=""><br>
+phone: <input type="text" name="phone" value=""><br>
+<input type="hidden" name="isPrimary" value="1">
+<input type="submit" name="action" value="save">
+
+</form>
+* import tpl_foot:
+
+
