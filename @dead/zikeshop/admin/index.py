@@ -58,8 +58,8 @@ class ZikeShopAdminApp(zikebase.AdminApp):
     
     def save_style(self):
         self.generic_save("style")
-        self.next = ("show", {"what":"product",
-                              "ID":self.input.get('parentID')})
+        self.redirect(action="show&what=product&ID=%s" %
+                      self.input.get('parentID'))
         
 
     ## sale stuff ######################################

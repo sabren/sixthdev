@@ -6,7 +6,8 @@
 * el:
     <b>add a new style:</b>
 
-<form action="index.py?what=style" method="POST">
+<form action="index.py" method="POST">
+<input type="hidden" name="what" value="style">
 code: <input type="text" name="code" value="{:code:}"><br>
 name: <input type="text" name="name" value="{:name:}"><br>
 price: <input type="text" name="price" value="{:price:}"><br>

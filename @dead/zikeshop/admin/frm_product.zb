@@ -7,8 +7,8 @@
 * el:
     <b>add a new product:</b>
 
-<form action="index.py?action=save&what=product" 
-      enctype="multipart/form-data" method="POST">
+<form action="index.py" enctype="multipart/form-data" method="POST">
+<input type="hidden" name="what" value="product">
 <table align="left" border="1" width="50%" style="background:silver">
 
 * if ID:
@@ -80,6 +80,6 @@ upload a new picture:<br>
 </table>
 
 <br clear="all"/>
-<input value="save" type="submit">
+<input name="action" value="save" type="submit">
 
 </form>

@@ -2,7 +2,8 @@
 *# $Id$
 
 <h1>enter a new sale</h1>
-<form action="index.py?action=save&what=sale" method="post">
+<form action="index.py" method="post">
+<input type="hidden" name="what" value="sale"/>
 <table border="1">
 <tr><th>code</th><th>product</th><th>price</th>
 <th>quantity</th></tr>
@@ -45,6 +46,6 @@ charge sales tax:
 <input type="checkbox" name="usetax" value="yes" checked><br>
 
 *## end the form ###################################
-<input type="submit" value="save">
+<input type="submit" name="action" value="save">
 </form>
 

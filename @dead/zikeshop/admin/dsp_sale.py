@@ -109,16 +109,18 @@ print "<b>adjustment:</b> %s<br>" % sale.adjustment
 print "<b>total:</b> %s<br>" % sale.total
 
 
-print """
+print '''
 <hr>
-<form action="index.py?action=save&what=sale" method="post">
-<input type="hidden" name="ID" value="%s">
-comments:<br>
-<textarea cols="40" name="comments" rows="10">%s</textarea><br>
-<input type="hidden" name="isFilled" value="0">
+<form action="index.py" method="POST">
+<input type="hidden" name="action" value="save"/>
+<input type="hidden" name="what" value="sale"/>
+<input type="hidden" name="ID" value="%s"/>
+comments:<br/>
+<textarea cols="40" name="comments" rows="10">%s</textarea><br/>
+<input type="hidden" name="isFilled" value="0"/>
 change <b>%s</b> status to:
 <select name="status">
-""" % (sale.ID, weblib.deNone(sale.comments), sale.status)
+''' % (sale.ID, weblib.deNone(sale.comments), sale.status)
 
 #@TODO: fix this duplicate status information!!!!!
 for row in ["new", "cancelled", "complete", "pending"]:
