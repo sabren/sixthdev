@@ -1,4 +1,8 @@
 
+# note: this was moved here from zdc. It's useful for
+# zebra templates, but it's not really integrated
+# with strongbox yet.
+
 class BoxView:
     """
     Builds a view (dict/list data structure) from a Box
