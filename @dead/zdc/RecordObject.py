@@ -57,6 +57,7 @@ class RecordObject(zdc.Object):
             else:
                 self._record[f.name] = data
         self._record.save()
+        
 
         # some fields may be calculated, so update our attributes:
         # use __dict__ to avoid overhead/errors with setattr

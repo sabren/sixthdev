@@ -17,6 +17,7 @@ class Object:
     """
 
     __key__="ID" # field that uniquely identifies this object
+    _links = {}
     _locks = []
     
     def __init__(self, key=None, **where):
@@ -24,6 +25,7 @@ class Object:
         Don't override this! override _init(), _new() or _fetch() instead.
         """
         self.__dict__['_data']={}
+        self._link()
         self._init()
 
         if key is None:
@@ -39,6 +41,33 @@ class Object:
 
     ### Abstract Protected Methods ##########################
 
+    def _link(self):
+        """
+        Set up the links (relationships) between the objects.
+        This is pretty generic, so you probably don't need to
+        override it. Just populate class._links.
+
+        Structure is:
+
+        _links = {
+           collectionName : (linkClass, params, to, linkClass's, constructor)
+        }
+
+        linkclasses (eg, zdc.LinkSet) Should take the left-hand object
+        (self, from our perspective) as the first parameter. You don't
+        have to include self in the param list.
+
+        eg:
+
+        _links = {
+           'details': (zdc.LinkSet, SomeDetailClass, 'ID', 'summaryID')
+        }
+        """
+        for item in self._links.keys():
+            setattr(self, item, apply(self._links[item][0],
+                                      (self,) + tuple(self._links[item][1:])))
+
+        
     def _init(self):
         """
         Override this to initialize an Object before

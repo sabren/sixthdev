@@ -148,7 +148,7 @@ class Record:
             res = res + "AND (" + f + "=" + \
                   self._sqlQuote(self.table.fields[f], self._where[f]) + ")"
 
-        res = res[4:] # strip first AND           
+        res = res[4:] # strip first AND
         return " WHERE (" + res + ")"
 
 
@@ -157,8 +157,19 @@ class Record:
     def _update(self):
         sql = "UPDATE " + self.table.name + " SET "
         for f in self.table.fields:
-            if not f.isGenerated:
-                sql = sql + f.name + "=" + self._sqlQuote(f) + ","
+            #@TODO: allow support for datetimes!!!!
+            # here's the issue: for some reason, MySQL gives me a
+            # nasty warning... but I haven't been able to figure out
+            # what the warning actually IS because of problems with
+            # MySQLdb.. and I can't seem to duplicate it outside of
+            # python. So right now, until I fix this, you just have to
+            # cope with datetimes/timestamps by yourself. :/ :/ :/
+            #
+            # actually, I think that it works with some dates and not
+            # with others... but not sure..
+            if not f.type == self.table.dbc_module.TIMESTAMP:
+                if not f.isGenerated:
+                    sql = sql + f.name + "=" + self._sqlQuote(f) + ","
         sql = sql[:-1] + self._whereClause()
 
         cur = self.table.dbc.cursor()
@@ -217,6 +228,9 @@ class Record:
 
     def __delitem__(self, fld):
         del self.value[fld]
+
+    def update(self, dict):
+        self.values.update(dict)
 
     def keys(self):
         return self.values.keys()

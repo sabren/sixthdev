@@ -17,7 +17,8 @@ class RecordTestCase(unittest.TestCase):
 
     def check_quotes(self):
         rec = zdc.Record(self.table)
-        assert rec._sqlQuote(rec.table.fields["fish"], "foo'fish") == "'foo\\'fish'", \
+        assert rec._sqlQuote(rec.table.fields["fish"], "foo'fish") \
+               == "'foo\\'fish'", \
                "quoting failed for STRING"
         assert rec._sqlQuote(rec.table.fields["ID"], 0) == "0",\
                "quotes failed for NUMBER"
@@ -149,6 +150,17 @@ class RecordTestCase(unittest.TestCase):
 
         assert rec['ID'] == firstID, \
                "uh-oh! rec's ID changed!: %s, %s" % (rec['ID'], firstID)
+
+
+    def check_dates(self):
+        self.cur.execute("insert into test_types (sometime) values (now())")
+        rec = zdc.Record(zdc.Table(zdc.test.dbc, "test_types"), ID=1)
+        # nothing to assert, but this was/is causing an error:
+        rec.save()
+
+        # actually, I turned off all date handling stuff altogether for
+        # the time being, because it was disabling zikeshop... :/
+        raise "@TODO: figure out how to support dates!"
 
         
     def tearDown(self):
