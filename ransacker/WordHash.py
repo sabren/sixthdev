@@ -20,24 +20,43 @@ class WordHash(UserDict.UserDict):
             self.data[ransacker.NEXTNUM] = 1
 
 
-    
     def get(self, word):
-        # make sure the word is in the wordlist
-        if not self.data.has_key(word):
-            wordID = self.data[word] = self.newWordID()
-            return wordID
-        else:
-            return self.data[word]
+        try:
+            res = self.add(word)
+        except KeyError:
+            res = self.data[word]
+        return res
 
-    
+
+    def add(self, word):
+        if self.data.has_key(word):
+            raise KeyError, '"%s" is already in this hash.' % word
+        else:
+            self.data[word] = newID = self.newWordID()
+            return newID
+
 
     def newWordID(self):
         wordID = self.data[ransacker.NEXTNUM]
-        self.data[ransacker.NEXTNUM] = self.data[ransacker.NEXTNUM]+1
+        self.data[ransacker.NEXTNUM] = wordID+1
         return wordID      
     
 
-
     def close(self):
         self.data.close()
-    
+
+
+    def keys(self):
+        """Returns all the keys except NEXTNUM"""
+        return filter(lambda w: w[:2]!="\t:", self.data.keys())
+
+
+    def __setitem__(self, name, value):
+        raise KeyError, "cannot assign items to WordHash objects. use .get() or .add()"
+
+
+    def __del__(self):
+        self.data.close()
+
+
+
