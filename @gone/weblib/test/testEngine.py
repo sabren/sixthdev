@@ -171,8 +171,12 @@ class EngineTestCase(unittest.TestCase):
 
 
     def check_cgi(self):
-        import os
-        actual = os.popen('python -c"import weblib.script; print \'hello\'"').read()
+        import os, string
+        actual = os.popen('python -c"import weblib.script; print \'hello\'"').readlines()
+
+        # scond line should be the set-cookie. ignore it!
+        actual = string.join([actual[0]] + actual[2:], '')
+        
         target = trim(
             """
             Content-type: text/html
