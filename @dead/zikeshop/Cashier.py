@@ -80,7 +80,7 @@ def chargeCard(theCard, amount):
 
 
 def alertNewSale(sale):
-    import zikeshop
+    import zikeshop, weblib
     msg = weblib.trim(
         """
         Subject: new order.
