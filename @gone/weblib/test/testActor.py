@@ -66,3 +66,11 @@ class ActorTestCase(unittest.TestCase):
                "Doesn't use correct request when in an Engine:\n %s" \
                % eng.error
         
+
+    def check_write(self):
+        devito = weblib.Actor()
+        goal = "what's the worst that could happen?"
+        devito.write(goal)
+        actual = devito.act()
+        assert actual == goal, \
+               "Actor.write() doesn't work. got: %s" % actual

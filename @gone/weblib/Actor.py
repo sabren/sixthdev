@@ -41,6 +41,10 @@ class Actor:
             else:
                 self.input = {}
 
+        # out is just a buffer:
+        import cStringIO
+        self.out = cStringIO.StringIO()
+
         # where is a special variable that tells you where
         # you can jump. It's basically a way to let you
         # redirect pages as you see fit via act_jump
@@ -75,6 +79,7 @@ class Actor:
     def act(self, action=None):
         """
         ex: actor.act();   actor.act('jump')
+        returns output buffer built by calls to write()
         """
 
         if action is not None:
@@ -92,6 +97,7 @@ class Actor:
             else:
                 apply(self.do, next)
         self.exit()
+        return self.out.getvalue()
 
 
     def do(self, action, input=None, **params):
@@ -184,6 +190,12 @@ class Actor:
         """
         return self.where.get(where)
 
+
+    def write(self, what):
+        """
+        write something to output..
+        """
+        self.out.write(what)
 
     ## actions ###################################################
 
