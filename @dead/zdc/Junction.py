@@ -43,7 +43,8 @@ class Junction(zdc.IdxDict):
         """
         load the junction data..
         """
-        for obj in self._getRows():
+        for row in self._getRows():
+            obj = self.rClass(ID=row[self.rKey])
             self << obj
 
     def save(self):

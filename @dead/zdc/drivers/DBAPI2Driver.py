@@ -120,9 +120,6 @@ class DBAPI2Driver:
         data[rowid] = key
 
 
-
-        
-
     def delete(self, tablename, wheredict):
         sql = "DELETE FROM %s %s" \
               % (tablename, self._whereClause(tablename, None, wheredict))
