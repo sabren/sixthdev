@@ -215,6 +215,45 @@ class StrongboxTest(unittest.TestCase):
 
     #@-node:6::Attributes use static typing
 
+    #@+node:7::Attributes allow the None value by default
+
+    #@+body
+
+    #@+at
+    # 
+    # But of course, we can turn it off...
+    # 
+
+    #@-at
+
+    #@@code
+    
+    def check_allowNone(self):
+        class Foo(Strongbox):
+           bar = attr(int)
+        foo = Foo()
+        try:
+           goterr = 0
+           foo.bar = None
+        except ValueError:
+           goterr = 1
+        assert not goterr, "assigning None didn't work!"
+    
+    
+    def check_dontAllowNone(self):
+        class Foo(Strongbox):
+           bar = attr(int,allowNone=0)
+        foo = Foo()
+        try:
+           goterr = 0
+           foo.bar = None
+        except ValueError:
+           goterr = 1
+        assert goterr, "assigning None should have failed!"
+    #@-body
+
+    #@-node:7::Attributes allow the None value by default
+
     #@-others
 
        

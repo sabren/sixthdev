@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <leo_file>
-<leo_header file_format="2" tnodes="0" max_tnode_index="13" clone_windows="0"/>
+<leo_header file_format="2" tnodes="0" max_tnode_index="14" clone_windows="0"/>
 <globals body_outline_ratio="0.5">
 	<global_window_position top="10" left="10" height="624" width="768"/>
 	<global_log_window_position top="0" left="0" height="0" width="0"/>
@@ -15,7 +15,7 @@
 <vnodes>
 <v t="T1" a="E"><vh>strongbox module overview</vh></v>
 <v t="T2"><vh>Persistence</vh></v>
-<v t="T3" a="EV"><vh>Replacing zdc</vh></v>
+<v t="T3" a="E"><vh>Replacing zdc</vh></v>
 <v t="T4" a="E"><vh>@file StrongboxTest.py</vh>
 <v t="T5" a="E"><vh>Strongbox uses metaclasses to provide its magic</vh></v>
 <v t="T6" a="E"><vh>Strongbox attributes are defined as class variables</vh></v>
@@ -23,10 +23,11 @@
 <v t="T8"><vh>Private variables are explicitly private</vh></v>
 <v t="T9"><vh>Attributes have defaults, but can be initialized via the constructor</vh></v>
 <v t="T10" a="E"><vh>Attributes use static typing</vh></v>
+<v t="T11" a="EV"><vh>Attributes allow the None value by default</vh></v>
 </v>
-<v t="T11" a="E"><vh>@file SubjectTest.py</vh>
-<v t="T12" a="E"><vh>Observers manage themselves with attach() and detatch()</vh></v>
-<v t="T13"><vh>subject.notify() sends messages to all the observers</vh></v>
+<v t="T12" a="E"><vh>@file SubjectTest.py</vh>
+<v t="T13" a="E"><vh>Observers manage themselves with attach() and detatch()</vh></v>
+<v t="T14"><vh>subject.notify() sends messages to all the observers</vh></v>
 </v>
 </vnodes>
 <tnodes>
@@ -273,6 +274,33 @@ def check_okay_regexp(self):
         goterr = 1
     assert goterr, "ssn regexp should reject even the most famous phone number in america..."</t>
 <t tx="T11">@
+But of course, we can turn it off...
+
+@code
+
+def check_allowNone(self):
+    class Foo(Strongbox):
+       bar = attr(int)
+    foo = Foo()
+    try:
+       goterr = 0
+       foo.bar = None
+    except ValueError:
+       goterr = 1
+    assert not goterr, "assigning None didn't work!"
+
+
+def check_dontAllowNone(self):
+    class Foo(Strongbox):
+       bar = attr(int,allowNone=0)
+    foo = Foo()
+    try:
+       goterr = 0
+       foo.bar = None
+    except ValueError:
+       goterr = 1
+    assert goterr, "assigning None should have failed!"</t>
+<t tx="T12">@
 Subject from the GoF Observer pattern.
 @code
 __ver__="$Id$"
@@ -290,7 +318,7 @@ class SubjectTest(unittest.TestCase):
        
     def tearDown(self):
         pass</t>
-<t tx="T12">
+<t tx="T13">
 
 def check_attach(self):
     subject = ObservableStrongbox()
@@ -305,7 +333,7 @@ def check_detach(self):
     subject.attach(object)
     subject.detach(object)
     assert len(subject.private.observers) == 0</t>
-<t tx="T13">
+<t tx="T14">
 def check_notify(self):
     class Observer:
         def update(self, subject): self.updated = 1

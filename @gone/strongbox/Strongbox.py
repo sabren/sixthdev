@@ -6,15 +6,26 @@ staticly typed attributes, and private namespaces
 import sre
 from types import StringType, LambdaType, ListType, NoneType
 
+class Notgiven: pass
+
 class attr(object):
     """
     A small class representing a static attribute.
     """
     # I made it lower case just because it looks nicer
-    def __init__(self, typ, okay=None, default=None):
+    def __init__(self, typ, okay=None, default=Notgiven, allowNone=1):
         self.type = typ
-        self.default = default
-        if type(okay) == StringType:
+        self.allowNone = allowNone
+
+        if default is Notgiven:
+            if typ == str:
+                self.default = ''
+            else:
+                self.default = None
+        else:
+            self.default = default
+            
+        if type(okay) == str:
             self.okay = sre.compile(okay)
         elif type(okay) in (LambdaType, ListType, NoneType):
             self.okay = okay
@@ -29,6 +40,9 @@ class attr(object):
                   % (value, self.type)
 
     def validate(self, value):
+        if (value is None) and (not self.allowNone):
+            return 0
+
         if self.okay is None:
             return 1
         elif type(self.okay)==LambdaType:
@@ -39,8 +53,9 @@ class attr(object):
             return self.okay.match(value) is not None
     
     def sanitize(self, value):
-        val = value
-        if not isinstance(value, self.type):
+        if (isinstance(value, self.type)) or (value is None):
+            val = value
+        else:
             val = self.cast(value)
         if not self.validate(val):
             raise ValueError, value
@@ -101,7 +116,7 @@ class Strongbox(object):
     """
     __metaclass__=StrongboxMetaclass
 
-    def __new__(klass, **args):
+    def __new__(klass, dbc=None, *args, **wargs):
         """
         set attributes to their defaults and creates the private namespace.
         """
@@ -112,6 +127,8 @@ class Strongbox(object):
         instance.__dict__['__values__'] = {}
         for a in klass.__attrs__:
             instance.__values__[a] = klass.__attrs__[a].default
+        if dbc:
+            instance.private.dbc = dbc
         return instance
 
     def __init__(self, **args):
