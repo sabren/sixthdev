@@ -62,7 +62,7 @@ if (eng.result is None) or (eng.result == eng.SUCCESS):
 ## close down shop and show the results  ########################
 eng.stop()
 
-if eng.result == eng.SUCCESS:
+if eng.result in (eng.SUCCESS, eng.EXIT):
     ## print the results    
     print eng.response.getHeaders() + eng.response.buffer
 else:

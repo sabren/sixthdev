@@ -27,9 +27,10 @@ class Engine:
     traceback = None
     error     = None
 
-    SUCCESS  = "* success *"
-    FAILURE  = "* failure *"
+    SUCCESS   = "* success *"
+    FAILURE   = "* failure *"
     EXCEPTION = "* exception *"
+    EXIT      = "* exit *"
       
 
     def __init__(self, script=None, pool=None, **kw):
@@ -179,7 +180,7 @@ class Engine:
         try:
             self._execute(script)
         except SystemExit:
-            pass # don't really quit on response.end()
+            self.result = self.EXIT
         except AssertionError, e:
             self.result = self.FAILURE
             self.error = e
