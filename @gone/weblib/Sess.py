@@ -3,7 +3,15 @@ Sess.py : emulates PHPLIB's session support in python
 """
 __ver__="$Id$"
 
-import weblib
+
+# NOTE: this module used to have two layers of pickling
+# _warmdata and _coldData, which allowed it to store
+# objects without having to import that object on every page.
+# but python seems to have trouble pickling a dictionary of
+# prepickled objects, so that method is deprecated.. If anyone
+# really needs it, look at HotColdSess.py (the old version)
+
+import weblib, UserDict
 
 try:
     from cPickle import loads, dumps
@@ -13,30 +21,25 @@ except ImportError:
 
 ## Sess : a session handler ################
 
-class Sess:
-
-    ## attributes ##########################
-
-    sid = ""
-    name = "weblib.Sess"
-    mode = "cookie"
-    fallbackMode = "get"
-    magic = "abracadabra"
-    lifetime = 0
-    gcTime = 1440   # purge sessions older than 24 hrs (1440 mins)
-    gcProb = 1      # probability of garbage collection as a %
-
+class Sess(UserDict.UserDict):
+    __super = UserDict.UserDict
 
     ## constructor ############################
 
     def __init__(self, pool, request, response):
-
+        self.__super.__init__(self)
         self._request = request
         self._response = response
-        self._pool = pool     # where to store the data
-        self._warmData = {}   # unpickled, live data
-        self._coldData = {}   # still-pickled data
-
+        self._pool = pool # where to store the data
+        
+        self.sid = ""   
+        self.name = "weblib.Sess"
+        self.mode = "cookie"
+        self.fallbackMode = "get"
+        self.magic = "abracadabra"
+        self.lifetime = 0
+        self.gcTime = 1440   # purge sessions older than 24 hrs (1440 mins)
+        self.gcProb = 1      # probability of garbage collection as a %
 
 
     ## public methods ########################
@@ -55,8 +58,6 @@ class Sess:
             self.sid = sid
         self._thaw()        
         self._gc()
-
-
 
 
     def abandon(self):
@@ -92,84 +93,6 @@ class Sess:
         self._freeze()
 
 
-
-    ## dictionary methods ####################
-    
-    # note that we can't subclass UserDict anymore because we're
-    # dealing with two internal dictionaries..
-    #
-    # We use two dictionaries so that things are only unpickled when
-    # you ask for them. This may or may not speed things up, but it
-    # lets us pickle objects without forcing the engine to declare
-    # them first.
-    #
-    # ie: To unpickle an instance of class X, class X must be defined
-    # in the current namespace. So, if you pickle an X instance on one
-    # page, every other page would have to import X. That's a pain,
-    # because you can easily break unrelated pages. The two-dictionary
-    # setup prevents this situation. With two dictionaries, you only
-    # have to import X on pages that actually use the instance.
-    #
-    # The "warm" dictionary is the live data. The "cold" dictionary
-    # is the pickled data we're not using right now.
-    
-
-    def has_key(self, name):
-        "dictionary interface"
-        return self._warmData.has_key(name) or self._coldData.has_key(name)
-
-
-    def __setitem__(self, key, value):
-        "dictionary interface"
-        self._warmData[key] = value
-
-
-    def __getitem__(self, key):
-        "dictionary interface"
-        if self._warmData.has_key(key):
-            return self._warmData[key]
-        
-        elif self._coldData.has_key(key):
-            self._warmData[key] = loads(self._coldData[key])
-            return self._warmData[key]
-        
-        else:
-            raise KeyError, key + " not found in session."
-
-
-    def __delitem__(self, key):
-        "dictionary interface"
-        if self.has_key(key):
-            if self._warmData.has_key(key): del self._warmData[key]
-            if self._coldData.has_key(key): del self._coldData[key]
-        else:
-            raise KeyError, key
-
-
-    def keys(self):
-        "dictionary interface"
-        # this might be faster if i used a dictionary..
-        allKeys = self._coldData.keys()
-        for key in self._warmData.keys():
-            if not key in allKeys:
-                allKeys.append(key)
-        return allKeys
-        
-    
-
-    def get(self, key, failObj = None):
-        "dictionary interface"
-        try:
-            return self[key]
-        except KeyError:
-            return failObj
-
-            
-    def clear(self):
-        "dictionary interface"
-        self._warmData.clear()
-        self._coldData.clear()
-        self._freeze()
 
     ## internal methods ####################
 
@@ -216,31 +139,15 @@ class Sess:
     def _freeze(self):
         """freezes sess and dumps it into the sesspool. call at end of page"""
 
-        # first, merge warm and cool data:
-        for key in self._warmData.keys():
-            self._coldData[key] = dumps(self._warmData[key], 1)
-
-        # now, freeze the cold stuff:
+        # freeze the data stuff:
         self._pool.putSess(self.name, self.sid,
-                           dumps(self._coldData, 1)) # 1 for binary
-
-
-
-
+                           dumps(self.data, 1)) # 1 for binary
 
     def _thaw(self):
         """gets a frozen sess out of the sesspool and thaws it out"""
         frozen = self._pool.getSess(self.name, self.sid)
         if frozen is None:
-            self._coldData = {}
+            self.data = {}
         else:
-            self._coldData = loads(frozen)
-
-        # nothing is actually warm until you use it:
-        self._warmData = {}
-
-
-
-if __name__ == "__main__":
-    pass
+            self.data = loads(frozen)
 
