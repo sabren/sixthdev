@@ -25,7 +25,11 @@ class Product(zdc.RecordObject):
     #
     # I need this to display the product page
     # (this product is in ...)
-    _tuples = ['categories']
+    #
+    # nodeIDs needs to be here (FOR NOW) to save a product
+    # to various nodes..
+    # @TODO: remove all trace of product.nodeIDs
+    _tuples = ['categories', 'nodeIDs']
     
     ### Magic RecordObject Methods ############################
 
@@ -45,8 +49,6 @@ class Product(zdc.RecordObject):
         self.retail = 0
         self.weight = 0
         self.parentID = 0
-        self.inStock = 0
-        self.onHold = 0
 
 
     def _fetch(self, **where):
@@ -127,9 +129,6 @@ class Product(zdc.RecordObject):
 
     ## accessors ###############################################
 
-    def get_available(self):
-        return self.inStock - self.onHold
-
     def get_price(self):
         return zdc.FixedPoint(self._data.get('price', '0.00'))
 
@@ -147,7 +146,6 @@ class Product(zdc.RecordObject):
         if type(blob) != type(""):
             self.get_picture()
             self._pic.picture = blob.value
-            import zikeshop
             self._pic.type = blob.type
 
     def get_picture(self):
