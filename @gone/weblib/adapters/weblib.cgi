@@ -48,9 +48,9 @@ if __name__=="__main__":
         eng.run()
 
         out = weblib.OutputDecorator(eng)
-        print out.getHeaders()
-        print out.getBody()
-
+        sys.stdout.write(out.getHeaders())
+        sys.stdout.write(out.getBody())
+        
         if eng.hadProblem and eng.locals["SITE_MAIL"]:
             out.sendError()
 
