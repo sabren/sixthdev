@@ -80,7 +80,14 @@ class SessTestCase(unittest.TestCase):
         del self.sess["cat"]
 
         assert self.sess.get("cat") is None, "Didn't delete key from coldData"
-        
+
+
+    def check_url(self):
+        #@TODO: more advanced checks..
+        self.sess.name = "sess"
+        self.sess.sid = "ABC"
+        assert self.sess.url("http://x.com") == "http://x.com?sess=ABC", \
+               "sess.url() doesn't encode correctly.."
         
 
 

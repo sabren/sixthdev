@@ -70,15 +70,15 @@ class Sess:
         self.clear()
 
 
-    def url(oldurl):
+    def url(self, oldurl):
         """ returns oldurl, but referencing the current session.
 
         If in get mode, the current session id is attached to this
         URL, else the URL is returned unmodified.
 
         """
-        # @TODO: code url()
-        return oldurl
+        # @TODO: make sess.url() handle urls with exsiting querystrings..
+        return oldurl + "?%s=%s" % (self.name, self.sid)
 
 
     def stop(self):
