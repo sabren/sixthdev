@@ -29,9 +29,13 @@ class ZikeShopAdminApp(zikebase.AdminApp):
     def list_product(self):
         # we want to see products in a particular node
         # (or in no nodes at all)
-        #@TODO: fix this! it crashes when nodeID is used.
-        self.model["nodeID"] = self.input.get("nodeID", 0)
-        self.consult("mdl_product")
+        nID = self.model["nodeID"] = self.input.get("nodeID", 0)
+        import mdl_product
+        mdl_product.nodeID = nID
+        mdl_product.doit()
+        if nID:
+            self.model["path"] = zikebase.Node(ID=self.model["nodeID"]).path
+        self.consult(mdl_product.model)
         self.consult("mdl_category")
         zebra.show("lst_product", self.model)
 

@@ -34,7 +34,7 @@ show products in... &nbsp;
 *#    <br>&nbsp;<br>
 
 * if nodeID == 0:
-    <b>products without a category:</b>
+    <b>all products:</b>
 * el:
     <b>products in {:path:}:</b>
 
