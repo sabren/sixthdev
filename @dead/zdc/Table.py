@@ -97,8 +97,34 @@ class Table(zdc.Object):
             raise LookupError, "mulitple records found for single key!!"
         return recs[0]
 
-    def delete(self, key):
+    def delete(self, key):                                            
+        #@TODO: TEST THIS! I just spent almost an hour tracking down a
+        #@TODO: bug where this simply wasn't executing the sQL!
+        #                                                      
+        #                   ####### 
+        #                  #########
+        #                  #########
+        #                  #########
+        #                   ####### 
+        #                   #######
+        #                   #######
+        #                    ##### 
+        #                    #####
+        #                    #####
+        #                     ### 
+        #                     ### 
+        #                     ### 
+        #                         
+        #                     ### 
+        #                    #####
+        #                    #####
+        #                     ### 
+        #
+        #
         sql = "DELETE FROM %s WHERE %s=%s" % (self.name, self.rowid, key)
+        cur = self.dbc.cursor()
+        cur.execute(sql)
+
 
     def update(self, key, data):
         sql = "UPDATE " + self.name + " SET "
