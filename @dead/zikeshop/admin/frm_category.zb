@@ -23,8 +23,17 @@ description:<br>
 <textarea cols="30" rows="5" name="descript">{:descript:}</textarea><br>
 <input name="what" value="category" type="hidden">
 <input name="action" value="save" type="submit">
-</form>
 
-* if ID:
-    <a href="index.py?action=delete&what=category&ID={:ID:}">
-    [delete this category]</a>
+* if (ID):
+    * exec:
+        kids = len(children)
+        prods = len(products)
+    * if (len(products)+len(children)==0):
+        &nbsp;&nbsp;<input name="action" value="delete" type="submit">
+    * ef prods:
+        <br>[no option to delete, because this category has <a
+             href="index.py?nodeID={:ID:}&action=list&what=product"
+             >products</a> in it]
+    * el:
+        <br>[no option to delete, because this category has subcategories]
+</form>

@@ -1,5 +1,5 @@
 """
-Category - a Node with Products in it.
+A Node with Products in it.
 """
 __ver__="$Id$"
 
@@ -18,3 +18,8 @@ class Category(zikebase.Node):
                                                "nodeID", "productID")
             self._data["prods"].fetch()
         return self._data["prods"]
+
+    def delete(self):
+        assert len(self.products)==0, \
+               "Cannot delete a category that has products in it."
+        self.__super.delete(self)

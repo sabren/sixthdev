@@ -40,3 +40,25 @@ class CategoryTestCase(unittest.TestCase):
                "wrong number of categories (%s) shown on category page" \
                % len(prods)
 
+
+    def check_delete(self):
+        cat = zikeshop.Category()
+        cat.name = "stuff"
+
+        prod = zikeshop.Product()
+        prod.name = "ASDF"
+        prod.code = "ASFD"
+        cat.products << prod
+
+        cat.save()
+        
+        assert len(cat.products)==1, \
+               "got wrong lengths for products"
+        try:
+            gotError=0
+            cat.delete()
+        except AssertionError:
+            gotError=1
+            
+        assert gotError, \
+               "didn't get error deleting category with products"
