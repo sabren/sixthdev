@@ -16,3 +16,4 @@
 
 # "list notification"
 notify CVSROOT/log %s -m notify@sabren.com
+#test
