@@ -73,6 +73,7 @@ class Z2X:
                           % (line, x+1)
 
                 ## find the new left edge:
+                newleft = 0
                 topx = x = x + 1
                 if topx >= len(lines):
                     newleft = left - 1
