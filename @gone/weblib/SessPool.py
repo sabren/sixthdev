@@ -85,6 +85,6 @@ class SqlSessPool:
         #@TODO: cleanup beforeWhen (garbage collection)
         sql =\
             """
-            DELETE FROM %s WHERE name='%s' and tsUpdate < ''
+            DELETE FROM %s WHERE name='%s' and tsUpdate < '%s'
             """ % (self.table, name, `beforeWhen`)
         cur.execute(sql)
