@@ -42,10 +42,6 @@ class ObjectEditor(weblib.Actor):
                 # just make a new instance:
                 self.object = self.whatClass()
 
-        # new data for links, if used:
-        self._newData = {}
-        for fld in self.object.getEditableTuples():
-            self._newData[fld] = {}
 
     ## public methods ####################################
 
@@ -54,49 +50,34 @@ class ObjectEditor(weblib.Actor):
             return (input)
         else:
             return input
-
-
-    ## actions ###########################################
-
-    def act_delete(self):
-        self.object.delete()
-        self.object = self.whatClass()
         
-
-    def act_update(self):
-        '''
-        update the object without saving it.
-        '''
+    def expected(self):
+        """
+        handles __expect__.. see test cases for docs..
+        """
         import string
-        
-        expected = {}
+        res = {}
         __expect__ = self.input.get("__expect__", ())
+
+        # it will either be a fieldname:value string...
         if type(__expect__) == type(""):
-            field, value = string.split(__expect__, ";")
-            expected[field]=value
+            field, value = string.split(__expect__, ":")
+            res[field]=value
+        # ... or a tuple of fieldname:value strings.
         else:
-            # it's a tuple
             for item in __expect__:
-                field, value = string.split(item, ";")
-                expected[field] = value
+                field, value = string.split(item, ":")
+                res[field] = value
 
-        errs = []
-        for field in self.object.getEditableAttrs():
-            try:
-                if self.input.has_key(field):
-                    setattr(self.object, field, self.input[field])
-                elif expected.has_key(field):
-                    setattr(self.object, field, expected[field])
-            except (ValueError, TypeError), err:
-                errs.append(str(err))
+        return res
+        
 
-        #@TODO: get rid of editable tuples, or add __expect__
-        ## this next bit lets you pass in a tuple of IDs..
-        ## it comes in handy for multi-select boxes and checboxes.
-        for field in self.object.getEditableTuples():
-            if self.input.has_key(field):
-                setattr(self.object, field, self.tuplize(self.input[field]))
-
+    def parseCollections(self):
+        #@TODO: further break this down, test, document..
+        # new data for links, if used:
+        self._newData = {}
+        for fld in self.object.getEditableTuples():
+            self._newData[fld] = {}
         ## @TODO: break these down into their own methods..
         ## this stuff lets you post multiple objects to a tuple
         ## (instead of just the IDs)... 
@@ -137,18 +118,69 @@ class ObjectEditor(weblib.Actor):
                             #@TODO: allow adding existing ID's, eg for *:* joins
                             #detail{+} maybe?
                             pass # edit existing record
-                    
-        # now actually add the data..
+
+
+
+
+    def mergeTuples(self):
+        """
+        merge tuples (of IDs) into an object...
+        it comes in handy for multi-select boxes and checboxes.
+        """
+        #@TODO: use the << notation..
+        for field in self.object.getEditableTuples():
+            if self.input.has_key(field):
+                setattr(self.object, field, self.tuplize(self.input[field]))
+
+
+    def mergeFields(self):
+        """
+        merge normal fields into the object
+        """
+        expected = self.expected()
+        for field in self.object.getEditableAttrs():
+            try:
+                if self.input.has_key(field):
+                    setattr(self.object, field, self.input[field])
+                elif expected.has_key(field):
+                    setattr(self.object, field, expected[field])
+            except (ValueError, TypeError), err:
+                self.errs.append(str(err))
+
+
+    def mergeCollections(self):
+        """
+        merge collection data into the object..
+        """
+        #@TODO: this might not be the best way to factor this..
         for fld in self._newData.keys():
             for i in self._newData[fld].keys():
                 getattr(self.object, fld) << self._newData[fld][i]
 
-        if errs:
-            raise ValueError, errs
+
+    ## actions ###########################################
+
+    def act_delete(self):
+        self.object.delete()
+        self.object = self.whatClass()
+        
+
+    def act_update(self):
+        """
+        update the object without saving it.
+        """
+        self.errs = []
+        self.mergeFields()
+        self.mergeTuples()
+        self.parseCollections()
+        self.mergeCollections()
+        
+        if self.errs:
+            raise ValueError, self.errs
 
     def act_save(self):
-        '''
+        """
         updates the object and then saves it.
-        '''
+        """
         self.act_update()
         self.object.save()

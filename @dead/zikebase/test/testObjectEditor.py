@@ -11,12 +11,33 @@ import zikebase
 import unittest
 import zdc
 
+class TestObjectClass(zdc.Object):
+    __super = zdc.Object
+
+    def _init(self):
+        self.isTrue=1
+        self.isAlsoTrue=1
+
+    def _new(self):
+        pass
+
+    #@TODO: shouldn't the base Object class be more useful?
+    def getEditableAttrs(self):
+        return self._data.keys()
+    def getEditableTuples(self):
+        return []
+
+    def save(self):
+        pass
+
+
+
+
 class ObjectEditorTestCase(unittest.TestCase):
 
     def setUp(self):
         self.cur = zikebase.test.dbc.cursor()
         self.cur.execute("delete from base_node")
-
 
     def check_simple(self):
         """
@@ -56,7 +77,6 @@ class ObjectEditorTestCase(unittest.TestCase):
         assert gotError, \
                "shouldn't be able to assign Nodes to themselves!!"
 
-
     def check_expect(self):
         """
         Sometimes, especially when it comes to checkboxes, select
@@ -86,27 +106,51 @@ class ObjectEditorTestCase(unittest.TestCase):
         after the semicolon. (0).
 
         You can have multiple __expect__ fields on a form.
+
+        .expected() figures it out..
         """
-        class FooBar(zdc.Object):
-            __super = zdc.Object
+        OEd = zikebase.ObjectEditor
 
-            def _init(self):
-                self.isTrue=1
-                self.isAlsoTrue=1
+        # case 1: single field is expected
+        ed = OEd(TestObjectClass, input={"__expect__":"name:fred"})
+        assert ed.expected() == {'name':'fred'}, \
+               "expected() screws up w/ just one field"
 
-            def _new(self):
-                pass
+        # case 2: multiple fields...
+        ed = OEd(TestObjectClass,
+                 input={"__expect__":("fname:fred", "lname:tempy")})
+        assert ed.expected() == {'fname':'fred', 'lname':'tempy'}, \
+               "expected() screws up when __expect__ is a tuple"
 
-            #@TODO: shouldn't the base Object class be more useful?
-            def getEditableAttrs(self):
-                return self._data.keys()
-            def getEditableTuples(self):
-                return []
-            
-            def save(self):
-                pass
-        
-        ed = zikebase.ObjectEditor(FooBar)
+
+        # case 3: invalid format - single field:
+        try:
+            gotError = 0
+            ed = OEd(TestObjectClass, input={"__expect__":"fred"})
+            ex = ed.expected()
+        except ValueError:
+            gotError = 1
+        assert gotError, \
+               "didn't get valueError with bad __expect__ field"
+
+        # case 4: invalid format - tuple:
+        try:
+            gotError = 0
+            ed = OEd(TestObjectClass,
+                     input={"__expect__":("fname:fred", "lastname...?")})
+            ex = ed.expected()
+        except ValueError:
+            gotError = 1
+        assert gotError, \
+               "didn't get valueError with bad __expect__ tuple"
+
+
+    def check_expectations(self):
+        """
+        this just exercises the behaviour of objecteditor based
+        on results from expected()..
+        """
+        ed = zikebase.ObjectEditor(TestObjectClass)
         assert ed.object.isTrue, \
                "foo should be true by default!"
 
@@ -117,16 +161,16 @@ class ObjectEditorTestCase(unittest.TestCase):
         assert ed.object.isTrue == '0', \
                "that shoulda turned foo's isTrue field off."
         
-        ed = zikebase.ObjectEditor(FooBar)
-        ed.input = {"__expect__":"isTrue;0"}
+        ed = zikebase.ObjectEditor(TestObjectClass)
+        ed.input = {"__expect__":"isTrue:0"}
         ed.act("save")
         assert ed.object.isTrue == '0', \
                "isTrue should be 0 because of __expect__."
 
         
         # now try testing two of 'em
-        ed = zikebase.ObjectEditor(FooBar)
-        ed.input = {"__expect__":("isTrue;0", "isAlsoTrue;0")}
+        ed = zikebase.ObjectEditor(TestObjectClass)
+        ed.input = {"__expect__":("isTrue:0", "isAlsoTrue:0")}
         ed.act("save")
         assert ed.object.isTrue == '0', \
                "isTrue should be 0 because of __expect__."
@@ -173,3 +217,8 @@ class ObjectEditorTestCase(unittest.TestCase):
 
         assert node.children[0].name=='specific', \
                "wrong name for child node: %s" % node.children[0].name
+
+
+    def check_prepare(self):
+        pass
+
