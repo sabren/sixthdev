@@ -1,6 +1,0 @@
-<h1>goal list</h1>
-[<a href="index.py?action=create&what=goal">add new</a>]
-<ul>
-* for list:
-    <li><a href="index.py?action=edit&what=goal&ID={:ID:}">{:name:}</a></li>
-</ul>
