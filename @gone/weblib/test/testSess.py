@@ -6,7 +6,7 @@ $Id$
 
 import unittest
 import weblib
-import test
+import sqlTest
 
 #@TODO: there ought to be test cases for each type of SessPool
 
@@ -16,7 +16,7 @@ from weblib import SessPool
 class SessTestCase(unittest.TestCase):
 
     def setUp(self, sid=None):
-        self.sess = weblib.Sess(SessPool.SqlSessPool(test.dbc))
+        self.sess = weblib.Sess(SessPool.SqlSessPool(sqlTest.dbc))
         self.sess.start(sid)
 
     def check_engine(self):
@@ -52,6 +52,25 @@ class SessTestCase(unittest.TestCase):
         self.sess["cat"] = "Indy"
 
         assert self.sess.keys() == ['cat'], "sess.keys() doesn't work"
+
+
+    def check_del(self):
+        self.setUp("deltest")
+        self.sess["cat"] = "indy"
+
+        del self.sess["cat"]
+
+        assert self.sess.get("cat") is None, "Didn't delete key from warmData"
+
+        self.sess["cat"] = "indy"
+        self.sess.stop()
+        del self.sess
+        self.setUp("deltest")
+        del self.sess["cat"]
+
+        assert self.sess.get("cat") is None, "Didn't delete key from coldData"
+        
+        
 
 
     def tearDown(self):

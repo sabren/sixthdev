@@ -130,7 +130,17 @@ class Sess:
             raise KeyError, key + " not found in session."
 
 
+    def __delitem__(self, key):
+
+        if self.has_key(key):
+            if self._warmData.has_key(key): del self._warmData[key]
+            if self._coldData.has_key(key): del self._coldData[key]
+        else:
+            raise KeyError, key
+
+
     def keys(self):
+        # this might be faster if i used a dictionary..
         allKeys = self._coldData.keys()
         for key in self._warmData.keys():
             if not key in allKeys:
