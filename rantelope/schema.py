@@ -92,7 +92,7 @@ class Channel(Strongbox):
     url = attr(str)
     description = attr(str)
     rssfile = attr(str, okay="([^/]+.rss|^$)" )
-    htmlfile = attr(str, okay="([^/]+.html|^$)" )
+    htmlfile = attr(str, okay="([^/]+|^$)" )
     template = attr(str, default=plainXSLT)
     stories = linkset(Story)
     categories = linkset(Category)
@@ -103,18 +103,17 @@ class Channel(Strongbox):
         return zebra.fetch("rss", BoxView(self))
 
     def toHTML(self, input=None):
-        rss = input or self.toRSS()
-        return transform(rss, self.template)
+        RSS = input or self.toRSS()
+        res = transform(RSS, self.template)
+        res = "\n".join(res.split("\n")[1:])
+        return res
 
     def writeFiles(self):
         """
         temporarily disabled: use blog.app instead
         """
-        return
-##         rss = self.toRSS()
-##         if self.rssfile:
-##             print >> open(self.path + self.rssfile, "w"), rss
-##         if self.htmlfile and self.template:
-##             print >> open(self.path + self.htmlfile, "w"), self.toHTML(rss)
-
-
+        rss = self.toRSS()
+        if self.rssfile:
+            print >> open(self.path + self.rssfile, "w"), rss
+        if self.htmlfile and self.template:
+            print >> open(self.path + self.htmlfile, "w"), self.toHTML(rss)
