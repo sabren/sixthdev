@@ -64,7 +64,7 @@ class AuthTestCase(unittest.TestCase):
 
 
         ## run it again with the "right" credentials 
-        engine.request.form = {"auth_name" : "username", "auth_pass":"password"}
+        engine.request.form = {"auth_username" : "username", "auth_password":"password"}
         engine.run()
 
         assert engine.response.buffer == "this should show up\n", \

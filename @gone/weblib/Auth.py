@@ -96,7 +96,7 @@ class Auth:
         # example implementation for testing, based on form below:
 
         authKey = None
-        if (dict.get("name") == "username") and (dict.get("pass") == "password"):
+        if (dict.get("username") == "username") and (dict.get("password") == "password"):
             authKey = 1 # user's key = 1
         return authKey
 
@@ -106,14 +106,14 @@ class Auth:
         You should overwrite this!"""
 
         self.engine.response.write("""
-        <h1>Auth: %s</h1>
+        <h1>%s: %s</h1>
         <form action="%s" method="post">
-        username: <input type="text" name="auth_name"><br>
-        password: <input type="password" name="auth_pass"><br>
+        username: <input type="text" name="auth_username"><br>
+        password: <input type="password" name="auth_password"><br>
         <input type="submit">
         %s
         </form>
-        """ % (message, action, hidden))
+        """ % (self.__class__.__name__, message, action, hidden))
         
 
 
