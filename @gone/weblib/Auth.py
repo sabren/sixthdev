@@ -24,13 +24,18 @@ class Auth:
         self.engine = engine
         if engine is weblib:
             weblib.auth = self
+
+        self.isLoggedIn = 1 # assume the best
         
         if authKey:
-            self.isLoggedIn = 1
+            self.key = authKey
+            
+        elif engine.sess.has_key('__auth_key'):
+            self.key = self.engine.sess['__auth_key']
+            
         else:
-            self.isLoggedIn = 0
+            self.isLoggedIn = 0 # oh well.
 
-        self.key = authKey
 
 
     ## public methods #########################
@@ -144,9 +149,9 @@ class Auth:
         self.key = self.validate(dict)
 
         if self.key is not None:
-            # should I automatically add it to session, or leave it decoupled?
-            res = 1
+            self.engine.sess['__auth_key'] = self.key
             self.fetch(self.key)
+            res = 1
                 
         return res
 
