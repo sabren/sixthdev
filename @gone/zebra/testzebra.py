@@ -21,10 +21,10 @@ def trim(s):
 
     return string.join(lines, "\n")
 
+#######################################
 class zebraTestCase(unittest.TestCase):
     def setUp(self):
-        self.zEngine = zebra.Engine()
-        pass
+        self.zEngine = zebra.Engine(zebra.PHPGenerator())
 
     ## actual test cases ####################
 

@@ -22,12 +22,28 @@ import xmllib, re, string, types, sys, os
 ## @TODO: this should be part of the engine
 useMessy = 0
 
+
 ###################################################
 ##[ zebra.Engine ]#################################
 ###################################################
 
-class Engine (xmllib.XMLParser):
-    reZVar = re.compile("{([$!]?\w+)}", re.I | re.S )
+class Engine:
+    def __init__(self, generator=None):
+        self.parser = Parser()
+        if generator == None:
+            self.generator = PyGenerator()
+        else:
+            self.generator = generator
+    def compile(self, text):
+        return self.generator.generate(self.parser.parse(text))
+
+
+
+###################################################
+##[ zebra.Parser ]#################################
+###################################################
+
+class Parser (xmllib.XMLParser):
 
     ###############################################
 
@@ -69,39 +85,6 @@ class Engine (xmllib.XMLParser):
         self.parsed  = {} # parsed content
         self.context = "show" # current context
         self.eval    = "" # python code to evaluate
-
-    ###############################################
-
-    def interpolate(self, match):
-
-        """replaces {fields}, {$vars} and {!inserts}
-        in a flattened zebra stripeset..."""
-
-        #@TODO: this is all hard-coded for PHP3. make it generic.
-        #@TODO: interpolation needs to be table driven so that
-        # we can translate into different languages
-        # (or maybe an overridable function?)
-        # also, it ought to be per-stripe (and only used on stripe
-        # bodies and conditionals)
-        # .. that way, we can change interpolation as context changes.
-
-        token = match.group(1)
-        if token[0]=="!":
-            if self.named.has_key(token[1:]):
-                # context="exec" so you don't get: print "print"whatever""
-                # @TODO: maybe have a "passthru" context, as some
-                # languages might alter "exec"?
-                # (eg, php3 mode might one day use "<?" and  "?>"
-                return self.flatten(self.named[token[1:]], context="exec")
-            else:
-                return ""
-        elif token[0] == "$":
-            return token
-        else:
-            # fields.. there needs to be a standard
-            # way of doing this per language.
-            return '$__tr[' + token + ']';
-
 
     ###############################################
 
@@ -318,6 +301,109 @@ class Engine (xmllib.XMLParser):
 
     ###############################################
 
+    ###############################################
+
+    def parse(self, zbr):
+
+        # if it's not XML-ish, assume it's an outline
+        if zbr[0:2] != "<?":
+            import o2x
+            zbr = o2x.o2x(zbr)
+
+        self.reset()
+        self.feed(zbr)
+        self.close
+        self.parsed = {
+            "stripe" : self.stripe,
+            "named"  : self.named,
+            "skins"  : self.skins,}
+        return self.parsed
+
+
+###################################################
+##[ zebra.Generator ]##############################
+###################################################
+class Generator:
+    reZVar = re.compile("{([$!]?\w+)}", re.I | re.S )
+
+    def __init__(self):
+        self._head = ""
+        self._foot = ""
+    
+    def generate(self, parsedict):
+        return self._head + self._flatten(parsedict["stripe"]) + self._foot
+    
+    def _flatten(self, stripeset, depth=0, context="show"):
+        """Converts a stripe or stripeset into a string"""
+
+        res = ""
+        if type(stripeset)!=types.ListType:
+            stripeset = [stripeset]
+
+        for stripe in stripeset:
+            stripehead  = stripebody  = stripetail  = ""
+            test = conditional = ""
+            if type(stripe)==types.StringType:
+                ## strip leading and trailing newlines
+                if stripe[0] == "\n":
+                    stripe = stripe[1:]
+                if stripe[-1] == "\n":
+                    stripe = stripe[:-1]
+                ## deal with context (we only care when it's a string)
+                if (context == "show"):
+                    stripehead = 'print "'
+                    stripebody = string.replace(
+                        string.replace(stripe, '"', '\\"'),
+                        "\n", "\\n")
+                    stripetail = '";'
+                elif context == "exec":
+                    stripebody = stripe
+                else:
+                    #@TODO: this should raise an error
+                    pass
+            elif type(stripe)==types.ListType:
+                stripebody = self.flatten(stripe,depth+1)
+            elif type(stripe)==types.DictionaryType:
+                # @TODO: this ought to all be stored in a
+                # dictionary that maps tags to functions
+                tag = stripe["tag"]
+                if tag == "stripe":
+                    stripebody = self.flatten(stripe["content"],depth+1,
+                                              stripe["context"])[:-1]
+                    test   = stripe["test"]
+                    conditional = stripe["conditional"]
+                elif tag == "report":
+                    res = res + self.flatten_report(stripe, depth+1)
+                else:
+                    print "*** don't know how to flatten " + tag
+            else:
+                raise("unknown structure in stripe")
+
+            ## finally, the conditional
+            if (test) and not (conditional):
+                conditional = "if"
+            if (test) or (conditional): # el has no condition
+                conditionals = {"if":"if", "ef":"elseif", "el":"else"}
+                if conditional == "":
+                    conditional = "if"
+                if conditional in ["if", "ef"]:
+                    stripehead = conditionals[conditional] + " (" \
+                                 + test + "){\n" \
+                                 + "   " + stripehead
+                    stripetail = stripetail + "\n}"
+                elif conditional == "el":
+                    stripehead = conditionals[conditional] + " {" \
+                                 + "   " + stripehead
+                    stripetail = stripetail + "\n}"
+
+            res = res + stripehead + stripebody + stripetail + "\n"
+
+        # now that we have the whole set, interpolate variables:
+        res = self.reZVar.sub(self._interpolate, res)
+        return res
+
+    ###############################################
+
     def flatten_report(self, report, depth=0):
 
         # @TODO: this is one serious kludge.
@@ -409,105 +495,62 @@ class Engine (xmllib.XMLParser):
 
     ###############################################
 
-    def flatten(self, stripeset, depth=0, context="show"):
+    def _interpolate(self, match):
 
-        """Converts a stripe or stripeset into a string"""
+        """replaces {fields}, {$vars} and {!inserts}
+        in a flattened zebra stripeset..."""
 
-        res = ""
-        if type(stripeset)!=types.ListType:
-            stripeset = [stripeset]
+        #@TODO: this is all hard-coded for PHP3. make it generic.
+        #@TODO: interpolation needs to be table driven so that
+        # we can translate into different languages
+        # (or maybe an overridable function?)
+        # also, it ought to be per-stripe (and only used on stripe
+        # bodies and conditionals)
+        # .. that way, we can change interpolation as context changes.
 
-        for stripe in stripeset:
-            stripehead  = stripebody  = stripetail  = ""
-            test = conditional = ""
-            if type(stripe)==types.StringType:
-                ## strip leading and trailing newlines
-                if stripe[0] == "\n":
-                    stripe = stripe[1:]
-                if stripe[-1] == "\n":
-                    stripe = stripe[:-1]
-                ## deal with context (we only care when it's a string)
-                if (context == "show"):
-                    stripehead = 'print "'
-                    stripebody = string.replace(
-                        string.replace(stripe, '"', '\\"'),
-                        "\n", "\\n")
-                    stripetail = '";'
-                elif context == "exec":
-                    stripebody = stripe
-                else:
-                    #@TODO: this should raise an error
-                    pass
-            elif type(stripe)==types.ListType:
-                stripebody = self.flatten(stripe,depth+1)
-            elif type(stripe)==types.DictionaryType:
-                # @TODO: this ought to all be stored in a
-                # dictionary that maps tags to functions
-                tag = stripe["tag"]
-                if tag == "stripe":
-                    stripebody = self.flatten(stripe["content"],depth+1,
-                                              stripe["context"])[:-1]
-                    test   = stripe["test"]
-                    conditional = stripe["conditional"]
-                elif tag == "report":
-                    res = res + self.flatten_report(stripe, depth+1)
-                else:
-                    print "*** don't know how to flatten " + tag
+        token = match.group(1)
+        if token[0]=="!":
+            if self.named.has_key(token[1:]):
+                # context="exec" so you don't get: print "print"whatever""
+                # @TODO: maybe have a "passthru" context, as some
+                # languages might alter "exec"?
+                # (eg, php3 mode might one day use "<?" and  "?>"
+                return self.flatten(self.named[token[1:]], context="exec")
             else:
-                raise("unknown structure in stripe")
+                return ""
+        elif token[0] == "$":
+            return token
+        else:
+            # fields.. there needs to be a standard
+            # way of doing this per language.
+            return '$__tr[' + token + ']';
 
-            ## finally, the conditional
-            if (test) and not (conditional):
-                conditional = "if"
-            if (test) or (conditional): # el has no condition
-                conditionals = {"if":"if", "ef":"elseif", "el":"else"}
-                if conditional == "":
-                    conditional = "if"
-                if conditional in ["if", "ef"]:
-                    stripehead = conditionals[conditional] + " (" \
-                                 + test + "){\n" \
-                                 + "   " + stripehead
-                    stripetail = stripetail + "\n}"
-                elif conditional == "el":
-                    stripehead = conditionals[conditional] + " {" \
-                                 + "   " + stripehead
-                    stripetail = stripetail + "\n}"
 
-            res = res + stripehead + stripebody + stripetail + "\n"
+    
+    
+###################################################
+##[ zebra.PHPGenerator ]###########################
+###################################################
+class PHPGenerator(Generator):
+    def __init__(self):
+        self._head = "<?\n"
+        self._foot = "?>\n"
+    
+#    def _flatten(self, stripeset, depth=0, context="show"):
+#        return ""
 
-        # now that we have the whole set, interpolate variables:
-        res = self.reZVar.sub(self.interpolate, res)
-        return res
 
-    ###############################################
-
-    def parse(self, zbr):
-
-        # if it's not XML-ish, assume it's an outline
-        if zbr[0:2] != "<?":
-            import o2x
-            zbr = o2x.o2x(zbr)
-
-        self.reset()
-        self.feed(zbr)
-        self.close
-        self.parsed = {
-            "stripe" : self.stripe,
-            "named"  : self.named,
-            "skins"  : self.skins,}
-        return self.parsed
-
-    ###############################################
-
-    def compile(self, xml=None):
-        if xml:
-            self.parse(xml)
-        return "<?\n" + self.flatten(self.parsed["stripe"], context="show") + "?>\n"
+###################################################
+##[ zebra.PyGenerator ]############################
+###################################################
+class PyGenerator(Generator):
+    pass
 
 
 ###################################################
 ## cleanup striped tags if useMessy is turned on ##
 ###################################################
+## @TODO: this doesn't get called anymore! allow useMessy for non-o2x!
 ## @TODO: account for freestanding <'s (eg, in a script)
 ## @TODO: *OR* account for <![CDATA[]]>
 if (useMessy):
