@@ -92,6 +92,7 @@ class Sess(UserDict.UserDict):
         Call at end of page to stop the session. (it calls _freeze)
         """
         self._freeze()
+        self._pool.done()
 
 
 

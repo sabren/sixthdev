@@ -18,20 +18,24 @@ class SessPool:
         
     def getSess(self, name, sid):
         """returns the sess with the specified name and id, or None"""
-        if self.storage.has_key(`name`+`sid`):
-            return self.storage[`name` + `sid`]
+        if self.storage.has_key(str(name)+str(sid)):
+            return self.storage[str(name)+str(sid)]
         else:
             return None
 
     def putSess(self, name, sid, frozensess):
         """stores a frozen sess with the specified name and id"""
-        self.storage[`name` + `sid`] = frozensess
+        self.storage["newkey"]="newval"
+        self.storage[str(name)+str(sid)] = frozensess
+
 
     def drain(self, name, beforewhen):
         """(should) performs garbage collection to kill off old sesses"""
         # 'cept this is just a dummy version, and it don't do nuttin. :)
         pass
 
+    def done(self):
+        self.storage.close()
 
 class InMemorySessPool(SessPool):
     """
@@ -47,6 +51,9 @@ class InMemorySessPool(SessPool):
             self.storage = dict
         else:
             self.storage = {}
+
+    def done(self):
+        pass
 
 
 class SqlSessPool:
@@ -103,3 +110,6 @@ class SqlSessPool:
             DELETE FROM %s WHERE name='%s' and tsUpdate < '%s'
             """ % (self.table, name, `beforeWhen`)
         cur.execute(sql)
+
+    def done(self):
+        pass
