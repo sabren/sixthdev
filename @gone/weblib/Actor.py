@@ -50,7 +50,8 @@ class Actor:
         
         self.action = None
         self.next = None
-        self.model = {}
+        self.errors = []
+        self.model = {"errors":[]}
         for key in self.input.keys():
             self.model[key] = self.input[key]
 
@@ -116,14 +117,17 @@ class Actor:
         self.action = oldaction
 
 
-    def complain(self, problem):
+    def complain(self, problems):
         """
-        Generic error handler. Prints a pretty error message.
-        You should probably override this.
+        Generic error handler. Pass it a string or list of strings.
         """
-        print '<b>[<span style="color:red">error:</span></b> %s<b>]</b><br>' \
-              % problem
-
+        if type(problems)=="":
+            probs = [problems]
+        else:
+            probs = problems
+        for prob in probs:
+            self.errors.append(prob)
+            self.model["errors"].append({"error":prob})
 
     def consult(self, model):
         """
