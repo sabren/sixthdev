@@ -57,12 +57,18 @@ class BoxMaker(object):
                 attrs.update(b.__attrs__)
         for a in self.attrs:
             attrs[a] = self.dict[a]
+            attrs[a].__name__ = a
         self.dict["__attrs__"] = attrs
 
     ## second pass (__init__) ###############################
 
     def finish(self, klass):
         self.addAccessors(klass)
+        self.addAttrOwners(klass)
+
+    def addAttrOwners(self, klass):
+        for a in self.attrs:
+            getattr(klass, a).__owner__ = klass
 
     def makeGetter(self, klass, slot):
         def getter(instance):
