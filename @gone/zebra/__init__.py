@@ -12,7 +12,7 @@ from Bootstrap import Bootstrap
 ###[ Utility Functions ]#######################################
 
 def escape(s):
-    """Escape backslashes, quotes, and newlines"""
+    "Escape backslashes, quotes, and newlines"
 
     replace = {
         "\\":"\\\\",  # backslash
@@ -29,8 +29,10 @@ def escape(s):
             res = res + ch
     return res
 
+
 def trim(s):
-    """strips leading indentation from a multi-line string."""
+    "trim(s) => Strips leading indentation from a multi-line string."
+
     lines = string.split(s, "\n")
 
     # strip leading blank line
@@ -45,7 +47,10 @@ def trim(s):
     return string.join(lines, "\n")
 
 
+
 def indent(s, depth=1, indenter="    "):
+    "indent(s,depth=1,indenter='    ') => Indent a multi-line string."
+
     lines = string.split(s, "\n")
 
     # don't indent trailing newline
