@@ -129,9 +129,9 @@ class AdminApp(weblib.Actor):
         """
         Generic object-deletion mechanism.
         """
-        what = self.input.get("what", "")
+        what = str(self.input.get("what", ""))
         self.objectEdit("delete")
-        self.next = ("list", {"what":what})
+        self.redirect(action="list&what=" + what)
 
 
     ## save ########################################################
@@ -140,13 +140,13 @@ class AdminApp(weblib.Actor):
         """
         Generic object-deletion mechanism.
         """
-        what = self.input.get("what", "")
+        what = str(self.input.get("what", ""))
         if hasattr(self, "save_%s" % what):
             getattr(self, "save_%s" % what)()
         else:
             self.generic_save(what)
         if not self.next:
-            self.next = ("list", {"what":what})
+            self.redirect(action="list&what=" + what)
 
     def generic_save(self, what):
         self.objectEdit("save")
