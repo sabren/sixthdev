@@ -22,7 +22,6 @@ class Auth:
     ## constructor #############################
     
     def __init__(self, engine=weblib):
-
         self.engine = engine
         self.engine.auth = self  #@TODO: ???????
 
@@ -34,13 +33,11 @@ class Auth:
 
         self._isStarted = 1
         self.isLoggedIn = 1 # assume the best
-        
+
         if key:
             self.key = key
-            
         elif self.engine.sess.has_key('__auth_key'):
             self.key = self.engine.sess['__auth_key']
-            
         else:
             self.isLoggedIn = 0 # oh well.
 
@@ -65,7 +62,6 @@ class Auth:
             else:
                 self.prompt(Auth.PLEASELOGIN, self._getAction(), self._getHidden())
                 self.engine.response.end()
-
         else:
             self.fetch(self.key) 
     
@@ -100,10 +96,8 @@ class Auth:
         # example implementation for testing, based on form below:
 
         authKey = None
-
         if (dict.get("name") == "username") and (dict.get("pass") == "password"):
             authKey = 1 # user's key = 1
-
         return authKey
 
 
@@ -150,14 +144,12 @@ class Auth:
         # first move all the auth_* variables into a hash,
         # transforming them along the way.
         
-        for item in self.engine.request.form.keys():
+        for item in self.engine.request.keys():
             if item[:5] == "auth_":
-                dict[item[5:]] = self.transform(item[5:], self.engine.request.form[item])
-
+                dict[item[5:]] = self.transform(item[5:], self.engine.request[item])
 
         # now pass it to validate() and see if we get in:
         self.key = self.validate(dict)
-
         if self.key is not None:
             self.engine.sess['__auth_key'] = self.key
             self.fetch(self.key)
@@ -214,7 +206,6 @@ class Auth:
         but we want to remember their data while they're logging back in!
         """
         res = ""
-
         for item in self.engine.request.form.keys():  # form should be an IdxDict..
             if item[:5] == "auth_":
                 pass # Ignore auth stuff here, too

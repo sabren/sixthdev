@@ -23,11 +23,9 @@ class AuthTestCase(unittest.TestCase):
 
 
     def check_check(self):
-
         engine = weblib.Engine(request=self.myReq,
                                script="import weblib; weblib.auth.check()" )
         engine.run()
-
         assert string.find(engine.response.buffer, weblib.Auth.PLEASELOGIN), \
                "check doesn't show login screen"
         
@@ -40,13 +38,11 @@ class AuthTestCase(unittest.TestCase):
             print "this should not show up"
             """))
         engine.run()
-
         assert string.find(engine.response.buffer, engine.auth.PLEASELOGIN) > -1, \
                "doesn't show prompt!"
 
 
     def check_login(self):
-
         engine = weblib.Engine(request= 
                                weblib.Request(environ = {"PATH_INFO":"sadfaf"},
                                               querystring="auth_check_flag=1",
@@ -60,9 +56,8 @@ class AuthTestCase(unittest.TestCase):
             
             print "this should show up"
             """))
-        
-        engine.run()
 
+        engine.run()
         assert string.find(engine.response.buffer, engine.auth.LOGINFAILED) > -1, \
                "invalid login doesn't give LOGINFAILED!"
 
