@@ -1,0 +1,39 @@
+*#
+*# This file displays a form for editing channels.
+*#
+*# $Id$
+
+* include header;
+
+
+<form action="rantelope.app" method="POST">
+<input type="hidden" name="what" value="channel">
+
+* exec:
+    from zebra import html
+* if ID:
+    <b>edit this channel:</b>
+    <input type="hidden" name="ID" value="{:ID:}">
+* el:
+    <b>add a new channel:</b>
+
+
+<table border="1">
+
+  <tr><td>title:</td>
+      <td>{:html.text("title",title):}</td></tr>
+
+  <tr><td>link:</td>
+      <td>{:html.text("link",link):}</td></tr>
+
+  <tr><td>RSS output file:</td>
+      <td>{:html.text("rssfile",rssfile):}</td></tr>
+
+  <tr><td colspan="2">description:</td></tr>
+  <tr><td colspan="2"><textarea name="description" 
+          rows="10" cols="60">{:description:}</textarea></td></tr>
+
+</table>
+
+<input name="action" value="save" type="submit">
+</form>
