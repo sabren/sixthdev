@@ -59,5 +59,10 @@ def load(what):
 
     exec("import zikebase; from %s import %s; zikebase.%s = %s"
          % ((what,) * 4))
+  
 
-    
+def sendmail(mail):
+    import os
+    sender = os.popen("sendmail -t", "w")
+    sender.write(mail)
+    sender.close()
