@@ -24,7 +24,7 @@ class Bagger(zikeshop.ShopActor):
             label = "%s [%s]" % (prod.name, style.style)
         link  = "product/%s" % (prod.code)
 
-        extra={"styleID":style.ID}
+        extra={"styleID":style.ID, "weight": prod.weight}
 
         quantity = self.input.get("quantity")
         
@@ -43,4 +43,11 @@ class Bagger(zikeshop.ShopActor):
     def act_update(self):
         quantities = []
         for i in range(self.cart.count()):
-            self.cart.update(i, int(self.input.get("quantity_%s" % i)))
+            try:
+                newamt = int(self.input.get("quantity_%s" % i, 0))
+            except:
+                newamt = 0
+            self.cart.update(i, newamt)
+
+
+

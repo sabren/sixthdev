@@ -1,3 +1,4 @@
+* import tpl_head:
 <h1>Your Shopping Cart</h1>
 
 * for contents:
@@ -6,21 +7,20 @@
         <form action="cart.py" method="POST">
         <ul>
 
-    <li><a href="{link}">{label}</a>
+    <li><a href="{link}">{label}</a>&nbsp;
     <input name="quantity_{_}" size="3" value="{quantity}">
 
     * foot:
         </ul>
         <input type="submit" name="action" value="update">
         </form>
-        <a href="checkout.py">checkout</a>
+        <a href="{checkouturl}">checkout</a>
 
 * none:
     <h4>your cart is empty</h4>
 
 
 <hr>
-<a href="{basehref}/category/">top</a>
-<hr>
-zikeshop alpha (c)2000 zike interactive, inc
+<a href="{basehref}/category/">continue shopping</a>
+* import tpl_foot:
 

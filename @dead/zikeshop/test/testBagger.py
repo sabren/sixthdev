@@ -1,8 +1,8 @@
 """
 test code for the Bagger class
-
-$Id$
 """
+__ver__="$Id$"
+
 import weblib
 import zikeshop
 import unittest
@@ -30,7 +30,7 @@ class BaggerTestCase(unittest.TestCase):
         import zikeshop; zikeshop.siteID = 1
         self.cur.execute("DELETE FROM shop_product")
         self.cur.execute("DELETE FROM shop_style")
-        self.cur.execute("INSERT INTO shop_product (name, code, price, siteID) "
+        self.cur.execute("INSERT INTO shop_product (name, code, price,siteID) "
                          "VALUES ('apple', 'APPL', 4.25, 1)")
         self.cur.execute("INSERT INTO shop_style (productID, style) "
                          "VALUES (1, 'green')")
@@ -54,7 +54,7 @@ class BaggerTestCase(unittest.TestCase):
                "bagger set wrong price (%s)"  % item["price"]
         assert item["link"] == "product/APPL",\
                "bagger set wrong link (%s)" % item["link"]
-        assert item["extra"]=={"styleID":1},\
+        assert item["extra"]["styleID"]==1,\
                "bagger set wrong extra (%s)" % item["extra"]
         
     

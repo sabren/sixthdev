@@ -7,12 +7,20 @@ $Id$
 def load():
     import zdc, zikeshop, zikebase
     from sqlTest import dbc
-    
+
+    ## clear out old data..
     dbc.cursor().execute("DELETE FROM base_user")
+    dbc.cursor().execute("DELETE FROM web_sess")
     dbc.cursor().execute("DELETE FROM base_node")
     dbc.cursor().execute("DELETE FROM shop_product")
     dbc.cursor().execute("DELETE FROM shop_product_node")
+    dbc.cursor().execute("DELETE FROM shop_style")
+    dbc.cursor().execute("DELETE FROM shop_location")
+    dbc.cursor().execute("DELETE FROM shop_inventory")
 
+    ## set up a location
+    dbc.cursor().execute("INSERT INTO shop_location (name, siteID) "
+                         "VALUES ('main location', 1)")
 
     user = zikebase.User()
     user.username=user.uid=user.email="username"
@@ -21,7 +29,7 @@ def load():
     user.save()
 
     user = zikebase.User()
-    user.username=user.uid=user.email="michal"
+    user.username=user.uid=user.email="michal@sabren.com"
     user.password="michal"
     user.siteID=2
     user.save()
@@ -74,7 +82,31 @@ def load():
         prod.nodeIDs=p[3]
         prod.save()
 
-
+        ## set up 10 of each product in inventory..
+        if prod.name == "dictionary":
+            # dictionary has two styles:
+            style = zikeshop.Style(productID=prod.ID)
+            style.style = "Webster"
+            style.save()
+            dbc.cursor().execute("INSERT INTO shop_inventory "
+                                 "(locationID, styleID, amount) "
+                                 "VALUES (1, %i, 5)" % style.ID)
+            # and add another:
+            style = zikeshop.Style()
+            style.productID=prod.ID
+            style.style = "Oxford"
+            style.save()
+            dbc.cursor().execute("INSERT INTO shop_inventory "
+                                 "(locationID, styleID, amount) "
+                                 "VALUES (1, %i, 5)" % style.ID)
+            
+        else:
+            # everything else has only one style:
+            style = zikeshop.Style(productID=prod.ID)
+            dbc.cursor().execute("INSERT INTO shop_inventory "
+                                 "(locationID, styleID, amount) "
+                                 "VALUES (1, %i, 10)" % style.ID)
+            
 
 if __name__=="__main__":
     load()

@@ -17,11 +17,13 @@ class Report:
         zres = zres + '/h1'
         zres = zres + '>'
         _ = 0
-        _max_ = len(self.model["model.addressbook"])
+        _max_ = len(self.model["addressbook"])
         scope_stack.append(scope)
         scope = copy.copy(scope)
+        scope.update(locals())
         for _ in range(_max_):
-            scope.update(self.model["model.addressbook"][_])
+            scope.update(self.model["addressbook"][_])
+            scope["_"] = _
             if _ == 0:
                 zres = zres + '<'
                 zres = zres + 'form action=\"checkout.py\" method=\"POST\"'
@@ -38,15 +40,15 @@ class Report:
                 zres = zres + '>'
             zres = zres + '<'
             zres = zres + 'option value=\"'
-            zres = zres + str(scope['ID'])
+            zres = zres + str(scope.get('ID',''))
             zres = zres + '\"'
             zres = zres + '>'
-            zres = zres + str(scope['fname'])
-            zres = zres + str(scope['lname'])
+            zres = zres + str(scope.get('fname',''))
+            zres = zres + str(scope.get('lname',''))
             zres = zres + '/'
-            zres = zres + str(scope['address1'])
+            zres = zres + str(scope.get('address1',''))
             zres = zres + '/'
-            zres = zres + str(scope['city'])
+            zres = zres + str(scope.get('city',''))
             if _ + 1 == _max_:
                 zres = zres + '<'
                 zres = zres + '/select'
@@ -178,8 +180,7 @@ class Report:
         return zres
 
 def fetch(model={}):
-    Report().fetch(model)
+    return Report().fetch(model)
     
 def show(model={}):
-    Report().show(model)
-
+    return Report().show(model)

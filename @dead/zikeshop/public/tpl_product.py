@@ -9,23 +9,27 @@ class Report:
         scope = model
         scope_stack = []
         zres = ""
+        import tpl_head
+        zres = zres+ tpl_head.fetch(scope)
         zres = zres + '<'
         zres = zres + 'h1'
         zres = zres + '>'
-        zres = zres + str(scope['name'])
+        zres = zres + str(scope.get('name',''))
         zres = zres + '<'
         zres = zres + '/h1'
         zres = zres + '>'
-        if scope['pictureID']:
+        if scope.get('pictureID',''):
             zres = zres + '<'
-            zres = zres + 'img src=\"picture.py?ID='
-            zres = zres + str(scope['pictureID'])
+            zres = zres + 'img src=\"'
+            zres = zres + str(scope.get('basehref',''))
+            zres = zres + '/picture.py?ID='
+            zres = zres + str(scope.get('pictureID',''))
             zres = zres + '\"'
             zres = zres + '>'
         zres = zres + '<'
         zres = zres + 'p'
         zres = zres + '>'
-        zres = zres + str(scope['descript'])
+        zres = zres + str(scope.get('descript',''))
         zres = zres + '<'
         zres = zres + '/p'
         zres = zres + '>'
@@ -33,16 +37,18 @@ class Report:
         _max_ = len(self.model["styles"])
         scope_stack.append(scope)
         scope = copy.copy(scope)
+        scope.update(locals())
         for _ in range(_max_):
             scope.update(self.model["styles"][_])
-            if not scope['style']:
+            scope["_"] = _
+            if not scope.get('style',''):
                 zres = zres + '<'
                 zres = zres + 'A HREF=\"'
-                zres = zres + str(scope['basehref'])
+                zres = zres + str(scope.get('basehref',''))
                 zres = zres + '/cart.py?action=add'
                 zres = zres + '&'
                 zres = zres + 'styleID='
-                zres = zres + str(scope['ID'])
+                zres = zres + str(scope.get('ID',''))
                 zres = zres + '\"'
                 zres = zres + '>'
                 zres = zres + 'add to cart'
@@ -51,14 +57,16 @@ class Report:
                 zres = zres + '>'
             else:
                 zres = zres + 'style: '
-                zres = zres + str(scope['style'])
+                zres = zres + str(scope.get('style',''))
+                zres = zres + '&'
+                zres = zres + 'nbsp;'
                 zres = zres + '<'
                 zres = zres + 'a href=\"'
-                zres = zres + str(scope['basehref'])
+                zres = zres + str(scope.get('basehref',''))
                 zres = zres + '/cart.py?action=add'
                 zres = zres + '&'
                 zres = zres + 'styleID='
-                zres = zres + str(scope['ID'])
+                zres = zres + str(scope.get('ID',''))
                 zres = zres + '\"'
                 zres = zres + '>'
                 zres = zres + 'add to cart'
@@ -74,8 +82,10 @@ class Report:
         _max_ = len(self.model["nodes"])
         scope_stack.append(scope)
         scope = copy.copy(scope)
+        scope.update(locals())
         for _ in range(_max_):
             scope.update(self.model["nodes"][_])
+            scope["_"] = _
             if _ == 0:
                 zres = zres + '<'
                 zres = zres + 'h2'
@@ -86,12 +96,12 @@ class Report:
                 zres = zres + '>'
             zres = zres + '<'
             zres = zres + 'a href=\"'
-            zres = zres + str(scope['basehref'])
+            zres = zres + str(scope.get('basehref',''))
             zres = zres + '/category/'
-            zres = zres + str(scope['path'])
+            zres = zres + str(scope.get('path',''))
             zres = zres + '\"'
             zres = zres + '>'
-            zres = zres + str(scope['path'])
+            zres = zres + str(scope.get('path',''))
             zres = zres + '<'
             zres = zres + '/a'
             zres = zres + '>'
@@ -108,26 +118,13 @@ class Report:
             zres = zres + '<'
             zres = zres + '/h2'
             zres = zres + '>'
-        zres = zres + '<'
-        zres = zres + 'hr'
-        zres = zres + '>'
-        zres = zres + '<'
-        zres = zres + 'a href=\"cart.py\"'
-        zres = zres + '>'
-        zres = zres + 'view cart'
-        zres = zres + '<'
-        zres = zres + '/a'
-        zres = zres + '>'
-        zres = zres + '<'
-        zres = zres + 'hr'
-        zres = zres + '>'
-        zres = zres + 'zikeshop alpha (c)2000 zike interactive, inc\n\n\n'
+        import tpl_foot
+        zres = zres+ tpl_foot.fetch(scope)
 # end of Report.fetch()
         return zres
 
 def fetch(model={}):
-    Report().fetch(model)
+    return Report().fetch(model)
     
 def show(model={}):
-    Report().show(model)
-
+    return Report().show(model)

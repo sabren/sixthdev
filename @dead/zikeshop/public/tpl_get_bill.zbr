@@ -1,6 +1,6 @@
 <h1>Billing Address</h1>
 
-* for model.addressbook:
+* for addressbook:
     * head:
         <form action="checkout.py" method="POST">
         <h3>Select an address to bill to...</h3>

@@ -53,4 +53,9 @@ class Customer(zikebase.User):
             FROM shop_card
             WHERE customerID=%i
             """ % self.ID)
-        return zdc.toListDict(cur)
+        res = zdc.toListDict(cur)
+        # maskedNumber has the xxxxxxxx1234 form of the card number:
+        for item in res:
+            item["maskedNumber"] = ("x" * (len(item["number"])-4)) \
+                                   + item["number"][-4:]
+        return res

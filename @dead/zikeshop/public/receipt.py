@@ -1,4 +1,4 @@
-print "(STILL IN PHP3... convert..)"
+#print "(STILL IN PHP3... convert..)"
 
 """
         ### and show the receipt

@@ -1,8 +1,19 @@
 """
 a class to facilitate checkouts
-
-$Id$
 """
+__ver__="$Id$"
+
+
+##         ###############################################           ##
+##         ##                                           ##           ##
+##         ## WARNING: THIS IS ONE UGLY PIECE OF CODE   ##           ##
+##         ##                                           ##           ##
+##         ###############################################           ##
+
+
+## @TODO: refactor this into a model-view-controller pattern..
+## @TODO: add some better test cases..
+
 import zikeshop
 import zdc
 
@@ -14,7 +25,8 @@ class Cashier(zikeshop.ShopActor):
     storedFields = [
         "shipAddressID",
         "billAddressID",
-        #"shiptypeID",
+        "salestax",
+        "shipping",
         "cardID",
         "receipt",
         "alldone"
@@ -52,21 +64,22 @@ class Cashier(zikeshop.ShopActor):
         for item in self.storedFields:
             if not hasattr(self, item):
                 setattr(self, item, self.pool.get("__cashier_" + item))
+                ## print "setting %s to %s" % (item, getattr(self, item))
 
         assert not self.cart.isEmpty(), \
                "Cannot check out because cart is empty."
 
-        print "<div style='background:red'>"
+        ##print "<div style='background:red'>"
 
 
     def exit(self):
         """Afterwards, store our state in the pool."""
         zikeshop.ShopActor.exit(self) # store the cart
         for item in self.storedFields:
-            print "setting %s = %s <br>" % (item, getattr(self, item))
+            ##print "setting %s = %s <br>" % (item, getattr(self, item))
             self.pool["__cashier_" + item] = getattr(self, item)
-
-        print "</div>"
+            
+        ##print "</div>"
 
 
     def nextStep(self):
@@ -76,11 +89,10 @@ class Cashier(zikeshop.ShopActor):
         for item in self.storedFields:
             # check has and get so that we can assign items
             # before calling act() (as we do in public/newaddress.py)
-            if not (hasattr(self, item) and getattr(self, item)):
+            if getattr(self, item, None) is None:
                 if self.fieldPages.get(item):
                     exec("import %s" % self.fieldPages[item])
-                    exec("%s.model = self.get_model()" % self.fieldPages[item])
-                    exec("%s.show()" % self.fieldPages[item])
+                    exec("%s.show(self.get_model())" % self.fieldPages[item])
                 else:
                     raise "don't know how to get %s" % item
                 break
@@ -94,6 +106,7 @@ class Cashier(zikeshop.ShopActor):
         """If we don't have something better to do, just show the next step"""
         self.nextStep()
 
+
     def act_update(self):
         """Update Cashier with some new information.
         This method allows you to inform the Cashier
@@ -103,10 +116,62 @@ class Cashier(zikeshop.ShopActor):
         """
         for item in self.storedFields:
             if self.input.has_key(item):
+                ##print "update: setting %s to %s" % (item, self.input[item])
                 setattr(self, item, self.input[item])
 
-        self.nextStep()
+        #@TODO: put this somewhere else.. probably in the Sale object?
+        #@TODO: Sale should have a reference to a "Store" object, and
+        #@TODO: "Store" should have a .hasNexus(state) for sales tax..
+        
+        ## calculate the sales tax
+        if (self.salestax is None) and (self.billAddressID is not None):
+            ## see if the store has nexus in the customer's state
+            cur = zikeshop.dbc.cursor()
+            cur.execute(
+                """
+                SELECT rate FROM shop_state
+                WHERE stateCD='%s' AND storeID=%i
+                """ \
+                % (zikeshop.Address(ID=self.billAddressID).stateCD,
+                   zikeshop.siteID)
+                )
 
+            ## if so, calculate taxes based on the data in shop_state
+            if cur.rowcount:
+                self.salestax = self.cart.subtotal() \
+                                * zikeshop.FixedPoint(cur.fetchone()[0])
+
+            ## otherwise, we don't charge tax..
+            else:
+                self.salestax = 0
+        ## print "update: sales tax is now %s" % self.salestax
+
+
+        ## calculate the shipping:
+        if (self.shipping is None) and (self.shipAddressID is not None):
+            ## find out what the merchant's address is
+            fromZip = zikeshop.Store(siteID=zikeshop.siteID).address.postal
+            
+            ## find out what the shipping address is
+            addr = zikeshop.Address(ID=self.shipAddressID)
+            toZip = addr.postal
+            toCountryCD = addr.countryCD
+            
+            ## calculate order weight by summing product weights
+            ## @TODO: make totalweight a cart method
+            weight = 0
+            import weblib
+            for item in self.cart.q_contents():
+                weight = weight + (weblib.deNone(item["extra"]["weight"],0)
+                                   * item["quantity"])
+            
+            ## ask ups for the price
+            import UPS
+            self.shipping = zikeshop.UPS.getRate(fromZip, toZip, toCountryCD,
+                                                 weight)
+
+            
+        self.nextStep()
 
 
     def act_addcard(self):
@@ -127,15 +192,34 @@ class Cashier(zikeshop.ShopActor):
     def act_checkout(self):
         """Records a sale in the database."""
 
-        ## first, save the main sale record.
+        ## calculate how much to bill
+        subtotal = self.cart.subtotal()
+        total = subtotal + self.salestax + self.shipping
+
+        ## bill the card
+        if zikeshop.authorizenetmerchant:
+            import payment
+            theCard = zikeshop.Card(ID=self.cardID)
+            pmt = payment.create("AuthorizeNet",
+                                 merchant=zikeshop.authorizenetmerchant,
+                                 card= theCard.number,
+                                 expires= theCard.expMonth+"/"+theCard.expYear,
+                                 )
+            pmt.charge(total) # fixedpoint
+            if acct.result != payment.APPROVED:
+                raise ValueError, "charge not accepted."
+        
+
+        ## now, save the main sale record.
         sale=zikeshop.Sale()
         sale.customerID= self.cust.ID
         sale.ship_addressID = self.shipAddressID
         sale.bill_addressID = self.billAddressID
         sale.cardID = self.cardID
-        ##sale["shiptypeID = self.shiptypeID
-        sale.subtotal = str(self.cart.subtotal()) # for FixedPoint
-        sale.total = 0
+        sale.subtotal = str(subtotal) # it's a fixedpoint
+        sale.salestax = self.salestax
+        sale.shipping = self.shipping
+        sale.total = str(total) # also a fixedpoint
         sale.statusID = zikeshop.Status(status="new").ID # mark it 'new'
         sale.siteID = zikeshop.siteID
         sale.save()
@@ -151,6 +235,7 @@ class Cashier(zikeshop.ShopActor):
         ## Now save each item in the detail table
         ## This is NOT normalized, because we don't want the history
         ## to change if the prices or codes change.
+        import zdc
         for item in self.cart.q_contents():
             r = zdc.Record(zdc.Table(zikeshop.dbc, "shop_sale_item"))
             r["saleID"] = saleID
@@ -160,6 +245,30 @@ class Cashier(zikeshop.ShopActor):
             r["price"] = str(item["price"]) # because its a FixedPoint!
             r.save()
 
+            ## also: update the inventory...
+            ## @TODO: handle decreasing inventory when multiple locations
+            ## @TODO: move this into its own routine or whatever..
+            rec = zdc.Record(zdc.Table(zikeshop.dbc, "shop_inventory"),
+                             styleID=item["extra"]["styleID"])
+            rec["amount"] = rec["amount"] - item["quanitity"]
+            rec.save()
+
+            prod = zikeshop.Product(ID=rec["productID"])
+            style = zikeshop.Style(ID=item["extra"]["styleID"])
+            if rec["amount"] < prod.instock_warn:
+                #@TODO: make this template-driven
+                msg = weblib.trim(
+                    """
+                    Zikeshop Warning:
+                    
+                    Inventory for %s [%s] {%s} has dropped below %s.
+                    """ \
+                    % (prod.name, prod.code, style.style, rec["amount"] ))
+                zikeshop.sendmail("inventorybot@zike.net",
+                                  zikeshop.owneremail,
+                                  msg)
+
+
         ## we're done, so empty the cart.
         self.cart.empty()
         self.receipt = 1
@@ -168,10 +277,12 @@ class Cashier(zikeshop.ShopActor):
 
 
     def get_model(self):
-        class Model: pass
-        res = Model()
-        res.addressbook = self.cust.q_addressbook()
-        res.creditcards = self.cust.q_creditcards()
+        res = {}
+        res["salestax"] = getattr(self, "salestax", None)
+        res["shippping"] = getattr(self, "shipping", None)
+        res["addressbook"] = self.cust.q_addressbook()
+        res["creditcards"] = self.cust.q_creditcards()
         return res
+
 
 

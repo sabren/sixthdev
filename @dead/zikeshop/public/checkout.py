@@ -22,18 +22,18 @@ if weblib.request.get("shipmeth"):
 if (useTax != ""):
     cart.useTax = useTax
 
-for item in weblib.sess.keys():
-    print item, ":", weblib.sess[item], "<br>"
-print "<hr>"
+#for item in weblib.sess.keys():
+#    print item, ":", weblib.sess[item], "<br>"
+#print "<hr>"
 
 cash = zikeshop.Cashier(cart, weblib.auth.user)
 cash.act()
 
 
-print "<hr>"
-for item in weblib.sess.keys():
-    print item, ":", weblib.sess[item], "<br>"
-print "<hr>"
+#print "<hr>"
+#for item in weblib.sess.keys():
+#    print item, ":", weblib.sess[item], "<br>"
+#print "<hr>"
 
 
 ##-- validate the data ---

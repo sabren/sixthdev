@@ -9,13 +9,15 @@ class Report:
         scope = model
         scope_stack = []
         zres = ""
-        if scope['name']:
+        import tpl_head
+        zres = zres+ tpl_head.fetch(scope)
+        if scope.get('name',''):
             zres = zres + '<'
             zres = zres + 'h1'
             zres = zres + '>'
             zres = zres + '<'
             zres = zres + 'a href=\"'
-            zres = zres + str(scope['basehref'])
+            zres = zres + str(scope.get('basehref',''))
             zres = zres + '/category\"'
             zres = zres + '>'
             zres = zres + 'top'
@@ -27,23 +29,25 @@ class Report:
             _max_ = len(self.model["crumbs"])
             scope_stack.append(scope)
             scope = copy.copy(scope)
+            scope.update(locals())
             for _ in range(_max_):
                 scope.update(self.model["crumbs"][_])
+                scope["_"] = _
                 zres = zres + '<'
-                zres = zres + 'a href='
-                zres = zres + str(scope['basehref'])
+                zres = zres + 'a href=\"'
+                zres = zres + str(scope.get('basehref',''))
                 zres = zres + '/category/'
-                zres = zres + str(scope['path'])
+                zres = zres + str(scope.get('path',''))
                 zres = zres + '\"'
                 zres = zres + '>'
-                zres = zres + str(scope['name'])
+                zres = zres + str(scope.get('name',''))
                 zres = zres + '<'
                 zres = zres + '/a'
                 zres = zres + '>'
                 zres = zres + ' :'
             scope = scope_stack.pop()
             del _
-            zres = zres + str(scope['name'])
+            zres = zres + str(scope.get('name',''))
             zres = zres + '<'
             zres = zres + '/h1'
             zres = zres + '>'
@@ -51,8 +55,10 @@ class Report:
             _max_ = len(self.model["children"])
             scope_stack.append(scope)
             scope = copy.copy(scope)
+            scope.update(locals())
             for _ in range(_max_):
                 scope.update(self.model["children"][_])
+                scope["_"] = _
                 if _ == 0:
                     zres = zres + '<'
                     zres = zres + 'h2'
@@ -63,12 +69,12 @@ class Report:
                     zres = zres + '>'
                 zres = zres + '<'
                 zres = zres + 'a href=\"'
-                zres = zres + str(scope['basehref'])
+                zres = zres + str(scope.get('basehref',''))
                 zres = zres + '/category/'
-                zres = zres + str(scope['path'])
+                zres = zres + str(scope.get('path',''))
                 zres = zres + '\"'
                 zres = zres + '>'
-                zres = zres + str(scope['name'])
+                zres = zres + str(scope.get('name',''))
                 zres = zres + '<'
                 zres = zres + '/a'
                 zres = zres + '>'
@@ -81,8 +87,10 @@ class Report:
             _max_ = len(self.model["products"])
             scope_stack.append(scope)
             scope = copy.copy(scope)
+            scope.update(locals())
             for _ in range(_max_):
                 scope.update(self.model["products"][_])
+                scope["_"] = _
                 if _ == 0:
                     zres = zres + '<'
                     zres = zres + 'h2'
@@ -93,12 +101,12 @@ class Report:
                     zres = zres + '>'
                 zres = zres + '<'
                 zres = zres + 'a href=\"'
-                zres = zres + str(scope['basehref'])
+                zres = zres + str(scope.get('basehref',''))
                 zres = zres + '/product/'
-                zres = zres + str(scope['code'])
+                zres = zres + str(scope.get('code',''))
                 zres = zres + '\"'
                 zres = zres + '>'
-                zres = zres + str(scope['name'])
+                zres = zres + str(scope.get('name',''))
                 zres = zres + '<'
                 zres = zres + '/a'
                 zres = zres + '>'
@@ -121,8 +129,10 @@ class Report:
             _max_ = len(self.model["children"])
             scope_stack.append(scope)
             scope = copy.copy(scope)
+            scope.update(locals())
             for _ in range(_max_):
                 scope.update(self.model["children"][_])
+                scope["_"] = _
                 if _ == 0:
                     zres = zres + '<'
                     zres = zres + 'h2'
@@ -133,12 +143,12 @@ class Report:
                     zres = zres + '>'
                 zres = zres + '<'
                 zres = zres + 'a href=\"'
-                zres = zres + str(scope['basehref'])
+                zres = zres + str(scope.get('basehref',''))
                 zres = zres + '/category/'
-                zres = zres + str(scope['path'])
+                zres = zres + str(scope.get('path',''))
                 zres = zres + '\"'
                 zres = zres + '>'
-                zres = zres + str(scope['name'])
+                zres = zres + str(scope.get('name',''))
                 zres = zres + '<'
                 zres = zres + '/A'
                 zres = zres + '>'
@@ -152,23 +162,20 @@ class Report:
         zres = zres + '>'
         zres = zres + '<'
         zres = zres + 'a href=\"'
-        zres = zres + str(scope['basehref'])
+        zres = zres + str(scope.get('basehref',''))
         zres = zres + '/cart.py\"'
         zres = zres + '>'
         zres = zres + 'view cart'
         zres = zres + '<'
         zres = zres + '/a'
         zres = zres + '>'
-        zres = zres + '<'
-        zres = zres + 'hr'
-        zres = zres + '>'
-        zres = zres + 'zikeshop alpha (c)2000 zike interactive, inc\n\n\n'
+        import tpl_foot
+        zres = zres+ tpl_foot.fetch(scope)
 # end of Report.fetch()
         return zres
 
 def fetch(model={}):
-    Report().fetch(model)
+    return Report().fetch(model)
     
 def show(model={}):
-    Report().show(model)
-
+    return Report().show(model)

@@ -1,8 +1,8 @@
-
+* import tpl_head:
 * if name:
     <h1><a href="{basehref}/category">top</a> :
     * for crumbs:
-        <a href={basehref}/category/{path}">{name}</a> :
+        <a href="{basehref}/category/{path}">{name}</a> :
     {name}</h1>
 
     * for children:
@@ -28,8 +28,5 @@
 
 <hr>
 <a href="{basehref}/cart.py">view cart</a>
-<hr>
-zikeshop alpha (c)2000 zike interactive, inc
-
-
+* import tpl_foot:
 

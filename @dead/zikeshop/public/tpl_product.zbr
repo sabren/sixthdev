@@ -1,7 +1,8 @@
+* import tpl_head:
 <h1>{name}</h1>
 
 * if pictureID:
-    <img src="picture.py?ID={pictureID}">
+    <img src="{basehref}/picture.py?ID={pictureID}">
 
 <p>{descript}</p>
 
@@ -9,7 +10,8 @@
     * if not style:
         <A HREF="{basehref}/cart.py?action=add&styleID={ID}">add to cart</a>
     * el:
-        style: {style} <a href="{basehref}/cart.py?action=add&styleID={ID}">
+        style: {style}
+        &nbsp;<a href="{basehref}/cart.py?action=add&styleID={ID}">
         add to cart</a><br>
 
 * for nodes:
@@ -19,10 +21,5 @@
 * none:
     <h2>this product is not categorized.</h2>
 
-<hr>
-<a href="cart.py">view cart</a>
-<hr>
-zikeshop alpha (c)2000 zike interactive, inc
-
-
+* import tpl_foot:
 
