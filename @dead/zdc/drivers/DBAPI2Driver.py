@@ -29,20 +29,27 @@ class DBAPI2Driver:
         if a sql/prql where-clause or value dictionary is
         given, only records that match it will be returned.
         """
-        ## run the query..
-        sql = "SELECT * FROM " + tablename + " " \
-              + self._whereClause(tablename, wclause, wdict)
+        import string
+        fnames = string.join(map(lambda f: f.name,
+                                 self.fields(tablename))
+                             , ",")
+        sql =\
+            """
+            SELECT %s FROM %s
+            """ % (fnames, tablename)
+        
+        sql = sql + self._whereClause(tablename, wclause, wdict)
         if orderBy:
             sql = sql + " ORDER BY " + orderBy
         cur = self.dbc.cursor()
         cur.execute(sql)
-        return cur.fetchall()
+        return zdc.toListDict(cur)
 
 
     def update(self, tablename, key, data):
             
         sql = "UPDATE " + tablename + " SET "
-        for f in self.fields(tablename):
+        for f in self._fields(tablename):
             #@TODO: allow support for datetimes!!!!
             # here's the issue: for some reason, MySQL gives me a
             # nasty warning... but I haven't been able to figure out
@@ -69,16 +76,18 @@ class DBAPI2Driver:
 
         vals = ''
         # .. and the fieldnames :
-        for f in self.fields(tablename):
+        for f in self._fields(tablename):
             # a hack to handle initialtimestamps:
-            if f.name in data.insertStamps:  #<------ @TODO: fix!
+            if data.get(f.name) == zdc.TIMESTAMP:
                 sql = sql + f.name + ","
                 vals = vals + "now(),"
             # this is the normal case:
             elif not f.isGenerated:
                 sql = sql + f.name + ","
                 # let's do fields and values at once
-                vals = vals + self._sqlQuote(tablename, f.name, data[f.name]) + ","
+                vals = vals + self._sqlQuote(tablename, f.name,
+                                             data.get(f.name))
+                vals = vals + ","
 
         # chop off those last commas:
         sql = sql[:-1] + ") VALUES (" + vals[:-1] + ")"
@@ -105,7 +114,7 @@ class DBAPI2Driver:
                 key = int(self.dbc.insert_id())
             except:
                 # and if THAT didn't work, we're out of luck for now
-                raise "don't yet know how to do autonumbers except MySQL"
+                pass
 
         # @TODO: this probably ought to just return the key?
         data[rowid] = key
@@ -132,7 +141,7 @@ class DBAPI2Driver:
         if wdict:
             ## build a where clause from the specified keywords: 
             for f in wdict.keys():
-                if not self.fields(tablename).has_key(f):
+                if not self._fields(tablename).has_key(f):
                     raise "no field called ", f
                 res = res + "AND (" + f + "=" + \
                       self._sqlQuote(tablename, f, wdict[f]) + ")"
@@ -147,7 +156,7 @@ class DBAPI2Driver:
         value is the value to quote, or None to quote the record's
         value for the field
         """
-        field = self.fields(tablename)[fieldname]
+        field = self._fields(tablename)[fieldname]
         if value is None:
             res = "NULL"
         
@@ -171,6 +180,19 @@ class DBAPI2Driver:
     def fields(self, tablename):
         """
         returns an IdxDict of fieldnames and types for a table name
+        """
+        return self._fields(tablename)
+
+    def _fields(self, tablename):
+        """
+        same as fields, but this is the one we actually use for
+        inserts and deletes..
+        
+        This is so you can override fields() to add, hide,
+        or reorder fields, in select(), while using _fields
+        to actually deal with the database..
+        
+        (I needed to do this in a subclass outside of ZDC)
         """
         if self._fieldcache.has_key(tablename):
             res = self._fieldcache[tablename]
