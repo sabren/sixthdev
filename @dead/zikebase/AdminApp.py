@@ -1,7 +1,7 @@
 """
 AdminApp - base class for apps that want to let you edit zdc.RecordObjects
 
-dispatches the following actions: list, show, edit, make, kill
+dispatches the following actions: list, show, edit, create, delete
 
 example: to let you list and edit Widgets:
 
@@ -23,14 +23,14 @@ class WidgetAdminApp(AdminApp):
         # edit is really just show with a different html view
         self.generic_show(Widget, 'frm_widget')
         
-    def make_widget(self):
-        # make is just edit with a new widget (no ID in url)
-        self.generic_make(Widget, 'frm_widget')
+    def create_widget(self):
+        # create is just edit with a new widget (no ID in url)
+        self.generic_create(Widget, 'frm_widget')
 
     def save_widget(self):
         self.generic_create(Widget, 'frm_widget')
 
-    # no kill_widget, so user can't delete...
+    # no delete_widget, so user can't delete...
 
 
 """
@@ -57,7 +57,7 @@ class AdminApp(weblib.Actor):
         self._runZebra(template)
         
 
-    ## show/edit/make ###############################################
+    ## show/edit/create ###############################################
 
     def act_show(self):
         self._dispatch("show")
@@ -65,21 +65,21 @@ class AdminApp(weblib.Actor):
     def act_edit(self):
         self._dispatch("edit")
 
-    def act_make(self):
-        self._dispatch("make")
+    def act_create(self):
+        self._dispatch("create")
 
     def generic_show(self, klass, template):
         self._showObject(klass(self.dbc, ID=self.input.get("ID")), template)
 
-    def generic_make(self, klass, template):
+    def generic_create(self, klass, template):
         self._showObject(klass(self.dbc), template)
 
-    ## delete ######################################################
+    ## delete  ######################################################
             
-    def act_kill(self):
-        self._dispatch("kill")
+    def act_delete(self):
+        self._dispatch("delete")
 
-    def generic_kill(self, klass, nextAction):
+    def generic_delete(self, klass, nextAction):
         self._objectEdit(klass, "delete")
         self.redirect(action=nextAction)
 
@@ -90,7 +90,7 @@ class AdminApp(weblib.Actor):
         self._dispatch("save")
 
     def generic_save(self, klass):
-        self._objectEdit(klass, "save")
+        return self._objectEdit(klass, "save")
 
 
     ###[ private methods ]###########################################
@@ -101,7 +101,7 @@ class AdminApp(weblib.Actor):
         if meth:
             meth()
         else:
-            self.complain("don't know how to list %s" % what)
+            self.complain("don't know how to %s %s" % (action, what))
 
 
     def _runZebra(self, template):
@@ -121,8 +121,4 @@ class AdminApp(weblib.Actor):
         ed = zikebase.ObjectEditor(
                  klass, self.dbc, self.input, self.input.get("ID"))
         ed.do(command)
-        #@TODO: delete this!
-        if command == "delete":
-            self.objectID = None
-        else:
-            self.objectID=ed.object.ID
+        return ed.object
