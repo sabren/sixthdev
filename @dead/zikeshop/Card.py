@@ -54,7 +54,7 @@ class Card(zdc.RecordObject):
                 num = num + ch
 
         # validate the card:
-        if (self.issuer != "unknown") and checkLength(self.issuer, len(num)) \
+        if (issuer(num) != "unknown") and checkLength(issuer(num), len(num)) \
            and self.checkdigits(num):
             self._data['number']=num
         else:
