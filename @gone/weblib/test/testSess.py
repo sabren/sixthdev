@@ -3,16 +3,18 @@
 #
 
 import unittest
-from weblib.Sess import Sess
+from weblib import Sess, DBSessPool
+import test
+
 
 class SessTestCase(unittest.TestCase):
     def setUp(self):
-        self.sess = Sess.Sess(Sess.SessPool("testSess"))
+        self.sess = Sess(DBSessPool(test.dbc))
 
-    def checkUid(self):
+    def check_sid(self):
         self.sess.start()
-        uid = self.sess.uid
-        assert len(uid)==32, "Sess.uid isn't right."
+        sid = self.sess.sid
+        assert len(sid)==32, "sess.sid isn't right."
 
     def tearDown(self):
         del self.sess

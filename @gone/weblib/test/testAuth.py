@@ -8,39 +8,40 @@ from weblib.Auth import Auth
 class AuthTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.auth = Auth()
+        pass
+        #self.auth = Auth()
         
-    def checkCheck(self):
+    def nocheck_Check(self):
         pass
 
-    def checkLogin(self):
-        self.auth
+    def nocheck_Login(self):
         pass
 
-    def checkLogout(self):
+    def nocheck_Logout(self):
         pass
 
-    def checkPrompt(self):
+    def nocheck_Prompt(self):
         pass
 
-    def checkFetch(self):
+    def nocheck_Fetch(self):
         pass
 
-    def checkValidate(self):
+    def nocheck_Validate(self):
         pass
 
-    def checkEncodeNormal(self):
+    def nocheck_EncodeNormal(self):
         pass
 
-    def checkEncodePassword(self):
+    def nocheck_EncodePassword(self):
         pass
     
-    def checkRecovery(self):
+    def nocheck_Recovery(self):
         pass
 
-    def checkPersistence(self):
+    def nocheck_Persistence(self):
         pass
     
     def tearDown(self):
-        del self.auth 
+        pass
+        #del self.auth 
 

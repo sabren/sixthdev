@@ -3,7 +3,13 @@
 #
 
 import unittest
-from weblib import Request
+from weblib import request
+
 
 class RequestTestCase(unittest.TestCase):
-    pass
+
+    def nocheck_printNormal(self):
+        pass
+
+    def nocheck_printIncercept(self):
+        pass

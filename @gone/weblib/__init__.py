@@ -1,16 +1,23 @@
 #
 # weblib : a library for web stuff
 # 
-#
 
-from Request  import request
-from Response import response, normalPrint, stdout
-session = {}
+
+### first, import the singletons ##########################
+
+from Request import *
+request = Request()
+
+from Response import *
+response = Response()
 
 from Sess import *
 from SessPool import *
+sess = {}
+
 from Auth import *
 from Perm import *
+
 
 ### unique identifier generator, for sessions, etc #######
 
@@ -55,7 +62,40 @@ def htmlEncode(s):
 
 #### URL encoder ########################################
 
-import urllib
-urlEncode = urllib.urlencode
+def urlEncode(what):
+    """This works the way ASP's urlEncode does, OR lets you do it
+    the urllib way (using a dict)"""
     
+    res = None
+    import urllib
+    if type(what) == type(""):
+        res = urllib.quote(what)
+    elif type(what) == type({}):
+        res = urllib.urlencode(what)
+    else:
+        raise "urlEncode doesn't know how to deal with this kind of data"
+
+    return res
+
+
+
+
+##############3
+
+
+def printNormal():
+    pass
+
+def printIntercept():
+    pass
+
+## import sys
+## stdout = sys.stdout
+## sys.stdout = response
+
+## ### but allow the old behavior, if needed ######
+
+## def normalPrint():
+##     sys.stdout = stdout
+
 
