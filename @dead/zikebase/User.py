@@ -24,7 +24,7 @@ class User(zikebase.Contact):
 
     def getEditableAttrs(self):
         return self.__super.getEditableAttrs(self) \
-               + ['username', 'password', 'uid', 'siteID']
+               + ['username', 'password', 'uid']
         
     def _fetch(self, key=None, **kw):
         keys = kw.keys()
@@ -56,11 +56,6 @@ class User(zikebase.Contact):
     def get_username(self):
         return self._userRec['username']
 
-    def set_siteID(self, value):
-        self._userRec['siteID'] = value
-    def get_siteID(self):
-        return self._userRec['siteID']
-        
     # we want to encrypt the passwords transparently.
     def get_password(self):
         """
