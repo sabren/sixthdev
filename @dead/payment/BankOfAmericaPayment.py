@@ -65,14 +65,15 @@ class BankOfAmericaPayment(payment.AbstractPayment):
             
             }
 
-
         try:
             gotError = 0
-            content = self._submit(values,
+            content = self._submit(values, 
                                    headers=[("Referer", self.referer)])
         except:
+            raise
             gotError = 1
 
+        self.details = ""
 
         if gotError:
             self.result = payment.ERROR
@@ -88,7 +89,6 @@ class BankOfAmericaPayment(payment.AbstractPayment):
                 self.error = None
             else:
                 self.error = resdict["ioc_reject_description"]
-                self.details = ""
                 if resdict.has_key("ioc_invalid_fields"):
                     self.result = payment.ERROR
                     errs = resdict["ioc_invalid_fields"].split(",")
@@ -134,7 +134,7 @@ class BankOfAmericaPayment(payment.AbstractPayment):
 
 
 ## @TODO: fix this:
-## test in here because sdunit isn't set up for custome python (threads)
+## test in here because sdunit isn't set up for custom python (threads)
 if __name__=="__main__":
     from bofacfg import kwargs
     pay = BankOfAmericaPayment(**kwargs)
