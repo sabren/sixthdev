@@ -1,7 +1,8 @@
 
 class Clerk:
-    def __init__(self, store):
+    def __init__(self, store, tables=None):
         self.store = store
+        self.tables = tables or {}
 
     def new(self, klass):
         # this is here because, until we replace recordobject
@@ -17,3 +18,5 @@ class Clerk:
         # just delegate for now:
         instance.save()
 
+    def select(self, klass, **wargs):
+        return self.store.select(self.tables[klass], **wargs)
