@@ -84,19 +84,44 @@ def urlDecode(what):
 
 
 
-### and now, a herd of singletons ##########################
+### and now, the herd of singletons ##########################
+
+# In all of these cases, importing * imports a class with the
+# same name as the module. This means the module basically
+# disappears, and all the user sees is that weblib has
+# a bunch of classes defined.
 
 from Engine import *
-
 from Request import *
-request = Request()
-
 from Response import *
-response = Response()
-
 from Sess import *
-from SessPool import *
-sess = {}
-
 from Auth import *
 from Perm import *
+
+# the config module is different. It defines a SessPool
+# object called pool... This is why we don't import SessPool
+# in the section above.
+#
+# we put it in a seperate module so that it would be easy to
+# customize.
+
+from config import pool
+
+# We don't want to define the singletons more than once, though.
+# Otherwise, we'd lose session data and waste time everytime some
+# subfuction somewhere said "import weblib"... So, we check for
+# __weblib__ in the global namespace first.
+
+if not globals().get("__weblib__"):
+
+    request = Request()
+    response = Response()
+
+    sess = Sess(pool)
+    auth = Auth()
+    perm = Perm()
+
+    globals()["__weblib__"] = 1
+
+
+

@@ -14,6 +14,8 @@ class Engine:
     
     """
 
+    parts=("request", "response", "sess", "auth", "perm")
+
     def __init__(self, script=None, pool=None, **kw):
 
         self.script = script       
@@ -21,15 +23,14 @@ class Engine:
         # first make sure they haven't passed us any bogus
         # keywords..
         
-        acceptable = ["request", "response", "sess", "auth", "perm"]
         for item in kw.keys():
-            if item not in acceptable:
+            if item not in Engine.parts:
                 raise TypeError, "unexpected keyword argument: " + item
 
         # Any of the singletons can be turned off by passing
         # None, or customized by passing an instance..
 
-        for item in acceptable:
+        for item in Engine.parts:
             
             if kw.has_key(item):
                 # use the one they supplied
@@ -40,21 +41,52 @@ class Engine:
                 self.sess = weblib.Sess(pool, engine=self)
 
             else:
-                # use the default (eg, self.perm=weblib.Perm())
+                # use a new copy of the default (eg, self.perm=weblib.Perm())
                 setattr(self, item, weblib.__dict__[string.capitalize(item)](engine=self))
+
+
+    def interceptPrint(self):
+        import sys
+        self.stdout = sys.stdout
+        sys.stdout = self.response
+       
+
+    
+    def restorePrint(self):
+        import sys
+        sys.stdout = self.stdout
+
+
+
+    def injectParts(self):
+        """Injects our parts into the weblib namespace"""
+
+        self._oldParts = {}
+       
+        for part in Engine.parts:
+            self._oldParts[part] = getattr(weblib, part)
+            setattr(weblib, part, getattr(self, part))
+
+
+
+    def restoreParts(self):
+        """Restore the old weblib parts.."""
+
+        for part in Engine.parts:
+            setattr(weblib, part, self._oldParts[part])
 
 
 
     def setUp(self):
-        import sys
-        self.stdout = sys.stdout
-        sys.stdout = self.response
+        self.injectParts()
+        self.interceptPrint()
+
 
 
     def tearDown(self):
-        import sys
-        sys.stdout = self.stdout
-
+        self.restorePrint()
+        self.restoreParts()
+            
 
 
     def execute(self, script):
@@ -62,8 +94,8 @@ class Engine:
         exec(script)
 
 
-
     def run(self):
+        #@TODO: capture error messages; expose a result flag...
         self.setUp()
         try:
             try:

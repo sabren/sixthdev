@@ -100,20 +100,22 @@ class EngineTestCase(unittest.TestCase):
             "perm": weblib.perm,
             "request": weblib.request,
             "response": weblib.response }
-        
-        weblib.Engine(script=trim(
+
+        eng = weblib.Engine(script=trim(
             """
             import weblib
             
-            assert weblib.auth is not orig["auth"], "weblib.auth is wrong!"
-            assert weblib.sess is not orig["sess"], "weblib.sess is wrong!"
-            assert weblib.perm is not orig["perm"], "weblib.perm is wrong!"
-            assert weblib.request is not orig["request"], "weblib.request is wrong!"
-            assert weblib.response is not orig["response"], "weblib.response is wrong!"
+            assert weblib.auth is not orig["auth"], "weblib.auth isn't fresh!"
+            assert weblib.sess is not orig["sess"], "weblib.sess isn't fresh!"
+            assert weblib.perm is not orig["perm"], "weblib.perm isn't fresh!"
+            assert weblib.request is not orig["request"], "weblib.request isn't fresh!"
+            assert weblib.response is not orig["response"], "weblib.response isn't fresh!"
 
-            """)).run()
+            """))
 
-
+        eng.run()
+        print eng.response.buffer
+        
 
     def check_weblib_assigned(self):
 
