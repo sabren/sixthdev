@@ -131,13 +131,13 @@ class EngineTest(unittest.TestCase):
     def test_request(self):
         os.environ["QUERY_STRING"]="enginetest"
 
-        engine = Engine()        
+        engine = Engine(script="")
         assert engine.request.query.string=="enginetest", \
                "engine has wrong default request"
         del engine
 
         req = self.builder.build(querystring="e=mc2&this=a+test")
-        engine = Engine(request=req)
+        engine = Engine("pass", request=req)
         assert engine.request.query.string=="e=mc2&this=a+test", \
                "engine has wrong passed-in request:" + \
                engine.request.query.string

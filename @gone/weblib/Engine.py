@@ -19,8 +19,8 @@ class Engine(object):
     REDIRECT  = "* redirect *"
     EXIT      = "* exit *"
 
-    def __init__(self, script=None, request=None,
-                 SITE_NAME=None, SITE_MAIL=None, **kw):
+    def __init__(self, script, request=None,
+                 SITE_NAME=None, SITE_MAIL=None):
         """
         script can be a string with actual code or a file object.
         """
@@ -57,7 +57,7 @@ class Engine(object):
         PATH_INFO CGI variable.
         """
         #@TODO: should this really be PATH_INFO? how about SCRIPT_NAME?
-        if not self.request.environ.get("PATH_INFO"):        
+        if not self.request.environ.get("PATH_INFO"):
             if (type(self.script) == type("")):
                 self.request.environ["PATH_INFO"] = "UNKNOWN_SCRIPT.py"
             else:
