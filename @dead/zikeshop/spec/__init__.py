@@ -4,7 +4,6 @@ import zikebase.test
 
 from sqlTest import dbc
 
-from testPublicPages import *
 from testProduct import *
 from testCart import *
 from testCategory import *
@@ -27,9 +26,6 @@ suites = {}
 ## # merge the lists
 ## for item in zikebase.test.suites.keys():
 ##     suites[item] = zikebase.test.suites[item]
-
-print ">> remember to turn public/admin test pages back on << "
-#suites['publicpages'] = unittest.makeSuite(PublicPagesTestCase, "check_")
 
 suites['category'] = unittest.makeSuite(CategoryTestCase, "check_")
 suites['product'] = unittest.makeSuite(ProductTestCase, "check_")
