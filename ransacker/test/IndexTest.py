@@ -29,3 +29,8 @@ class IndexTest(unittest.TestCase):
                "match() doesn't find things: %s" % str(actual)
         assert actual == ('twodog', 'onedog'), \
                "match() doesn't use relevance: %s" % str(actual)
+
+    def check_score(self):
+        actual = self.idx.score("dog")
+        self.assertEquals(actual, (('twodog', 2), ('onedog',1)))
+

@@ -12,12 +12,6 @@ class MkIndexTest(IndexTest):
     def newIndex(self):
         return MkIndex()
 
-
-    def check_score(self):
-        actual = self.idx.score("dog")
-        self.assertEquals(actual, (('twodog', 2), ('onedog',1)))
-
-
     def check_file(self):
         name = "./spec/test"
         exts = [".rki", ".rkw", ".rkp"]
