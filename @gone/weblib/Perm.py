@@ -4,11 +4,14 @@ Perm.py - emulate PHPLIB's permission support in python.
 @TODO: license
 """
 
+import weblib
+
 class Perm:
 
     ## attributes #############################
     
-    def __init__(self):
+    def __init__(self, engine=weblib):
+        self.engine = engine
         self.perms = {}
 
     ## public methods #########################

@@ -12,28 +12,42 @@ get lumped together. Plus it's old and crufty. :) .. but it also
 # @TODO: request["x"] should look at all 3 sources
 # @TODO: figure out how to treat file uploads
 
+import os
+import string
+import weblib
 
 class Request:
     
-    def __init__(self):
+    def __init__(self, querystring=None, form=None, environ=None, cookie=None, engine=weblib):
+
+        self.engine = engine
+
+        ## environment
+        if environ is None:
+            self.environ = os.environ
+        else:
+            self.environ = environ
         
-        import os, string
-        self.environ = os.environ
 
         ## querystring:
         ## @TODO: handle urlencoding/decoding
+        if querystring is not None: # test explicitly. we might want to pass a ""
+            self.querystring = querystring
+        elif self.environ.has_key("QUERY_STRING"):
+            self.querystring = self.environ["QUERY_STRING"]
+        else:
+            self.querystring = ""
+
+        ## query, a hash of the querystring
         self.query = {}
-        self.querystring = ""
-        if os.environ.has_key("QUERY_STRING"):
-            self.querystring = os.environ["QUERY_STRING"]
-            for pair in string.split(os.environ["QUERY_STRING"], "&"):
-                l = string.split(pair, "=", 1)
-                k = l[0]
-                if len(l) > 1:
-                    v = l[1]
-                else:
-                    v = ''
-                self.querystring[k]=v
+        for pair in string.split(self.querystring, "&"):
+            l = string.split(pair, "=", 1)
+            k = l[0]
+            if len(l) > 1:
+                v = l[1]
+            else:
+                v = ''
+            self.query[k]=v
 
 
         ## cookie:

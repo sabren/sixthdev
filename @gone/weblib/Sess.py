@@ -4,7 +4,7 @@ Sess.py : emulates PHPLIB's session support in python
 @TODO: python-style license lingo
 """
 
-from weblib import request, response
+import weblib
 
 try:
     from cPickle import loads, dumps
@@ -17,10 +17,9 @@ class Sess:
 
     ## attributes ##########################
 
-    def __init__(self, pool):
+    def __init__(self, pool=None, engine=weblib):
 
-        import weblib
-        weblib.session = self
+        self.engine = weblib
         
         self.sid = ""
         self.name = "weblib.Sess"
@@ -113,9 +112,9 @@ class Sess:
         # first try to get the sid from the browser..
         try:
             if self.mode == "cookie":
-                sid = request.cookie[self.name]
+                sid = self.engine.request.cookie[self.name]
             elif self.mode == "get":
-                sid = request.querystring[self.name]
+                sid = self.engine.request.querystring[self.name]
             else:
                 raise "Unknown Sess.mode: " + self.mode
         except KeyError:
@@ -127,7 +126,7 @@ class Sess:
             sid = weblib.uid()
             #@TODO: add code for timeouts wrt setCookie
             if self.mode == "cookie":
-                response.addCookie(self.name, sid)
+                self.engine.response.addCookie(self.name, sid)
                 
         return sid
 

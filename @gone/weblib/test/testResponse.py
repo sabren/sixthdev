@@ -3,13 +3,11 @@
 #
 
 import unittest
-from weblib import response
+from weblib import Response
 
 class ResponseTestCase(unittest.TestCase):
-    
-    def nocheck_printNormal(self):
-        pass
-    
-    def nocheck_printIncercept(self):
+
+    def check_init(self):
+        response = Response()
         pass
 

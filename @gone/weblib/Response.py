@@ -1,11 +1,14 @@
 """
 Response.py - loosely emulates the ASP Response object for python CGI's
 """
+import weblib
 
 class Response:
     """Response object similar to the one from ASP"""
 
-    def __init__(self):
+    def __init__(self, engine=weblib):
+
+        self.engine = engine
 
         self._headers = ""
         self._headerSent = 0

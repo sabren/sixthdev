@@ -5,14 +5,12 @@ Auth.py - generic authentication framework for python cgi.
 @TODO: license, etc..
 """
 
-from weblib import request, response
-
+import weblib
 
 ## messages ###################################
 
 LOGINFAILED = 'Login failed.'
 PLEASELOGIN = 'Please log in.'
-
 
 
 ## Auth class #################################
@@ -21,7 +19,10 @@ class Auth:
 
     ## constructor #############################
     
-    def __init__(self, authKey=None):
+    def __init__(self, authKey=None, engine=weblib):
+
+        self.engine = engine
+        
         if authKey:
             self.isLoggedIn = 1
         else:

@@ -5,6 +5,8 @@
 
 ### first, import the singletons ##########################
 
+from Engine import *
+
 from Request import *
 request = Request()
 
