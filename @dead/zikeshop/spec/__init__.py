@@ -8,7 +8,6 @@ from testProduct import *
 from testCart import *
 from testCategory import *
 from testCustomer import *
-from testShopActor import *
 from testStore import *
 from testSale import *
 from testCard import *
@@ -26,7 +25,6 @@ suites['category'] = unittest.makeSuite(CategoryTestCase, "check_")
 suites['product'] = unittest.makeSuite(ProductTestCase, "check_")
 suites['cart'] = unittest.makeSuite(CartTestCase, "check_")
 suites['customer'] = unittest.makeSuite(CustomerTestCase, "check_")
-suites['shopactor'] = unittest.makeSuite(ShopActorTestCase, "check_")
 suites['store'] = unittest.makeSuite(StoreTestCase, "check_")
 suites['sale'] = unittest.makeSuite(SaleTestCase, "check_")
 suites['card'] = unittest.makeSuite(CardTestCase, "check_")
