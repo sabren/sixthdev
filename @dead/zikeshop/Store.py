@@ -3,16 +3,16 @@ class to represent the actual store
 """
 __ver__="$Id$"
 
-import zdc
 import zikeshop
+from strongbox import Strongbox
 
-class Store(zdc.Object): #(zdc.RecordObject):
+class Store(Strongbox):
 
     ## zdc init  ##########################################
 
     def __init__(self, clerk):
         super(Store, self).__init__()
-        self.__dict__['clerk'] = clerk
+        self.private.clerk = clerk
 
     def _init(self):
         self._onHold = {}
@@ -24,9 +24,9 @@ class Store(zdc.Object): #(zdc.RecordObject):
     def get_products(self):
         #@TODO: get rid of this?
         #@TODO: improper use of clerk.store!
-        return self.clerk.store.select(zikeshop.Product,
-                              "class='product'",
-                              orderBy="code")
+        return self.private.clerk.store.select(zikeshop.Product,
+                                               "class='product'",
+                                               orderBy="code")
 
     ## calculations #######################################
 

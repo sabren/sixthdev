@@ -3,10 +3,8 @@ SaleEditor - an ObjectEditor with special magic for sales.
 """
 __ver__="$Id$"
 
-import sixthday
 
-
-class SaleEditor(sixthday.ObjectEditor):
+class SaleEditor: #(sixthday.ObjectEditor):
     
     def mergeCollections(self):
         """

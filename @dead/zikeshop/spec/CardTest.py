@@ -20,7 +20,7 @@ class CardTestCase(unittest.TestCase):
         self.BADCARD  = '4111111111111119' 
     
     def check_masked(self):
-        card = clerk.new(Card)
+        card = Card()
         card.number = self.GOODCARD
         assert card.masked == 'xxxxxxxxxxxx1111', \
                "masking doesn't work: %s" % card.masked
@@ -29,7 +29,7 @@ class CardTestCase(unittest.TestCase):
         """
         check the checker..
         """
-        card = clerk.new(Card)
+        card = Card()
         assert card.checkdigits(self.GOODCARD) == 1, \
                "check of good card failed..."
 

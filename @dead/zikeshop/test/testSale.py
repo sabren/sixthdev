@@ -13,7 +13,7 @@ class SaleTestCase(unittest.TestCase):
 
     
     def check_links(self):
-        sale = clerk.new(Sale)
+        sale = Sale()
         
         assert isinstance(sale.billAddress, Contact),\
                "invalid billAddress"

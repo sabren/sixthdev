@@ -23,17 +23,17 @@ class ShopApp(zikeshop.PublicApp):
     def act_show_category(self):
         import zdc, zebra
         if self.input.get("path","/")== "/":
-            cat = self.clerk.new(Category)
+            cat = Category()
             cat.ID = 0
         else:
-            cat = self.clerk.load(Category, path=self.input["path"])
+            cat = self.clerk.match(Category, path=self.input["path"])[0]
 
         self.consult(zdc.ObjectView(cat))
         self.write(zebra.fetch("dsp_category", self.model))
 
     def act_show_product(self):
         import zdc, zebra
-        prod = self.clerk.load(Product, code=self.input["code"])
+        prod = self.clerk.match(Product, code=self.input["code"])[0]
         self.consult(zdc.ObjectView(prod))
         print >> self, zebra.fetch("dsp_product", self.model)
 

@@ -4,25 +4,23 @@ Contact - name, phone, and address..
 __ver__="$Id$"
 
 
-import zdc
+from strongbox import Strongbox, attr
 
-class Contact(zdc.RecordObject):
-    _tablename = "base_contact"
-
-    def _new(self):
-        super(Contact,self)._new()
-        self._data["userID"]=0
-        self._data["fname"]=""
-        self._data["lname"]=""
-        self._data["email"]=""
-        self._data["address1"]=""
-        self._data["address2"]=""
-        self._data["address3"]=""
-        self._data["city"]=""
-        self._data["stateCD"]=""
-        self._data["postal"]=""
-        self._data["countryCD"]="US"
-        self._data["phone"]=""
+class Contact(Strongbox):
+    ID = attr(int)
+    userID = attr(int, default=0)
+    fname = attr(str)
+    lname = attr(str)
+    email = attr(str)
+    address1 = attr(str)
+    address2 = attr(str)
+    address3 = attr(str)
+    city = attr(str)
+    stateCD = attr(str)
+    postal = attr(str)
+    countryCD = attr(str)
+    phone = attr(str)
+    
     
     def set_email(self, value):
         #@TODO: test set_email!

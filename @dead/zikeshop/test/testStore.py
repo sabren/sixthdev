@@ -14,19 +14,18 @@ class StoreTestCase(unittest.TestCase):
         self.store = Store(clerk)
         try:
             try:
-                state = clerk.load(State, CD="CA")
+                state = clerk.match(State, CD="CA")[0]
             except:
-                state = clerk.new(State)
-                state.CD = "CA"
+                state = State(CD="CA")
             state.salestax = FixedPoint("8.25")
-            state.save()
+            clerk.store(state)
         except:
             pass
 
 
     def check_salesTax(self):
 
-        addr = clerk.new(Contact)
+        addr = Contact()
         addr.stateCD = 'NY'
         addr.postal = '123456'
 
@@ -34,11 +33,11 @@ class StoreTestCase(unittest.TestCase):
         assert actual == 0, \
                "shouldn't have sales tax because no nexus in NY"
 
-        addr = clerk.new(Contact)
+        addr = Contact()
         addr.stateCD = 'CA'
 
         actual = self.store.calcSalesTax(addr, 10)
-        goal = (FixedPoint(clerk.load(State, CD="CA").salestax)
+        goal = (FixedPoint(clerk.match(State, CD="CA")[0].salestax)
                 * 10) / 100.0
         assert actual == goal, \
                "wrong sales tax after nexus established: %s vs %s" \

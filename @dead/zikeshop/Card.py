@@ -4,11 +4,14 @@
 __ver__="$Id$"
 
 import time
-import zdc
 import zikeshop
+from strongbox import attr
+from strongbox import Strongbox
 
-class Card(zdc.RecordObject):
-    _tablename = "shop_card"
+class Card(Strongbox):
+    expMonth = attr(int)
+    expYear = attr(int)
+    number = attr(str)
 
     def getEditableAttrs(self):
         return super(Card, self).getEditableAttrs() + ["masked","issuer"]
@@ -36,12 +39,6 @@ class Card(zdc.RecordObject):
         nowYear, nowMonth = time.localtime(time.time())[0:2]
         return (nowYear, nowMonth) > (self.expYear, self.expMonth)
 
-    def set_expMonth(self, value):
-        self._data['expMonth']=int(value)
-
-    def set_expYear(self, value):
-        self._data['expYear']=int(value)
-
     def set_number(self, value):
         # Strip dashes and spaces..
         # I'm leaving letters and other characters in
@@ -54,7 +51,7 @@ class Card(zdc.RecordObject):
         # validate the card:
         if (issuer(num) != "unknown") and checkLength(issuer(num), len(num)) \
            and self.checkdigits(num):
-            self._data['number']=num
+            self.__values__['number']=num
         else:
             raise ValueError, "Invalid credit card number."
 

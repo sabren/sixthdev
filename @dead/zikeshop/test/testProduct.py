@@ -33,21 +33,21 @@ class ProductTestCase(unittest.TestCase):
     ## price, cost, and retail should all be FixedPoints ###############
 
     def check_price(self):
-        assert isinstance(clerk.new(Product).price, FixedPoint), \
+        assert isinstance(Product().price, FixedPoint), \
                "price is wrong type!"
 
     def check_cost(self):
-        assert isinstance(clerk.new(Product).cost, FixedPoint), \
+        assert isinstance(Product().cost, FixedPoint), \
                "cost is wrong type!"
 
     def check_retail(self):
-        assert isinstance(clerk.new(Product).retail, FixedPoint), \
+        assert isinstance(Product().retail, FixedPoint), \
                "retail is wrong type!"
 
     ## inventory checking ############################################
 
     def check_available(self):
-        prod = clerk.new(Product)
+        prod = Product()
         assert prod.available == 0, \
                "products shouldn't be available by default."
 
@@ -70,7 +70,7 @@ class ProductTestCase(unittest.TestCase):
     ## styles collection #############################################
     def check_styles(self):
 
-        prod = clerk.new(Product)
+        prod = Product()
         assert len(prod.styles) == 0, \
                "shouldn't be any styles by default."
         style = prod.styles.new()
@@ -80,7 +80,7 @@ class ProductTestCase(unittest.TestCase):
                "didn't add style in memory.."
 
 
-        prod = clerk.new(Product)
+        prod = Product()
         prod.name = prod.code ="abc"
         prod.save()
         style = prod.styles.new()
@@ -93,19 +93,19 @@ class ProductTestCase(unittest.TestCase):
     ## categories collection #########################################
 
     def check_categories(self):
-        prod = clerk.new(Product)
+        prod = Product()
         assert len(prod.categories)==0, \
                "categories should be empty list by default"
 
-        nodeA = clerk.new(sixthday.Node)
+        nodeA = sixthday.Node()
         nodeA.name="abc"
         nodeA.save()
         
-        nodeB = clerk.new(sixthday.Node)
+        nodeB = sixthday.Node()
         nodeB.name="xyz"
         nodeB.save()
         
-        prod = clerk.new(Product)
+        prod = Product()
         prod.code = 'some03'
         prod.name = 'something else'
         prod.categories = (nodeA.ID, nodeB.ID)
@@ -117,7 +117,7 @@ class ProductTestCase(unittest.TestCase):
 
 
     def check_categories_some_more(self):
-        prod = clerk.new(Product)
+        prod = Product()
         prod.code = 'some02'
         prod.name = 'something else'
         prod.categories = (1, 2, 3, 4)
@@ -159,7 +159,7 @@ class ProductTestCase(unittest.TestCase):
 
 
     def check_single_nodeID(self):
-        prod = clerk.new(Product)
+        prod = Product()
         prod.categories = 1
         prod.code =""
         try:
@@ -170,7 +170,7 @@ class ProductTestCase(unittest.TestCase):
 
 
     def check_validation(self):
-        prod = clerk.new(Product)
+        prod = Product()
         prod.code = "some01"
         try:
             prod.save()

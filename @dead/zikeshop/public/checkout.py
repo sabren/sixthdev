@@ -32,11 +32,11 @@ class CheckoutApp(zikeshop.PublicApp):
         # internal data (basically a bunch of dicts until checkout)
         self.data = self.sess.get("__checkout__",{})
         self.billData = self.data.get("billData",
-                                      self.clerk.new(Contact)._data.copy())
+                                      Contact()._data.copy())
         self.shipData = self.data.get("shipData",
-                                      self.clerk.new(Contact)._data.copy())
+                                      Contact()._data.copy())
         self.cardData = self.data.get("cardData",
-                                      self.clerk.new(Card)._data.copy())
+                                      Card()._data.copy())
         self.comments = self.data.get("comments", "")
         self.model["comments"]=self.comments
 
@@ -190,9 +190,9 @@ class CheckoutApp(zikeshop.PublicApp):
         #@TODO: make a .fromDict or .consult for zdc.RecordObjects
         # for now, we'll assume this is okay, since the classes have
         # already validated everything in here:
-        bill = self.clerk.new(Contact); bill._data = self.billData
-        ship = self.clerk.new(Contact); ship._data = self.shipData
-        card = self.clerk.new(Card); card._data = self.cardData
+        bill = Contact(); bill._data = self.billData
+        ship = Contact(); ship._data = self.shipData
+        card = Card(); card._data = self.cardData
 
         #@TODO: lots of duplicate logic here.. clean up
         store = zikeshop.Store(self.clerk)

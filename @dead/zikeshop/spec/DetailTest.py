@@ -15,17 +15,17 @@ class DetailTestCase(unittest.TestCase):
         subtotal should always be product price * quantity
         """
         
-        det = clerk.new(Detail)
+        det = Detail()
         assert det.subtotal == 0, \
                "wrong default subtotal: %s" % det.subtotal
         
-        prod = clerk.new(Product)
+        prod = Product()
         prod.price = '12.00'
         det.product = prod
         assert det.subtotal == 0, \
                "wrong subtotal for 0 quantity: %s" % det.subtotal
 
-        det = clerk.new(Detail)
+        det = Detail()
         det.quantity = 10
         det.product = prod
         assert det.subtotal == 120, \
@@ -38,7 +38,7 @@ class DetailTestCase(unittest.TestCase):
         
         
     def check_set_subtotal(self):
-        det = clerk.new(Detail)
+        det = Detail()
         try:
             gotError = 0
             det.subtotal = 5
