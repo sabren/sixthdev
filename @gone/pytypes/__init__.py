@@ -1,6 +1,7 @@
 from FixedPoint import *
 from DateTime import *
 from Date import *
+from Range import *
 from IdxDict import *
 from EmailAddress import EmailAddress
 
@@ -27,6 +28,7 @@ def toDateTime(thing):
 def dateRange(date1, date2):
     """
     returns a tuple of Date objects between two dates (inclusive)
+    @TODO: this has nothing to do with the Range class
     """
     d1 = toDate(date1)
     d2 = toDate(date2)
