@@ -138,3 +138,23 @@ class ClerkTest(unittest.TestCase):
             self.clerk.store(a)
         except AttributeError:
             self.fail("shouldn't die when columns outnumber attributes")
+
+
+
+
+
+    def check_user(self):
+        """
+        @TODO: test case from cornerhost that exposed a bug
+        also, the isInstance(LinkSetInjector) lines in Clerk.py
+        don't seem to have test cases. And ought to do some kind
+        of polymorphism magic anyway.
+        """
+        from cornerhost import *
+        import cornerhost.config #@TODO: decouple from cornerhost
+        clerk = Clerk(MockStorage(), cornerhost.config.dbMap)
+        u = clerk.store(User(username="ftempy"))
+        d = clerk.store(Domain(domain="ftempy.com", user=u))
+        assert d.user, "didn't follow link before fetch"
+        d = clerk.fetch(Domain, 1)
+        assert d.user, "didn't follow link broke after fetch"
