@@ -7,13 +7,13 @@ $Id$
 import unittest
 import zikeshop
 
-class CartTestCase(unittest.TestCase):
+class CartTest(unittest.TestCase):
 
     def setUp(self):
         self.cart = zikeshop.Cart({})
 
 
-    def check_isEmpty(self):
+    def test_isEmpty(self):
         assert self.cart.isEmpty(), \
                "Cart should be empty by default."
 
@@ -22,7 +22,7 @@ class CartTestCase(unittest.TestCase):
                "Cart shouldn't be empty when there's stuff in it."
 
 
-    def check__getKey(self):
+    def test__getKey(self):
         assert self.cart._getKey() == "__cart_", \
                "doesn't return the expected key."        
 
@@ -31,7 +31,7 @@ class CartTestCase(unittest.TestCase):
                "doesn't properly encode the cart name in the key"
 
 
-    def check_q_contents(self):
+    def test_q_contents(self):
         assert self.cart.q_contents() == [], \
                "q_contents returns wrong thing with empty cart"
 
@@ -50,7 +50,7 @@ class CartTestCase(unittest.TestCase):
                        "q_contents returns wrong thing with full cart"
         
 
-    def check_add(self):
+    def test_add(self):
         self.cart.add("bananas")
         goal = {"label":"bananas", "price":0,
                 "link":"", "quantity":1, "extra":None}
@@ -62,7 +62,7 @@ class CartTestCase(unittest.TestCase):
                    "wrong contents attribute: %s" % item
 
 
-    def check_update(self):
+    def test_update(self):
         self.cart.add("something")
         self.cart.add("something", quantity=2)
         self.cart.add("something", quantity=1)
@@ -77,7 +77,7 @@ class CartTestCase(unittest.TestCase):
                "update screws up quantities when newQuantity is None"
         
 
-    def check_remove(self):
+    def test_remove(self):
         self.cart.add("something")
         self.cart.remove(0)
 
@@ -85,7 +85,7 @@ class CartTestCase(unittest.TestCase):
                "cart.remove(item) doesn't work"
         
     
-    def check_purge(self):
+    def test_purge(self):
         self.cart.add("cheese")
         self.cart.update(0, 0)
         self.cart.purge()
@@ -94,7 +94,7 @@ class CartTestCase(unittest.TestCase):
                "cart.purge() doesn't purge items"
 
 
-    def check_subtotal(self):
+    def test_subtotal(self):
         self.cart.add("fried green tomatoes", 1.25, 2)
         self.cart.add("red hot chili peppers", 2.5, 5)
 
@@ -103,7 +103,7 @@ class CartTestCase(unittest.TestCase):
                % self.cart.subtotal()
 
 
-    def check_calcWeight(self):
+    def test_calcWeight(self):
         self.cart.add("2 tens", 1, 2, extra={"weight":10})
         self.cart.add("3 ones", 1, 3, extra={"weight":1})
         actual = self.cart.calcWeight()
@@ -113,3 +113,6 @@ class CartTestCase(unittest.TestCase):
     def tearDown(self):
         del self.cart
 
+if __name__=="__main__":
+    unittest.main()
+    

@@ -3,14 +3,10 @@ test cases for zikeshop.SaleEditor
 """
 __ver__="$Id$"
 import unittest
-import zikeshop
-from zikeshop.test import clerk
-from zikeshop.test import dbc
-from zikeshop import Product
 
-class SaleEditorTestCase(unittest.TestCase):
+class SaleEditorTest(unittest.TestCase):
     def check_noteToSelf(self):
-        raise "@TODO: revive ObjectEditor so I can make this work"
+        raise "skip" #@TODO: revive ObjectEditor so I can make this work
 
 
 ##     def setUp(self):

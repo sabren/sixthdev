@@ -5,29 +5,27 @@ __ver__="$Id$"
 
 import sixthday
 import unittest
-import zikeshop
-import zikeshop.test
 from pytypes import FixedPoint
 from zikeshop import Product
-from zikeshop.test import clerk
 
 #@TODO: test picture attribute
 
-class ProductTestCase(unittest.TestCase):
+class ProductTest(unittest.TestCase):
 
     def setUp(self):
-        self.cur = zikeshop.test.dbc.cursor()
-        self.cur.execute("delete from base_node")
-        self.cur.execute("delete from shop_product")
-        self.cur.execute("delete from shop_product_node")
+        pass
+##         self.cur = zikeshop.test.dbc.cursor()
+##         self.cur.execute("delete from base_node")
+##         self.cur.execute("delete from shop_product")
+##         self.cur.execute("delete from shop_product_node")
 
-        self.cur.execute("insert into base_node (name) values ('cat1')")
-        self.cur.execute("insert into base_node (name) values ('cat2')")
-        self.cur.execute("insert into base_node (name) values ('cat3')")
-        self.cur.execute("insert into base_node (name) values ('cat4')")
+##         self.cur.execute("insert into base_node (name) values ('cat1')")
+##         self.cur.execute("insert into base_node (name) values ('cat2')")
+##         self.cur.execute("insert into base_node (name) values ('cat3')")
+##         self.cur.execute("insert into base_node (name) values ('cat4')")
         
-        self.cur.execute("INSERT INTO shop_product (code, name) "
-                         "VALUES ('some01', 'something')")
+##         self.cur.execute("INSERT INTO shop_product (code, name) "
+##                          "VALUES ('some01', 'something')")
 
 
     ## price, cost, and retail should all be FixedPoints ###############

@@ -2,12 +2,10 @@
 zikeshop.State - states, with sales tax info
 """
 __ver__="$Id$"
-import zdc
-import zikeshop
+from strongbox import *
 from pytypes import FixedPoint
 
-class State(zdc.RecordObject):
-    _tablename = "ref_state"
+class State(Strongbox):
+    code = attr(str)
+    salestax = attr(FixedPoint)
 
-    def get_salestax(self):
-        return FixedPoint(self._data["salestax"])

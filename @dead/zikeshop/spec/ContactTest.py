@@ -1,20 +1,21 @@
 __ver__="$Id$"
 
 import unittest
-import zikeshop.test
 from zikeshop import Contact
 
-class ContactTestCase(unittest.TestCase):
+class ContactTest(unittest.TestCase):
 
-    def check_email(self):
-        ctact = Contact(zikeshop.test.dbc)
+    def test_email(self):
+        ctact = Contact()
         try:
             ctact.email="@sadf@@"
             gotError =0
-        except ValueError:
+        except TypeError:
             gotError =1 
         assert gotError, "didn't get error assigning invalid email."
 
         ctact.email = "michal@zike.net"
-        assert ctact.email=="michal@zike.net", \
-               "setting the email didn't work!"
+        self.assertEquals(ctact.email, "michal@zike.net")
+
+if __name__=="__main__":
+    unittest.main()

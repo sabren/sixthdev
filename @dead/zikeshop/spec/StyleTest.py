@@ -7,13 +7,14 @@ import unittest
 import zikeshop
 import zdc
 from zikeshop import Style
-from zikeshop.test import clerk
+from arlo import MockClerk
+clerk = MockClerk()
 
 #@TODO: test picture attribute
 
-class StyleTestCase(unittest.TestCase):
+class StyleTest(unittest.TestCase):
 
-    def check_product(self):
+    def test_product(self):
         #@TODO: what's up with this test?
         # maybe it just tries not to get an error?
         style = clerk.fetch(Style, ID=2)

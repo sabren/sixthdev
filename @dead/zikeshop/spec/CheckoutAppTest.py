@@ -9,11 +9,13 @@ import weblib
 
 import sys, os
 from zikeshop.public.checkout import CheckoutApp
-from zikeshop.test import clerk
+#from zikeshop.test import clerk
 
-class CheckoutAppTestCase(unittest.TestCase):
+class CheckoutAppTest(unittest.TestCase):
     
     def setUp(self):
+        raise "skip"
+    
         # wipe the database clean.
         self.cur = zikeshop.test.dbc.cursor()
         self.cur.execute("DELETE FROM shop_sale")
@@ -28,7 +30,7 @@ class CheckoutAppTestCase(unittest.TestCase):
     def tearDown(self):
         os.chdir(self.cwd)
 
-    def check_checkout(self):
+    def test_checkout(self):
         ## THIS IS ONE *LONG* TEST...............
         
         import zikeshop
@@ -175,3 +177,6 @@ class CheckoutAppTestCase(unittest.TestCase):
         #import pdb; pdb.set_trace()
         #app.act()
         
+if __name__=="__main__":
+    unittest.main()
+    

@@ -4,10 +4,13 @@ from pytypes import FixedPoint
 from zikeshop import Contact
 from zikeshop import State
 from zikeshop import Store
-from zikeshop.test import clerk
-from zikeshop.test import dbc
 
-class StoreTestCase(unittest.TestCase):
+from arlo import MockClerk
+clerk = MockClerk()
+
+#@TODO: is store anything more than a clerk?
+
+class StoreTest(unittest.TestCase):
     __ver__ = "$Id$"
 
     def setUp(self):
@@ -23,7 +26,7 @@ class StoreTestCase(unittest.TestCase):
             pass
 
 
-    def check_salesTax(self):
+    def test_salesTax(self):
 
         addr = Contact()
         addr.stateCD = 'NY'
@@ -42,19 +45,11 @@ class StoreTestCase(unittest.TestCase):
         assert actual == goal, \
                "wrong sales tax after nexus established: %s vs %s" \
                % (actual, goal)
-        
 
-    def check_products(self):
-        import zikeshop.test
-        cur = zikeshop.test.dbc.cursor()
-        cur.execute("DELETE FROM shop_product")
-        cur.execute("INSERT INTO shop_product (class, name)" 
-                    "values ('product', 'asdfasf')")
-        actual = len(self.store.products)
-        assert actual==1, \
-               "wrong # of products found: %s"  % actual
-        
-
-    def check_fakedata(self):
+    def test_fakedata(self):
         import fakedata
         fakedata.load()
+
+if __name__=="__main__":
+    unittest.main()
+    

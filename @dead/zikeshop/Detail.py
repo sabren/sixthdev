@@ -3,36 +3,16 @@ a Sale Detail.
 """
 __ver__="$Id$"
 
-import zdc
-import zikeshop
+from strongbox import *
+from zikeshop import Style
+from zikeshop import Product
 
-class Detail(zdc.RecordObject):
-    _tablename = "shop_detail"
-    _tuples = ["product"]
-
-    def _new(self):
-        super(Detail,self)._new()
-        self.saleID = 0
-        self.productID = 0
-        self.quantity = 0
-
-    # @TODO: this won't (?) save products that have no ID when saved?
-    # (but that only happens when testing, right?)
-    # the best bet is to make this into a zdc.link of some kind..
-    def set_product(self, value):
-        self.productID = value.ID
-        self._data['_prod'] = value
-
-    def get_product(self):
-        res = None
-        if  hasattr(self, "_prod"):
-            return self._prod
-        elif self.productID:
-            #@TODO: this is a HORRIBLE way to do this:
-            res = zikeshop.Product(self._ds, ID=self.productID)
-            if res._data["class"]=="style":
-                res = zikeshop.Style(self._ds, ID=self.productID)
-        return res
+class Detail(Strongbox):
+    ID = attr(long)
+    product = link(Product) #@TODO: this might be a style!?
+    productID = attr(long, default=0)  #@TODO: kill this?
+    saleID = attr(long, default=0)
+    quantity = attr(long, default=0)
 
     ### subtotal calculation #######################################
     def get_subtotal(self):
@@ -44,7 +24,5 @@ class Detail(zdc.RecordObject):
     def set_subtotal(self, value):
         raise TypeError, "subtotal is read-only."
         
-    def save(self):
-        # add the calculated field to the actual record:
-        self._data["subtotal"] = self.subtotal
-        super(Detail,self).save()
+    #@TODO: auto-calculate subtotal field for saving to database
+    

@@ -1,63 +1,33 @@
-import zdc
-import zikeshop
+"""
+Product.py - product object for zikeshop
+"""
+__ver__="$Id$"
+
 from zikeshop import Picture
 from pytypes import FixedPoint
-from zdc import LinkSet
-from zdc import Junction
+from strongbox import *
 
-class Product(zdc.RecordObject):
-    """
-    Product.py - product object for zikeshop
-    """
-    __ver__="$Id$"
-    _tablename = "shop_product"
-
-    # @TODO: fix this!!!!!! there should be no _tuples..
-    # or should there be? I DO need to tell ObjectView
-    # that there's a collection called nodes...
-    # I'm only doing it this way because I don't have
-    # a *:* join object yet.
-    #
-    # I need categories to display the product page
-    # (this product is in ...)
-    #
-    _tuples = ['styles', 'categories']
+class Product(Strongbox):
+    ID = attr(long)
+    _pic = attr(Picture)
+    code = attr(str)
+    name = attr(str)
+    brief = attr(str)
+    descript = attr(str)
+    warn = attr(int, okay=[0,1], default=0)
+    price = attr(FixedPoint, default=0)
+    cost = attr(FixedPoint, default=0)
+    retail = attr(FixedPoint, default=0)
+    weight = attr(FixedPoint, default=0)
+    isHidden = attr(int, okay=[0,1], default=0)
+    hold = attr(int) # @TODO: what does this mean again?
+    stock = attr(int, default=-1) # no value known
+    warn = attr(int, default=-1)  # no warning amount
     
-    ### Magic RecordObject Methods ############################
+    #_tuples = ['styles', 'categories']
+    #self._data['class'] = "product"
+    #self.parentID = 0
 
-    def _init(self):
-        self._pic = None            
-
-    def _new(self):
-        super(Product,self)._new()
-        self._data['class'] = "product"
-        self.code = ""
-        self.name = ""
-        self.brief=""
-        self.descript = ""
-        self.warn = 0
-        self.price = 0
-        self.cost = 0
-        self.retail = 0
-        self.weight = 0
-        self.parentID = 0
-        self.isHidden = 0
-
-        self.hold = 0
-        self.stock = None  # no value known (this doesn't mean no stock..)
-        self.warn = None   # no warning
-
-
-    def _fetch(self, **where):
-        super(Product, self)._fetch(**where)
-        self.categories.fetch()
-
-    ## Normal RecordObject Methods #######################################
-
-    def getEditableAttrs(self):
-        #@TODO: this model is really straining: available isn't editable..
-        #(but I need it here for now so ObjectView can find available..)
-        return super(Product,self).getEditableAttrs() + ['picture','available']
 
     def delete(self):
         self.categories.delete()
@@ -67,32 +37,14 @@ class Product(zdc.RecordObject):
         super(Product,self).delete()
 
 
-    def save(self):
-        if self._pic:
-            self._pic.save()
-            self.pictureID = self._pic.ID
+## @TODO: move duplicate code check to admin app or something.
+## # check for dulplicate codes:
+##         where = "code = '%s'" % (self.code)
+##         if self.ID:
+##             where = where + "AND ID != %i" % int(self.ID)
+##         if self._ds.select(self._tablename, where):
+##             raise ValueError, "This code already exists!"
 
-        # check for dulplicate codes:
-        where = "code = '%s'" % (self.code)
-        if self.ID:
-            where = where + "AND ID != %i" % int(self.ID)
-        if self._ds.select(self._tablename, where):
-            raise ValueError, "This code already exists!"
-
-        super(Product,self).save()
-        self.categories.save()
-
-
-    ## accessors ###############################################
-
-    def get_price(self):
-        return FixedPoint(self._data.get('price', '0.00'))
-
-    def get_cost(self):
-        return FixedPoint(self._data.get('cost', '0.00'))
-
-    def get_retail(self):
-        return FixedPoint(self._data.get('retail', '0.00'))
 
     def get_available(self):
         #@TODO: this is where styled/unstyled distinction
@@ -102,63 +54,41 @@ class Product(zdc.RecordObject):
             res = res + (item.stock or 0) - item.hold
         return res
     
-    def set_picture(self, blob):
-        # on a multipart/form-data form,
-        # if you don't upload a file, it still gives you
-        # a string field.. this "if" copes with that.
-        if type(blob) != type(""):
-            self.get_picture()
-            self._pic.picture = blob.value
-            self._pic.type = blob.type
 
-    def get_picture(self):
-        if not self._pic:
-            if self.pictureID:
-                self._pic = Picture(self._ds, ID=self.pictureID)
-            else:
-                self._pic = Picture(self._ds)
-        return self._pic
+##     #@TODO: proper linkset for product styles
+##     def get_styles(self):
+##         if not self._data.has_key("_styles"):
+##             self._data["_styles"] = LinkSet(self,
+##                                                 zikeshop.Style,
+##                                                 "parentID")
+##         return self._data["_styles"]
 
+    ## @TODO: category junction stuff ############################
 
-    def get_styles(self):
-        if not self._data.has_key("_styles"):
-            self._data["_styles"] = LinkSet(self,
-                                                zikeshop.Style,
-                                                "parentID")
-        return self._data["_styles"]
-
-    ## category junction stuff #########################################
-
-
-    def get_categories(self):
-        if not self._data.has_key("cats"):
-            self._data["cats"] = Junction(self,
-                                              zikeshop.Category,
-                                              "shop_product_node",
-                                              "productID", "nodeID")
-        return self._data["cats"]
+##     def get_categories(self):
+##         if not self._data.has_key("cats"):
+##             self._data["cats"] = Junction(self,
+##                                               zikeshop.Category,
+##                                               "shop_product_node",
+##                                               "productID", "nodeID")
+##         return self._data["cats"]
           
-    def set_categories(self, value):
-        vals = []
-        if type(value) == type(0):
-            vals.append(value)
-        elif type(value)==type(""):
-            vals.append(int(value))
-        elif type(value) in (type(()), type([])):
-            for item in value:
-                vals.append(int(item))
-        else:
-            raise TypeError, \
-                  "value assigned to categories should be int or int list," \
-                  "not %s" % type(value)
+##     def set_categories(self, value):
+##         vals = []
+##         if type(value) == type(0):
+##             vals.append(value)
+##         elif type(value)==type(""):
+##             vals.append(int(value))
+##         elif type(value) in (type(()), type([])):
+##             for item in value:
+##                 vals.append(int(item))
+##         else:
+##             raise TypeError, \
+##                   "value assigned to categories should be int or int list," \
+##                   "not %s" % type(value)
 
-        self.categories.clear()
-        from zikeshop import Category
-        for catID in vals:
-            self.categories << Category(self._ds, "@TODO: fixme!", ID=catID)
+##         self.categories.clear()
+##         from zikeshop import Category
+##         for catID in vals:
+##             self.categories << Category(self._ds, "@TODO: fixme!", ID=catID)
 
-    def get_label(self):
-        return self.name
-
-    def __str__(self):
-        return self.label

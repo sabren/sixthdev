@@ -4,11 +4,9 @@ test cases for zikeshop.Card
 __ver__ = "$Id$"
 
 import unittest
-import zikeshop
-from zikeshop.test import clerk
 from zikeshop import Card
 
-class CardTestCase(unittest.TestCase):
+class CardTest(unittest.TestCase):
 
     #@TODO: really test the validation stuff!
 
@@ -19,13 +17,13 @@ class CardTestCase(unittest.TestCase):
         self.GOODCARD = '4111111111111111'
         self.BADCARD  = '4111111111111119' 
     
-    def check_masked(self):
+    def test_masked(self):
         card = Card()
         card.number = self.GOODCARD
         assert card.masked == 'xxxxxxxxxxxx1111', \
                "masking doesn't work: %s" % card.masked
 
-    def check_checkdigits(self):
+    def test_checkdigits(self):
         """
         check the checker..
         """
@@ -36,4 +34,6 @@ class CardTestCase(unittest.TestCase):
         assert card.checkdigits(self.BADCARD) == 0, \
                "check of bad card failed to fail... :)"
         
-        
+if __name__=="__main__":
+    unittest.main()
+    

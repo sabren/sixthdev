@@ -7,9 +7,10 @@ import unittest
 import zikeshop
 import sys, os
 from zikeshop.public.shop import ShopApp
-from zikeshop.test import clerk
+from arlo import MockClerk
+clerk = MockClerk()
 
-class ShopAppTestCase(unittest.TestCase):
+class ShopAppTest(unittest.TestCase):
     
     def setUp(self):
 
@@ -28,14 +29,18 @@ class ShopAppTestCase(unittest.TestCase):
     def tearDown(self):
         os.chdir(self.cwd)
         
-    def check_show_category(self):
+    def test_show_category(self):
         self.app.do("show_category")
         #@TODO: put some assertions in here!
         #@TODO: what if category doesn't exist?
 
-    def check_show_product(self):
+    def test_show_product(self):
         from zikeshop.test import fakedata
         fakedata.load()
         self.app.do("show_product", input={"code":"GAM00"})
         #@TODO: put some assertions in here!
         #@TODO: what if product doesn't exist?
+
+if __name__=="__main__":
+    unittest.main()
+    
