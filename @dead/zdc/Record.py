@@ -38,15 +38,11 @@ class Record:
 
     ## public methods ###############################################
 
-    def delete(self, key=None):
-        """Deletes the specified (default is current) record. """
-        if key is not None:
-            self.key = key
-        else:
-            pass  # because we'll just delete the current record.
+    def delete(self):
+        """Deletes the record. """
 
         # and delete it
-        sql = "DELETE FROM  " + self.table + \
+        sql = "DELETE FROM  " + self.table.name + \
               self._whereClause()
         self.table.dbc.cursor().execute(sql)
 
@@ -78,7 +74,7 @@ class Record:
         row = cur.fetchone()
 
         if row is None:
-            raise KeyError, "invalid key for '" + self.table + "' table : " + `self.key`
+            raise "record not found where" + `where`
 
         for f in range(len(row)):
             self[self.table.fields[f].name]=row[f]
