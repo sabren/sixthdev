@@ -86,13 +86,20 @@ class BankOfAmericaPayment(payment.AbstractPayment):
                 self.result = payment.APPROVED
                 self.authcode = resdict["ioc_authorization_code"]
                 self.error = None
-            elif resdict.has_key("ioc_invalid_fields"):
-                self.result = payment.ERROR
-                self.error = resdict["ioc_reject_description"]
             else:
-                self.result = payment.DENIED
                 self.error = resdict["ioc_reject_description"]
-
+                self.details = ""
+                if resdict.has_key("ioc_invalid_fields"):
+                    self.result = payment.ERROR
+                    errs = resdict["ioc_invalid_fields"].split(",")
+                    for e in range(0, len(errs), 3):
+                        field, val, reason = errs[e:e+3]
+                        field = field[5:]
+                        reason = reason[:-1]
+                        self.details += "%s: %s (value was '%s')<br>" \
+                                      % (field, reason, val)
+                else:
+                    self.result = payment.DENIED
 
 
     def charge(self, amount, description=""):
