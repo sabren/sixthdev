@@ -192,7 +192,7 @@ class Engine(object):
         msg += self.error
         msg += hr
         msg += "FORM: %s\n"  % self.request.form
-        msg += "QUERYSTRING: %s\n" % self.request.querystring
+        msg += "QUERYSTRING: %s\n" % self.request.query.string
         msg += "COOKIE: %s\n" % self.request.cookie
 
         if hasattr(self, "sess"):
@@ -221,7 +221,7 @@ class Engine(object):
         print "<b>script input:</b>"
         print '<ul>'
         print '<li>form: %s</li>' % self.request.form
-        print '<li>querystring: %s</li>' % self.request.querystring
+        print '<li>querystring: %s</li>' % self.request.query.string
         print '<li>cookie: %s</li>' % self.request.cookie
         print '</ul>'
 
