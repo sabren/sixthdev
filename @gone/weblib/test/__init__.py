@@ -18,6 +18,7 @@ suites = {
     "response" : unittest.makeSuite(ResponseTestCase, "check_"),
     "sess" : unittest.makeSuite(SessTestCase, "check_"),
     "auth" : unittest.makeSuite(AuthTestCase, "check_"),
+    "perm" : unittest.makeSuite(PermTestCase, "check_"),
     "engine" : unittest.makeSuite(EngineTestCase, "check_"),
     }
 
