@@ -7,7 +7,7 @@ __ver__ = "$Id$"
 
 class Actor:
     """
-    Actor(input) #input=None or a dict with a key called 'action'.
+    Actor(input) where input=a dict, usually with a key called 'action'.
     
     This class is designed to make it easy to write classes that can
     be called directly through a URL. It's just a base class, and only
@@ -16,9 +16,6 @@ class Actor:
     The input dict should have a key called "action" that will tell the
     actor what to do. The Actor subclass must have a method caled act_XXX
     where XXX is whatever "action" mapped to.
-    
-    If input is None, it will use weblib.sess, or an empty dict if weblib.sess
-    isn't defined.
     """
 
     ##@TODO: a generic nextMap for action chains might come in handy,
@@ -26,20 +23,10 @@ class Actor:
 
     ## constructor ################################################
 
-    def __init__(self, input=None):
-        if input is not None:
-            self.input = input
-        else:
-            import weblib
-            if hasattr(weblib, "request"):
-                self.input = {}
-                # this is so we can do self.input[xx]=yy
-                for key in weblib.request.keys():
-                    # .update doesn't work with non-dicts
-                    self.input[key] = weblib.request[key]
-                    
-            else:
-                self.input = {}
+    def __init__(self, input):
+        self.debug = 0 # alters behavior of complain()
+
+        self._copyinput(input)
 
         # out is just a buffer:
         import cStringIO
@@ -58,6 +45,15 @@ class Actor:
         self.model = {"errors":[]}
         for key in self.input.keys():
             self.model[key] = self.input[key]
+
+    def _copyinput(self, input):
+        self.input = {} # so we can call do() with extra params
+        try:
+            for k in input.keys():
+                self.input[k] = input[k]
+        except AttributeError, e:
+            raise "invalid input: %s" % `input`
+            
 
 
     ## public methods ############################################
@@ -80,6 +76,11 @@ class Actor:
         """
         ex: actor.act();   actor.act('jump')
         returns output buffer built by calls to write()
+
+        ## @TODO: clean up this whole 'next' concept..
+        ## looks like it was set up to tell the client to
+        ## reinvoke act(). But it's basically a giant,
+        ## nasty GOTO feature and must be killed!
         """
 
         if action is not None:
@@ -95,7 +96,7 @@ class Actor:
             if type(next)==type(""):
                 self.do(next)
             else:
-                apply(self.do, next)
+                raise TypeError, "next should not be... %s" % `next`
         self.exit()
         return self.out.getvalue()
 
@@ -106,7 +107,7 @@ class Actor:
         handy if you want an action to call another action
         """
         if input is not None:
-            self.input = input
+            self._copyinput(input)
         for key in params.keys():
             self.input[key]=params[key]
 
@@ -122,18 +123,19 @@ class Actor:
         method() # hey! method acting! :)
         self.action = oldaction
 
-
     def complain(self, problems):
         """
         Generic error handler. Pass it a string or list of strings.
         """
-        if type(problems)=="":
+        if type(problems)==type(""):
             probs = [problems]
         else:
             probs = problems
         for prob in probs:
             self.errors.append(prob)
             self.model["errors"].append({"error":prob})
+            if self.debug:
+                print "\n::>ERROR<::", prob
 
     def consult(self, model):
         """
@@ -185,6 +187,7 @@ class Actor:
         write something to output..
         """
         self.out.write(what)
+
 
     ## actions ###################################################
 

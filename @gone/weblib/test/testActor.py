@@ -20,14 +20,15 @@ class ActorTestCase(unittest.TestCase):
 
     def check_input(self):
 
+        ## used to rely on weblib.request.. now should NOT
         weblib.request = {"GOAL":"GOAL"}
-        actor = weblib.Actor()
-        assert actor.input == {"GOAL":"GOAL"}, \
+        actor = weblib.Actor({})
+        assert actor.input == {}, \
                "Wrong default input when weblib.request IS defined:\n%s" \
                % actor.input
         del weblib.request
 
-        actor = weblib.Actor()
+        actor = weblib.Actor({})
         assert actor.input == {}, \
                "Wrong default input when weblib.request IS NOT defined"
 
@@ -43,32 +44,15 @@ class ActorTestCase(unittest.TestCase):
                 ToBe = "?"
                 self.question = ToBe or (not ToBe)
         
-        hamlet = Shakespearean()
+        hamlet = Shakespearean({})
         hamlet.question = None
         hamlet.act()
 
         assert hamlet.question == "?", \
                "act() doesn't default to calling act_(). :("
-        
-    def check_inEngine(self):
-        "I thought this was having problems in other tests. it wasn't."
-
-        req = weblib.Request(form={"E":"X"})
-        eng = weblib.Engine(request=req, script=weblib.trim(
-            """
-            import weblib
-            a = weblib.Actor()
-            assert a.input["E"] == "X", 'form failed'
-            """))
-
-        eng.run()
-        assert eng.result == eng.SUCCESS, \
-               "Doesn't use correct request when in an Engine:\n %s" \
-               % eng.error
-        
-
+               
     def check_write(self):
-        devito = weblib.Actor()
+        devito = weblib.Actor({})
         goal = "what's the worst that could happen?"
         devito.write(goal)
         actual = devito.act()
@@ -77,7 +61,7 @@ class ActorTestCase(unittest.TestCase):
 
 
     def check_jump(self):
-        brando = weblib.Actor()
+        brando = weblib.Actor({})
         self.assertRaises(weblib.Redirect,
                           brando.redirect, action="somewhere")
         
