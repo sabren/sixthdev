@@ -88,4 +88,5 @@ from Engine import Engine
 from Request import Request, RequestBuilder, RequestData
 from Response import Response
 from Sess import Sess
+from OutputDecorator import OutputDecorator
 import SessPool

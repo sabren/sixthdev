@@ -45,9 +45,14 @@ if __name__=="__main__":
         
         req = weblib.RequestBuilder().build()
         eng = weblib.Engine(script, req)       
-        
-        eng.printFullResponse() # ick!
-        
+        eng.run()
+
+        out = weblib.OutputDecorator(eng)
+        print out.getHeaders()
+        print out.getBody()
+
+        if eng.hadProblem and eng.locals["SITE_MAIL"]:
+            out.sendError()
 
     except Exception, e:
         print "content-type: text/plain\n"
