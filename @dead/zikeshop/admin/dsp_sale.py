@@ -14,14 +14,7 @@ saleID = weblib.request.get("ID")
 assert saleID is not None, \
        "Please specify a saleID."
 
-#try:
-
 sale = zikeshop.Sale(ID=saleID)
-#except:
-#    assert 0, "invalid saleID"
-
-cur = zikeshop.dbc.cursor()
-
 
 # @TODO: move comments off into the content table. (??)
 # @TODO: explicitly track partially filled orders.
