@@ -6,18 +6,17 @@ __ver__="$Id$"
 import unittest
 import weblib
 import sixthday
-import sixthday.spec
+from arlo import Clerk
 from sixthday import Auth
 from sixthday import SignupApp
 from sixthday import User
+from storage import MockStorage
 
 class SignupAppTest(unittest.TestCase):
 
     def setUp(self):
-        self.clerk = sixthday.spec.clerk
-        self.cur = sixthday.spec.dbc.cursor()
-        self.cur.execute("delete from base_user")
-        self.cur.execute("delete from base_contact")
+        self.storage = MockStorage()
+        self.clerk = Clerk(self.storage)
 
     def check_save(self):
         #import pdb; pdb.set_trace()
@@ -34,7 +33,7 @@ class SignupAppTest(unittest.TestCase):
                
         #@TODO: I want to search by a field besides the key, but can't
         # until I finish refactoring zdc..
-        fred = self.clerk.load(User, username='fred')
+        fred = self.clerk.fetch(User, 1)
         assert fred.email == 'fred@tempyco.com', \
                "email is wrong: %s" % fred.email
 
@@ -43,7 +42,7 @@ class SignupAppTest(unittest.TestCase):
         # the database... really strongbox should check that and
         # throw an error...
         
-##         # try to save again..
+         # try to save again..
 ##         app = SignupApp(req, self.clerk, Auth({},{}))
 ##         app.do("save")
 ##         assert app.errors, \

@@ -8,19 +8,17 @@ import zebra
 import zdc
 from handy import sendmail
 from sixthday import App
-from sixthday import ObjectEditor
 from sixthday import User
+from strongbox import BoxView
 
 class SignupApp(App):
     userClass = User
-    editorClass = ObjectEditor
     tplDir = "."
 
-    def __init__(self, input, ds, auth):
-        self.ds = ds
+    def __init__(self, input, clerk, auth):
+        self.clerk = clerk
         self.auth = auth
         super(SignupApp, self).__init__(input)
-        
 
     def act_(self):
         self.do("signup")
@@ -33,14 +31,14 @@ class SignupApp(App):
 
     def act_signup(self):
         if self.input.get("action")!="save":
-            self.consult(zdc.ObjectView(self.userClass(self.ds)))
+            self.consult(BoxView(userClass()))
         print >> self.out, zebra.fetch(self.tplDir + "/frm_signup", self.model)
 
     def act_save(self):
         try:
-            ed = ObjectEditor(
-                     self.userClass, self.ds, self.input, self.input.get("ID"))
-            ed.do("save")
+            obj = self.clerk.upsert(self.userClass,
+                                    self.input.get("ID"),
+                                    **self.input)
         except ValueError, err:
             #@TODO: clean up the type mess on ValueError
             if type(err)==type([]):
@@ -49,13 +47,13 @@ class SignupApp(App):
                 self.complain(err.args[0])
         if self.errors:
             # complain:
-            self.consult(zdc.ObjectView(ed.object))
+            self.consult(BoxView(obj))
             self.consult(self.input)
-            self.model["ID"]=ed.object.ID # security measure, just in case..
+            self.model["ID"]=obj.ID # security measure, just in case..
             self.next = "signup"
         else:
             # now log in as that user:
-            self.auth.login(ed.object.ID)
+            self.auth.login(obj.ID)
             self.next = "on_signup"
 
     def act_on_signup(self):
@@ -81,7 +79,7 @@ class SignupApp(App):
                 ''' % weblib.request["email"])
             self.next = "requestpass"
         else:
-            self.consult(zdc.ObjectView(user))
+            self.consult(BoxView(user))
             msg = zebra.fetch("eml_sendpass", self.model)
             zikebase.sendmail(msg)
             self.msg_sentpass()
@@ -104,7 +102,7 @@ class SignupApp(App):
 
     def act_update(self):
         self.auth.check()
-        self.consult(zdc.ObjectView(self.auth.user))
+        self.consult(BoxView(self.auth.user))
         import os
         print >> self.out, zebra.fetch(self.tplDir + "/frm_update", self.model)
 
