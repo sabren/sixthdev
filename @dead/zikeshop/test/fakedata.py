@@ -107,7 +107,7 @@ def load():
     sale = zikeshop.Sale()
     det = zikeshop.Detail()
     det.productID = 1
-    sale.statusID = 1 #@TODO: fix this
+    sale.status = "new"
     sale.details << det
     sale.save()
 
