@@ -12,3 +12,10 @@ import SessPool
 from sqlTest import dbc
 
 pool = SessPool.SqlSessPool(dbc)
+
+
+if __name__=="__main__":
+    print
+    print "edit this module's source to configure your weblib installation."
+    print
+    
