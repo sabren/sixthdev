@@ -102,7 +102,7 @@ class Request:
                     self.content = sys.stdin.read(contentLength)
                 else:
                     self.content = content
-                for pair in string.split(self.content, "&"):
+                for pair in string.split(weblib.urlDecode(self.content), "&"):
                     l = string.split(pair, "=", 1)
                     k = l[0]
                     if len(l) > 1:
@@ -150,4 +150,3 @@ class Request:
             return 0
             
             
-
