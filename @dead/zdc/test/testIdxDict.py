@@ -2,7 +2,7 @@
 # testIdxDict.py - test cases for zdc.IdxDict
 
 import unittest
-import IdxDict
+import zdc.IdxDict
 
 
 class IdxDictTestCase(unittest.TestCase):

@@ -3,7 +3,7 @@
 
 import unittest
 import test
-import Record
+import zdc
 
 
 class RecordTestCase(unittest.TestCase):
@@ -13,7 +13,7 @@ class RecordTestCase(unittest.TestCase):
     def win32check_ModuleGuess(self):
         import winODBCdb
         conn = winODBCdb.connect("testzdc")
-        rec = Record.Record(conn, "testzdc_fish")
+        rec = zdc.Record(conn, "testzdc_fish")
         assert rec.dbcModule == winODBCdb, "dbcModule failed for winODBCdb"
 
 
@@ -23,28 +23,37 @@ class RecordTestCase(unittest.TestCase):
         conn = ODBC.Windows.connect("testzdc")
         raisedAnError = 0
         try:
-            rec = Record.Record(conn, "testzdc_fish")
+            rec = zdc.Record(conn, "testzdc_fish")
         except:
             raisedAnError = 1
         # note: this test would fail if ODBC.Windows ever got a .__class__
         assert raisedAnError, "dbcModule shoulda given an error for ODBC.Windows"
 
         # now test the proper use:
-        rec = Record.Record(conn, "fish", module=ODBC.Windows)
+        rec = zdc.Record(conn, "fish", module=ODBC.Windows)
+
 
     def setUp(self):
         cur = test.dbc.cursor()
-        cur.execute("""CREATE TABLE fish (ID INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-                       fish VARCHAR(32))""")
+        try:
+            cur.execute("DROP TABLE fish")
+        except:
+            pass
+        cur.execute("""
+           CREATE TABLE fish (
+              ID INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+              fish VARCHAR(32)
+           )
+           """)
 
     def check_fields(self):
-        rec = Record.Record(test.dbc, "fish")
+        rec = zdc.Record(test.dbc, "fish")
         assert rec.fields[0].name == "ID", "ID not first field"
         assert rec.fields[1].name == "fish", "fish not second field"
 
 
     def check_quotes(self):
-        rec = Record.Record(test.dbc, "fish")
+        rec = zdc.Record(test.dbc, "fish")
         assert rec._sqlQuote(rec.fields["fish"], "foo'fish") == "'foo''fish'", \
                "quoting failed for STRING"
         rec.quoteEscape = '\\'
@@ -56,7 +65,7 @@ class RecordTestCase(unittest.TestCase):
 
 
     def check_insert(self):
-        rec = Record.Record(test.dbc, "fish")
+        rec = zdc.Record(test.dbc, "fish")
         rec.new()
         rec['fish'] = 'salmon'
         rec.save()
@@ -64,5 +73,4 @@ class RecordTestCase(unittest.TestCase):
 
 
     def tearDown(self):
-        cur = test.dbc.cursor()
-        cur.execute("DROP TABLE fish")
+        pass
