@@ -19,7 +19,7 @@ class RecordObject(Strongbox):
 
     ## constructor ##################################################
 
-    def __init__(self, ds, forceclerk=None,  **where):
+    def __init__(self, ds, **where):
         
         # make isclerk non-optional and you'll get
         # an error if it's not clerk (only for smoketest
@@ -47,14 +47,16 @@ class RecordObject(Strongbox):
             self.__dict__['_data'] = self.__values__
             self.__dict__['_record'] = None
 
+        # if all's well, go ahead with the init:
+        super(RecordObject, self).__init__(**where)
+
+        self._link()
         self._init()
         if where:
             self._fetch(**where)
         else:
             self._new()
 
-        # if all's well, go ahead with the init:
-        super(RecordObject, self).__init__(**where)
 
 
     ## public methods ################################################
@@ -114,6 +116,33 @@ class RecordObject(Strongbox):
         
 
     ## private methods ###############################################
+
+    def _link(self):
+        """
+        Set up the links (relationships) between the objects.
+        This is pretty generic, so you probably don't need to
+        override it. Just populate class._links.
+
+        Structure is:
+
+        _links = {
+           collectionName : (linkClass, params, to, linkClass's, constructor)
+        }
+
+        linkclasses (eg, zdc.LinkSet) Should take the left-hand object
+        (self, from our perspective) as the first parameter. You don't
+        have to include self in the param list.
+
+        eg:
+
+        _links = {
+           'details': (zdc.LinkSet, SomeDetailClass, 'ID', 'summaryID')
+        }
+        """
+        for item in self._links.keys():
+            self.__dict__[item] = apply(self._links[item][0],
+                                      (self,) + tuple(self._links[item][1:]))
+
 
     def _init(self):
         pass

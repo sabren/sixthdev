@@ -33,7 +33,7 @@ class LinkSet(IdxDict):
                                          % (self.lKey, int(lID)))
             for row in rows:
                 #@TODO: unhardcode primary key for right hand class
-                self << self.rClass(self.owner._ds, "ok", ID=row["ID"])
+                self << self.rClass(self.owner._ds, ID=row["ID"])
         self._loaded = 1
 
 
@@ -43,7 +43,7 @@ class LinkSet(IdxDict):
             item.save()
 
     def new(self):
-        return self.rClass(self.owner._ds, "ok")
+        return self.rClass(self.owner._ds)
 
     def __len__(self):
         if not self._loaded:
