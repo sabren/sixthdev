@@ -76,11 +76,12 @@ class Bootstrap:
             """
             class Report:
             
-                def show(self, model=[]):
+                def show(self, model={}):
                     print self.fetch(model)
 
-                def fetch(self, model=[]):
+                def fetch(self, model={}):
                     self.model = model
+                    globals().update(self.model)
                     zres = ""
             """)
         res = res + zebra.indent(self.walk(model), 2)
@@ -88,6 +89,9 @@ class Bootstrap:
             """
             # end of fetch()
                     return zres
+
+            def show(model=[]):
+                Report().show(model)
             """)
         return res
 
@@ -121,7 +125,7 @@ class Bootstrap:
 
     ## <var> ##
     def handle_var(self, model, attrs):
-        res = "zres = zres + %s\n" % model[0]
+        res = "zres = zres + str(%s)\n" % model[0]
         return res
 
 
