@@ -1,7 +1,7 @@
 """
 formats Engine output (mostly for error-trapping)
 """
-from handy import trim
+from handy import trim, sendmail
 from weblib import Engine
 from weblib import htmlEncode
 
@@ -40,7 +40,7 @@ class OutputDecorator(object):
             """ % (SITE_MAIL, SITE_MAIL, SITE_NAME))
         msg += "uncaught exception in %s\n\n" % self.eng.request.pathInfo
         msg += hr
-        msg += self.eng.error
+        msg += str(self.eng.error)
         msg += hr
         msg += "FORM: %s\n"  % self.eng.request.form
         msg += "QUERYSTRING: %s\n" % self.eng.request.query.string
@@ -62,7 +62,7 @@ class OutputDecorator(object):
         msg += self.eng.response.buffer + "\n"
         msg += hr
 
-        handy.sendmail(msg)
+        sendmail(msg)
 
     def errTraceback(self):
         res = '<b>uncaught exception while running %s</b><br>\n'\
