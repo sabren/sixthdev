@@ -14,7 +14,16 @@ class Record:
     values = IdxDict()
     isNew = 0
     
-    quoteEscape = "'"  #@TODO: put this somewhere else? does the DB-API do this?
+    escapes = {  #@TODO: put this somewhere else? does the DB-API do this?
+        chr( 0) : "\\0",      # NULL
+        chr( 9) : "\\t",      # TAB
+        chr(10) : "\\n",      # newline
+        chr(13) : "\\r",      # carriage return
+        chr(34) : '\\"',      # double quote
+        chr(39) : "\\'",      # single quote
+        chr(92) : "\\\\",     # backslash
+        }
+    
     _where = {}
 
 
@@ -107,19 +116,19 @@ class Record:
         if value is None:
             res = "NULL"
         
-        #@TODO: handle BINARY/DATE types explicitly
+        #@TODO: handle DATE types explicitly
         elif field.type == self.table.dbc_module.NUMBER:
             res = `value`
-        else: # should be elif ... STRING
-            res = "'"
-            for c in value:
-                # escape quotes:
-                if c == "'":
-                    res = res + self.quoteEscape + c
-                else:
-                    res = res + c
-            res = res + "'"
-        
+            
+        # binary, text, and string are all treated the same,
+        # at least for now:
+        else:
+            # loop through each character individually..
+            # if we used string.replace, we could get in troulbe
+            # by escaping things we've already escaped            
+            for ch in value:
+                res = res + self.escapes.get(ch, ch)
+            res = "'%s'" % res
         return res
 
 
