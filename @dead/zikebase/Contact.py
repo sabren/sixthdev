@@ -22,7 +22,7 @@ class Contact(zdc.RecordObject):
         self._data["city"]=""
         self._data["stateCD"]=""
         self._data["postal"]=""
-        self._data["country"]="US"
+        self._data["countryCD"]="US"
         self._data["phone"]=""
     
     def set_email(self, value):
