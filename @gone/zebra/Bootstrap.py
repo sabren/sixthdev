@@ -87,10 +87,13 @@ class Bootstrap:
         res = res + zebra.indent(self.walk(model), 2)
         res = res + zebra.trim(
             """
-            # end of fetch()
+            # end of Report.fetch()
                     return zres
 
-            def show(model=[]):
+            def fetch(model={}):
+                Report().fetch(model)
+                
+            def show(model={}):
                 Report().show(model)
             """)
         return res
