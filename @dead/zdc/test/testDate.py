@@ -62,3 +62,7 @@ class DateTestCase(unittest.TestCase):
         assert Date("2/1/2001").daysInMonth() == 28
         assert Date("2/1/2000").daysInMonth() == 29
         
+    def check_daysInYear(self):
+        assert Date("1/1/1999").daysInYear() == 365
+        assert Date("1/1/2000").daysInYear() == 366 # leap year
+        assert Date("1/1/2001").daysInYear() == 365

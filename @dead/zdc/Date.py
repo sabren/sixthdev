@@ -36,6 +36,11 @@ class Date:
         returns number of days in the month
         """
         return calendar.monthrange(self.y, self.m)[1]
+
+    def daysInYear(self):
+        from operator import add
+        return reduce(add,
+                      [calendar.monthrange(self.y, m+1)[1] for m in range(12)])
         
     def toSQL(self):
         return "%i-%i-%i" % (self.y, self.m, self.d)
