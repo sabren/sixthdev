@@ -1,7 +1,11 @@
 from storage import Storage
 from pytypes import Date
 
+#from SQLQueryBuilder import *
+
 class MySQLStorage(Storage):
+    #qb = SQLQueryBuilder
+    #q = SQLQueryBuilder()
 
     def __init__(self, dbc):
         self.dbc = dbc
@@ -34,17 +38,9 @@ class MySQLStorage(Storage):
             
 
     def _insert_main(self, table, **row):
-
         # generate column/value lists for INSERT
-        cols, vals = "", ""
-        for col,val in row.iteritems():
-            cols += col + ","
-            # ok for numbers in mysql
-            vals += self._toSQLString(val) + ","
-
-        # strip off last commas:
-        cols = cols[:-1]
-        vals = vals[:-1]
+        cols = ', '.join(row.keys())
+        vals = ', '.join([self._toSQLString(v) for v in row.values()])
 
         sql = "INSERT INTO %s (%s) VALUES (%s)" % (table, cols, vals)
         self._execute(sql)
@@ -79,21 +75,26 @@ class MySQLStorage(Storage):
         return self.fetch(table, row["ID"])
         
 
-    def match(self, table, **where):
-        criteria = []
-        for col,val in where.iteritems():
-            criteria.append(col + "='" + str(val) + "'")
-
-        sql = "SELECT * FROM " + table
-        if criteria:
-            sql += " WHERE " + " AND ".join(criteria)
-            
+    def _match(self, table, where=None, orderBy=None):
+        # RICK: building query not needed with QueryBuilder obj
+        sql = ["SELECT * FROM %s" % table]
+        
+        # RICK: changed to use QueryBuilder obj
+        if where is not None:
+            sql.append(" WHERE %s" % str(where))
+        if orderBy is not None:
+            sql.append(" ORDER BY %s" % orderBy)
+        sql = ''.join(sql)
         self._execute(sql)
         return self._dictify(self.cur)
         
 
     def delete(self, table, ID):
-        self._execute("DELETE FROM %s WHERE ID=%s" % (table, ID))
+        # RICK: allows deleting by criteria or ID
+        if type(ID) == int:
+            self._execute("DELETE FROM %s WHERE ID=%s" % (table, ID))
+        else:
+            self._execute("DELETE FROM %s WHERE %s" % (table, str(ID)))
 
     def _execute(self, sql):
         try:
