@@ -173,6 +173,10 @@ class CheckoutApp(zikeshop.PublicApp):
         if not self.cardData["number"]:
             self.cardData["number"]=""
             
+        # @TODO: issuer isn't completely sticky...
+        # it doesn't stick if you leave the page...
+        self.model["check_issuer"]=self.input.get("check_issuer",
+                                                  self.cardData["issuer"])
         self.consult(self.cardData)
         zebra.show("frm_card", self.model)
 
