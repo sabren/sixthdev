@@ -29,9 +29,25 @@ class Actor:
         else:
             import weblib
             if hasattr(weblib, "request"):
-                self.input = weblib.request
+                self.input = {}
+                # this is so we can do self.input[xx]=yy
+                for key in weblib.request.keys():
+                    # .update doesn't work with non-dicts
+                    self.input[key] = weblib.request[key]
             else:
                 self.input = {}
+
+        # jumpMap is a special variable that tells you where
+        # you can jump. It's basically a way to let you
+        # redirect pages as you see fit via act_jump
+        # without letting anyone use your page to redirect
+        # things arbitrarily..
+        self.jumpMap = {}
+        
+        self.action = None
+        self.next = None
+        self.model = {}
+        self.model.update(self.input)
 
 
     ## public methods ############################################
@@ -48,17 +64,52 @@ class Actor:
 
     def act(self, action=None):
         """ex: actor.act();   actor.act("jump")"""
-        self.enter()
 
         if action is not None:
-            toDo = action
+            self.action = action
         else:
-            toDo = self.input.get("action", "")
-        
-        method = "act_" + toDo
-        apply(getattr(self, method), ())
+            self.action = self.input.get("action", "")
 
+        self.enter()
+        self.next=self.action
+        while self.next is not None:
+            next = self.next
+            self.next = None
+            if type(next)==type(""):
+                self.do(next)
+            else:
+                apply(self.do, next)
         self.exit()
+
+
+    def do(self, action, input=None, **params):
+        """
+        like act(), but doesn't do enter/exit stuff..
+        handy if you want an action to call another action
+        """
+        if input is not None:
+            self.input = input
+        self.input.update(params)
+
+        self.perform(action)
+            
+
+    def perform(self, action=None):
+        oldaction = self.action
+        if action is not None:
+            self.action = action
+            
+        if type(self.action) == type(()):
+            raise TypeError, 'Multiple actions requested: %s' \
+                  % str(self.action)
+
+        method = getattr(self, "act_" + self.action, self.act__error__)
+        method() # hey! method acting! :)
+        self.action = oldaction
+
+
+    def complain(self, problem):
+        raise Error, problem
 
 
     ## actions ###################################################
@@ -66,3 +117,10 @@ class Actor:
     def act_(self):
         """Default action. Does nothing, but you can override it."""
         pass
+
+    def act_jump(self):
+        import weblib
+        weblib.response.redirect(self.jumpMap[self.input["where"]])
+
+    def act__error__(self):
+        self.complain("don't know how to %s" % self.action)

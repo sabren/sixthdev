@@ -29,7 +29,8 @@ import os.path, sys, string, weblib, StringIO
 path = os.environ["PATH_TRANSLATED"]
 dir = string.join(string.split(path,os.sep)[:-1], os.sep)
 sys.path.append(dir)
-
+import os
+os.chdir(dir)
 
 ## build the engine ##############################################
 eng = weblib.Engine()

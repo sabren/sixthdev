@@ -91,6 +91,7 @@ class Response:
 
 
     def redirect(self, url):
+        self.addHeader("Status", "302")
         self.addHeader("Location", url)
         self.end()
 

@@ -8,6 +8,7 @@ __ver__="$Id$"
 #### selectBox() ####################################################
 
 
+#@TODO: get rid of this - we have html.select now
 def selectBox(name, rows, blank=None, extra=''):
     "rows should be a sequence of (real value, displayed value, isSelected)"
     res = '<select name="%s" %s>\n' % (name, extra)

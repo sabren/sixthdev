@@ -79,5 +79,7 @@ class ActorTestCase(unittest.TestCase):
 
         eng.run()
         assert eng.result == eng.SUCCESS, \
-               "Doesn't use correct request when in an Engine"
+               "Doesn't use correct request when in an Engine: %s" \
+               % eng.error
         
+
