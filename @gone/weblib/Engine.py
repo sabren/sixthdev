@@ -6,8 +6,6 @@ __ver__ = "$Id$"
 import weblib
 import string
 
-#@TODO: a lot of these methods could be consolidated!
-
 class Engine:
     """
     Engine - a wrapper class that runs a script in a custom environment.
@@ -17,10 +15,7 @@ class Engine:
     as an alternative, you can run it inside an Engine class. this is
     especially useful for testing or for restricted execution, etc..
     """
-
-    globals = {'__name__':'__main__'}
-    locals  = globals
-
+    
     parts=("request", "response")
 
     script = None
@@ -56,54 +51,20 @@ class Engine:
         # None, or customized by passing an instance..
 
         for item in Engine.parts:
-            
             if kw.has_key(item):
                 # use the one they supplied
                 setattr(self, item, kw[item])
                 kw[item].engine = self
-
-            elif getattr(weblib, item, None):
-                # use one in weblib (perhaps set up by .weblib.py
-                _ = getattr(weblib, item)
-                _.engine = self
-                setattr(self, item, _)
-                
             else:
-                # use a new copy of the default (eg, self.auth=weblib.Auth())
+                # use new copy as default (eg, self.request=weblib.Request())
                 setattr(self, item,
                         weblib.__dict__[string.capitalize(item)](engine=self))
 
 
-
-    def interceptPrint(self):
-        """
-        This replaces sys.stdout with the engine's response object.
-        """
-        import sys
-        self.stdout = sys.stdout
-        sys.stdout = self.response
-       
-
-    
-    def restorePrint(self):
-        """
-        This restores sys.stdout after a call to interceptPrint.
-        """
-        import sys
-        sys.stdout = self.stdout
-
-
-    def startParts(self):
-        """
-        Starts all the internal parts.
-        """
-        self.response.start()
-
-
-    def stopParts(self):
-        """
-        Calls stop for all the internal parts.
-        """
+        # set up internal namespaces..
+        self.globals = {'__name__':'__main__'}
+        self.locals  = self.globals
+        self._exitstuff = []
 
 
     def injectParts(self):
@@ -115,13 +76,12 @@ class Engine:
         self.globals["RES"] = self.response
 
 
-    def restoreParts(self):
-        """
-        Restore the old weblib parts..
-        """
-        #@TODO: do I still need this now that weblib is out of the picture?
-
     def setPathInfo(self):
+        """
+        This (technology/app server specific) routine sets the
+        PATH_INFO CGI variable.
+        """
+        #@TODO: should this really be PATH_INFO? how about SCRIPT_NAME?
         if not self.request.environ.get("PATH_INFO"):        
             if (type(self.script) == type("")):
                 self.request.environ["PATH_INFO"] = "UNKNOWN_SCRIPT.py"
@@ -130,23 +90,25 @@ class Engine:
         
 
     def start(self):
-        self._exitstuff = []
-        self.startParts()
+        """
+        Start the Engine
+        """
+        self.response.start()
         self.injectParts()
         self.setPathInfo()
-        #self.interceptPrint()
-
-
 
     def stop(self):
+        """
+        Stop the Engine
+        """
         self._exit()
-        #self.restorePrint()
-        self.restoreParts()
-        self.stopParts()
-
 
     def do_on_exit(self, func, *targs, **kargs):
+        """
+        Register a callback for the end of page.
+        """
         self._exitstuff.append((func, targs, kargs))
+
 
     def _exit(self):
         """
@@ -183,10 +145,9 @@ class Engine:
                 sys.exc_value,
                 sys.exc_traceback), '')
 
-
     def run(self):
         """
-        Run the engine!
+        Run the engine! (calls start, execute, and stop)
         """
         self.start()
         try:
