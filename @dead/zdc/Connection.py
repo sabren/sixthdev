@@ -2,6 +2,7 @@
 zdc.Connection class - connects to a storage area.
 """
 __ver__="$Id$"
+import zdc
 
 class Connection:
     from MySQLdb import * # for NUMBER, etc..
@@ -18,8 +19,17 @@ class Connection:
 
     # delegate everything to the source...
 
-    def select(self, tablename, where=None, **wdict):
-        return apply(self.source.select, (tablename, where), wdict)
+    def select(self, table, where=None, **wdict):
+        #@TODO: clean this up and test it!
+        import types
+        if type(table) == types.ClassType:
+            tablename = table._table.name
+            res =  map(lambda row, klass=table: klass(ID=row["ID"]),
+                       apply(self.source.select, (tablename, where), wdict))
+        else:
+            tablename = table
+            res = apply(self.source.select, (tablename, where), wdict)
+        return res
 
     def fields(self, tablename):
         return self.source.fields(tablename)

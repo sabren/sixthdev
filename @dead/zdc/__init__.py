@@ -36,12 +36,14 @@ class TIMESTAMP:
 
 def sqlEscape(s):
     #@TODO: get the real version of this out of Record
+    #@TODO: get rid of this? (probably no longer needed)
     import string
     return string.replace(s, "'", "\\'")
 
 
 def sqlSet(*data):
     """returns a string with a SQL set containing whatever you pass in"""
+    #@TODO: get rid of this? (probably no longer needed)
     set = []
     for item in data:
         
@@ -70,39 +72,11 @@ def sqlSet(*data):
 
 def toListDict(cur):
     """converts cursor.fetchall() results into a list of IdxDicts"""
+    #@TODO: (is this still needed?)
     res = []
     for row in cur.fetchall():
         dict = IdxDict()
         for i in range(len(cur.description)):
             dict[cur.description[i][0]] = row[i]
         res.append(dict)
-    return res
-
-
-
-def find(what, where=None, orderBy=None, _select=None):
-    """
-    find(what, where, orderBy) -> list of what's matching where
-    what is a zdc.RecordObject class
-    where is a SQL where clause
-    orderBy is a SQL order by clause
-
-    this is how to do ad-hoc SQL queries for objects..
-    """
-    #@TODO: test case for this.. (it was factored out of zikeshop)
-    if _select:
-        # this is a really dumb kludge at the moment..
-        sql = _select
-    else:
-        tablename = what._table.name
-        sql = "SELECT ID FROM %s " % tablename
-    if where:
-        sql = sql + " WHERE %s " % where
-    if orderBy:
-        sql = sql + " ORDER BY %s " % orderBy
-    cur = what._table.driver.dbc.cursor()
-    cur.execute(sql)
-    res = []
-    for row in cur.fetchall():
-        res.append(what(ID=row[0]))
     return res
