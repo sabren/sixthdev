@@ -8,11 +8,11 @@ class Clerk:
         # this is here because, until we replace recordobject
         # with strongbox, we still need a Connection object
         # so zdc can figure out the slots..
-        return klass(self.store, "isclerk")
+        return klass(self.store)
 
     def load(self, klass, **where):
         assert where # (if no where clause, call new() instead)
-        return klass(self.store, "isclerk", **where)
+        return klass(self.store, **where)
 
     def save(self, instance):
         # just delegate for now:
