@@ -175,8 +175,7 @@ class CheckoutApp(zikeshop.PublicApp):
             
         # @TODO: issuer isn't completely sticky...
         # it doesn't stick if you leave the page...
-        self.model["check_issuer"]=self.input.get("check_issuer",
-                                                  self.cardData["issuer"])
+        self.model["check_issuer"]=self.input.get("check_issuer")
         self.consult(self.cardData)
         zebra.show("frm_card", self.model)
 
@@ -279,6 +278,9 @@ class CheckoutApp(zikeshop.PublicApp):
             view = zdc.ObjectView(sale)
             for item in view.keys():
                 model[item] = view[item]  # ICK!
+            model["billContact"] = [zdc.ObjectView(sale.billAddress)]
+            model["shipContact"] = [zdc.ObjectView(sale.shipAddress)]
+            model["card"] = [zdc.ObjectView(sale.card)]
             model["owner_email"] = getattr(zikeshop,"owner_email")
             model["customer_email"] = sale.billAddress.email
             zikebase.sendmail(zebra.fetch("eml_receipt", model))
