@@ -7,8 +7,20 @@ import zikebase
 zikebase.load("Password")
 
 class Rot13Password(zikebase.Password):
-    """Use this if you want to be able to send people their plaintext
-    password via email."""
+    """
+    Use this if you want to EASILY decrypt someone's password
+    (perhaps to send people their plaintext password via email)..
+
+    examples:
+    >>> import zikebase
+    >>> pw = zikebase.Rot13Password()
+    >>> pw.set('my password')
+    >>> pw.crytped
+    zikebase.Rot13Password('zl cnffjbeq')
+
+    >>> zikebase.Rot13Password().crypt('zl cnffjbeq')
+    'my password'
+    """
 
     def __repr__(self):
         if self.crypted:
@@ -20,7 +32,7 @@ class Rot13Password(zikebase.Password):
     ## public methods ############################
     
     def crypt(self, plain):
-        """Rot13 doesn't really encrypt stuff, just encodes as a simple rot13 cipher"""
+        """Doesn't really encrypt, but rotates 13 chars through the alphabet"""
 
 
         lowerA = "abcdefghijklmnopqrstuvwxyz"
@@ -48,5 +60,5 @@ class Rot13Password(zikebase.Password):
             
           
     def decrypt(self):
-        """Since rot13 both crypts and decrypts, this just calls .crypt() again"""
+        """Since rot13 both crypts and decrypts, this just calls .crypt()"""
         return self.crypt(self.crypted)
