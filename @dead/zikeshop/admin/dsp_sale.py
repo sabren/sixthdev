@@ -9,7 +9,7 @@ import weblib
 import zikebase
 import zikeshop
 
-weblib.auth.check()
+#weblib.auth.check()
 saleID = weblib.request.get("ID")
 
 assert saleID is not None, \
@@ -101,7 +101,7 @@ for det in sale.details:
     print '<td>%s</td>' % det.product.name
     print '<td>%s</td>' % det.quantity
     print '<td>%s</td>' % det.product.price # @TODO: olap for prices?
-    print '<td>%s</td>' % det.amount
+    print '<td>%s</td>' % det.subtotal
     print '</tr>'
 print '</table>'
 
