@@ -26,5 +26,5 @@
 #DEFAULT (echo ""; id; echo %{sVv}; date; cat) >> $CVSROOT/CVSROOT/commitlog
 
 # "list notification"
-.*    CVSROOT/log -m notify@sabren.com -f CVSROOT/commitlog %s
+ALL $CVSROOT/CVSROOT/log -m notify@sabren.com -f $CVSROOT/CVSROOT/commitlog %s
 
