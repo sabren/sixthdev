@@ -57,8 +57,8 @@ CREATE TABLE rnt_comment (
 );
 
 CREATE TABLE web_sess (
-    name varchar(32),
-    sid varchar(64),
+    name varchar(32) not null,
+    sid varchar(64) not null,
     sess blob,
     tsUpdate timestamp,
     primary key (name, sid)
