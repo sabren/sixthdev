@@ -176,7 +176,8 @@ class Object:
             ## B4: Attribute isn't part of the object
             else:
                 raise AttributeError, \
-                      "can't add new attributes to locked object."
+                      "can't add new attribute '%s' to locked object." \
+                      % name
 
         ## case C: unlocked, so do whatever you want
         else:
