@@ -93,6 +93,8 @@ class BlackBoxTest(unittest.TestCase):
         assert instance.c == 0
         assert instance.d == 4, instance.d
 
+        assert "a" in instance.__slots__
+
         # e is a special case, because a default in duckbill.Account
         # wasn't working when there was also an accessor.
         # (but I think this issue is with Cyclic, not strongbox)

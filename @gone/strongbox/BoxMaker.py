@@ -30,6 +30,7 @@ class BoxMaker(object):
         self.bases = bases
         self.dict = dict
         self.attrs = [a for a in dict if isinstance(dict[a], attr)]
+        self.slots = ["private"]
 
         self.addSlots()
         self.addAttrs()
@@ -42,10 +43,9 @@ class BoxMaker(object):
         return klass
 
     def addSlots(self):
-        slots = ["private"]
         for a in self.attrs:
-            slots.append(a)
-        self.dict["__slots__"] = slots
+            self.slots.append(a)
+        self.dict["__slots__"] = self.slots
 
     def addAttrs(self):
         """
@@ -97,8 +97,12 @@ class BoxMaker(object):
             slot = item[4:]
             if item.startswith("get_"):
                 getter[slot] = self.dict[item]
+                if slot not in self.attrs:
+                    self.slots.append(slot)
             elif item.startswith("set_"):
                 setter[slot] = self.dict[item]
+                if slot not in self.attrs:
+                    self.slots.append(slot)
             else:
                 continue
             props.setdefault(slot, property())
