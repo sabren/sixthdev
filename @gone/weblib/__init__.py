@@ -112,16 +112,34 @@ from config import pool
 # subfuction somewhere said "import weblib"... So, we check for
 # __weblib__ in the global namespace first.
 
-if not globals().get("__weblib__"):
+import __builtin__
+
+if not __builtin__.__dict__.get("__weblib__"):
+
+    class CgiResponse(Response):
+        """In CGI-mode, we want to insert headers automatically..."""
+        
+        def __init__(self):
+            import sys
+            Response.__init__(self)
+            self.stdout = sys.stdout
+            sys.stdout = self
+
+
+        def __del__(self):
+            import sys
+            sys.stdout = self.stdout
+            print self.header
+            print self.buffer
+
+    import sys
+    stdout = sys.stdout
 
     request = Request()
-    response = Response()
+    response = CgiResponse()
 
     sess = Sess(pool)
     auth = Auth()
     perm = Perm()
 
-    globals()["__weblib__"] = 1
-
-
-
+    __builtin__.__weblib__ = 1
