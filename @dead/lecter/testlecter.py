@@ -3,10 +3,11 @@
 #
 
 import unittest
+# at-> http://www.xprogramming.com/ftp/TestingFramework/python/pyunit-1.0.zip
+
 import weblib.uid
-import re
+import re, string
 import lecter
-from lecter import Hannibal
 
 
 def stripuid (uidString):
@@ -16,6 +17,13 @@ def stripuid (uidString):
     return re.sub ('[a-f0-9]{32}', uidrepl, uidString)
 
 
+def showdiff(a, b):
+    assert type(a)==type(b), \
+           "can't compare " + `type(a)` + " to " + `type(b)`
+    if type(a)==type([]):
+        a = string.join(a, "\n")
+        b = string.join(b, "\n")
+    return "these don't match:\n[" + a + "]\n--\n[" + b + ']'
 
 def trim(s):
     """strips leading indentation from a multi-line string."""
@@ -36,12 +44,59 @@ def trim(s):
 ############### main test class: #####################
 class lecterTestCase(unittest.TestCase):
 
-    def checkComplexLectify(self):
+    def checkStripUselessLines(self):
+        output = lecter.stripUselessLines(trim("""
+        #simple comment
+        
+        x = 1 # end of line comment
+        print '#not a comment'
+        print \"#not a comment\"
+        """))
+
+        goal = trim("""
+        x = 1 # end of line comment
+        print '#not a comment'
+        print \"#not a comment\"""")
+
+        assert goal==output, showdiff(goal, output)
+
+    def checkDeLectifyBalanced(self):
+
+        # this should work:
+        lecter.deLectify("([][][[[]]][([()])])")
+
+        # let's try for an error:
+        unbalanced = 0
+        try:
+            # this should not:
+            lecter.deLectify("([][][[[]]]][([()])])")
+        except:
+            unbalanced = 1
+
+        assert unbalanced, "didn't catch unbalanced []()'s"
+
+
+    def checkDeLectifyCurlies(self):
+        # should not give syntax errror:
+        output = lecter.deLectify(trim("""
+        for i in {'a':1, 'b':2}.keys() {
+            print 'hello}{ :) ' # just to mess with it :)
+        }
+        """))
+
+        goal = [
+        "for i in {'a':1, 'b':2}.keys():",
+        "    print 'hello}{ :) '",
+        ]
+
+        assert output==goal, showdiff(output, goal)
+
+    def nocheckComplexDeLectify(self):
         """does it strip comments and consolidate multi-line statements?"""
 
-        output = lecter.lectify("""
+        output = lecter.deLectify("""
         print 'keep this # comment'
-        print ")#look#a-Testwith\nEmacs\\Cruft\"andEscapes!"
+        print ")#look#a-Testwith\\nEmacs\\\\Cruft\\"andEscapes!"
         
         set = [1, 2,
                3, 4] # just a list
@@ -54,22 +109,18 @@ class lecterTestCase(unittest.TestCase):
 
         goal = [
             'print \'keep this # comment\'',
-            'print ")#look#a-Testwith\nEmacs\\Cruft\"andEscapes!"',
+            'print ")#look#a-Testwith\\nEmacs\\\\Cruft\\"andEscapes!"',
             'set = [1, 2, 3, 4]',
             'for y in set:',
-            '    print "this is a \n        split line"',
+            '    print "this is a \\n        split line"',
             '    print "and so " + "is this"']
 
-        print "--------------"
-        for o in output: print o
-        print "--------------"
-        
-        assert output == goal, "lectify doesn't handle tough stuff"
+        assert output == goal, showdiff(output, goal)
 
 
     ## makes sure lecter correctly parses lines
-    def checkSimpleLectify(self):
-        result = lecter.lectify(r"""
+    def checkSimpleDeLectify(self):
+        result = lecter.deLectify(r"""
         try:
             print "hello,", \
                   "world!!"
@@ -88,7 +139,7 @@ class lecterTestCase(unittest.TestCase):
             'except:',
             '    "but not this!"',
             '    print "something happened."'
-            ], "lectify doesn't parse lines correctly."
+            ], "deLectify doesn't parse lines correctly."
 
 
     ## makes sure lecter handles the basic syntax for ?:
@@ -133,6 +184,11 @@ def run():
 if __name__=="__main__":
     run()
 
+############################################################
+############################################################
+############# It's all junk below this line ################
+############################################################
+############################################################
 
 ### @TODO: clean all this crap up and put it up top
 if 1==0:    
