@@ -186,7 +186,8 @@ class Bootstrap:
 
     ## <xpr> ##
     def handle_xpr(self, model, attrs):
-        res = "zres = zres + str(%s)\n" % model[0]
+        res = "zres = zres + str(%s)\n" \
+              % self.walk(model, mode="exec")
         return res
 
     ## <exec> ##
