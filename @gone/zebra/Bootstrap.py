@@ -68,20 +68,38 @@ class Bootstrap:
         return res
 
 
+    ## language-specific templates for handling scope ##############
+
+    def scopify(self, expression):
+        "points names in expressions to the current scope"
+        
+        import string
+        res = []
+        toks = zebra.lexer.parse(expression)
+        for token in toks:
+            if token[0]=="NAME":
+                res.append("scope['%s']" % token[1])
+            else:
+                res.append(token[1])
+        return string.join(res, " ")
+
+
     ## individual tag templates ####################################
 
     ## <zebra> ##
     def handle_zebra(self, model, attrs):
         res = zebra.trim(
-            """
+            """            
             class Report:
             
                 def show(self, model={}):
                     print self.fetch(model)
 
                 def fetch(self, model={}):
+                    import copy   # used by scope
                     self.model = model
-                    globals().update(self.model)
+                    scope = model
+                    scope_stack = []
                     zres = ""
             """)
         res = res + zebra.indent(self.walk(model), 2)
@@ -104,16 +122,16 @@ class Bootstrap:
         res = zebra.trim(
             """
             _ = 0
-            _max_ = len(self.model["%s"])
+            _max_ = len(self.model["%(series)s"])
+            scope_stack.append(scope)
+            scope = copy.copy(scope)
             for _ in range(_max_):
-                #@TODO: take this out of the global namespace.
-                #(either figure out why local doesn't work, or
-                #just wrap it all in an exec()
-                globals().update(self.model["%s"][_])
-            """ % (attrs["series"], attrs["series"]))
+                scope.update(self.model["%(series)s"][_])
+            """ % attrs)
         res = res + zebra.indent(self.walk(model), 1)            
         res = res + zebra.trim(
             """
+            scope = scope_stack.pop()
             del _
             """)
         return res
@@ -128,20 +146,20 @@ class Bootstrap:
 
     ## <var> ##
     def handle_var(self, model, attrs):
-        res = "zres = zres + str(%s)\n" % model[0]
+        res = "zres = zres + str(scope['%s'])\n" % model[0]
         return res
 
 
     ## <if> ##
     def handle_if(self, model, attrs):
-        res = "if %s:\n" % attrs["condition"]
+        res = "if %s:\n" % self.scopify(attrs["condition"])
         res = res + zebra.indent(self.walk(model), 1)
         return res
 
 
     ## <ef> ##
     def handle_ef(self, model, attrs):
-        res = "elif %s:\n" % attrs["condition"]
+        res = "elif %s:\n" % self.scopify(attrs["condition"])
         res = res + zebra.indent(self.walk(model), 1)
         return res
 
