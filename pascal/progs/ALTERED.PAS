@@ -1,7 +1,6 @@
 program altered;
 uses crtstuff, sndstuff, crt;
 
-
 var
  ch : char;
 begin

@@ -1,6 +1,6 @@
 Unit Crtstuff;
 Interface
-
+{$G+}
 {note: (1,1) is ALWAYS top left corner of a screen or window }
 
 
@@ -16,6 +16,11 @@ Const
  Fore     = True;
  Back     = False;
  Off      = False;
+
+{ altkeys }
+ alt16to25 : string = 'QWERTYUIOP';
+ alt30to38 : string = 'ASDFGHJKL';
+ alt44to50 : string = 'ZXCVBNM';
 
 { days of the week }
  days : array[ 0 .. 6 ] of string[ 3 ] =
@@ -52,6 +57,7 @@ Const
  cwloadcol    = $0D;
  cwchntimes   = $0E;
  cwspecialstr = $0F;
+ cwrenegade   = $10;
 
 { keyboard shift states }
  rshiftpressed  = $01;
@@ -76,7 +82,9 @@ Type
  screentypeptr = ^screentype;
 
 Var
- Screen : ScreenType absolute $B800:$0000;       { co80 screen  }
+ sw      : word;                                 { width of screen * 2}
+ Screen  : ScreenType absolute $B800:$0000;      { co80 screen  }
+ Banner  : Screentype absolute $B800:$0FA0;      { page2  }
  MScreen : ScreenType absolute $B000:$0000;      { Mono Screen  }
  BScreen : BScreenType absolute $B800:$0000;     { ega43  vga50 }
  HScreen : HScreenType absolute $B800:$0000;     { screenmode51 }
@@ -121,11 +129,13 @@ Var
 
 { þ screen/window handling commands }
  procedure setmode( mode : word );
+ procedure settextheight( h : byte );
  procedure fillscreen( atch : word ); {ATTR then CHAR}
  procedure fillbox( a1, b1, a2, b2 : byte; atch : word );
  procedure slidedown( x1, x2, y1, y2 : byte; offwhat : screentypeptr );
  procedure slidedownoff( offwhat : screentypeptr );
  procedure scrollup1( x1, x2, y1, y2 : byte; offwhat : screentypeptr );
+ procedure scrolldown1( x1, x2, y1, y2 : byte; offwhat : screentypeptr );
  procedure scrolldown( x1, x2, y1, y2 : byte; offwhat : screentypeptr );
  procedure scrolldownoff( offwhat : screentypeptr );
  procedure scrollright(  x1, x2, y1, y2 : byte; offwhat : screentypeptr );
@@ -133,6 +143,7 @@ Var
 
 { þ string formatting commands }
  function cLength( s : string ) : byte;                { length - color codes }
+ function cstrip( s : string ) : string;
  function normaltext( s : string ) : string;
  function strtrunc( s : string; len : byte ) : string;
  function UpStr( s : string ) : String;
@@ -197,7 +208,10 @@ Var
  procedure error( msg : string );
  function thisdir : string;
  function paramline : string;
- procedure adl( cline : string );
+ procedure installfont( fontseg, fontofs : word );
+ procedure installfont2( fontseg, fontofs : word );
+ procedure loadfont(s: string);
+ procedure SetWidth90;
 
 Implementation
 
@@ -211,8 +225,8 @@ Uses
   Begin
    for count := 1 to length(s) do
     begin
-     WriteTo^[(2*(A+Count-2))+((B-1)*160)  ] := Byte(s[count]);
-     WriteTo^[(2*(A+Count-2))+((B-1)*160)+1] := c;
+     WriteTo^[(2*(A+Count-2))+((B-1)*sw)  ] := Byte(s[count]);
+     WriteTo^[(2*(A+Count-2))+((B-1)*sw)+1] := c;
     end;
   End;
 
@@ -222,8 +236,8 @@ Uses
   Begin
    for count := 1 to length(s) do
     begin
-     WriteTo^[(2*(A-1))+((B+count-2)*160)  ] := Byte(s[count]);
-     WriteTo^[(2*(A-1))+((B+count-2)*160)+1] := c;
+     WriteTo^[(2*(A-1))+((B+count-2)*sw)  ] := Byte(s[count]);
+     WriteTo^[(2*(A-1))+((B+count-2)*sw)+1] := c;
     end;
    End;
 
@@ -317,7 +331,8 @@ Uses
       'P' : cwrite( thisdir );
       'D' : cwrite( stardate );
      end;
-   end; { of case nc }
+    cwrenegade : tcolor := s2n( s );
+   end; { of case cn }
   end; { of cwcommand }
 
  procedure cwrite( s : string );
@@ -333,6 +348,7 @@ Uses
      cwrite( #13 );
    end;
   begin
+   if s = '' then exit; {0311.95: i never bothered to check that!!}
    b := 0;
    repeat
     inc( b );
@@ -380,6 +396,11 @@ Uses
                    '(': cwcommand( cwloadcol, '' );
                    ']': cwcommand( cwsavexy, '' );
                    '[': cwcommand( cwloadxy, '' );
+                   '0'..'9': begin
+                               cwdigit1 := s[b];
+                               cwcurrenttask := cwrenegade;
+                               cwnchexpected := 1;
+                             end;
                    else
                     if s[b] in ccolset then cwcommand( cwchangefore, s[b] );
                   end;
@@ -426,6 +447,13 @@ Uses
                       dec( cwnchexpected );
                       cwcommand( cwspecialstr, s[b] );
                      end;
+      cwrenegade : if cwnchexpected = 1 then
+                    begin
+                     cwcommandmode := false;
+                     cwcurrenttask := cwnotask;
+                     dec( cwnchexpected );
+                     cwcommand( cwrenegade, cwdigit1 + s[b] );
+                    end;
      end;
    until b = length(s);
   gotoxy( txmin+txpos-1, tymin+typos-1 );
@@ -464,8 +492,7 @@ Uses
     for counter := 1 to Length(S) do
      begin
        case S[counter] of
-        'a'..'z','A'..'Z',' ' : TColor := $0F;
-        '0'..'9' : TColor := $09;
+        'a'..'z','0'..'9','A'..'Z',' ' : TColor := $0F;
         '[',']','(',')','{','}','<','>','"' : TColor := $09;
         '°'..'ß' : TColor := $08;
         else TColor := $07;
@@ -499,6 +526,11 @@ Uses
     mov ax,Mode;
     int 10h
    end;
+  end;
+
+ procedure settextheight( h : byte );
+  begin
+   portw[$3D4] := h * 256 + 9;
   end;
 
  procedure FillScreen( atch : word ); {ATTR then CHAR}
@@ -538,12 +570,12 @@ Uses
    for count :=  pred(y1) to pred(y2) do
     begin
      delay(10);
-     offset := 160 * count + pred(x1);
+     offset := sw * count + pred(x1);
      {first, slide old screen section down 1 line}
      for count2 := pred(y2) downto count do
       begin
-       thingy := 160 * count2 + pred( x1 );
-       move(  screen[ thingy - 160 ], screen[ thingy ], len );
+       thingy := sw * count2 + pred( x1 );
+       move(  screen[ thingy - sw ], screen[ thingy ], len );
       end;
      {now, add the next line}
      move( offwhat^[ offset ], screen[ offset ], len );
@@ -557,22 +589,40 @@ Uses
 
  procedure scrollup1( x1, x2, y1, y2 : byte; offwhat : screentypeptr );
   var
-   count, count2 : byte;
-   thingy,offset,len : word;
+   count : byte;
+   offset,len : word;
   begin
-   x1 := pred(x1); x2 := pred(x2);
-   y1 := pred(y1); y2 := pred(y2);
+   dec( x1 ); dec( x2 ); dec( y1 ); dec( y2 );
    len := (x2-x1+1) * 2;
-   offset :=  160 * (y2-count+2) + x1 * 2;
+   offset := y1*sw + x1*2;
    {first, slide old screen section up 1 line}
-    for count2 := succ(y1) to y2 do
+    for count := succ(y1) to y2 do
      begin
-      thingy := (160 * count2) + (x1*2);
-      move(  screen[ thingy ], screen[ thingy-160 ], len );
+      move(writeto^[offset+sw], writeto^[offset], len);
+      inc(offset, sw);
      end;
     {now, add the next line}
-     if offwhat <> @screen then
-      move( offwhat^[ offset ], screen[ (160*y1)+(x1*2) ], len );
+     if offwhat <> nil then
+      move( offwhat^[ (sw*y2)+(x1*2) ], writeto^[ (sw*y2)+(x1*2) ], len );
+    end;
+
+ procedure scrolldown1( x1, x2, y1, y2 : byte; offwhat : screentypeptr );
+  var
+   count : byte;
+   offset,len : word;
+  begin
+   dec( x1 ); dec( x2 ); dec( y1 ); dec( y2 );
+   len := (x2-x1+1) * 2;
+   offset :=  sw * y2 + x1 * 2;
+   {first, slide old screen section down 1 line}
+    for count := pred(y2) downto y1 do
+     begin
+      move(writeto^[offset-sw], writeto^[offset], len);
+      dec(offset, sw);
+     end;
+    {now, add the next line}
+     if offwhat <> nil then
+       move( offwhat^[ (sw*y1)+(x1*2) ], writeto^[ (sw*y1)+(x1*2) ], len );
     end;
 
 
@@ -588,15 +638,15 @@ Uses
    for count :=  y1 to y2 do
     begin
      delay(10);
-     offset :=  160 * (y2-count+2) + x1 * 2;
+     offset :=  sw * (y2-count+2) + x1 * 2;
      {first, slide old screen section down 1 line}
      for count2 := y2 downto succ(y1) do
       begin
-       thingy := (160 * count2) + (x1*2);
-       move(  screen[ thingy-160 ], screen[ thingy ], len );
+       thingy := (sw * count2) + (x1*2);
+       move(  screen[ thingy-sw ], screen[ thingy ], len );
       end;
      {now, add the next line}
-     move( offwhat^[ offset ], screen[ (160*y1)+(x1*2) ], len );
+     move( offwhat^[ offset ], screen[ (sw*y1)+(x1*2) ], len );
     end;
   end;
 
@@ -616,9 +666,9 @@ Uses
    for count := x1 to x2 do
     for count2 := y1 to y2 do
      begin
-      thingy := (count2*160)+(x1*2);
+      thingy := (count2*sw)+(x1*2);
       move( screen[ thingy ], screen[ thingy+2 ], len );
-      move( offwhat^[ (count2*160)+(x2-count)*2 ], screen[ thingy ], 2 );
+      move( offwhat^[ (count2*sw)+(x2-count)*2 ], screen[ thingy ], 2 );
      end;
    end;
 
@@ -653,6 +703,31 @@ Uses
      end;
    clength := c;
   end;
+
+ function cstrip( s : string ) : string;
+  var
+   i : byte;
+   c : string;
+  begin
+   c := '';
+   i := 1;
+   while i <= length(s) do
+    if
+     s[ i ] = '|'
+    then
+     case s[i+1] of
+      '@' : inc( i, 5 );
+      '#' : inc( i, 4 );
+      else inc( i, 2 );
+     end
+    else
+     begin
+      c := c + s[i];
+      inc( i );
+     end;
+   cstrip := c;
+  end;
+
 
  function normaltext( s : string ) : string;
    var
@@ -992,14 +1067,14 @@ procedure greyshadow( a1, b1, a2, b2 : byte );
   for
    i := 1 to w
   do
-   writeto^[ (a1 + i) * 2 - 1 + (b2 * 160) ] := $08;
+   writeto^[ (a1 + i) * 2 - 1 + (b2 * sw) ] := $08;
   if
    a2 < txmax-txmin+1
   then
    for
     i := 0 to h
    do
-    writeto^[ (a2 * 2) + 1 + ( b1 + i ) * 160 ] := $08;
+    writeto^[ (a2 * 2) + 1 + ( b1 + i ) * sw ] := $08;
  end;
 
 procedure blackshadow( a1, b1, a2, b2 : byte );
@@ -1015,28 +1090,28 @@ procedure stamp( a1, b1, a2, b2 : byte; pic : pcel );
   h := b2 - b1;
   w := a2 - a1;
   for i := 0 to h - 1 do
-    move( pic^[ ( i * w * 2 ) ], writeto^[(( b1 + i ) * 160 ) + ( a1 * 2 )], w * 2 );
+    move( pic^[ ( i * w * 2 ) ], writeto^[(( b1 + i ) * sw ) + ( a1 * 2 )], w * 2 );
  end;
 
 { þ screen savers }
 
 procedure rnd;
  var
-  tmp : screentype;
+  tmp : bscreentype;
   t  : byte;
   ch : char;
  begin
-  tmp := screen;
+  tmp := bscreen;
   t := shiftstate;
   while keypressed do ch := readkey;
   repeat
-   colorxy( random( 80 )+1, random( 25 ) +1, random( 15 )+1,
+   colorxy( random( 80 )+1, random( 50 ) +1, random( 15 )+1,
             chr( random( 255 ) ) );
   until (keypressed) or (t <> shiftstate);
   while keypressed do ch := readkey;
   repeat until shiftstate and ( rshiftpressed or lshiftpressed or
                                 ctrlpressed or altpressed ) = 0;
-  screen := tmp;
+  bscreen := tmp;
  end;
 
 procedure rnd2;
@@ -1077,9 +1152,9 @@ procedure rnd2;
 
 Procedure SetUpCrt;
  Begin
-  DosCursorOff;
   TextAttr := $0F;
-  ClrScr;
+  setmode($03);
+  DosCursorOff;
   txpos := 1;
   typos := 1;
  End;
@@ -1253,20 +1328,23 @@ function date : string;
           flushrt( n2s( y ), 4, '0' );
  end;
 
-function stardate : string;  { Sat 1218.93 21:40:00 }
+function stardate : string;  { Sat 1218.93 12:40:00 }
  var
-  w,mo,d,y,h,mi,s,n: word;
+  w,mo,d,y,h,h2,mi,s,n: word;
   sdate : string;
  begin
   getdate( y, mo, d, w );
   gettime( h, mi, s, n );
+  h2 := h mod 12;
+  if h2 = 0 then h2 := 12;
   sdate := days[ w ] + ' ' +
               flushrt( n2s( mo ), 2, '0') +
               flushrt( n2s( d ), 2, '0') + '.' +
               copy( flushrt( n2s( y ), 4, '0'), 3, 5 ) + ' ' +
-              flushrt( n2s( h ), 2, '0' ) + ':' +
+              flushrt( n2s( h2 ), 2, '0' ) + ':' +
               flushrt( n2s( mi ), 2, '0' )+ ':' +
-              flushrt( n2s( s ), 2, '0' );
+              flushrt( n2s( s ), 2, '0' )+
+              boolchar( h < 12, 'a', 'p');
   stardate := sdate;
  end;
 
@@ -1297,377 +1375,127 @@ function paramline : string;
   paramline := s;
  end;
 
-procedure adl( cline : string );
- Var
-  DirInfo: Searchrec;
-  SearchStr : String;
-  Thing : Word;
-  D : DirStr;
-  na : NameStr;
-  ex : extstr;
-  pstr, N,E : String;
-  T : DateTime;
-  X,
-  Wide,
-  Pause,
-  Hid,
-  prgsonly : Boolean;
-  TA,
-  TA2 : Byte;
-  C,
-  C2,
-  C3 : Integer;
-  CD : string;
-  Pchk : integer;
-  S2 : string;
-  nl : byte;
-
- Function LZ( w : Word ) : String;
-  var
-   s : String;
-  begin
-   Str( w:0, s );
-   if
-    length( s ) = 1
-   then
-    s := '0' + s;
-   lz := s;
-  end;
-
- Function LastPart( S : String ) : String;
-  var
-   counter : byte;
-  begin
-   s := '\' + s;
-   counter := length( s );
-   While
-    S[counter] <> '\'
-   do
-    dec( counter, 1 );
-   Delete( S, 0, counter+1 );
-   Lastpart := S;
-  end;
-
+procedure installfont( fontseg, fontofs : word );
  Begin
-  SearchStr := '';
-  cwriteln('');
-  cwriteln('');
-  Thing := Directory;
-  X := False;
-  C := 0;
-  C2 := 0;
-  C3 := 0;
-  Wide := False;
-  Hid := False;
-  Pause := False;
-  GetDir(0,CD);
-  pstr := '';
-  if
-   nwords( cline ) > 0
-  then
-   for
-    pchk := 1 to nwords( cline )
-   do
-    pstr := pstr + ' ' + wordn( cline, pchk );
-  If
-   CD[length(cd)]='\'
-  then
-   Delete(CD,length(cd),1);
-  If (pos('/?', pstr) > 0) or  (pos('/H', upstr(pstr)) > 0) then
-   begin
-    cwriteln('');
-    Cwriteln('|!k|WA|wdvanced |WD|wir |WL|wister |B5|w.|B0 ' +
-     '|K(|Wc|K)|w1994 '+SilverWare );
-    Cwriteln('|K|#Ä73');
-    CWrite('|Wxxxxxxxx |wxxx');
-    stWriteLn(' Ä> regular file (generic text or binary)');
-    CWrite('|Yxxxxxxxx |yxxx');
-    StWriteLn(' Ä> executable program (*.com *.exe)');
-    CWrite('|Gxxxxxxxx |gxxx');
-    StWriteLn(' Ä> executable batch file (*.bat)');
-    CWrite('|Mxxxxxxxx |mxxx');
-    StWriteLn(' Ä> compressed file or archive (*.arj *.zip *.arc *.pak *.zoo)');
-    CWrite('|Rxxxxxxxx |rxxx');
-    StWriteLn(' Ä> graphics file (*.gif *.jpg *.gl *.fli *.pic *.bmp *.pcx)');
-    CWrite('|Cxxxxxxxx |cxxx');
-    StWriteLn(' Ä> source code (*.bas *.pas *.asm *.inc *.c *.h *.cpp *.lsp)');
-    CWrite('|bxxxxxxxx xxx');
-    StWriteLn(' Ä> hidden file of any type (must use /a option)');
-    CWrite('|BXXXXXXXXXXX ');
-    StWriteLn(' Ä> subdirectory');
-    CWrite('|bXXXXXXXXXXX ');
-    StWriteLn(' Ä> hidden subdirectory (with /a option)');
-    Cwriteln('|K|#Ä73');
-    StWRiteln('Switches (type after "ADL" from the command line):');
-    Cwriteln('|K|#Ä73');
-    StWriteln(' /a Ä> shows all files in the directory, including hidden files. ');
-    StWriteln(' /w Ä> allows for a wider display of filenames.');
-    StWriteln(' /p Ä> pauses after each screenful of information.');
-    StWriteln(' /e Ä> show only executable files.');
-    StWriteln(' /h Ä> this help screen.');
-    Cwriteln('|K|#Ä73');
-    exit;
-   end;
-  hid   := pos( '/A', upstr(pstr)) > 0;
-  wide  := pos( '/W', upstr(pstr)) > 0;
-  pause := pos( '/P', upstr(pstr)) > 0;
-  prgsonly := pos( '/E', upstr(pstr)) > 0;
-  If
-   wordn( cline, 1) = ''
-  then
-   begin
-    SearchStr := cd+'\'
-   end
-  else
-   for
-    Pchk := 1 to nwords( cline )
-   do
-    if
-     pos( '/', wordn( cline, pchk )) = 0
-    then
-     SearchStr := wordn( cline, pchk);
-  If
-   SearchStr = ''
-  then
-   SearchStr := CD+'\';
-  If
-   Searchstr[Length(searchstr)] = ':'
-  then
-   begin
-    getdir( ord(upcase(searchstr[1]))-ord('A')+1, searchstr );
-    if searchstr[length(searchstr)] <> '\'
-     then searchstr := searchstr + '\';
-   end;
-  {$I-}
-  chdir( copy( searchstr , 1, length(searchstr)-1 ) );
-  {$I+}
-  If
-   Searchstr[Length(searchstr)] = '\'
-  then
-   searchstr := searchstr + '*.*';
-  Findfirst( SearchStr, Thing, DirInfo );
-  s2 := Upstr( lastpart( SearchStr ) );
-  If
-   ( ( DirInfo.Attr = Directory ) and
-   ( DirInfo.Name = s2 ) ) or
-   ( Searchstr = '..' )
-  then
-   searchstr := searchstr + '\*.*';
-  If
-   Hid
-  then
-   Thing := Anyfile;
-  Findfirst( SearchStr, Thing, DirInfo );
-  Stwrite( 'Looking at : '+dnstr( SearchStr ) );
-  cwriteln('');
-  cwriteln('');
-  nl := 4;
-  While DosError = 0 do
-   begin
-    FSplit( DirInfo.Name, d, na, ex );
-    n := na;
-    e := ex;
-    Delete( E, 1, 1 );
-    n := dnstr( normaltext( n ) );
-    e := dnstr( normaltext( e ) );
-    If
-     ( dirInfo.Attr and VolumeID <> 0 )
-    then
-     begin
-      TColor := $08;
-      cwrite( flushrt( DirInfo.Name, 12, ' ' ) );
-      if
-       (not wide)
-      then
-       if
-        x
-       then
-        cwriteLn('    |B[|WVolume ID|B]')
-      else
-       cwrite('    |B[|WVolume ID|B]            ');
-      C3 := 1;
-     end
-    else
-     If
-      ( DirInfo.Attr and Hidden ) <> 0
-     then
-      begin
-       ta := 1;
-       TColor := $01;
-       if
-        (dirInfo.Attr and Directory) <> 0
-       then
-        cwrite( flushrt( DirInfo.Name, 12, ' ' ))
-       else
-       cwrite( flushrt( N, 8, ' ' ) + ' ' + flushrt( E, 3, ' ' ) );
-       if
-        (not Wide)
-       then
-        if
-         (dirinfo.Attr and Directory <> 0)
-        then
-         cwrite('    |B[|WDir|B]')
-       else
-        cwrite(' ' + flushrt( n2s( DirInfo.Size ), 8, ' ' ) );
-       if
-        not wide
-       then
-        If
-         X
-        then
-         cWriteLn(' |B[|WHid|B]')
-        else
-         cwrite(' |B[|WHid|B]            ');
-        if
-         dirinfo.attr and directory <> 0
-        then
-         inc( c2, 1 )
-        else
-         inc( c, 1 );
-      end
-     else
-      Case DirInfo.Attr of
-       Directory :
-        begin
-         Ta := $09;
-         TColor := $09;
-         cwrite( flushrt( DirInfo.Name, 12, ' ' ) );
-         if
-          ( not wide )
-         then
-          if
-           x
-          then
-           cwriteln('    |B[|WDir|B]')
-          else cwrite('    |B[|WDir|B]                  ');
-         Inc(C2,1);
-        end;
-       Else
-        begin
-         TA := $0F; TA2 := $07;
-         if
-          ( e = 'exe' ) or
-          ( e = 'com' )
-         then
-           TA := $0E;
-         if
-          e = 'bat'
-         then
-          TA := LightGreen;
-         if (ta = $0F) and prgsonly then ta := 0 else
-         begin
-          if
-           ( e = 'zip' ) or
-           ( e = 'arc' ) or
-           ( e = 'lzh' ) or
-           ( e = 'pak' ) or
-           ( e = 'zoo' ) or
-           ( e = 'arj' )
-          then
-           TA := $0D;
-          if
-           ( e = 'gif' ) or
-           ( e = 'jpg' ) or
-           ( e = 'gl'  ) or
-           ( e = 'fli' ) or
-           ( e = 'pic' ) or
-           ( e = 'bmp' ) or
-           ( e = 'pcx' )
-          then
-           TA := $0C;
-          if
-           ( e = 'bas' ) or
-           ( e = 'pas' ) or
-           ( e = 'asm' ) or
-           ( e = 'inc' ) or
-           ( e = 'c' ) or
-           ( e = 'h' ) or
-           ( e = 'cpp' ) or
-           ( e = 'lsp' )
-          then
-           TA := $0B;
-         end;
-         Case TA of
-          $0A : TA2 := $02;
-          $0D : TA2 := $05;
-          $0C : TA2 := $04;
-          $0B : TA2 := $03;
-          $0E : TA2 := $06;
-         end;
-         if ta <> 0 then
-         begin
-          TColor := TA;
-          cwrite( flushrt( N, 8, ' ' ) );
-          TColor := TA2;
-          cwrite( flushrt( E, 4, ' ' ) );
-          If
-           Not Wide
-          then
-           begin
-            TColor := TA;
-            UnPacktime(DirInfo.Time,T);
-            cwrite( ' ' + flushrt( n2s( DirInfo.Size ), 8, ' ' ) + ' ' );
-            TColor := TA2;
-            cwrite(LZ(T.Hour)+':'+LZ(T.Min));
-            TColor := TA;
-            If X then
-             cwriteLn(' '+LZ(T.Month)+'/'+LZ(T.Day)+'/'+n2s(T.Year))
-            else
-             cwrite((' '+LZ(T.Month)+'/'+LZ(T.Day)+'/'+N2S(T.Year))+' ');
-           end; { if not wide }
-          Inc(c,1);
-         end; { if ta <> 0 }
-        end; { if ta <> 0 }
-       end;  { case dirinfo }
-      FindNext(DirInfo);
-      if ta <> 0
-      then
-       begin
-        TColor := $08;
-        If
-         Wide
-        then
-         if
-          ((C + C2 + C3) mod 5 = 0)
-         then
-          cwriteln('')
-         else cwrite( ' ³ ')
-        else
-         if
-          (Not X)
-         then
-          cwrite('³ ');
-        if
-         txpos = 1
-        then
-         begin
-          inc( nl );
-          if (nl mod 22 = 0) and pause then hitakey;
-         end;
-        X := Not X;
-       end;
-      end;
-  If
-   txpos > 1
-  then
-  cwriteln('');
-  cwriteln('');
-  StWriteLn( N2S(C)+' file(s), '+N2s(c2)+' directories in this listing, '+
-  N2S(DiskFree(0))+' bytes free.');
-  Cwrite('|WA|wdvanced |WD|wir |WL|wister |B5|w.|B0 |K(|Wc|K)|w1994' + SilverWare );
-  StWriteLn(' Type "ADL /h" for help.');
-  {$I-}
-  chdir(cd);
-  {$I+}
- End; {of adl}
+   fontofs := fontofs + 16;
+   Asm;
+
+   push    bp
+
+   mov     si, 40h
+   mov     es, si
+   mov     ax, es:[ 60h ]
+   push    ax                 { save old cursor style on stack }
+
+   mov     ax, fontseg
+   mov     es, ax
+
+   mov     ax, 1100h           { Load userdefined charset }
+   mov     bx, 1000h           { bh = bytes per char ( 10h ); bl = page ( 0h ) }
+   mov     cx, 00FFh           { number of patterns }
+   mov     dx, 0001h           { dx = first char }
+   mov     bp, fontofs         { es:bp -> new char table }
+
+   int     10h                 { install the new chars }
+
+   mov     ah, 12h
+   mov     bh, 20h
+
+   int     10h                 { and set up the printscreen procedure }
+
+   mov     ax,0100h
+   pop     cx                  { get the old cursor style }
+   int     10h                 { and restore it }
+
+   pop     bp                  { restore bp }
+ end; {asm}
+End;
+
+procedure installfont2( fontseg, fontofs : word );
+ Begin
+   fontofs := fontofs + 16;
+   Asm;
+
+   push    bp
+
+   mov     si, 40h
+   mov     es, si
+   mov     ax, es:[ 60h ]
+   push    ax                 { save old cursor style on stack }
+
+   mov     ax, fontseg
+   mov     es, ax
+
+   mov     ax, 1110h           { Load userdefined charset }
+   mov     bx, 1001h           { bh = bytes per char ( 10h ); bl = page ( 0h ) }
+   mov     cx, 00FFh           { number of patterns }
+   mov     dx, 0001h           { dx = first char }
+   mov     bp, fontofs         { es:bp -> new char table }
+
+   int     10h                 { install the new chars }
+
+   mov     ah, 12h
+   mov     bh, 20h
+
+   int     10h                 { and set up the printscreen procedure }
+
+   mov     ax,0100h
+   pop     cx                  { get the old cursor style }
+   int     10h                 { and restore it }
+
+   pop     bp                  { restore bp }
+ end; {asm}
+End;
+
+ procedure loadfont( s : string );
+  var
+   f: file;
+   t : array[ 1..4096 ] of byte;
+  begin
+  {$I-} assign( f, s ); reset( f,1 ); {$I+}
+   if ioresult <> 0 then exit;
+   blockread( f, t, 4096 );
+   close( f );
+   installfont(seg(t),ofs(t));
+  end;
+
+const
+    Vga90: array [1..9] of word = (
+        $6B00,$5901,$5A02,$8E03,$6004,$8D05,$2D13,$0101,$0800);
+
+
+procedure SetWidth90; assembler;
+asm
+        mov     dx,03D4h
+        mov     ax,02E11h
+        out     dx,ax
+        lea     si,[Vga90]
+        mov     dx,03D4h
+        mov     cx,7
+        rep     outsw
+        mov     dx,03C4h
+        outsw
+        lodsw
+        mov     dx,03DAh
+        in      al,dx
+        mov     dx,03C0h
+        mov     al,13h
+        out     dx,al
+        mov     al,ah
+        out     dx,al
+        mov     al,20h
+        out     dx,al
+        out     dx,al
+end;
 
 
 
 Begin
+ sw := 160;
  DOSscreen := screen;
  DOSxpos := wherex;
  DOSypos := wherey;
- tColor := $000F;
+ tColor := $0007;
  sColor := $000E;
  tXpos := wherex;
  tYpos := wherey;

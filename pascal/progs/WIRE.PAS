@@ -194,9 +194,13 @@ begin
  initplotting( an, tl );
  initperspective( on, px, py, pz, pd );
  setmode( $13 );
- loadcol( '\aa\shades.col');
  new( starfield );
- loadcel( '\aa\starfield.cel', starfield );
+{ loadcel( '\aa\starfield.cel', starfield ); }
+ loadpic( 'Grid.dat');
+ loadcol( '\aa\shades.col');
+ directvideo := true;
+ gotoxy( 1, 25 );  writeln; writeln; writeln; writeln;
+ starfield^ := vga;
  mouseon;
  showmouse( off );
  plat.init( -30,  -20, 25, 0, -25, -25, 5 );

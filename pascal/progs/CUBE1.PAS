@@ -200,7 +200,7 @@ Begin
   OutTextXY(1,11,'-=< (C)1992 MJW >=-');
 {-----}
   Done := False;
-  Camera.Init( 0, 0, 0, 600, 90, 0, TRUE );
+  Camera.Init( 0, 0, -500, 600, 90, 0, TRUE );
   Cube.Init ( 0, 0, 0, 30, @Camera, 9 );
   Cube2.Init( 0, 0, 0, 50, @Camera, 1 );
 Repeat

@@ -6,6 +6,7 @@ InterFace
   Function ctextwidth( s : string ) : word;
   Procedure ctextxy( x, y : integer; s : string );
   Procedure whitebox( x1, y1, x2, y2 : integer );
+  procedure drawline( x1, y1, x2, y2 : integer; c : byte );
 
 type
  button = object
@@ -60,7 +61,7 @@ Procedure InitGrafx;
 
 function ctextwidth( s : string ) : word;
  begin
-  ctextwidth := clength( s ) * 8;
+  ctextwidth := clength( s ) * textwidth('M');
  end;
 
 procedure ctextxy( x, y : integer; s : string );
@@ -103,6 +104,13 @@ procedure whitebox( x1, y1, x2, y2 : integer );
   rectangle( max( -1, x1), y1, x2, y2 );
   setcolor( tc );
  end;
+
+ procedure drawline( x1, y1, x2, y2 : integer; c : byte );
+  begin
+   setcolor( c );
+   line( x1, y1, x2, y2 );
+  end;
+
 
 {BUTTON}
 

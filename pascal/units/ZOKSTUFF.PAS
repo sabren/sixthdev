@@ -1,93 +1,137 @@
 Unit ZokStuff;  { menus, dialogs, input, confirmation boxes, etc }
 Interface
-uses crtstuff;
-
+uses crtstuff, pntstuff;
 { NOTE : ZOKSTUFF Considers (0,0) the top left corner! }
 
+{ newsepbar( next : pzchoice ) }
+{ newchoicexy( x, y, s1, s2, on, shortcut, value, submenu, next }
+{ newchoice( s1, s2, on, shortcut, value, submenu, next }
+{ newmenu( e, a, menu )  }
+{ newbouncemenu( x, y, w, palstr, esc, alt, menu ) }
+{ newmenubar( x, y, palette, esc, alt, menu ) }
+
+var
+ ZokWork : screentype absolute $B800:$2000;
+ ZokBack : screentype absolute $B800:$3000;
+
  Type
-  ZObj = object
+
+  pzobj = ^zobj;
+  ZObj = object ( node ) { a clickable rectangle onscreen }
    x, y, x2, y2 : byte;
    constructor init( a, b, a2, b2 : byte );
-   procedure invert; virtual;
-   procedure uninvert; virtual;
+   procedure shownormal; virtual;
+   procedure showinvert; virtual;
    function mouseover : boolean; virtual;
    function pressed : boolean; virtual;
    function click : boolean; virtual;
-   destructor done;
   end;
-  Ztext = object( Zobj )
+
+  pztext = ^ztext;
+  ztext = object( zobj )
    st1, st2 : string;
    constructor init(  a, b : byte; s, s2 : string );
-   procedure invert; virtual;
-   procedure uninvert; virtual;
+   procedure shownormal; virtual;
+   procedure showinvert; virtual;
   end;
-  ZMenuPtr = ^ZMenuObj;
-  ZMenuObj = Object( ZObj )
-   Next, Last : ZMenuPtr;
-   Sub : pointer;
-   s1,s2 : string;
-   on : boolean;
-   sc : char;
-   v : byte;
-   constructor init( a, b : byte; st1, st2 : string; ison : boolean;
-                     shortcut : char; value : word; nxt : zmenuptr );
-   procedure draw( switch : boolean ); virtual;
-   function click : boolean; virtual;
+
+  pzchoice = ^zchoice;
+  zchoice = object( ztext )
+   sub : plist;                     { sumbmenus }
+   on : boolean;                    { active? }
+   sc : char;                       { shortcut character }
+   v : byte;                        { return value }
+   constructor init( a, b : byte; s, s2 : string; ison : boolean;
+                     shortcut : char; value : word; submen : plist;
+                     nxt : pzchoice );
+   procedure draw( high : boolean ); virtual;
   end;
-  ZMenuObjPtr = ^ZMenu;
-  ZMenu = Object
-   endloop : boolean;
-   Top,High: ZMenuPtr;
-   EscExits : boolean;
-   Constructor Init( esc : boolean );
-   Procedure DrawAChoice( index: ZMenuPtr ); virtual;
-   Procedure Add( x, y : byte; s1, s2 : string;
-                  on: boolean; sc : char; v: word ); virtual;
-   Procedure Show; virtual;
-   procedure seton( z : zmenuptr );
-   procedure setto( z : zmenuptr ); { sets and draws }
-   Function ShortCut( ch : char ) : ZmenuPtr;
-(*   function find( v : word ) : ZMenuPtr; virtual; *)
-(*   procedure turnon( v : word ); virtual;         *)
-(*   procedure turnoff( v : word ); virtual;        *)
-(*   procedure toggle( v : word ); virtual;         *)
-(*   procedure addbefore( v : word ); virtual;      *)
-   function value : byte; virtual;
-   procedure Handle( ch : char ); virtual;
+
+  function newsepbar( next : pzchoice ) : pzchoice;
+  function newchoicexy( x, y : byte; s1, s2 : string; on : boolean;
+                        sc : char; v : word; sub : plist;
+                        next : pzchoice ) : pzchoice;
+  function newchoice( s1, s2 : string; on : boolean; sc : char; v : word;
+                      sub : plist; next : pzchoice ) : pzchoice;
+
+ Type
+  pzmenu = ^zmenu;
+  zmenu = object ( list )
+   tx, ty,
+   height,
+   width : byte; { updated constantly in reformatting loop }
+   high : pzchoice;
+   topmenu,
+   endloop,
+   escexits,
+   altexits,
+   subactive,
+   usetempscreen : boolean;
+   constructor init( esc, alt, usetemp : boolean; menu : pzchoice );
+   procedure insert( z : pzchoice ); virtual;
+   procedure add( z : pzchoice ); virtual;
+   procedure show; virtual;
+   procedure seton( z : pzchoice );
+   procedure setto( z : pzchoice );
+   procedure setonfirst;
+   procedure settofirst;
+   procedure handle( ch : char ); virtual;
    procedure handlestripped( ch : char ); virtual;
    procedure reset; virtual;
    procedure domousestuff; virtual;
-   Function Get : byte;
+   procedure dowhilelooping; virtual;
+   procedure format( choice : pzchoice ); virtual;
+   function normalstr( s: string ) : string; virtual;
+   function invertstr( s: string ) : string; virtual;
+   function submenu : pzmenu;
+   function shortcut( ch : char ) : pzchoice;
+   function valuecut( v : word ) : pzchoice;
+   function value : byte;
+   function get : byte;
   end;
- Function NewLine( s1, s2 : string; on:boolean; sc : char; v:word;
-                   next: ZMenuPtr ) : ZMenuPtr;
- Function NewBar( next : ZMenuPtr ) : ZMenuPtr;
- Type
+
+  function newmenu( e, a : boolean; menu : pzchoice ) : pzmenu;
+
+ const
+  zbmb  : char = 'k';
+  zbmf  : char = 'K';
+  zbmt  : char = 'w';
+  zbhb  : char = 'r';
+  zbhf  : char = 'Y';
+  zbmw : byte = 1;
+
+ type
+  pzbouncemenu = ^zbouncemenu;
   ZBounceMenu = Object( ZMenu )
-   tx, ty, width, height : byte;
-   constructor init( x, y, w : byte; p : string; esc : boolean; menu : ZMenuPtr );
-   function topline : string; virtual;
-   function format1( s : string ) : string; virtual;
-   function format2( s : string ) : string; virtual;
-   function barline : string; virtual;
-   function bottomline : string; virtual;
+   constructor init( x, y, w : byte; p : string;
+                     e, a : boolean; menu : pzchoice );
    procedure show; virtual;
-(*   procedure move( x, y : byte );                 *)
-(*   procedure moverel( x, y : byte );              *)
-(*   procedure center;                              *)
+   procedure format( choice : pzchoice ); virtual;
+   function normalstr( s: string ) : string; virtual;
+   function invertstr( s: string ) : string; virtual;
+   function top : string; virtual;
+   function sepbar : string; virtual;
+   function bottom : string; virtual;
   end;
-  ZMenubar = object( Zmenu )
-   shownbefore : boolean;
-   constructor init( esc : boolean );
-   procedure addsub( whatkey : char; submenu : ZMenuobjptr );
-   procedure altkey( whatkey : char );
-   procedure show; virtual;
-   procedure reset; virtual;
+
+ function newbouncemenu( x, y, w : byte; p:string; e, a : boolean;
+                         menu : pzchoice ) : pzbouncemenu;
+
+ type
+ pzmenubar = ^zmenubar;
+ ZMenubar = object( ZMenu )
+   constructor init( x, y : byte; p : string; e, a : boolean;
+                     menu : pzchoice );
+   procedure handle( ch : char ); virtual; { ð menu - #32 }
    procedure handlestripped(ch:char); virtual;
-   procedure domousestuff; virtual;
-   function value : byte; virtual;
-   function Get : byte;
+    { uses alt keys, plus the up+right are reversed for submenus }
+   procedure format( choice : pzchoice ); virtual;
   end;
+
+ function newmenubar( x, y : byte; p : string; e, a : boolean;
+                      menu : pzchoice ) : pzmenubar;
+
+type
   ZInput = Object ( ZObj )
    tcol,               { text color  }
    acol,               { arrow color (scroller) }
@@ -97,10 +141,11 @@ uses crtstuff;
    cpos : byte;        { cursor position }
    back,               { backup copy }
    strg : string;      { actual string }
+   escexits,
    tovr ,              { type over toggle }
    frst ,              { first key to be pressed }
    isdone : boolean;   { end-loop flag }
-   constructor init(a,b,tl,dl,tc,ac : byte; start : string );
+   constructor init(a,b,tl,dl,tc,ac : byte; esc : boolean; start : string );
    constructor default( a, b, tl, dl : byte; start : string );
    procedure reset;
    Procedure show; virtual;
@@ -185,7 +230,7 @@ uses crtstuff;
   end;
 
 Implementation
-uses Crt,sndstuff,moustuff;
+uses crt,sndstuff,moustuff;
 
 constructor Zobj.init( a, b, a2, b2 : byte );
  begin
@@ -195,11 +240,11 @@ constructor Zobj.init( a, b, a2, b2 : byte );
   y2 := b2;
  end;
 
-procedure zobj.invert;
+procedure zobj.shownormal;
  begin
  end;
 
-procedure zobj.uninvert;
+procedure zobj.showinvert;
  begin
  end;
 
@@ -216,16 +261,15 @@ function ZObj.pressed : boolean;
   pressed := mouseover and (ms and 1 <> 0)
  end;
 
-
 function zobj.click : boolean;
  begin
   if
    pressed
   then
    begin
-    invert;
-    repeat until not mouseover or (ms and $01 = 0);
-    uninvert;
+    showinvert;
+    repeat until not pressed;
+    shownormal;
     if
      mouseover 
     then
@@ -237,296 +281,416 @@ function zobj.click : boolean;
    click := false; { never even clicked in box }
  end;
 
-destructor ZObj.done;
- begin
- end;
-
 constructor Ztext.init(  a, b : byte; s, s2 : string );
  begin
   zobj.init( a, b, a+clength(s), b );
   st1 := s;
   st2 := s2;
-  uninvert;
  end;
 
-procedure ztext.invert;
+procedure ztext.shownormal;
  var
   mv : boolean;
  begin
   mv := mvisible;
-  showmouse( off );
-  cwritexy( x, y, st2 );
-  showmouse( mv );
- end;
-
-procedure ztext.uninvert;
- var
-  mv : boolean;
- begin
-  mv := mvisible;
-  showmouse( off );
+  if mv then showmouse( off );
   cwritexy( x, y, st1 );
-  showmouse( mv );
+  if mv then showmouse( on );
  end;
 
-constructor ZMenuObj.init( a, b : byte; st1, st2 : string; ison : boolean;
-                           shortcut : char; value : word; nxt : zmenuptr );
- begin
-  zobj.init( a, b, a + clength( st1 ), b );
-  s1 := st1;
-  s2 := st2;
-  on := ison;
-  sc := shortcut;
-  v  := value;
-  next := nxt;
-  sub := nil;
- (********  if nxt <> nil then add( nxt ); *********)
- end;
-
-procedure zmenuobj.draw( switch: boolean );
- begin
-  if switch then
-   cwritexy( x, y, s1 )
-  else
-   cwritexy( x, y, s2 );
- end;
-
-function zmenuobj.click : boolean;
+procedure ztext.showinvert;
  var
-  c : boolean;
+  mv : boolean;
  begin
-  c := on and zobj.click;
-  if c and (sub <> nil) then zmenuobjptr(sub)^.show;
-  click := c;
+  mv := mvisible;
+  if mv then showmouse( off );
+  cwritexy( x, y, st2 );
+  if mv then showmouse( on );
  end;
 
-Constructor ZMenu.Init( esc : boolean );
+constructor zchoice.init( a, b : byte; s, s2 : string; ison : boolean;
+            shortcut : char; value : word; submen : plist; nxt : pzchoice );
  begin
-  top := New( zmenuptr, init( 0,0, '-=>TOP<=-', '', off, #255, $FFFF, nil ));
-  Top^.Last := Top;
-  Top^.Next := Top;
-  High := Top;
-  EscExits := esc;
+  ztext.init( a, b, s, s2 );
+  st1 := s;
+  st2 := s2;
+  on := ison;
+  sc := upcase( shortcut );
+  v  := value;
+  sub := submen;
+  next := nxt;
+ end;
+
+procedure zchoice.draw( high: boolean );
+ begin
+  if high then
+   showinvert
+  else
+   shownormal;
+ end;
+
+function newchoicexy( x, y : byte; s1, s2 : string; on : boolean;
+                      sc : char; v : word; sub : plist;
+                      next : pzchoice ) : pzchoice;
+var
+ zp : pzchoice;
+ begin
+  zp := new( pzchoice, init( x, y, s1, s2, on, sc, v, sub, next ));
+  newchoicexy := zp;
+  end;
+
+function newchoice( s1, s2 : string; on : boolean; sc : char; v : word;
+                    sub : plist; next : pzchoice ) : pzchoice;
+ begin
+  newchoice := newchoicexy( 0, 0, s1, s2, on, sc, v, sub, next );
+ end;
+
+function newsepbar( next : pzchoice ) : pzchoice;
+ begin
+  newsepbar := new( pzchoice, init( 0, 0, '', '', off, #255, 0, nil, next ));
+ end;
+
+constructor zmenu.init( esc, alt, usetemp : boolean; menu : pzchoice );
+ var
+  m : pzchoice;
+ begin
+  list.init;
+  add( menu );
+  m := pzchoice( first );
+  while (m <> nil) do   { post-setformat }
+   begin
+    format( m );
+    m := pzchoice( next( m ) );
+   end;
+  setonfirst;
+  escexits := esc;
+  altexits := esc;
+  usetempscreen := usetemp;
+  endloop := false;
+  topmenu := false;
+  subactive := false;
+ end;
+
+procedure zmenu.insert( z : pzchoice );
+ var
+  l : pzchoice;
+ begin
+  if z = nil then exit;
+  l := z;
+  while l^.next <> nil do l := pzchoice( l^.next );
+  if last = nil then last := l else l^.next := last^.next;
+  last^.next := z;
+ end;
+
+
+procedure zmenu.add( z : pzchoice );
+ var
+  l,t : pzchoice;
+ begin
+  if z = nil then exit; { has to add in all the nexts! }
+  l := z;
+  while l^.next <> nil do
+   begin
+    t := l;
+    l := pzchoice( l^.next );
+    if l <> nil then l^.prev := t;
+   end;
+  if last = nil then last := l else l^.next := last^.next;
+  first^.prev := l;
+  last^.next := z;
+  z^.prev := last;
+  last := l;
+ end;
+
+procedure zmenu.show;
+ var
+  mv : boolean;
+  p, q : pzchoice;
+  oldwriteto : pointer;
+ begin
+  if topmenu then zokwork := zokback;
+  oldwriteto := writeto;
+  writeto := @zokwork;
+  p := pzchoice( first );
+  while p <> nil do
+   begin
+    q := p;
+    p := pzchoice( next( p ) );
+    q^.draw( q = high );
+   end;
+  if high^.sub <> nil then submenu^.show;
+{  if topmenu then}
+   begin
+    mv := mvisible;
+    if mv then showmouse( off );
+    writeto := oldwriteto;
+    writeto^ := zokwork;
+    if mv then showmouse( on );
+   end;
+ end;
+
+procedure zmenu.seton( z : pzchoice );
+ begin
+  if (z <> nil) and (z^.on) then high := z;
+  subactive := submenu <> nil;
+  if subactive then
+   begin
+    submenu^.reset;
+    subactive := submenu^.high <> nil;
+   end;
+ end;
+
+procedure zmenu.setto( z : pzchoice );
+ begin
+  seton( z );
+  show;
+ end;
+
+procedure zmenu.setonfirst;
+ begin
+  high := pzchoice( first );
+  while (high <> pzchoice(last)) and ( not high^.on )
+   do high := pzchoice( next( high ));
+ end;
+
+procedure zmenu.settofirst;
+ begin
+  setonfirst;
+  show;
+ end;
+
+procedure zmenu.handle( ch : char );
+ begin
+  if (ch = #0) then
+    begin handlestripped( readkey ); exit; end;
+  if (ch = #27) then { hitting esc anywhere will exit }
+    begin
+     if escexits then begin high := nil; endloop := true; end;
+     exit; { quit handling regardless of whether esc exits the menu }
+    end;
+  { since we're still here.. }
+  if subactive then { just letters, so the submenu handles it }
+   begin
+    submenu^.handle( ch );
+    endloop := submenu^.endloop;
+    submenu^.endloop := false;
+   end { sub <> nil }
+  else
+   Case Ch of
+    #13: EndLoop := True;
+    else
+    if shortcut( ch ) <> nil then
+     begin
+      setto( shortcut( ch ) );
+      if not subactive then endloop := true;
+     end; { else }
+   end; { case }
+ end; { handle }
+
+procedure Zmenu.Handlestripped( ch : Char );
+ var
+  l : pzchoice;
+ begin
+  if (subactive) and ( ch in [#71,#72,#73,#77,#79,#80,#81] )
+   then submenu^.handlestripped( ch )
+  else
+   Case Ch of
+    #72 : begin                                                { up }
+           repeat
+             if (high = pzchoice(first)) then high := pzchoice(last);
+             if high <> nil then high := pzchoice(prev(high))
+            until (high^.on) or (high = nil);
+            if high = nil then halt;
+            show;
+           end;
+    #75 : if subactive then                                    { left }
+           if submenu^.subactive
+            then submenu^.handlestripped( ch )
+           else
+            begin
+             subactive := no;
+             submenu^.high := nil;
+            end;
+    #80 : begin                                                 { down }
+            repeat
+             if (high = pzchoice(last)) then high := pzchoice(first);
+             if high <> nil then high := pzchoice(next(high))
+            until (high^.on) or (high = nil);
+            if high = nil then halt;
+            show;
+           end;
+    #77 : if high^.sub <> nil then                             { right }
+            begin
+             subactive := true;
+             submenu^.reset;
+             subactive := submenu^.high <> nil;
+            end;
+     #71,#73 : begin                                           { home }
+                l := pzchoice( first );
+                while (not l^.on) do l := pzchoice(l^.next);
+                setto( pzchoice( l ) );
+               end;
+     #79,#81 : begin                                           { end }
+                l := pzchoice( last );
+                while (not l^.on) do l := pzchoice(l^.prev);
+                setto( pzchoice( l ) );
+               end;
+    else
+     handle( ch );
+   end; { case }
+  end; { handlestripped }
+
+procedure zmenu.reset;
+ begin
+  if empty then exit;
+  setonfirst;
+   repeat
+    high := pzchoice( next( high ));
+    if high^.sub <> nil then submenu^.reset;
+   until high = pzchoice( last );
+   setonfirst;
+   subactive := submenu <> nil;
   endloop := false;
  end;
 
-
- Procedure ZMenu.DrawAChoice( index: ZMenuPtr );
-   Begin
-    index^.draw( index <> high );
-   End;
-
-
- Procedure zmenu.Add( x, y : byte; s1,s2 : string;
-                      on: boolean; sc : char; v: word );
-   var
-      newchoice : zmenuptr;
-   begin
-     newchoice := new( zmenuptr, init( x, y, s1, s2, on, sc, v, nil ));
-      newchoice^.next := top;
-      newchoice^.last := top^.last;
-      Top^.Last^.Next := NewChoice;
-      Top^.Last := NewChoice;
-      If Top^.Next = Top then Top^.Next := NewChoice;
-      High := Top^.Next;
-     Newchoice := nil;
-   end;
-
- procedure zmenu.seton( z : zmenuptr );
-  begin
-   if (z <> nil) and (z^.on) then high := z;
-  end;
-
- procedure zmenu.setto( z : zmenuptr );
-  begin
-   seton( z );
-   show;
-  end;
-
- Procedure ZMenu.Show;
-   var
-    index : zmenuptr;
-    mv : boolean;
-   begin
-     mv := mvisible;
-     showmouse( off );
-     Index := Top;
-     While Index^.next <> top do
-       begin
-         Index := Index^.Next;
-         DrawAChoice( Index );
-       end;
-     showmouse( mv );
-   end;
-
- Function ZMenu.Shortcut( ch : char ) : Zmenuptr;
+procedure zmenu.domousestuff;
   var
-   z,t : zmenuptr;
-  begin
-   z := nil;
-   t := top;
-   while ( t^.next <> top ) and (z = nil) do
-    begin
-     t := t^.next;
-     if
-      (upcase( t^.sc ) = upcase( ch ))
-     then
-      If
-       (t^.on)
-      then
-       z := t
-      else
-       shortcut := nil
-     else;
-    end;
-   shortcut := z;
-  end;
-
- function zmenu.value : byte;
-  begin
-   if high <> top then value := High^.V else value := 255;
-  end;
-
- procedure Zmenu.Handle( ch : Char );
-  begin
-   Case Ch of
-     #0: handlestripped( Readkey );
-     #13,
-     #27: handlestripped( ch );
-     else
-      if shortcut( ch ) <> nil then
-       begin
-        setto( shortcut( ch ) );
-        endloop := true;
-       end; { else }
-     end; { case }
-  end; { handle }
-
- procedure Zmenu.Handlestripped( ch : Char );
-  var
-   z : zmenuptr;
-  begin
-   z := high;
-   Case Ch of
-     #72,{up}#75{rt} : begin;
-                        repeat
-                         z := z^.Last;
-                         If z = Top then z := Top^.Last;
-                        until z^.on;
-                        setto( z );
-                       end;
-     #71 : begin
-            z := top^.next;
-            while not z^.on do z := z^.next;
-            setto( z );
-           end;
-     #79 : begin
-            z := top^.last;
-            while not z^.on do z := z^.last;
-            setto( z );
-           end;
-     #80,{dn}#77{lf} : begin;
-                        repeat
-                         z := z^.Next;
-                         If z = Top then z := Top^.Next;
-                        until z^.on;
-                        setto( z );
-                       end;
-     #13: EndLoop := True;
-     #27: if EscExits then
-          begin
-           high := top;
-           endloop := true;
-          end;
-     else
-      if shortcut( ch ) <> nil then
-       begin
-        setto( shortcut( ch ) );
-        endloop := true;
-       end; { else }
-     end; { case }
-  end; { handle }
-
- procedure zmenu.reset;
-  begin
-   high := top;
-   while
-    not high^.on
-   do
-    begin
-     High := High^.Next;
-     If High = Top then High := Top^.Last;
-    end;
-   endloop := false;
-  end;
-
- procedure zmenu.domousestuff;
-  var
-   z : zmenuptr;
-  begin
-   if not mpresent then exit;
-   getmpos;
-   if
-    (ms = 2)
-   then
-    begin
-     repeat getmpos until (ms and 2 = 0);
-     handle( #27 )
-    end
-   else
-    begin
-     z := top;
-     while z^.next <> top do
-      begin
-       z := z^.next;
-       if
-        z^.mouseover and (ms and 1 <> 0)
-       then
-        setto( z );
-       if
-        z^.click
-       then
-        handle( #13 );
-      end;
-    end;
-  end;
-
- Function ZMenu.Get : byte;
-  var
-   ch: char;
-  begin
-   reset;
-   show;
-   Repeat
-    if not keypressed then
-     domousestuff
-    else
-     handle( readkey );
-   Until endloop;
-   get := value;
-  end;
-
-Function NewLine( s1, s2: string; on:boolean; sc : char;
-                  v:word; next: ZMenuPtr ) : ZMenuPtr;
-var
- zp : zmenuptr;
+   p, q : pzchoice;
  begin
-  zp := new( zmenuptr, init( 0, 0, s1, s2, on, sc, v, next ));
-  if s2 = '' then zp^.s2 := s1 else zp^.s2 := s2;
-  newline := zp;
+  if not mpresent then exit;
+  getmpos;
+  if
+   high^.sub <> nil
+  then
+   begin
+    submenu^.domousestuff;
+    endloop := submenu^.endloop;
+    submenu^.endloop := false;
+   end;
+  if endloop then exit;
+  if (ms = 2) then
+   begin
+    repeat getmpos until (ms and 2 = 0);
+    handle( #27 )
+   end
+  else { no right click, procede as usual }
+   begin
+    p := pzchoice( first );
+    while p <> nil do
+     begin
+      q := p;
+      p := pzchoice( next( p ) );
+      if (q^.on) and (q^.pressed) then
+       begin
+        setto( q );
+        if q^.click then handle( #13 );
+        show;
+       end; { clicked }
+     end; { while }
+    end; { else }
+ end; { domousestuff }
+
+procedure zmenu.dowhilelooping;
+ begin
+  { this is to allow the menu to update clocks or screen savers, }
+  { or to allow other controls to be onscreen at the same time.. }
+  { multi-tasking in other words.. }
  end;
 
-Function NewBar ( next : zmenuptr ) : ZMenuPtr;
+procedure zmenu.format( choice : pzchoice );
  begin
-  newbar := new( zmenuptr, init( 0, 0, '', '', off, #255, 0, next ));
+  { virtual procedure }
+  if choice^.st2 = '' then choice^.st2 := invertstr( choice^.st1 )
+   else choice^.st2 := invertstr( choice^.st2 );
+  if choice^.st1 <> '' then choice^.st1 := normalstr( choice^.st1 );
  end;
 
-const
- zbmb  : char = 'k';
- zbmf  : char = 'K';
- zbmt  : char = 'w';
- zbhb  : char = 'r';
- zbhf  : char = 'Y';
+function zmenu.normalstr( s: string ) : string;
+ begin
+  normalstr := '|!'+zbmb+'|'+zbmt+ s;
+ end;
+
+function zmenu.invertstr( s: string ) : string;
+ begin
+  invertstr := '|!'+zbhb+'|'+zbhf+s
+ end;
+
+function zmenu.submenu : pzmenu;
+ begin
+  if high^.sub <> nil
+   then submenu := pzmenu( high^.sub ) else submenu := nil;
+ end;
+
+function zmenu.shortcut( ch : char ) : pzchoice;
+ var
+  p : pzchoice;
+ begin
+  if empty then exit;
+  ch := upcase( ch );
+  p := pzchoice( first );
+  while ( p^.sc <> ch ) and (p <> pzchoice(last)) do p := pzchoice( next( p ) );
+  if (p^.sc = ch) and (p^.on) then shortcut := p else shortcut := nil;
+  end;
+
+function zmenu.valuecut( v : word ) : pzchoice;
+ var
+  p : pzchoice;
+ begin
+  p := pzchoice( first );
+  while (p <> nil) and ( p^.v <> v ) do p := pzchoice( next( p ) );
+  if (p <> nil) and (p^.on) then valuecut := p else valuecut := nil;
+ end;
+
+function zmenu.value : byte;
+ begin
+  if high = nil then value := 255
+   else if high^.sub = nil then value := high^.v
+   else value := submenu^.value;
+ end;
+
+function zmenu.get : byte;
+ var
+  ch: char;
+  ta : byte;
+  mv : boolean;
+ begin
+  ta := textattr;
+  if empty then begin get := 0; exit; end;
+  topmenu := true;
+  mv := mvisible;
+  if mv then showmouse( off );
+  zokback := writeto^;
+  if mv then showmouse( on );
+  endloop := false;
+  reset;
+  if high = nil then high := pzchoice( first );
+  show;
+  Repeat
+   writeto := @screen;
+   dowhilelooping;
+   if ((shiftstate and altpressed) <> 0) then
+    begin
+     repeat until (shiftstate and altpressed) = 0;
+     if (altexits) and (not keypressed) then handle( #27 );
+    end;
+   if keypressed then handle( readkey )
+    else domousestuff;
+  until endloop;
+  get := value;
+  topmenu := false;
+  mv := mvisible;
+  if mv then showmouse( off );
+  zokback := writeto^;
+  if mv then showmouse( on );
+  writeto := @screen;
+  textattr := ta;
+  tcolor := ta;
+ end;
+
+ function newmenu( e, a : boolean; menu : pzchoice ) : pzmenu;
+  begin
+   newmenu := new( pzmenu, init( e, a, true, menu ));
+  end;
 
 procedure setpal( palstr : string );
  begin
@@ -547,206 +711,173 @@ procedure setpal( palstr : string );
   zbhf := palstr[ 5 ];
  end;
 
-constructor zbouncemenu.init( x,y,w: byte; p : string; esc: boolean; menu: zmenuptr );
+constructor zbouncemenu.init( x, y, w : byte; p : string; e, a : boolean;
+                              menu : pzchoice );
  var
-  b : byte;
-  m : zmenuptr;
-  s1, s2 : string;
-  on : boolean;
-  sc : char;
-  v : word;
+  m : pzchoice;
  begin
-  zmenu.init( esc );
-  b := 1;
   tx := x;
   ty := y;
   width := w;
   setpal( p );
-  zmenu.add( x, y, topline, '', false, #255, 255 );
   height := 1;
-  m := new( zmenuptr );
-  m^.next := menu;
-  while m^.next <> nil do
-   begin
-    m := m^.next;
-    if m^.next <> nil then m^.next^.last := m;
-    if m^.s2 = '' then m^.s2 := m^.s1;
-    if m^.s1 <> '' then m^.s1 := format1( m^.s1 )  else m^.s1 := barline;
-    m^.s2 := format2( m^.s2 );
-    m^.x  := x;
-    m^.x2 := x + width + 1;
-    m^.y  := y+b;
-    m^.y2 := y+b;
-    inc( b, 1 );
-    inc( height, 1 );
-   end;
-  m^.next := top; { m is now last item }
-  menu^.last := top^.last; { <- top of menu's frame }
-  top^.last^.next := menu;
-  top^.last := m;
-  zmenu.add( x, y + b, bottomline, '', false, #255, 255 );
+  zmenu.init( e, a, on, menu );
+  insert( newchoicexy( x, y, top, '', off,
+                       #255, 255, nil, nil ) );
+  add( newchoicexy( x, y + height, bottom, '', off,
+                    #255, 255, nil, nil ) );
   high := menu;
   inc( height, 1 );
   inc( width, 1 );
  end;
 
-function zbouncemenu.topline : string;
- begin
-  topline := '|!'+zbmb+'|'+zbmf+ 'Ú' + chntimes( 'Ä', width ) + '¿'
- end;
-
-function zbouncemenu.format1( s : string ) : string;
- begin
-  s := cpadstr(s, width, ' ' );
-  format1 := '|!'+zbmb+'|'+zbmf+'³|'+zbmt+ s + '|'+zbmf+'³';
- end;
-
-function zbouncemenu.format2( s : string ) : string;
- begin
-  s := cpadstr(s, width, ' ' );
-  format2 := '|!'+zbmb+'|'+zbmf+'³|!'+zbhb+'|'+zbhf+s+'|!'+zbmb+'|'+zbmf+'³';
- end;
-
-function zbouncemenu.bottomline : string;
- begin
-  bottomline := '|!'+zbmb+'|'+zbmf+'À' + chntimes( 'Ä', width ) + 'Ù'
- end;
-
-function zbouncemenu.barline : string;
- begin
-  barline := '|!'+zbmb+'|'+zbmf+'Ã' + chntimes( 'Ä', width ) + '´'
- end;
-
 procedure zbouncemenu.show;
  var
   mv : boolean;
+  old : pointer;
  begin
   mv := mvisible;
-  showmouse( off );
-  zmenu.show;
+  old := writeto;
+  if mv then showmouse( off );
+  writeto := @zokwork;
   greyshadow( tx, ty, tx+width, ty+height - 1 );
-  showmouse( mv );
+  writeto := old;
+  zmenu.show;
+  if mv then showmouse( on );
  end;
 
-constructor zmenubar.init( esc : boolean );
+procedure zbouncemenu.format( choice : pzchoice );
  begin
-  zmenu.init( esc );
-  add( 0, 0, ' ', ' ', off, #255, 0 );
-  shownbefore := false;
+  if choice^.st2 = '' then choice^.st2 := invertstr( choice^.st1 );
+  if choice^.st1 <> '' then choice^.st1 := normalstr( choice^.st1 )
+    else choice^.st1 := sepbar;
+  choice^.x  := tx;
+  choice^.x2 := tx + width + 1;
+  choice^.y  := ty+height;
+  choice^.y2 := ty+height;
+  inc( height, 1 );
  end;
 
-procedure zmenubar.addsub( whatkey : char; submenu : zmenuobjptr );
+function zbouncemenu.normalstr( s: string ) : string;
  begin
-  setto( shortcut( whatkey ) );
-  high^.sub := submenu;
+   s := cpadstr(s, width, ' ' );
+   normalstr := '|!'+zbmb+'|'+zbmf+'³|'+zbmt+ s + '|'+zbmf+'³';
  end;
 
-procedure zmenubar.altkey( whatkey : char );
+function zbouncemenu.invertstr( s: string ) : string;
  begin
+   s := cpadstr(s, width, ' ' );
+   Invertstr :=
+      '|!'+zbmb+'|'+zbmf+'³|!'+zbhb+'|'+zbhf+s+'|!'+zbmb+'|'+zbmf+'³';
  end;
 
-procedure zmenubar.show;
+function zbouncemenu.top : string;
+ begin
+   top := '|!'+zbmb+'|'+zbmf+ 'Ú' + chntimes( 'Ä', width ) + '¿';
+ end;
+
+function zbouncemenu.sepbar : string;
+ begin
+  sepbar := '|!'+zbmb+'|'+zbmf+'Ã' + chntimes( 'Ä', width ) + '´';
+ end;
+
+function zbouncemenu.bottom : string;
+ begin
+  bottom := '|!'+zbmb+'|'+zbmf+'À' + chntimes( 'Ä', width ) + 'Ù';
+ end;
+
+function newbouncemenu( x, y, w : byte; p:string; e, a : boolean;
+                        menu : pzchoice ) : pzbouncemenu;
+ begin
+  newbouncemenu := new( pzbouncemenu, init( x, y, w, p, e, a, menu ));
+ end;
+
+
+constructor zmenubar.init( x, y : byte; p : string; e, a : boolean;
+                           menu : pzchoice );
  var
-  mv : boolean;
+  m : pzchoice;
  begin
-  mv := mvisible;
-  showmouse( off );
-  if not shownbefore then
-   begin
-    zmenu.show;
-    shownbefore := true;
-   end
-  else
-   begin
-    zmenu.show;
-   end;
-  if (high^.sub <> nil) then zmenuobjptr( high^.sub )^.show;
-  showmouse( mv );
+  tx := x;
+  ty := y;
+  width := 0;
+  setpal( p );
+  zmenu.init( e, a, on, menu );
  end;
 
-procedure zmenubar.reset;
+procedure zmenubar.handle( ch : char );
  begin
-  high := top;
-  repeat
-   high := high^.next;
-   if high^.sub <> nil then zmenuobjptr(high^.sub)^.reset;
-  until high = top;
-  repeat high := high^.next; until high^.on;
-  endloop := false;
-  Show;
+  if ch <> #32 then
+   zmenu.handle( ch )
+  else
+   if shortcut( ' ' ) <> nil then
+    begin
+     setto( shortcut( ' ' ));
+     if submenu <> nil then
+      begin
+       subactive := true;
+       submenu^.reset;
+       subactive := submenu^.high <> nil;
+     end;
+    end;
  end;
 
 procedure zmenubar.handlestripped( ch : char );
  begin
   case ch of
-   #72, #80, #79, #71 : if high^.sub <> nil then
-              zmenuobjptr( high^.sub )^.handlestripped( ch );
-   #75, #77 : zmenu.handlestripped( ch );
-   #27 : zmenu.handlestripped( ch );
-   #13 : zmenu.handlestripped( ch );
+   #2 : handle( #32 ); {alt-space}
+   #71, #73, { home, pageup, }
+   #79, #81, { end,  pgdown, }
+   #72, #80 : if subactive then submenu^.handlestripped( ch ); { up & down }
+   #75 : begin { go to prev one }
+          subactive := false; { turn off submenu now }
+          zmenu.handlestripped( #72 );
+          if submenu <> nil then
+           begin
+            subactive := true;
+            submenu^.reset;
+            subactive := submenu^.high <> nil;
+           end;
+         end;
+   #77 : begin { go to next one }
+          subactive := false; { turn off submenu }
+          zmenu.handlestripped( #80 );
+           if submenu <> nil then
+            begin
+             subactive := true;
+             submenu^.reset;
+             subactive := submenu^.high <> nil;
+            end;
+         end;
+    { and the alt keys: }
+    #16..#25 : if shortcut( alt16to25[ byte( ch )-15 ] ) <> nil then
+                setto(shortcut( alt16to25[ byte( ch )-15 ] ));
+    #30..#38 : if shortcut( alt30to38[ byte( ch )-29 ] ) <> nil then
+                setto(shortcut( alt30to38[ byte( ch )-29 ] ));
+    #44..#50 : if shortcut( alt44to50[ byte( ch )-43 ] ) <> nil then
+                setto(shortcut( alt44to50[ byte( ch )-43 ] ));
    else
-    if high^.sub <> nil then
-    begin
-     zmenuobjptr( high^.sub )^.handle( ch );
-     endloop := zmenuobjptr( high^.sub )^.endloop;
-     zmenuobjptr( high^.sub )^.endloop := false;
-    end;
-   end;
+    zmenu.handlestripped( ch );
+  end;
  end;
 
-procedure zmenubar.domousestuff;
+procedure zmenubar.format( choice : pzchoice );
  begin
-  zmenu.domousestuff;
-  if
-   (high^.sub <> nil)
-  then
-   begin
-    zmenuobjptr( high^.sub )^.domousestuff;
-    endloop := zmenuobjptr( high^.sub )^.endloop;
-    zmenuobjptr( high^.sub )^.endloop := false;
-   end;
+  zmenu.format( choice );
+  choice^.y := ty;
+  choice^.y2 := ty;
+  choice^.x := tx + width;
+  width := width + clength( choice^.st1 ) -1;
+  choice^.x2 := tx + width;
  end;
 
-function Zmenubar.value : byte;
+function newmenubar( x, y : byte; p : string; e, a : boolean;
+                     menu : pzchoice ) : pzmenubar;
  begin
-  if
-   high <> top
-  then
-   if
-    (high^.sub <> nil)
-   then
-    value := zmenuobjptr( high^.sub )^.value
-   else
-    value := High^.V
-  else
-   value := 255;
+  newmenubar := new( pzmenubar, init( x, y, p, e, a, menu ));
  end;
 
-function Zmenubar.get : byte;
- var
-  ch: char;
-  mv : boolean;
- begin
-  high := top^.next;
-  mv := mvisible;
-  reset;
-  Repeat
-   if (shiftstate and altpressed) <> 0 then
-    begin
-     repeat until (shiftstate and altpressed) = 0;
-     if not keypressed then handle( #27 );
-    end;
-   if not keypressed then
-    domousestuff
-   else
-    handlestripped( readkey );
-  Until endloop;
-  get := value;
-  mv := mvisible;
-  showmouse( mv );
- end;
-
-constructor ZInput.Init(a,b,tl,dl,tc,ac : byte; start : string );
+constructor ZInput.Init(a,b,tl,dl,tc,ac:byte; esc:boolean; start : string );
  begin
   zobj.init( a, b, a, b );
   tlen := tl;
@@ -754,6 +885,7 @@ constructor ZInput.Init(a,b,tl,dl,tc,ac : byte; start : string );
   tcol := tc;
   acol := ac;
   cpos := 1;
+  escexits := esc;
   back := start;
   strg := start;
   isdone := false;
@@ -764,7 +896,7 @@ constructor ZInput.Init(a,b,tl,dl,tc,ac : byte; start : string );
 
 constructor ZInput.Default( a, b, tl, dl : byte; start : string );
  begin
-  init( a, b, tl, dl, $4E, $07, start );
+  init( a, b, tl, dl, $4E, $07, true, start );
  end;
 
 Procedure Zinput.reset;
@@ -783,7 +915,7 @@ Procedure ZInput.Show;
  begin
   if tovr then doscursorbig else doscursoron;
   if
-   d1st < tlen - dlen
+   length(strg) > dlen
   then
    begin
     colorxy( x + dlen, y, acol, '¯' );
@@ -920,14 +1052,18 @@ Procedure zinput.handlestripped( ch : char );
           finish;
          end;
    #24 : while (cpos > 1) do backspace; { ^X }
-   #27 : begin      { esc }
-          strg := back;
-          finish;
-         end;
+   #27 : if escexits then
+           begin      { esc }
+            strg := back;
+            finish;
+           end;
    #71 : movecursor( 1 ); { home }
    #75 : movecursor( cpos-1 ); { left }
    #77 : movecursor( cpos+1 ); { right }
-   #79 : movecursor( tlen + 1 ); { end }
+   #79 : begin
+          movecursor( 1 );
+          movecursor( length(strg)+1 ); { end }
+         end;
    #82 : setovr( not tovr );
    #83 : delete;
    #115: begin { ^Left}
@@ -987,7 +1123,7 @@ Function ZInput.Get : string;
 
 constructor zpassword.init(a,b,tl,dl,tc,ac : byte; pwc: char;start : string );
  begin
-  zinput.init(a,b,tl,dl,tc,ac,start);
+  zinput.init(a,b,tl,dl,tc,ac,true,start);
   pwchar := pwc;
  end;
 
@@ -1231,7 +1367,7 @@ function zconfirmbox.get : boolean;
 constructor zinputbox.init( a, b, border : byte; s1, s2 : string; l : byte );
  begin
   zconfirmbox.init( a, b, border, s1, s2 );
-  i.init( x + 1 + clength( s2 ), y + 2, l, l, $4E, $07, '' );
+  i.init( x + 1 + clength( s2 ), y + 2, l, l, $4E, $07, true, '' );
  end;
 
 constructor zinputbox.default( a, b : byte; s1, s2 : string; l : byte );

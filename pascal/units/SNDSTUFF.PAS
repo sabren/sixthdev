@@ -19,6 +19,7 @@ InterFace
       function  sbdetected : boolean;
       Procedure sbInit;
       Procedure Sound(Hz : word);
+      Procedure SoundC(Hz : word; c : byte); {use a different channel}
       Procedure SoundLeft(Hz : word);
       Procedure SoundRight(Hz : word);
       Procedure NoSound;
@@ -28,7 +29,8 @@ InterFace
       Procedure Pop;
       Procedure Zap;
       Procedure Slide;
-      Procedure Ansiplay( SoundC : String );
+      Procedure Ding;
+      Procedure Ansiplay( SndC : String );
       Procedure On;
       Procedure Off;
     end;
@@ -319,6 +321,23 @@ Implementation
         Crt.Sound(Hz);
     end;
 
+  Procedure SoundSystem.SoundC(Hz : word; c : byte);
+    begin
+      if
+       SndOn
+      then
+       if
+        SbOn
+       then
+        begin
+         sbSetreg( $A0+c, lo( hz ));
+         sbSetreg( $B0+c, 32 + sboctave shl 2 + (hi( hz ) and $03) );
+        end
+       else
+        Crt.Sound(Hz);
+    end;
+
+
   Procedure SoundSystem.SoundLeft(Hz : word);
     begin
       if
@@ -379,6 +398,9 @@ Implementation
 
   Procedure SoundSystem.Beep;
     begin
+     sound( 900 );
+     delay( 300 );
+     nosound;
     end;
 
   Procedure Soundsystem.Pop;
@@ -404,9 +426,13 @@ Implementation
       nosound;
     end;
 
-  Procedure SoundSystem.Ansiplay( SoundC : String );
+  Procedure Soundsystem.Ding;
    begin
-    If SndOn then sndstuff.Ansiplay( soundc );
+   end;
+
+  Procedure SoundSystem.Ansiplay( SndC : String );
+   begin
+    If SndOn then sndstuff.Ansiplay( sndc );
    end;
 
   Procedure SoundSystem.On;
@@ -427,4 +453,7 @@ Begin
       ansiplay('t280 o3 p2 l4');
  {init my stuff}
  Spkr.Init;
+ Spkr2.Init;
+ Spkr2.SbOn := false;
+ Spkr2.Sndon := true;
 End.

@@ -117,7 +117,7 @@ procedure plogin;
   cwriteln('|wmain entrance.');
   cwriteln('|RTiny is here.');
   cwrite('|GTiny: What do they call ya, mate?'+#13+sprompt);
-  name.init( txpos, 25, 12, 12, $0F, $0E, 'new' );
+  name.init( txpos, 25, 12, 12, $0F, $0E, false, 'new' );
   user := name.get;
   cwriteln('');
   while upstr( user ) <> 'STERLING' do
@@ -290,7 +290,7 @@ procedure init;
   plook;
   ptime;
   cwrite( pstring( prompt ));
-  cline.init( txpos, 25, 70, 70, $0F, $0E, '' );
+  cline.init( txpos, 25, 70, 70, $0F, $0E, false, '' );
   cline.show;
  end;
 

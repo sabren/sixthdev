@@ -37,7 +37,7 @@ type
   kind : kinds;
   facing : direction;
   touch : string;
-  deathsound : noises;
+{  deathsound : noises; }
   c : char;
   constructor init( a1, b1, dlay, atr : byte; ch : char );
   procedure setfields; virtual;
@@ -87,6 +87,7 @@ type
   magicstat,
   ammostat,
   healthstat : stat;
+  godmode : boolean;
   name : string;
   rank : byte;
   cpoints, cmax, mpoints, mmax, apoints, amax, hpoints, hmax : longint;
@@ -375,7 +376,6 @@ type
  nextroomobj = object ( obj )
   constructor init;
  end;
- roomstring = array [ 1 .. 1400 ] of pobj;
 
 Var
  progdone,
@@ -622,10 +622,10 @@ procedure obj.setfields;        { update these later for better interface }
   greyshadow( 5, 5, 65, 10 );
   cwritexy( 25, 6, '|rÄÄÄÄÄ|WS|Ge|WTF|Gie|WLDS|rÄÄÄÄÄ|W' );
   cwritexy( 10, 7, '|WC|Go|WL|Go|WR|Y: |W');
-  a := getcolor( txpos, typos, a );
   cwritexy( 35, 7, '|WCH|Ga|WR|Ga|WCT|GE|WR|Y: |W');
-  readln( c );
   cwritexy( 10, 8, '|WD|Ge|WL|Ga|WY|Y: |W' );
+  a := getcolor( 18, 7, a );
+  readln( c );
   readln( delay );
   if
    ( at <> a ) or ( ct <> byte( c ) ) or ( dt <> delay )
@@ -890,6 +890,7 @@ constructor heroobj.init( a1, b1 : byte; nam : string );
   cmax := cshmax;
   cashstat.init( cshx, cshy, '|w000000' );
   cashstat.value( cpoints, 6 );
+  godmode := false;
   facing := nowhere;
   face( south );
   player := @self;
@@ -1003,12 +1004,17 @@ procedure heroobj.update;
    '2' : walk( south );
    '3' : walk( southeast );
    'D' : die;
+   'G' : begin
+          godmode := not godmode;
+          a := 14 - (byte(godmode) * 3);
+         end;
    #27 : menu;
   end;
  end;
 
 procedure heroobj.die;
  begin
+  if godmode then exit;
   gameon := false;
   msgstat.changeto('|WYou|w''|Wre dead|w... |b<|Wtsk|w,|Wtsk|w,|Wtsk|b>');
   obj.die;
@@ -1047,7 +1053,7 @@ constructor doppelgangerobj.init( a1, b1 : byte; m : pobj );
 
 constructor doppelgangerobj.default( a1, b1 : byte );
  begin
-  doppelgangerobj.init( a1, b1, nil );
+  doppelgangerobj.init( a1, b1, player );
  end;
 
 procedure doppelgangerobj.draw;
@@ -1264,7 +1270,7 @@ function scuzzyobj.blocked( d : direction ) : boolean;
 
 constructor bulletobj.init( a1, b1 : byte; d : direction );
  begin
-  obj.init( a1, b1, 1, $07, 'ù' );
+  obj.init( a1, b1, 0, $07, 'ù' );
   facing := d;
   kind := bullet;
  end;
@@ -1456,7 +1462,7 @@ Procedure ShowObjects;
   for y := 1 to 20 do
    for x := 1 to 70 do
      if room[x,y] <> nil then
-        {colorxy( x + 1, y +1, room[x,y]^.a, 'X' )}  room[x,y]^.draw;
+       room[x,y]^.draw;
  end;
 
 Procedure UpdateObjects;
@@ -1713,16 +1719,16 @@ procedure menu;
  begin
   exitmenu := false;
   mark(heap);
-  m.Init( 5, 3, 14, 'kKwrY', gameon,
-   newline('  |WD|Go|WTH M|Ge|WN|Gu   ', '', false,  #0,   0,
-   newbar(
-   newline('(|)|WN|()ew         ', '', true,   'N',  1,
-   newline('(|)|WL|()oad        ', '', true,   'L',  2,
-   newline('(|)|WS|()ave        ', '', gameon, 'S',  3,
-   newbar(
-   newline('(|)|WE|()dit        ', '', true,   'E',  4,
-   newbar(
-   newline('(|)|WQ|()uit to DOS ', '', true,   'Q',  5,
+  m.Init( 5, 3, 14, 'kKwrY', gameon, off,
+   newchoice('  |WD|Go|WTH M|Ge|WN|Gu   ', '', false,  #0,   0, nil,
+   newsepbar(
+   newchoice('(|)|WN|()ew         ', '', true,   'N',  1, nil,
+   newchoice('(|)|WL|()oad        ', '', true,   'L',  2, nil,
+   newchoice('(|)|WS|()ave        ', '', gameon, 'S',  3, nil,
+   newsepbar(
+   newchoice('(|)|WE|()dit        ', '', true,   'E',  4, nil,
+   newsepbar(
+   newchoice('(|)|WQ|()uit to DOS ', '', true,   'Q',  5, nil,
   nil ))))))))));
   repeat
     result := m.get;

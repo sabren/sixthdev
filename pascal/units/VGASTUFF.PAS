@@ -14,6 +14,8 @@ var
  procedure rectangle( a1, b1, a2, b2 : integer; c : byte );
  procedure box( a1, b1, a2, b2 : integer; c : byte );
  procedure filltop( x1, x2, y1, x3, x4, y2 : integer; c : byte );
+ procedure setcolor( c, r, g, b : byte );
+ procedure getcolor( c : byte; var r, g, b : byte );
  procedure savepic( fn : string );
  procedure loadpic( fn : string );
  procedure loadcel( fn : string );
@@ -27,9 +29,11 @@ var
  cga : vgascreen absolute $b800:0000;
  vga : vgascreen absolute $a000:0000;
  drawto,tempvga : ^vgascreen;
+ yline : array[0..199] of integer;
 
 implementation
 uses crtstuff, filstuff;
+
 
 procedure SetMode (Mode : word);
 begin
@@ -42,7 +46,7 @@ end;
 {$F+}
 procedure putpixelvga( x, y : integer; c : byte );
  begin
-  drawto^[ y * 320 + x ] := c;
+  drawto^[ yline[y] + x ] := c;
  end;
 
 procedure putpixelcga( x, y : integer; c : byte );
@@ -140,6 +144,22 @@ procedure filltop( x1, x2, y1, x3, x4, y2 : integer; c : byte );
              trunc(m2 * (count-y1)) + x2, count, c );
  end;
 
+procedure setcolor( c, r, g, b : byte );
+ begin
+  port[ $3c8 ] := c;
+  port[ $3c9 ] := r;
+  port[ $3c9 ] := g;
+  port[ $3c9 ] := b;
+ end;
+
+procedure getcolor( c : byte; var r, g, b : byte );
+ begin
+  port[ $3c7 ] := c;
+  r:= port[ $3c9 ];
+  g:= port[ $3c9 ];
+  b:= port[ $3c9 ];
+ end;
+
  procedure savepic( fn : string );
   var
    f : file;
@@ -208,7 +228,9 @@ function getmaxy: integer;
 
 var
   Dum : ^byte;
+  d : byte;
 begin
+  for d := 0 to 199 do yline[d] := d * 320;
   repeat
     new (tempvga);
     if ofs (tempvga^) <> 0 then begin

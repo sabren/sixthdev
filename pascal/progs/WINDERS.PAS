@@ -13,6 +13,19 @@ const
 var
  doredraw : boolean;
 
+const
+ black : GCursor =
+  ( ScreenMask : ( $3FFF, $1FFF, $0FFF, $07FF,
+$03FF, $01FF, $00FF, $007F,
+$003F, $003F, $01FF, $10FF,
+$30FF, $F87F, $F87F, $FC7F);
+    CursorMask : ( $C000, $A000, $9000, $8800,
+$8400, $8200, $8100, $8080,
+$8040, $83C0, $9200, $A900,
+$C900, $0480, $0480, $0380);
+    hotx : $0001;
+    hoty : $0001);
+
 type
 winder=object
 attrib,z,id,user:byte;
@@ -70,6 +83,7 @@ end;
 
 procedure winder.move;
  var
+  mx2,my2:integer;
   ofx, ofy, h, w : word;
   mv : boolean;
  begin
@@ -81,12 +95,25 @@ procedure winder.move;
   h := y2 - y1;
   ofx := mx-x1;
   ofy := my-y1;
-  SetLineStyle(solidln,0,ThickWidth);
+  SetLineStyle(dottedln,0,normwidth);
   while ms and $01 <> 0 do
    begin
     getmpos;
+    
+    showmouse(false);
     rectangle( mx - ofx, my - ofy, mx-ofx + w, my-ofy + h );
-    rectangle( mx - ofx, my - ofy, mx-ofx + w, my-ofy + h );
+
+    showmouse(yes);
+    mx2:=mx;
+    my2:=my;
+    repeat
+     getmpos;
+    until (mx <> mx2 ) or ( my <> my2 ) or (ms=0);
+    showmouse(false);
+
+    rectangle( mx2 - ofx, my2 - ofy, mx2-ofx + w, my2-ofy + h );
+    showmouse(true);
+    {getmpos;}
    end;
   x1 := mx - ofx;
   x2 := x1+w;
@@ -129,26 +156,44 @@ procedure winder.resize;
 
 
  var
+    my2,mx2, xs,ys :integer;
     mv : boolean;
  begin
+  getmpos;
+  xs:=x2-mx; ys:=y2-my;
+  mx2:=mx; my2:=my;
   mv := mvisible;
   showmouse( off );
   setwritemode( xorput );
   setcolor( 15  );
-  SetLineStyle(solidln,0,ThickWidth);
+  SetLineStyle(dottedln,0,normWidth);
 
   while ms and $01 <> 0 do
    begin
-    getmpos;
-    rectangle( x1,y1,mx,my );
-    showmouse(on);showmouse(off);
-    rectangle( x1,y1,mx,my );
 
-    showmouse(on);showmouse(off);
+    getmpos;
+    showmouse(false);
+    rectangle( x1,y1,mx+xs,my+ys );
+    showmouse(true);
+    mx2:=mx;
+    my2:=my;
+
+    repeat
+     getmpos;
+    until (mx <> mx2 ) or ( my <> my2 ) or (ms=0);
+
+    if mx < (x1+50) then setmpos(x1+50,my);
+
+    if my < (y1+50) then setmpos(mx,y1+50);
+
+    showmouse(false);
+    rectangle( x1,y1,mx2+xs,my2+ys);
+    showmouse(true);
+
    end;
-  
-  x2 := mx ;
-  y2 := my ;
+
+  x2 := mx+xs ;
+  y2 := my+ys ;
   SetLineStyle(solidln,0,normwidth);
   setwritemode( normalput );
   showmouse( mv );
@@ -174,17 +219,17 @@ rectangle(x1,y1,x1+15,y1+15);
 rectangle(x2,y1,x2-15,y2);
 rectangle(x1,y2-15,x2,y2);
 
-
 showmouse(mv);
 end;
-var w01:winder;
+var w01,w02:winder;
 
 procedure redraw;
 begin
  showmouse(off);
- setfillstyle(1,9);
+ setfillstyle(1,8);
  bar(0,0,640,480);
  w01.draw;
+ w02.draw;
  showmouse(on);
 end;
 
@@ -193,7 +238,9 @@ procedure init;
  begin
   initgrafx;
   w01.init;
+  w02.init;
   mouseon;
+  setgcurs(black);
   redraw;
  end;
 
@@ -207,8 +254,10 @@ done :=false;
 repeat
 getmpos;
  done:=w01.z = 0;
+
  if ms and 1 <> 0 then
   begin
+   w02.tools;
    w01.tools;
    if doredraw then redraw;
   end;
