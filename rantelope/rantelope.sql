@@ -14,6 +14,7 @@ CREATE TABLE rnt_story (
 
 CREATE TABLE rnt_channel (
     ID int not null auto_increment primary key,
+    parentID int not null,
     title varchar(255),
     link varchar(255),
     rssfile varchar(32),
@@ -22,3 +23,15 @@ CREATE TABLE rnt_channel (
     template text,
     path enum('./out/')
 );
+
+/**
+ *  This table was for testing purposes only. You
+ *  can use it if you want to play around with the
+ *  code in Node.py
+**/
+-- CREATE TABLE rnt_node (
+--     ID int not null auto_increment primary key,
+--     parentID int not null,
+--     name varchar(64),
+--     note varchar(255),
+-- );
