@@ -28,14 +28,15 @@ class Request:
         ## querystring:
         ## @TODO: handle urlencoding/decoding
         self.querystring = {}
-        for pair in string.split(os.environ["QUERY_STRING"], "&"):
-            l = string.split(pair, "=", 1)
-            k = l[0]
-            if len(l) > 1:
-                v = l[1]
-            else:
-                v = ''
-            self.querystring[k]=v
+        if os.environ.has_key("QUERY_STRING"):
+            for pair in string.split(os.environ["QUERY_STRING"], "&"):
+                l = string.split(pair, "=", 1)
+                k = l[0]
+                if len(l) > 1:
+                    v = l[1]
+                else:
+                    v = ''
+                self.querystring[k]=v
 
 
         ## cookie:

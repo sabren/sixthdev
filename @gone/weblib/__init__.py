@@ -5,12 +5,12 @@
 
 from Request  import request
 from Response import response, normalPrint, stdout
+session = {}
 
 from Sess import *
 from SessPool import *
 from Auth import *
 from Perm import *
-
 
 ### unique identifier generator, for sessions, etc #######
 
@@ -32,4 +32,30 @@ def uid():
         uid = uid + string.zfill(hex(ord(i))[2:],2)        
 
     return uid
+
+
+### HTML encoder #########################################
+
+import htmlentitydefs
+
+#@TODO: is there really no built-in way to turn a hash inside out?
+_entitymap = {}
+for i in htmlentitydefs.entitydefs.keys():
+    _entitymap[htmlentitydefs.entitydefs[i]] = i
+
+
+def htmlEncode(s):
+    res = ""
+    for ch in s:
+        if _entitymap.has_key(ch):
+            res = res + "&" + _entitymap[ch] + ";"
+        else:
+            res = res + ch
+    return res
+
+#### URL encoder ########################################
+
+import urllib
+urlEncode = urllib.urlencode
+    
 
