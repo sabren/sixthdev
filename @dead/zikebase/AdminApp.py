@@ -167,6 +167,10 @@ class AdminApp(weblib.Actor):
             ed = zikebase.ObjectEditor(klass,
                      self.input.get("ID"), input=self.input)
             ed.do(command)
+            if command == "delete":
+                self.objectID = None
+            else:
+                self.objectID=ed.object.ID
         else:
             print "don't know how to %s a %s" % (command, what)
 
