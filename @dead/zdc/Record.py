@@ -113,19 +113,27 @@ class Record:
         
         return res
 
+
+
     def _whereClause(self):
+        import types
+
         res = ""
-        if type(self.key) == type(1):
-            res = self.autoNum + "=" + `self.key`
-        elif type(self.key) == type(1L):
-            res = self.autoNum + "=" + `self.key`[:-1]
-        elif type(self.key) == type({}):
+        
+        if type(self.key) == types.DictType:
             for f in self.key.keys():
-                res = res + "AND (" + f + "=" + self._sqlQuote(self.fields[f], self.key[f]) + ")"
-            res = res[4:] # strip first AND
+                res = res + "AND (" + f + "=" + \
+                      self._sqlQuote(self.fields[f], self.key[f]) + ")"
+                res = res[4:] # strip first AND
         else:
-            raise "Invalid key: " + `self.key`
+            try:
+                res = self.autoNum + "=" + `int(self.key)`
+            except:
+                raise TypeError, "Can't assign " + `self.key` + " to an autonumber."
+            
         return " WHERE (" + res + ")"
+
+
 
 
     def _getFields(self):
