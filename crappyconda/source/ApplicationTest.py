@@ -21,7 +21,7 @@ class ApplicationTest(unittest.TestCase):
         self.clerk.store(Task(name="task_3"))
         self.clerk.store(User(name="Durran Jordan", login="djordan"))
         self.clerk.store(User(name="Michal Wallace"))
-        self.clerk.store(Plan())		
+        self.clerk.store(Plan())
 		
 		
 	# Testing the listing of goals in the Controller
