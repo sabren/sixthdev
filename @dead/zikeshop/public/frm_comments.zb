@@ -1,0 +1,5 @@
+<p><b>Comments:</b><br/>
+* exec:
+    from weblib import html
+{:html.textarea("comments",comments,'rows="5" cols="40"'):}
+</p>
