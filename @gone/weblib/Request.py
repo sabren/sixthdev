@@ -46,11 +46,13 @@ class RequestBuilder(object):
     """
     should only be used for CGI and testing
     """
-    def build(self, method=None, querystring=None, form=None, cookie=None,
-              content=None, remoteAddress=None):
+    def build(self, method=None, host=None, path=None, querystring=None,
+              form=None, cookie=None, content=None, remoteAddress=None):
         if content and not method: method = "POST"
         return Request(
             method= method or os.environ.get("REQUEST_METHOD", "GET"),
+            host = host or os.environ.get("SERVER_NAME"),
+            path = path or os.environ.get("PATH_INFO"),
             query=RequestData(querystring
                               or os.environ.get("QUERY_STRING", "")),
             form=form,
@@ -65,8 +67,11 @@ class Request(object):
     """
     A read-only dictionary that represents an HTTP reqeust
     """
-    def __init__(self, method, query, form, cookie, content, remoteAddress):
+    def __init__(self, method, host, path, query, form,
+                 cookie, content, remoteAddress):
         self.method = method
+        self.host = host
+        self.path = path
         self.query = query
         self.cookie = cookie
         self.form = form or RequestData(content or "")
