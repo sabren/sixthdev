@@ -108,7 +108,8 @@ class Record:
     def _sqlQuote(self, field, value=None):
         """Figures out whether to put '' around a value or not.
         field is an actual field object
-        value is the value to quote, or None to quote the record's value for the field
+        value is the value to quote, or None to quote the record's
+        value for the field
         """
 
         res = ''
@@ -137,7 +138,8 @@ class Record:
 
 
     def _whereClause(self):
-        """Given a dictionary of fieldname:value pairs, creates a SQL where clause"""
+        """Given a dictionary of fieldname:value pairs,
+        creates a SQL where clause"""
         
         res = ""      
         for f in self._where.keys():
@@ -203,3 +205,8 @@ class Record:
     def __delitem__(self, fld):
         del self.value[fld]
 
+    def keys(self):
+        return self.values.keys()
+
+    def get(self, fld, default=None):
+        return self.values.get(fld, default)
