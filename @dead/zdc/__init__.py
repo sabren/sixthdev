@@ -18,6 +18,7 @@ from Junction import Junction
 from FixedPoint import FixedPoint
 from Connection import Connection
 from Date import Date
+from DateTime import DateTime
 
     
 # @TODO: we need to know which module 'dbc' comes from, because
@@ -103,6 +104,16 @@ def toDate(thing):
         return thing
     else:
         return Date(thing)
+    
+
+def toDateTime(thing):
+    """
+    ensures that a datetime is a DateTime object
+    """
+    if isinstance(thing, DateTime):
+        return thing
+    else:
+        return DateTime(thing)
     
 
 def dateRange(date1, date2):
