@@ -1,0 +1,42 @@
+* include dsp_head;
+* exec:
+    from zebra import html
+
+
+<form action="tracker.app">
+<input type="hidden" name="action" value="list"/>
+<input type="hidden" name="what" value="task"/>
+<table width="100%" border="0"  style="border-bottom: solid black 2px">
+<tr>
+  <td>[<a href="tracker.app?action=create&what=task">add task</a>]</td>
+  <td>
+<!--
+    <b>filter</b>
+    status:  {:html.select("status", ['[any]'] + opt_status, status):}
+    <input type="submit" value="go">
+-->
+  </td>
+</tr>
+</table>
+</form>
+
+* for list:
+    * head:
+        <table class="tasks" width="100%" cellspacing="0" cellpadding="2">
+        <tr>
+          <th width="*">task</th>
+        </tr>
+    <tr class="{:status:}">
+      <td width="*">
+          <a href="tasks.py?action=edit&what=task&ID={:ID:}">{:task:}</a>
+      </td>
+    </tr>
+    * if detail and status != 'closed':
+        <tr>
+        <td class="description" colspan="5">{:detail:}</td>
+        </tr>
+    * foot:
+        </table>
+* none:
+    no tasks found.
+

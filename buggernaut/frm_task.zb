@@ -1,0 +1,36 @@
+*# $Id$
+* include dsp_head;
+* exec:
+    import weblib
+    from zebra import html
+
+<form action="tracker.app" method="POST">
+<input type="hidden" name="what" value="task">
+* if ID:
+    <input type="hidden" name="ID" value="{:ID:}">
+<table>
+<tr><td>task:<br>
+    {:html.text("task", task, 'size="45"'):}</b></td></tr>
+
+<tr><td>
+    detail:<br>
+    <textarea cols="50" rows="5"
+         name="detail">{:weblib.htmlEncode(detail):}</textarea></td></tr>
+
+<tr><td colspan="2"><hr/></td></tr>
+
+<tr><td>
+    <b>status:</b> &nbsp;
+        {:html.select("status", opt_status, status):}&nbsp;&nbsp;
+</td></tr>
+
+<tr><td colspan="2"><hr/></td></tr>
+
+
+
+</table>
+<input type="submit" name="action" value="save">
+* if 0:
+    ID:
+    &nbsp;&nbsp;<input type="submit" name="action" value="delete">
+</form>

@@ -1,0 +1,34 @@
+<html>
+<head>
+<title>web app bugs</title>
+<style class="text/css">
+body, td, th {
+    font-size: 10pt;
+    font-family: verdana;
+    background: white;
+}
+th { background: black;
+     color:white;
+     text-align: left;
+     border-right: solid black 1px;
+}
+
+table.tasks td { border-top: solid #999 1px; }
+
+tr th.critical {background: red; color:black;}
+tr th.high {background: gold; color:black;}
+tr th.medium {background: #66cc33;  color:black;}
+tr th.low {background: #3399cc; color:black;}
+
+table.tasks td.description { 
+    color: #333; 
+    padding-left: 20px; 
+    font-family: arial;  
+    border-top: 0px;
+}
+
+tr.closed td {background: #cccccc; }
+</style>
+</head>
+<body>
+<h2>web app bugs</h2>
