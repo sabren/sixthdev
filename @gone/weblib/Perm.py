@@ -1,6 +1,8 @@
 """
 Perm.py - emulate PHPLIB's permission support in python.
 
+$Id$
+
 @TODO: license
 """
 
