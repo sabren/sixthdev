@@ -1,37 +1,20 @@
-"""
-a Payment class for talking to Authorize.net servers
-"""
-__ver__="$Id$"
-
 import payment
 import urllib
 import string
 from M2Crypto import httpslib, SSL ## only until python 2 comes out 
 
 class AuthorizeNetPayment(payment.AbstractPayment):
-
-    def _submit(self, dict):
-        """Given a dict of form variables, makes the HTTP POST..."""
-        data = urllib.urlencode(dict)
-
-        h = httpslib.HTTPS(SSL.Context("sslv3"), "secure.authorize.net")
-        h.putrequest('POST',"/gateway/transact.dll") 
-        h.putheader('Content-type', 'application/x-www-form-urlencoded')
-        h.putheader('Content-length', '%d' % len(data))
-        h.endheaders()
-        h.send(data)
-
-        errcode, errmsg, headers = h.getreply()
-        assert errcode==200, \
-               "problem reading from authorize.net: %s, %s" \
-               % (errcode, errmsg)
-        fp = h.getfile()
-
-        content = fp.read()
-        fp.close()
-
-        return content
-
+    """
+    a Payment class for talking to Authorize.net servers
+    """
+    
+    __super = payment.AbstractPayment
+    __ver__="$Rev: AuthorizeNetPayment.py,v 1.6 2001/05/23 21:56:05 sabren Exp $"    
+    def __init__(self, **kwargs):
+        self.__super.__init__(self, **kwargs)
+        self._secureServer = "secure.authorize.net"
+        self._securePage = "gateway/transact.dll"
+        
 
     def charge(self, amount, description=""):
         """Charge the card..."""
