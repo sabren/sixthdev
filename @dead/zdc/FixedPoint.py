@@ -257,7 +257,7 @@ class FixedPoint:
             frac = ""
         # same for i: -mwallace
         str_i = str(i)
-        if str_i =="L":
+        if str_i[-1] =="L":
             str_i =str_i[:-1]
         return "-"[:n<0] + str_i + "." + frac
 
