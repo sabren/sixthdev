@@ -2,6 +2,13 @@
 ransacker.WordHash - maps words to numbers and stores on disk. (in a .rkw file)
 
 $Id$
+
+
+file format (disk-based hash):
+
+ {NEXTNUM: 2,            # next ID to use
+  "a":1}                 # the word "A"'s ID is 1
+
 """
 
 import ransacker
