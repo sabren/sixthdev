@@ -1,15 +1,15 @@
 
 from arlo import Clerk
 from storage import MockStorage
-from strongbox import Strongbox, attr, link
+from strongbox import Strongbox, attr, link, linkset, forward
 import unittest
-
 
 class Record(Strongbox):
     ID = attr(long)
     val = attr(str)
-    next = link("Record")
-    
+    next = link(forward)
+Record.__attrs__["next"].type=Record
+
 
 class ClerkTest(unittest.TestCase):
 
@@ -17,7 +17,8 @@ class ClerkTest(unittest.TestCase):
         self.storage = MockStorage()
         self.clerk = Clerk(self.storage)
         # @TODO: figure out how to let me use Record.next here..
-        self.clerk.dbmap[Record.__attrs__['next']] = (Record, 'nextID')
+        self.clerk.dbmap[Record.__attrs__["next"]] = (Record, 'nextID')
+
 
     def check_store(self):
         """
@@ -46,7 +47,7 @@ class ClerkTest(unittest.TestCase):
         assert self.storage.match("Record") == []
 
 
-    def check_links(self):
+    def check_link_injection(self):
         self.storage.store("Record", val="a", nextID=2)
         self.storage.store("Record", val="b", nextID=3)
         self.storage.store("Record", val="c", nextID=None)
@@ -58,6 +59,30 @@ class ClerkTest(unittest.TestCase):
         assert a.next.next.val == "c"
         assert a.next.next.next is None
 
+
+    def check_linkset_injection(self):
+
+        class Node(Strongbox):
+            ID = attr(long)
+            data = attr(str)
+            parentID = attr(long)
+            kids = linkset(forward)
+        Node.__attrs__["kids"].type=Node
+
+        self.clerk.dbmap[Node.__attrs__["kids"]] = (Node, 'parentID')
+
+        self.storage.store("Node", data="top", parentID=None)
+        self.storage.store("Node", data="a",   parentID=1)
+        self.storage.store("Node", data="a.a", parentID=2)
+        self.storage.store("Node", data="b",   parentID=1)
+        
+        top = self.clerk.fetch(Node, 1)
+        assert top.kids[0].data == "a"
+        assert top.kids[1].data == "b"
+        assert top.kids[1].kids == []
+        assert top.kids[0].kids[0].data == "a.a"
+
+        
 
     def check_fetch_from_wide_table(self):
         """
