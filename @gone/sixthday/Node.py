@@ -17,12 +17,12 @@ class Node(Strongbox):
     ID = attr(long)
     name = attr(str)
     path = attr(str)
-    note = attr(str)
+    data = attr(str)
     parent = link(forward("sixthday.Node"))
     children = linkset(forward("sixthday.Node"), "parent")
 
     def __init__(self, **kwargs):
-        self.private.named = 0
+        self.private.named = False
         super(Node, self).__init__(**kwargs)
 
         
@@ -46,9 +46,12 @@ class Node(Strongbox):
 
     def set_name(self, value):
         self.__values__["name"]=str(value)
+        # this .private.named thing prevents a max
+        # bug of some kind. It probably needs a
+        # closer look.
         if self.private.named:
             self._updatePath(self.crumbs)
-        self.private.named = 1
+        self.private.named = True
 
         
     def _updatePath(self, crumbs):
