@@ -1,6 +1,5 @@
 """
 Auth.py - generic authentication framework for python cgi.
-          loosely based on Auth.inc from PHPLIB...
 """
 __ver__ = "$Id$"
 
@@ -22,39 +21,29 @@ class Auth:
 
     ## constructor #############################
     
-    def __init__(self, users=None, engine=weblib):
+    def __init__(self, sess, userdict):
         """
-        usage:
-           auth=Auth()
-        or:
-           auth=Auth({"user1":"password1","user2":"password2"...})
+        usage: auth=Auth(sess, userdict)
+        where userdict is like {'usr1':'pwd1','usr2':'pwd2'...}
         """
-        if users:
-            self.users = users
-        else:
-            self.users = {"username":"password"}
-        self.engine = engine
-        self.engine.auth = self  #@TODO: ???????
+        self._sess = sess
+        self._users = userdict
 
 
     ## public methods #########################
 
     def start(self, key=None):
-        """
-        Must be called after the engine's session has started
-        """
+        #@TODO: is there any reason why this shouldn't be in __init__?
 
         self._isStarted = 1
         self.isLoggedIn = 1 # assume the best
 
         if key:
             self.key = key
-        elif self.engine.sess.has_key('__auth_key'):
-            self.key = self.engine.sess['__auth_key']
+        elif self._sess.has_key('__auth_key'):
+            self.key = self._sess['__auth_key']
         else:
             self.isLoggedIn = 0 # oh well.
-
-
 
     def check(self):
         """
@@ -65,21 +54,21 @@ class Auth:
         if not self._isStarted:
             self.start()
         
-        if self.engine.request.query.has_key('auth_logout_flag'):
+        if self._sess._request.query.has_key('auth_logout_flag'):
             self.logout()
 
         if not self.isLoggedIn:
-            if self.engine.request.query.has_key('auth_check_flag'):
+            if self._sess._request.query.has_key('auth_check_flag'):
                 if self._attemptLogin():
                     self.onLogin() # they're in!
                 else:
                     self.prompt(Auth.LOGINFAILED, self._getAction(),
                                 self._getHidden())
-                    self.engine.response.end()
+                    self._sess._response.end()
             else:
                 self.prompt(Auth.PLEASELOGIN, self._getAction(),
                             self._getHidden())
-                self.engine.response.end()
+                self._sess._response.end()
         else:
             self.login(self.key) 
     
@@ -90,13 +79,10 @@ class Auth:
         """
         self.key = key
         self.fetch(self.key)
-        self.engine.sess['__auth_key'] = self.key
+        self._sess['__auth_key'] = self.key
         self.onLogin()
 
                 
-
-
-
     def logout(self):
         """
         Logs out the current user.
@@ -104,8 +90,8 @@ class Auth:
         self.onLogout()
         self.isLoggedIn = 0
         self.key = None
-        if self.engine.sess.has_key('__auth_key'):
-            del self.engine.sess['__auth_key']
+        if self._sess.has_key('__auth_key'):
+            del self._sess['__auth_key']
                     
 
 
@@ -124,8 +110,8 @@ class Auth:
         # example implementation for testing, based on form below:
 
         authKey = None
-        if (dict.get("username") in self.users.keys()) \
-           and (dict.get("password") == self.users[dict["username"]]):
+        if (dict.get("username") in self._users.keys()) \
+           and (dict.get("password") == self._users[dict["username"]]):
             authKey = dict["username"]
         return authKey
 
@@ -136,7 +122,7 @@ class Auth:
         You should overwrite this!
         """
 
-        self.engine.response.write("""
+        self._sess._response.write("""
         <h1>%s: %s</h1>
         <form action="%s" method="post">
         username: <input type="text" name="auth_username"><br>
@@ -186,10 +172,10 @@ class Auth:
         # first move all the auth_* variables into a hash,
         # transforming them along the way.
         
-        for item in self.engine.request.keys():
+        for item in self._sess._request.keys():
             if item[:5] == "auth_":
                 dict[item[5:]] = self.transform(item[5:],
-                                                self.engine.request[item])
+                                                self._sess._request[item])
 
         # now pass it to validate() and see if we get in:
         self.key = self.validate(dict)
@@ -219,8 +205,8 @@ class Auth:
         # wrapper, it will be the path to the wrapper, in which
         # case you want PATH_INFO...
 
-        res = self.engine.request.environ.get("PATH_INFO", 
-            self.engine.request.environ.get("SCRIPT_NAME", None))
+        res = self._sess._request.environ.get("PATH_INFO", 
+            self._sess._request.environ.get("SCRIPT_NAME", None))
 
         assert res is not None, \
                "You must set SCRIPT_NAME or PATH_INFO to use Auth."
@@ -229,12 +215,12 @@ class Auth:
         # add in a query string of our own:
         res = res + "?auth_check_flag=1"
 
-        for item in self.engine.request.query.keys():
+        for item in self._sess._request.query.keys():
             if item[:5] == "auth_":
                 pass # IGNORE old auth stuff
             else:
                 res = res + "&" + weblib.urlEncode(item) + \
-                      "=" + weblib.urlEncode(self.engine.request.query[item])
+                      "=" + weblib.urlEncode(self._sess._request.query[item])
         
         return res
 
@@ -249,16 +235,16 @@ class Auth:
         but we want to remember their data while they're logging back in!
         """
         res = ""
-        for item in self.engine.request.form.keys():
+        for item in self._sess._request.form.keys():
             # form should be an IdxDict..
             if item[:5] == "auth_":
                 pass # Ignore auth stuff here, too
             else:
                 # value should either be a string or a tuple
                 # of strings. (for multi-select boxes or whatever)
-                if type(self.engine.request.form[item]) == type(()):
+                if type(self._sess._request.form[item]) == type(()):
                     # for tuples, loop through all the values:
-                    for subitem in self.engine.request.form[item]:
+                    for subitem in self._sess._request.form[item]:
                         res = res + '<input type="hidden" name="' + \
                               weblib.htmlEncode(item) + '" value="' + \
                               weblib.htmlEncode(subitem) + \
@@ -267,7 +253,7 @@ class Auth:
                     # only one value:
                     res = res + '<input type="hidden" name="' + \
                           weblib.htmlEncode(item) + '" value="' + \
-                          weblib.htmlEncode(self.engine.request.form[item]) + \
+                          weblib.htmlEncode(self._sess._request.form[item]) + \
                           '">\n'
 
         return res

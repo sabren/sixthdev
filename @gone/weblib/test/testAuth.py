@@ -1,80 +1,87 @@
 """
 testAuth.py - unit tests for weblib.Auth
-
-$Id$
 """
+__ver__="$Id$"
+
 import unittest
 import weblib
 import string
-from weblib import trim                                                         
+from weblib import trim
 
 class AuthTestCase(unittest.TestCase):
 
     def setUp(self):
         # auth requires a PATH_INFO variable.. otherwise,
         # it doesn't know where to redirect the form.
+        #
+        # @TODO: is PATH_INFO correct? I think standard might be SCRIPT_NAME
+        #
         self.myReq = weblib.Request(environ={"PATH_INFO":"dummy.py"})
-
-
-    def check_engine(self):
-        auth = weblib.Auth()
-        assert auth.engine==weblib, "auth.engine doesn't default to weblib. :/"
-        assert weblib.auth is auth, "auth doesn't register itself with weblib"
-
+        self.myRes = weblib.Response()
+        self.sess = weblib.Sess(weblib.SessPool.InMemorySessPool(),
+                                self.myReq,
+                                self.myRes)
 
     def check_check(self):
-        engine = weblib.Engine(request=self.myReq,
-                               script="import weblib; weblib.auth.check()" )
-        engine.run()
-        assert string.find(engine.response.buffer, weblib.Auth.PLEASELOGIN), \
+        try:
+            auth = weblib.Auth(self.sess, {})
+            auth.check()
+            gotExit = 0
+        except SystemExit:
+            gotExit = 1
+        assert gotExit, \
+               "didn't get systemExit (from response.end)"
+        assert string.find(self.myRes.buffer, weblib.Auth.PLEASELOGIN), \
                "check doesn't show login screen"
         
 
-    def check_prompt(self):
-        engine = weblib.Engine(request=self.myReq, script=trim(
-            """
-            from weblib import auth
+    def check_login_invalid(self):
+        """
+        Invalid login should show error, display form, and raise SystemExit.
+        """
+        req = weblib.Request(environ = {"PATH_INFO":"sadfaf"},
+                             querystring="auth_check_flag=1",
+                             form={"auth_username":"wrong_username",
+                                   "auth_password":"wrong_password"})
+        sess = weblib.Sess(weblib.SessPool.InMemorySessPool(),
+                           req, self.myRes)
+        try:
+            auth = weblib.Auth(sess, {'username':'password'})
             auth.check()
-            print "this should not show up"
-            """))
-        engine.run()
-        assert string.find(engine.response.buffer,
-                           engine.auth.PLEASELOGIN) > -1, \
-               "doesn't show prompt!"
-
-
-    def check_login(self):
-        engine = weblib.Engine(
-            request= 
-            weblib.Request(environ = {"PATH_INFO":"sadfaf"},
-                           querystring="auth_check_flag=1",
-                           form={"auth_name":"wrong_username",
-                                 "auth_pass":"wrong_password"},
-                           ),
-            script=
-            trim(
-                """
-                import weblib
-                weblib.auth.check()
-                
-                print "this should show up"
-                """))
-        
-        engine.run()
-        assert string.find(engine.response.buffer,
-                           engine.auth.LOGINFAILED) > -1, \
+            gotExit = 0
+        except SystemExit:
+            gotExit = 1
+        assert gotExit, \
+               "invalid login didn't get SystemExit"
+        assert string.find(self.myRes.buffer, auth.LOGINFAILED) > -1, \
                "invalid login doesn't give LOGINFAILED!"
 
 
 
-        ## run it again with the "right" credentials 
-        engine.request.form = {"auth_username" : "username",
-                               "auth_password":"password"}
-        engine.run()
+    def check_login_valid(self):
+        """
+        Valid login should have no side effects.
+        """
+        req = weblib.Request(environ = {"PATH_INFO":"sadfaf"},
+                             querystring="auth_check_flag=1",
+                             form={"auth_username":"username",
+                                   "auth_password":"password"})
+        sess = weblib.Sess(weblib.SessPool.InMemorySessPool(),
+                           req, self.myRes)
+        try:
+            auth = weblib.Auth(sess, {"username":"password"})
+            auth.check()
+            gotExit = 0
+        except SystemExit:
+            gotExit = 1
+        assert self.myRes.buffer == "", \
+               "valid login shouldn't output anything! [vs '%s']" \
+               % self.myRes.buffer
+        assert not gotExit, \
+               "valid login still got SystemExit"
 
-        assert engine.response.buffer == "this should show up\n", \
-               "valid login doesn't let you in!!!!"
-        
+
+    # @TODO: write tests for this stuff:
         
     def nocheck_Logout(self):
         pass
