@@ -3,10 +3,6 @@ from config import dbc
 from Product import Product
 from Cart import Cart
 from Style import Style
-
-#@TODO: chicken and egg problem! :/ [need a factory?]
-Product._links["styles"][1] = Style
-
 from PublicApp import PublicApp
 from Category import Category
 from Detail import Detail

@@ -12,10 +12,6 @@ import zikeshop
 class Product(zdc.RecordObject):
     __super = zdc.RecordObject
     _table = zdc.Table(zikeshop.dbc, "shop_product")
-    _links = {
-        #@TODO: we have a chicken and egg problem here...
-        "styles": [zdc.LinkSet, None, "parentID"],
-        }
 
     # @TODO: fix this!!!!!! there should be no _tuples..
     # or should there be? I DO need to tell ObjectView
@@ -29,7 +25,7 @@ class Product(zdc.RecordObject):
     # nodeIDs needs to be here (FOR NOW) to save a product
     # to various nodes..
     # @TODO: remove all trace of product.nodeIDs
-    _tuples = ['categories', 'nodeIDs']
+    _tuples = ['styles', 'categories', 'nodeIDs']
     
     ### Magic RecordObject Methods ############################
 
@@ -121,7 +117,7 @@ class Product(zdc.RecordObject):
         nodeIDs = self.nodeIDs
         self._deleteNodes()
         self.nodeIDs = nodeIDs
-        
+        #@TODO: replace this with a linkset.save() call..
         for id in self.nodeIDs:
             cur.execute("INSERT INTO shop_product_node (nodeID, productID) "
                         "VALUES (%s, %s)" % (id, int(self.ID)))
@@ -157,24 +153,15 @@ class Product(zdc.RecordObject):
         return self._pic
 
 
-    def get_nodes(self):
-        #@TODO: replace with a junction thingy..
-        return map(lambda x: zikebase.Node(ID=x), self.nodeIDs)
-
     def get_categories(self):
         #@TODO: replace with a junction thingy..
         return map(lambda x: zikeshop.Category(ID=x), self.nodeIDs)
 
     def get_styles(self):
-        res = []
-        if self.ID:
-            sql = "SELECT ID from shop_product WHERE parentID=%s" % self.ID
-            cur = zikeshop.dbc.cursor()
-            cur.execute(sql)
-            for row in cur.fetchall():
-                res.append(zikeshop.Product(ID=row[0]))
-        return res
-
+        if hasattr(self, "_styles"):
+            return self._styles
+        else:
+            return zdc.LinkSet(self, zikeshop.Style, "parentID")
 
         
     ## Other stuff ############################################
@@ -187,4 +174,3 @@ class Product(zdc.RecordObject):
         cur.execute("DELETE FROM shop_product_node WHERE productID=%s" \
                     % int(self.ID))
         self.nodeIDs = ()
-
