@@ -64,7 +64,7 @@ class Z2X:
                 if line[-1] == ":":
                     isBlock = 1
                 elif line[-1] == ";":
-                    isBlock == 0
+                    isBlock = 0
                 else:
                     raise SyntaxError, \
                           "* tag without ':' or ';' on line %i" \

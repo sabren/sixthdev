@@ -235,3 +235,31 @@ class Zbr2xmlTestCase(unittest.TestCase):
         actual = zebra.Z2X().translate(zbr)
         assert actual==goal, \
                "Doesn't do for..none right:\n%s" % actual
+
+
+    def check_blocks(self):
+        """
+        @TODO: this test is really stupid. it should
+        really test to make sure that non-blocked commands
+        use a ; a the end and blocked-commands use a :..
+        further, for .. ; should cause a syntax error, not
+        pass like this test says.
+        """
+        zbr = zebra.trim(
+            """
+            * for this_won't_work;
+                {?name?} is a nice person.
+            """)
+        
+        goal = zebra.trim(
+            """
+            <?xml version="1.0"?>
+            <zebra>
+                <var>name</var> is a nice person.
+            </zebra>
+            """)
+
+        actual = zebra.Z2X().translate(zbr)
+        assert actual==goal, \
+               "Doesn't handle ; blocks right:\n%s" % actual
+
