@@ -26,7 +26,7 @@
   <tr><td>link:</td>
       <td>{:html.text("link",link):}</td></tr>
 
-  <tr><td>RSS output file:</td>
+  <tr><td>RSS output file (must end in .rss):</td>
       <td>{:html.text("rssfile",rssfile):}</td></tr>
 
   <tr><td colspan="2">description:</td></tr>
