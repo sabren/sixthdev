@@ -170,7 +170,11 @@ class Clerk(object):
             column = self.schema.columnForLinkSet(ls)
             for item in getattr(obj.private, name):
                 if id_has_changed or item.private.isDirty:
-                    assert getattr(item, ls.back) is obj
+                    assert getattr(item, ls.back) is obj, \
+                           "getattr(%s, %s) was not (this) %s" \
+                           % (item.__class__.__name__,
+                              ls.back,
+                              obj.__class__.__name__)
                     self.store(item)
 
         self._makeMemo(obj)
@@ -192,12 +196,9 @@ class Clerk(object):
         return [self.rowToInstance(row, klass)
                 for row in self.storage.match(self.schema.tableForClass(klass),
                                               *args, **kwargs)]
-   
-    def fetch(self, klass, __ID__=None, **kw):
-        if __ID__:
-            res = self.match(klass, ID=__ID__)
-        else:
-            res = self.match(klass, **kw)
+
+    def matchOne(self, klass, *args, **kwargs):
+        res = self.match(klass, *args, **kwargs)
         if len(res)==0:
             raise LookupError("fetch(%s, %s, **%s) didn't match anything!"
                               % (klass, __ID__, kw))
@@ -205,6 +206,13 @@ class Clerk(object):
             raise LookupError("fetch(%s) matched multiple values!"
                               % (klass, __ID__, kw))
         return res[0]
+        
+   
+    def fetch(self, klass, __ID__=None, **kw):
+        if __ID__:
+            return self.matchOne(klass, ID=__ID__)
+        else:
+            return self.matchOne(klass, **kw)
 
     def delete(self, klass, ID):
         self.storage.delete(self.schema.tableForClass(klass), ID)
