@@ -9,7 +9,7 @@ __ver__="$Id$"
 #######################################################################
 # 0923.2000 refactorings:
 
-def calcSalesTax(addressID):
+def calcSalesTax(addressID, subtotal):
     import zikeshop    
 
     #@TODO: put this somewhere else.. probably in the Sale object?
@@ -29,7 +29,7 @@ def calcSalesTax(addressID):
     
     ## if so, calculate taxes based on the data in shop_state
     if cur.rowcount:
-        return self.cart.subtotal() * \
+        return subtotal * \
                (zikeshop.FixedPoint(cur.fetchone()[0])/100)
         
     ## otherwise, we don't charge tax..
@@ -191,7 +191,7 @@ class Cashier(zikeshop.Wizard):
         
         ## calculate the sales tax
         if (self.salestax is None) and (self.billAddressID is not None):
-            self.salestax = calcSalesTax(self.billAddressID)
+            self.salestax = calcSalesTax(self.billAddressID, self.cart.subtotal())
 
         ## calculate the shipping:
         if (self.shipping is None) and (self.shipAddressID is not None):
