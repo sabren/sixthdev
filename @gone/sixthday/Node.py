@@ -18,8 +18,8 @@ class Node(Strongbox):
     name = attr(str)
     path = attr(str)
     note = attr(str)
-    parent = link(forward)
-    children = linkset(forward)
+    parent = link(forward("sixthday.Node"))
+    children = linkset(forward("sixthday.Node"), "parent")
 
     def __init__(self, **kwargs):
         self.private.named = 0
