@@ -51,12 +51,6 @@ if weblib.request.get("action") == "save":
     f.write(contents)
     f.close()
 
-    ## compile the template:
-    import zebra
-    contents = zebra.Z2X().translate(contents)
-    f = open(tpldir() + "/" + which + ".py", "w")
-    f.write(zebra.Bootstrap().compile(contents))
-    f.close()
     
 elif which:
 
