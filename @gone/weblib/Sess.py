@@ -58,7 +58,7 @@ class Sess:
             self.sid = self._getSid()
         else:
             self.sid = sid
-        self._thaw()
+        self._thaw()        
         self._gc()
 
 
@@ -66,8 +66,8 @@ class Sess:
 
     def abandon(self):
         """abandons the session"""
-        self.sid = ""
         self.clear()
+        self.sid = ""
 
 
     def url(self, oldurl):
@@ -183,9 +183,11 @@ class Sess:
         if sid is None:
             import weblib
             sid = weblib.uid()
-            #@TODO: add code for timeouts wrt setCookie
-            if self.mode == "cookie":
-                self.engine.response.addCookie(self.name, sid)
+
+        #@TODO: add code for timeouts wrt setCookie
+        if self.mode == "cookie":
+            # always update the cookie
+            self.engine.response.addCookie(self.name, sid)
                 
         return sid
 
