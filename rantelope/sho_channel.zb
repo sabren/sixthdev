@@ -7,6 +7,18 @@
 
 <p><b>channel: {:title:}</b></p>
 
+
+<p>
+
+<a accesskey="p" href="rantelope.app?action=publish&channelID={:ID:}">[p]ublish</a>
+
+|
+
+<a accesskey="s" target="_blank" href="{:url:}">[s]how</a>
+</p>
+
+
+
 <table border="1">
   <tr><th>title:</th>
       <td>{:title:}</td></tr>

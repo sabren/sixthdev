@@ -25,13 +25,15 @@
 
   <tr><td>public URL:</td>
       <td>{:html.text("url",url):}</td></tr>
-<!--
+
+  <tr><td>output path:</td>
+      <td>{:html.text("path",path):}</td></tr>
+
   <tr><td>RSS output file (must end in .rss):</td>
       <td>{:html.text("rssfile",rssfile):}</td></tr>
 
-  <tr><td>HTML output file (must end in .html):</td>
+  <tr><td>HTML output file:</td>
       <td>{:html.text("htmlfile",htmlfile):}</td></tr>
--->
 
   <tr><td colspan="2">description:</td></tr>
   <tr><td colspan="2"><textarea name="description" 

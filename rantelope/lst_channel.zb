@@ -8,20 +8,32 @@
 
 <h2>channels</h2>
 
+* exec:
+    count = 1
 * for each:
     * head:
         <ul>
     * body:
-        <li><small>
+        * exec:
+            if count < 10:
+                accesskey = str(count)
+            elif count==10:
+                accesskey = "0"
+            else:
+                accesskey = ""
+        <li><b>
+            * if accesskey:
+                [{:accesskey:}]
+            <a accesskey="{:accesskey:}"
+               href="rantelope.app?action=create&what=story&channelID={:ID:}"
+               >{:title:}</a>&nbsp;
+            </b>
+            <small>
             [<a href="rantelope.app?action=show&what=channel&ID={:ID:}"
                >config</a>]&nbsp;
             [<a href="blog.app?channelID={:ID:}">html</a>]&nbsp;
             [<a href="blog.app?channelID={:ID:}&as=xml">xml</a>]&nbsp;
             </small>
-            <b>
-            <a href="rantelope.app?action=create&what=story&channelID={:ID:}"
-               >{:title:}</a>&nbsp;
-            </b>
         </li>
     * foot:
         </ul>

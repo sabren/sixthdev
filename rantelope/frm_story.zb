@@ -9,6 +9,16 @@
     from zebra import html
 
 
+* if scope.get('status') == 'published':
+     <p><b style="color:green">publish successful!</b></p>
+
+<a accesskey="p" href="rantelope.app?action=publish&channelID={:channelID:}">[p]ublish</a>
+
+|
+
+<a accesskey="s" target="_blank" href="{:siteurl:}">[s]how</a>
+
+
 <form action="rantelope.app" method="POST">
   <input type="hidden" name="what" value="story">
   {:html.hidden("channelID", channelID):}
@@ -49,3 +59,8 @@
         <tr><td>{:description:}</td></tr>
     * foot:
         </table>
+
+<script language="javascript">
+   document.forms[0].title.focus();
+</script>
+

@@ -19,7 +19,7 @@ th {
 
 <table border="0" width="100%">
 <tr><td>
-<a href="rantelope.app">channels</a>
+<a accesskey="c" href="rantelope.app">[c]hannels</a>
 | <a href="rantelope.app?action=list&what=author">authors</a>
 | <a href="search.app">search</a>
 </td>

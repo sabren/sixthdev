@@ -22,6 +22,7 @@ class RantelopeApp(sixthday.AdminApp):
         
     def act_(self):
         self.list_channel()
+        
 
     ## authors #########################
 
@@ -83,14 +84,17 @@ class RantelopeApp(sixthday.AdminApp):
         self.model["categories"] = [(c.ID, c.name) for c in chan.categories]
         # @TODO: will need to limit number of past stories soon.
         self.model["stories"] = [BoxView(s) for s in chan.stories]
+        return chan
 
     def create_story(self):
-        self.studyChannel(self.input.get("channelID"))
+        c = self.studyChannel(self.input.get("channelID"))
+        self.model["siteurl"] = c.url        
         self.generic_create(Story, "frm_story")
         
     def edit_story(self):
         s = self.clerk.fetch(Story, self.input["ID"])
-        self.studyChannel(s.channelID)
+        c = self.studyChannel(s.channelID)
+        self.model["siteurl"] = c.url
         self.model["stories"] = []
         self.generic_show(Story, "frm_story")
 
@@ -101,13 +105,9 @@ class RantelopeApp(sixthday.AdminApp):
             story.author = self.user
         self.clerk.store(story)
 
-        ## now write the XML file:
-        chan=self.clerk.fetch(Channel, self.input["channelID"])
-        chan.writeFiles()
-
         ## go back to the channel:
         self.redirect(action='create&what=story&channelID='
-                            + str(chan.ID))        
+                            + str(story.channelID))        
         
     def show_story(self):
         self.generic_show(Story, "sho_story")
@@ -118,7 +118,17 @@ class RantelopeApp(sixthday.AdminApp):
         cmt = self.generic_save(Comment)
         self.redirect(action='show&what=story&ID='
                       + str(cmt.storyID))
-    
+
+
+    ## publishing ######################
+        
+    def act_publish(self):
+        ## now write the XML file:
+        chan=self.clerk.fetch(Channel, self.input["channelID"])
+        chan.writeFiles()
+        self.redirect(action="create&what=story&status=published&channelID="
+                      + self.input["channelID"])
+
 
 ### main code #######################################
 
