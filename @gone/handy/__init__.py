@@ -1,3 +1,7 @@
+"""
+Misc handy routines
+"""
+
 
 def sendmail(mail):
     import os
@@ -25,6 +29,28 @@ def trim(s):
         lines[i] = lines[i][indent:]
 
     return string.join(lines, "\n")
+
+
+def indent(s, depth=1, indenter="    "):
+    """
+    opposite of trim
+    """
+    import string
+    lines = string.split(s, "\n")
+
+    # don't indent trailing newline
+    trailer = ""
+    if lines[-1] == "":
+        lines = lines[:-1]
+        # BUT.. add it back in later
+        trailer = "\n"
+        
+    for i in range(len(lines)):
+        lines[i] = (indenter * depth) + lines[i]
+        
+    return string.join(lines, "\n") + trailer
+   
+
 
 
 def uid():
