@@ -1,15 +1,14 @@
 """
 zdc: zike data classes (wrapper for python db-api 2.0)
-
-$Id$
 """
+__ver__="$Id$"
+
 from IdxDict import IdxDict
 from Field import Field
 from Table import Table
 from Record import Record
 from Object import Object
 from RecordObject import RecordObject
-
 
 def sqlEscape(s):
     #@TODO: get the real version of this out of Record
@@ -45,3 +44,12 @@ def sqlSet(*data):
     return res
 
 
+def toListDict(cur):
+    """converts cursor.fetchall() results into a list of dicts"""
+    res = []
+    for row in cur.fetchall():
+        dict = {}
+        for i in range(len(cur.description)):
+            dict[cur.description[i][0]] = row[i]
+        res.append(dict)
+    return res
