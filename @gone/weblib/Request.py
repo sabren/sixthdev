@@ -21,6 +21,8 @@ class Request:
     def __init__(self, querystring=None, form=None, environ=None, cookie=None, engine=weblib):
 
         self.engine = engine
+        if self.engine is weblib:
+            weblib.request = self
 
         ## environment
         if environ is None:
@@ -31,7 +33,7 @@ class Request:
 
         ## querystring:
         ## @TODO: handle urlencoding/decoding
-        if querystring is not None: # test explicitly. we might want to pass a ""
+        if querystring is not None:
             self.querystring = querystring
         elif self.environ.has_key("QUERY_STRING"):
             self.querystring = self.environ["QUERY_STRING"]
@@ -40,48 +42,91 @@ class Request:
 
         ## query, a hash of the querystring
         self.query = {}
-        for pair in string.split(self.querystring, "&"):
+        for pair in string.split(weblib.urlDecode(self.querystring), "&"):
             l = string.split(pair, "=", 1)
             k = l[0]
             if len(l) > 1:
                 v = l[1]
             else:
                 v = ''
-            self.query[k]=v
+            if self.query.has_key(k):
+                if type(self.query[k]) == type((0,)):
+                    # already a tuple
+                    self.query[k] = tuple(self.query[k] + (v,))
+                else:
+                    # convert it to a tuple
+                    self.query[k] = tuple((self.query[k],) + (v,))
+            else:
+                self.query[k]=v
 
 
         ## cookie:
         ## @TODO: get some real cookie parsing abilities...
-        self.cookie = {}
-        try:
-            for pair in string.split(os.environ["HTTP_COOKIE"], "; "):
-                l = string.split(pair, "=", 1)
-                k = l[0]
-                if len(l) > 1:
-                    v = l[1]
-                else:
-                    v = ''
-                self.cookie[k] = v
-        except:
-            pass # no cookies
+        self.cookie = cookie
+        if cookie is None:
+            self.cookie = {}
+            try:
+                for pair in string.split(os.environ["HTTP_COOKIE"], "; "):
+                    l = string.split(pair, "=", 1)
+                    k = l[0]
+                    if len(l) > 1:
+                        v = l[1]
+                    else:
+                        v = ''
+                    self.cookie[k] = v
+            except:
+                pass # no cookies
 
         ## form:
         ## @TODO: genericize this split stuff..
         ## @TODO: handle FILE uploads/multipart encoding
-        self.form = {}
-        try:
-            contentLength = int(os.environ["CONTENT_LENGTH"])
-            import sys
-            content = sys.stdin.read(contentLength)
-            for pair in string.split(content, "&"):
-                l = string.split(pair, "=", 1)
-                k = l[0]
-                if len(l) > 1:
-                    v = l[1]
-                else:
-                    v = ''
-                self.form[k]=v
-        except:
-            pass
+        self.form = form
+        if not form:
+            self.form = {}
+            try:
+                contentLength = int(os.environ["CONTENT_LENGTH"])
+                import sys
+                content = sys.stdin.read(contentLength)
+                for pair in string.split(content, "&"):
+                    l = string.split(pair, "=", 1)
+                    k = l[0]
+                    if len(l) > 1:
+                        v = l[1]
+                    else:
+                        v = ''
+                    self.form[k]=v
+            except:
+                pass
 
+
+    ## Dictionary Methods @TODO: more of them ##########################
+
+
+    def __getitem__(self, key):
+
+        res = None
+
+        for dict in [self.query, self.form, self.cookie, self.environ]:
+            if dict.has_key(key):
+                res = dict[key]
+                break
+
+        # if a tuple, grab the first value:
+        if type(res) == type((0,)):
+            res = res[0]
+
+
+        if res is None:
+            raise KeyError, key
+
+        return res
+
+
+
+    def get(self, key, failobj=None):
+        
+        try:
+            return self[key]
+        except KeyError:
+            return failobj
 
