@@ -5,6 +5,8 @@ __ver__="$Id$"
 
 import weblib
 
+#@TODO: test cases for each and every one of these punks..
+
 ##[ HTML form elements ]################################
 
 def textarea(name, value, attrs=''):
@@ -14,14 +16,14 @@ def textarea(name, value, attrs=''):
     return '<textarea name="%s"%s>%s</textarea>' \
            % (name, attrs, weblib.htmlEncode(weblib.deNone(value)))
 
-def checkbox(name, isChecked, value=1, attrs=''):
+def checkbox(name, isChecked, onValue=1, offValue=0, attrs=''):
     '''
     An html checkbox. Also adds a hidden __expect__ variable
     since the browser doesn\'t often send unchecked checkboxes.
     '''
-    return '<input type="hidden" name="__expect__" value="%s;0">' \
+    return '<input type="hidden" name="__expect__" value="%s:%s">' \
            '<input type="checkbox" name="%s" %s %s value="%s">' \
-           % (name, name, attrs, ['','CHECKED'][isChecked], value)
+           % (name, offValue, name, attrs, ['','CHECKED'][isChecked], onValue)
 
 def radio(name, isChecked, value=1, attrs=''):
     '''
@@ -62,29 +64,30 @@ def select(name, options, value=None, attrs=''):
         vals = value
 
     ## expand options into a X*3 grid (if it's not):
-
-    # if options is a sequence of sequences:
-    if type(options[0]) in (type([]), type(())):
-        case = len(options[0])
-        ## if options is a list of 3-tuples:
-        if case == 3:
-            ## leave it as is, ignore values
-            opts = options
-        ## elif options is a list of 2-tuples:
-        elif case == 2:
-            ## loop through and add isChecked
-            opts = []
-            for item in options:
-                opts.append(list(item) + [(item[0] in vals)])
+    opts = []
+    if options:
+        # if options is a sequence of sequences:
+        if type(options[0]) in (type([]), type(())):
+            case = len(options[0])
+            ## if options is a list of 3-tuples:
+            if case == 3:
+                ## leave it as is, ignore values
+                opts = options
+            ## elif options is a list of 2-tuples:
+            elif case == 2:
+                ## loop through and add isChecked
+                for item in options:
+                    opts.append(list(item) + [(item[0] in vals)])
+            else:
+                raise TypeError, \
+                      "Invalid option structure passed to html.select()!"
+        ## else options is a list of keys:
         else:
-            raise TypeError, \
-                  "Invalid option structure passed to html.select()!"
-    ## else options is a list of keys:
+            ## loop through and add make it [key key isChecked]
+            for item in options:
+                opts.append([item, item, (item in vals)])
     else:
-        ## loop through and add make it [key key isChecked]
-        opts = []
-        for item in options:
-            opts.append([item, item, (item in vals)])
+        pass # kinda silly to want no options, but no point crashing.
 
     ## now that we have an X*3 grid, show the box:
     res = '<select name="%s" %s>' % (name, attrs)
