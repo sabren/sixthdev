@@ -21,35 +21,54 @@ def compile(template):
     ifp.close()
     
 
-
 def fetch(template, model={}):
+    """
+    fetch the template, and appy it to the model
+    """
     import os.path
+
+    path, filename = os.path.split(template)
+    cwd = os.getcwd()
+    if path:
+        os.chdir(path)
+    
     doCompile = 0
     # if existing compiled template:
-    if os.path.exists(template + ".zbc"):
+    if os.path.exists(filename + ".zbc"):
         # if also uncompiled template:
-        if os.path.exists(template + ".zb"):
+        if os.path.exists(filename + ".zb"):
             # and the uncompiled is newer:
-            if os.path.getmtime(template + '.zb') \
-               > os.path.getmtime(template + '.zbc'):
+            if os.path.getmtime(filename + '.zb') \
+               > os.path.getmtime(filename + '.zbc'):
                 doCompile = 1
     else:
         # no existing template, so compile
         doCompile = 1
 
     if doCompile:
-        compile(template)
-        
+        compile(filename)
+
+    # get the result..
     namespace = {}
-    execfile(template + ".zbc", namespace)
-    return namespace['fetch'](model)
+    execfile(filename + ".zbc", namespace)
+    res = namespace['fetch'](model)
+
+    # cleanup and go home
+    os.chdir(cwd)    
+    return res
+
+
 
 def show(template, model={}):
+    """
+    same as fetch(), but prints the result
+    """
     print fetch(template, model)
     
 def escape(s):
-    "Escape backslashes, quotes, and newlines"
-
+    """
+    Escape backslashes, quotes, and newlines
+    """
     replace = {
         "\\":"\\\\",  # backslash
         "\n":"\\n",   # newline
