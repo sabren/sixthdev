@@ -51,7 +51,7 @@ class Table(zdc.Object):
         else:
             ## sql where clause specified
             where = " WHERE " + wclause
-
+        
         ## run the query..
         sql = "SELECT * FROM " + self.name + where
         cur = self.dbc.cursor()
@@ -78,7 +78,9 @@ class Table(zdc.Object):
         """
         if key is None:
             raise TypeError, "argument to fetch() must be a primary key value"
-        recs = self.select("%s=%s" % (self.rowid, key))
+        recs = self.select("%s=%s" \
+                           % (self.rowid,
+                              self._sqlQuote(self.fields[self.rowid], key)))
         if recs == []:
             raise LookupError, "record not found for key %s" % key
         elif len(recs) > 1:
