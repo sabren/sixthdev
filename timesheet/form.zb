@@ -1,8 +1,7 @@
 
-<!-- timesheet entry editing form -->
+*# timesheet entry editing form
 
 <form action="timesheet.app" method="POST">
-  <input type="hidden" name="ID" value="{:ID:}">
   <table border="0">
     <tr>
       <td>day:</td>
@@ -19,6 +18,9 @@
   </table>
   <input type="submit" name="action" value="save">
   * if ID:
+      *# ID is used for both save and delete...
+      &nbsp;&nbsp;
+      <input type="hidden" name="ID" value="{:ID:}">
       <input type="submit" name="action" value="delete">
 </form>
 	
