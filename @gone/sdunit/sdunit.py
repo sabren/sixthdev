@@ -10,8 +10,9 @@ import unittest
 
 class SixthDayTestResult(unittest._TextTestResult):
     def printHeader(self):
-        if self.errors:
+        if self.errors or self.failures:
             print
+            print 
 
 class SixthDayTestRunner(unittest.TextTestRunner):
     def __init__(self):
@@ -54,7 +55,7 @@ if __name__=="__main__":
 
     elif hasattr(testmodule, 'suites'):
         for suite in testmodule.suites.keys():
-            print "** testing", suite + ":",
+            print "** testing", suite + ": ",
             SixthDayTestRunner().run(testmodule.suites[suite])
             print
     else:
