@@ -45,6 +45,9 @@ class Record:
         cur.execute(sql)
         row = cur.fetchone()
 
+        if row is None:
+            raise KeyError, "invalid key for '" + self.table + "' table : " + `self.key`
+
         for f in range(len(row)):
             self[self.fields[f].name]=row[f]
 

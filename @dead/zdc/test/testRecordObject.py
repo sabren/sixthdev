@@ -1,5 +1,8 @@
-#
-# testRecordObject.py - test cases for zdc.RecordObject
+"""
+testRecordObject.py - test cases for zdc.RecordObject
+
+$Id$
+"""
 
 import unittest
 import zdc.RecordObject
@@ -46,6 +49,27 @@ class RecordObjectTestCase(unittest.TestCase):
 
         self.cur.execute("SELECT ID, fish FROM fish WHERE fish='trout'")
         assert self.cur.fetchone() == (1, 'trout'), "save() didn't add record correctly."
+
+
+
+    def check_fetch(self):
+        self.cur.execute("insert into fish (fish) values ('guppy')")
+        robj = zdc.RecordObject(test.dbc, 1, table="fish")
+
+        assert robj.ID == 1, "didn't fetch correct ID"
+        assert robj.fish == 'guppy', "didn't fetch correct 'fish' field."
+
+
+    def check_invalidKey(self):
+        try:
+            robj = zdc.RecordObject(test.dbc, 55, table="fish")
+        except KeyError:
+            gotError = 1
+        else:
+            gotError = 0
+
+        assert gotError, "invalid key doesn't throw KeyError :/"
+            
 
 
     def tearDown(self):
