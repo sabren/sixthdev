@@ -10,7 +10,6 @@ from testCart import *
 from testCategory import *
 from testCustomer import *
 from testShopActor import *
-from testWizard import *
 from testStore import *
 from testSale import *
 from testCard import *
@@ -42,4 +41,3 @@ suites['sale'] = unittest.makeSuite(SaleTestCase, "check_")
 suites['card'] = unittest.makeSuite(CardTestCase, "check_")
 suites['saleEditor'] = unittest.makeSuite(SaleEditorTestCase, "check_")
 suites['checkoutApp'] = unittest.makeSuite(CheckoutAppTestCase, "check_")
-suites['wizard'] = unittest.makeSuite(WizardTestCase, "check_") #@TODO: take this out!
