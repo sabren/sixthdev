@@ -2,11 +2,10 @@
 PublicApp - a base class for zikeshop's public AppActors.
 """
 
-import zikebase, zikeshop
-zikebase.load("AppActor")
+import weblib, zikeshop
 
-class PublicApp(zikebase.AppActor):
-    __super = zikebase.AppActor
+class PublicApp(weblib.Actor):
+    __super = weblib.Actor
 
     def __init__(self, cart=None, input=None):
         self.__super.__init__(self, input)

@@ -2,12 +2,12 @@
 def link_category(path):
     'return a link to a category.'
     import weblib
-    return "shop.py?action=show&what=category&path=%s" \
+    return "shop.py?action=show_category&path=%s" \
            % weblib.urlEncode(path)
 
 def link_product(code):
     'return a link to a product.'
-    return "shop.py?action=show&what=product&code=%s" % code
+    return "shop.py?action=show_product&code=%s" % code
 
 def link_picture(ID, size=None):
     'return a link to a picture, optionally thumbnailed'

@@ -1,19 +1,29 @@
 import weblib, zebra
 
 import zikebase
-zikebase.load("AppActor")
+zikebase.load("AdminApp")
 
-class ZikeShopAppActor(zikebase.AppActor):
 
-    def _whatnext(self):
-        _next_ = weblib.request.parse(self.input.get("_next_", ""))
-        if _next_.has_key("action"):
-            self._next_ = _next_
-            return _next_["action"]
+class ZikeShopAdminApp(zikebase.AdminApp):
+    __super = zikebase.AdminApp
 
     def enter(self):
-        weblib.auth.check()
-        zebra.show("dsp_head")
+        self.__super.enter(self)
+        #@TODO: this is a big mistake:
+        weblib.auth.user.siteID=1
+        
+
+    def objectEdit(self):
+        #@TODO: clean this siteID junk up
+        self.input["siteID"] = weblib.auth.user.siteID
+        self.__super.objectEdit(self)
+
+    def act_save(self):
+        #@TODO: get rid of siteID crap
+        import zikeshop
+        zikeshop.siteID = weblib.auth.user.siteID
+        self.__super.save(self)
+
 
     ## home page ########################################
 
@@ -22,15 +32,15 @@ class ZikeShopAppActor(zikebase.AppActor):
 
     ## category stuff ##################################
         
-    def act_lst_category(self):
+    def list_category(self):
         self.consult("mdl_category")
         zebra.show("lst_category", self.model)
 
 
     ## product stuff ###################################
 
-    def act_lst_product(self):
-        self.model = self.input
+    def list_product(self):
+        self.model["nodeID"] = self.input.get("nodeID", 0)
         self.consult("mdl_product")
         self.consult("mdl_category")
         zebra.show("lst_product", self.model)
@@ -47,7 +57,7 @@ class ZikeShopAppActor(zikebase.AppActor):
         self.consult("mdl_product")
         zebra.show("frm_sale", self.model)
 
-    def act_lst_sale(self):
+    def list_sale(self):
         self.model = self.input
         self.consult("mdl_sale")
         zebra.show("lst_sale", self.model)
@@ -62,7 +72,7 @@ class ZikeShopAppActor(zikebase.AppActor):
     ######### THIS SHOULD BE IN A SUPERCLASS ############
 
 
-    def fetch_class(self, what):
+    def map_what(self, what):
         """
         returns a class to work with based on
         the string passed in. override this!
@@ -81,84 +91,7 @@ class ZikeShopAppActor(zikebase.AppActor):
         return res
 
 
-    def act_create(self):
-        """
-        generic routine to display a form for adding an object
-        """
-        what = self.input.get("what", "")
-        try:
-            import zdc
-            zebra.show("frm_%s" % what, zdc.ObjectView(
-                self.fetch_class(what)()))
-        except IOError:
-            print "[error: no form to edit %s]" % what
-
-    def act_edit(self):
-        """
-        generic object-modifying mechanism
-        """
-        if self.input.get("ID"):
-            what = self.input.get("what", "")
-            import zdc
-            zebra.show("frm_%s" % what, zdc.ObjectView(
-                self.fetch_class(what)(ID=self.input.get("ID"))))
-        else:
-            print "[error: no ID given]"
-        
-    def act_delete(self):
-        """
-        Generic object-deletion mechanism.
-        """
-        what = self.input.get("what", "")
-        self.objectEdit("delete")
-        next = self._whatnext()
-        if not next:
-            self.perform("lst_%s" % what)
-        else:
-            #@TODO: clean up / clarify this magic side effect.. (_next_)
-            self.input = self._next_
-            self.perform(next)
-
-
-    def act_save(self):
-        """
-        Generic object-deletion mechanism.
-        """
-        #@TODO: get rid of siteID crap
-        import zikeshop
-        zikeshop.siteID = weblib.auth.user.siteID
-        what = self.input.get("what", "")
-        self.objectEdit("save")
-        next = self._whatnext()
-        if not next:
-            self.perform("lst_%s" % what)
-        else:
-            #@TODO: clean up / clarify this magic side effect.. (_next_)
-            self.input = self._next_
-            self.perform(next)
-
-    def objectEdit(self, command):
-        """
-        generic routine that invokes an ObjectEditor
-        and feeds it a command.. Requires that you pass
-        a 'what' in on the input string.
-        """
-        what = self.input.get("what", "")
-        klass = self.fetch_class(what)
-        if klass:
-            import zikebase
-            #@TODO: clean this siteID junk up
-            self.input["siteID"] = weblib.auth.user.siteID
-            ed = zikebase.ObjectEditor(klass,
-                     self.input.get("ID"), input=self.input)
-            ed.act(command)
-        else:
-            print "don't know how to %s a %s" % (command, what)
-
-    def exit(self):
-        zebra.show("dsp_foot")
-
 
 if __name__=="__main__":
-    ZikeShopAppActor().act()
+    ZikeShopAdminApp().act()
 

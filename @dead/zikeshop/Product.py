@@ -29,8 +29,11 @@ class Product(zdc.RecordObject):
     # that there's a collection called nodes...
     # I'm only doing it this way because I don't have
     # a *:* join object yet.
+    #
+    # I need this to display the product page
+    # (this product is in ...)
     _tuples = ['nodes']
-
+    
     #@TODO: this caching mechanism should probably go too..
     _pic = None
 

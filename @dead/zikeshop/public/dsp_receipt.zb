@@ -1,21 +1,29 @@
-* include ssl_head:
+* include ssl_head;
 <h2>Thank you!</h2>
 
-<b>{date} - receipt for <a href="http://www.aggressivemall.com/">aggressivemall.com</a></b>
+<b>{?date?} - your receipt</b>
 <br>&nbsp;<br>
 
 <table border="1">
-* for products:
-     <tr><td>{label}
-     * if quantity > 1:
-         <b>(* {quantity})</b>
-     </td><td align="right">${subtotal}</td></tr>
-<tr><td bgcolor="#666666">SalesTax</td><td align="right">${salestax}</td></tr>
-<tr><td bgcolor="#666666">Shipping</td><td align="right">${shipping}</td></tr>
+* for details:
+    <tr><td>{:product.name:}
+    * if quantity > 1:
+        <b>(* {:quantity:})</b>
+    </td><td align="right">${:subtotal:}</td></tr>
+
+<tr><td>Sales tax</td>
+    <td align="right">${:salestax:}</td></tr>
+
+<tr><td>Shipping</td>
+    <td align="right">${:shipping:}</td></tr>
+
 * if adjustment:
-    <tr><td bgcolor="#666666">Adjustment</td><td align="right">{adjustment}</td></tr>
-<tr><td bgcolor="#000000">Total</td><td align="right">${total}</td></tr>
+    <tr><td>Adjustment</td>
+        <td align="right">{:adjustment:}</td></tr>
+        
+<tr><td>Total</td>
+    <td align="right">${:total:}</td></tr>
 </table>
 
-* include ssl_foot:
+* include ssl_foot;
 

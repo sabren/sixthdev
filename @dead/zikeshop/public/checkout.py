@@ -7,26 +7,90 @@ import zikeshop
 class CheckoutApp(zikeshop.PublicApp):
     __super = zikeshop.PublicApp
 
+    def __init__(self):
+        self.__super.__init__(self)
+
+        import weblib
+        weblib.auth.check()
+
+        # internal data:
+        #@TODO: why  won't weblib store a Sale object in the session?
+        if not weblib.sess.has_key("checkout_data"):
+            weblib.sess["checkout_data"] = {}
+        self.data = weblib.sess["checkout_data"]
+
+        if not self.data.has_key('bill_addressID'):
+            #@TODO: double check that .ID is correct
+            self.data['bill_addressID']=weblib.auth.user.ID
+        
+    ## Actor methods ############################
+    
     def enter(self):
         self.__super.enter(self)
-
-        # get the customer?
-        weblib.auth.check()
-        self.cust = weblib.auth.user
-
-        # internal storage device
-        self.storage = weblib.sess
 
         # @TODO: clean this up:
         if self.cart.isEmpty():
             raise Error, "Can't check out because cart is empty."
 
+        # get the customer?
+        weblib.auth.check()
+        self.cust = weblib.auth.user
+
+
+    def exit(self):
+        self.__super.exit(self)
+        if self.data:
+            weblib.sess["checkout_data"] = self.data
+
     def act_(self):
-        print "this is checkout"
+        self.next = 'get_billing'
+
+    ## other stuff ... ###################################
+
+    def checkShipToBilling(self):
+        if self.input.get('shipToBilling'):
+            self.data['ship_addressID']=self.data['bill_addressID']
+            
+    def act_get_billing(self):
+        self.consult(self.cust)
+        #@TODO: add list of contacts to zikebase.user
+        zebra.show('frm_billing', self.model)
+
+    def act_set_billing(self):
+        self.data['bill_addressID']=self.data['addressID']
+        self.checkShipToBilling():
+        if self.data['shipping']:
+            self.next='get_card'
+        else:
+            self.next='get_shipping'
+
+    def act_get_shipping(self):
+        self.consult(self.cust)
+        zebra.show('frm_billing', self.model)
 
     def act_set_shipping(self):
-        if self.input.get('use_billing'):
-            self.do("get_card")
+        self.checkShiptoBilling()
+        self.next='get_card'
+
+    def act_add_address(self):
+        import zikebase
+        zikebase.load("Contact")
+        ed = zikebase.ObjectEditor(zikebase.Contact)
+        ed.do("update")
+        ed.object.userID = self.cust.ID
+        ed.object.save()
+
+        context = self.input.get('context','bill')
+        if context=='bill':
+            self.data['bill_addressID']=ed.object.ID
+            if self.input.get('shipToBilling'):
+                self.data['ship_addressID']=self.data['bill_addressID']
+                self.next='get_card'
+            else:
+                self.next='get_shipping'
+        elif context=='ship':
+            self.data['ship_addressID']=ed.object.ID
+            self.next='get_card'
 
     def act_add_card(self):
         # Add a new card to the database:
@@ -37,13 +101,13 @@ class CheckoutApp(zikeshop.PublicApp):
         ed.object.save()
 
         # use the card for the transaction:
-        self.storage['cardID'] = ed.object.ID
+        self.data['cardID'] = ed.object.ID
 
         #@TODO: resolve - cards with secondary billing addresses?
         self.next = "checkout"
 
     def act_set_card(self):
-        self.storage['cardID'] = int(self.input['cardID'])
+        self.data['cardID'] = int(self.input['cardID'])
         self.next = "checkout"
 
     def act_get_card(self):
@@ -53,33 +117,37 @@ class CheckoutApp(zikeshop.PublicApp):
 
 
     def act_show_receipt(self):
-        import zebra
-        self.consult({"products":[]})
+        # @TODO: move this to customer app page?
+        import zebra, zdc
+        sale = zikeshop.Sale(ID=self.data['saleID'])
+        self.consult(zdc.ObjectView(sale))
         zebra.show("dsp_receipt", self.model)
 
     def act_checkout(self):
         sale = zikeshop.Sale()
+        shop = zikeshop.Store(ID=zikeshop.siteID)
 
+        #@TODO: update test suite to ensure cardID <> 0 if it shouldn't be.
+        sale.cardID = self.data.get('cardID', 0)
+        sale.bill_addressID = self.data.get('bill_addressID', 0)
+        sale.ship_addressID = self.data.get('ship_addressID', 0)
+        
         for item in self.cart.q_contents():
             det = sale.details.new()
             det.productID = item["extra"]["ID"]
             det.quantity = item["quantity"]
+            det.subtotal = item["quantity"] * item["price"]
             sale.details << det
+
+        sale.salestax = shop.calcSalesTax(sale.shipAddress, sale.subtotal)
+        sale.shipping = shop.calcShipping(sale.billAddress,
+                                          self.cart.calcWeight())
         sale.save()
+        self.data['saleID'] = sale.ID
 
-        self.jumpMap={"receipt":"checkout.py?action=show_receipt"}
-        self.next = ("jump", {"where":"receipt"})
+        self.where = {"receipt":"checkout.py?action=show_receipt"}
+        self.next  = ("jump", {"where":"receipt"})
         
         
-
 if __name__=="__main__":
     CheckoutApp().act()
-    
-##     import weblib
-##     weblib.auth.check()
-
-##     #@TODO: consolidate all this with Cashier and replace with an Actor
-##     import zikeshop
-##     cart = zikeshop.Cart()
-##     cash = zikeshop.Cashier(cart, weblib.auth.user)
-##     cash.act()

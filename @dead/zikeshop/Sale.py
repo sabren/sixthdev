@@ -10,18 +10,24 @@ class Sale(zdc.RecordObject):
     __super = zdc.RecordObject
     _table = zdc.Table(zikeshop.dbc, "shop_sale")
     _links = {
-        "details": (zdc.LinkSet, zikeshop.Detail, "saleID")
-        }
-    _defaults = {
-        "customerID": 0,
-        "ship_addressID": 0,
-        "bill_addressID": 0,
-        "shiptypeID": 0,
-        "cardID": 0,
-        "status": "new",
-        "siteID":0, #@TODO: remove this!
+        "details": [zdc.LinkSet, zikeshop.Detail, "saleID"],
         }
     _tuples = []
+
+    def _new(self):
+        self.__super._new(self)
+
+        self.customerID = 0
+        self.ship_addressID = 0
+        self.bill_addressID = 0
+        self.shiptypeID = 0
+        self.cardID = 0 
+        self.status = "new"
+        self.subtotal = 0
+        self.salestax = 0
+
+        self.siteID = 0 #@TODO: remove this!
+        
 
 
     #@TODO: replace all this crap with generic stuff from ZDC...
@@ -79,6 +85,15 @@ class Sale(zdc.RecordObject):
 
     def save(self):
         doTS = not(self.ID)
+
+        # @TODO: where should this go, and when should
+        # it be updated?
+        self.total = zikeshop.FixedPoint('0.00') \
+                     + self.subtotal \
+                     + self.shipping \
+                     + self.salestax \
+                     + self.adjustment
+
         self.__super.save(self)
         for det in self.details:
             det.saleID = self.ID

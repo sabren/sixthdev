@@ -10,12 +10,6 @@ zikebase.load("UserApp")
 class ZSUserApp(zikebase.UserApp):
     __super = zikebase.UserApp
 
-    def act_(self):
-        self.do("signup")
-
-    def act_signup(self):
-        zebra.show("frm_signup")
-
     def act_create(self):
         self.__super.act_create(self)
 

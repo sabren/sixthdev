@@ -2,7 +2,7 @@
 *# $Id$
 
 *# @TODO: cleanup zebra's include syntax.. (no : needed!)
-* include dsp_head:
+* include dsp_head;
 * if name:
     <a href="{:link_category('/'):}">top</a> :
     * for crumbs:

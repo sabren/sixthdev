@@ -1,5 +1,4 @@
-#print "content-type: text/plain"
-#print ""
+#print "content-type: text/plain\n\n"
 #import sys; sys.stderr = sys.stdout
 
 import zikeshop, weblib

@@ -35,9 +35,9 @@ h1 {
   <tr bgcolor="#00FF00"> 
     <td width="568" colspan="8"><font
        face="Verdana, Arial, Helvetica, sans-serif" size="2">
-       <a href="index.py?action=lst_category">categories</a> |
-       <a href="index.py?action=lst_product">products</a> |
-       <a href="index.py?action=lst_sale">sales</a> |
+       <a href="index.py?action=list&what=category">categories</a> |
+       <a href="index.py?action=list&what=product">products</a> |
+       <a href="index.py?action=list&what=sale">sales</a> |
        <a href="index.py?action=inventory">inventory</a> |
        affiliates |
        reports |
