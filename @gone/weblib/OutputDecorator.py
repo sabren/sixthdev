@@ -79,7 +79,7 @@ class OutputDecorator(object):
             res+= '<b>session data:</b><br>\n'
             res+= '<ul>\n'
             for item in self.eng.globals["SESS"].keys():
-                res+= '<li>', item, ': '
+                res+= '<li>%s: ' % item
                 try:
                    res+= self.eng.globals["SESS"][item]
                 except:
