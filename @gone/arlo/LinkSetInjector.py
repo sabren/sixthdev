@@ -19,7 +19,7 @@ class LinkSetInjector:
         name: the attribute name that was getattr'd
         """
         if name == self.atr:
-            table = self.clerk.classToTable(self.fclass)
+            table = self.clerk.schema.tableForClass(self.fclass)
             for row in self.clerk.storage.match(table, **{self.fkey:box.ID}):
                 obj = self.clerk.rowToInstance(row, self.fclass)
                 getattr(box.private, self.atr) << obj

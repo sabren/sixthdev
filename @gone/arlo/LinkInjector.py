@@ -18,20 +18,38 @@ class LinkInjector:
         self.fclass = fclass
 
     def inject(self, stub, name):
-        if name != "ID":
+        """
+        This injects data into the stub.
+
+        WARNING: It replaces the entire .private
+        object with a fresh instance, which means any
+        state information will disappear. That is why
+        it's imperative that you call .notifyInjectors()
+        before manipulating .private in your Strongbox.
+
+        However, it does preserve observers and
+        any other injectors attached to the stub.
+        """
+        if name == "ID":
+            pass # stubs have ID, so no need to load
+        else:
+            old = stub.private
+
+            # we call fetch so we get stubs for all the
+            # new object's dependents
             data = self.clerk.fetch(self.fclass, self.fID)
-            ## can't just call stub.update() because it
-            ## was trying to assign linksets, which raises
-            ## an AttributeError
-            #
-            # @TODO: I'm not sure I believe that.
-            # is this a good place for a memento pattern?
-            #
-            # ah.. we don't want fetch... we want to get
-            # a memento from the database... no wonder.
-            #
-            for name, attr in stub.__attrs__.items():
-                ## @TODO: this doesn't seem very object-oriented. :/
-                if type(attr) != strongbox.linkset:
-                    setattr(stub, name, getattr(data.private, name))
+
+            # inject the data:
+            stub.private = data.private
+
+            # that wiped out pretty much everything,
+            # but just in case, we'll preserve observers:
+            stub.private.observers.extend(old.observers)
+            
+            # and injectors, even though we should be the only one:
+            stub.private.injectors.extend(old.injectors)
+
+            # since we might have observers, we'll
+            # let them know:
+            stub.notifyObservers("inject", "inject")
             stub.removeInjector(self.inject)

@@ -1,9 +1,67 @@
 import unittest
 from strongbox import *
-from arlo import Clerk
+from arlo import Clerk, Schema
 from storage import MockStorage
 
 class _regression_Test(unittest.TestCase):
+
+    def test_disappearing_events(self):
+        """
+        This bug came from duckbill. A subscription
+        would post events to its account, and then
+        when it showed the statements the new events
+        would be the only ones to show up - even though
+        there were still others in the database.
+
+        In other words, the injector wasn't working.
+
+        Turns out the problem was that the sub.account
+        stub didn't have injectors on IT'S dependent
+        objects. That's why I now replace .private
+        in LinkInjector.inject()
+        """
+        class Evt(Strongbox):
+            ID = attr(long)
+            acc = link(forward)
+        class Sub(Strongbox):
+            ID = attr(long)
+            acc = link(forward)
+        class Acc(Strongbox):
+            ID = attr(long)
+            subs = linkset(Sub, "acc")
+            evts = linkset(Evt, "acc")
+        Evt.acc.type = Acc
+        Sub.acc.type = Acc
+        schema = Schema({
+            Evt:"evt",
+            Sub:"sub",
+            Acc:"acc",
+            Evt.acc: "accID",
+            Sub.acc: "accID",
+        })
+        st = MockStorage()
+        c1 = Clerk(st, schema)
+
+        # store an account with two events and one sub:
+        a = Acc()
+        a.evts << Evt()
+        a.evts << Evt()
+        a.subs << Sub()
+        c1.store(a)
+
+        # new clerk, new cache:
+        c2 = Clerk(st, schema)
+
+        # add more events while s.acc is a stub:
+        s = c2.fetch(Sub, ID=1)
+        s.acc.evts << Evt()
+        c2.store(s)        
+        a = c2.fetch(Acc, ID=1)
+
+        # we should now have all three events,
+        # but we were getting only the third one:
+        assert len(a.evts) == 3, a.evts
+    
 
     def test_complex_recursion(self):
         """
@@ -24,8 +82,8 @@ class _regression_Test(unittest.TestCase):
         class User(Strongbox):
             ID = attr(long)
             username = attr(str)
-            domains = linkset(forward,None)
-            sites = linkset(forward,None)
+            domains = linkset(forward,"user")
+            sites = linkset(forward,"user")
         class Domain(Strongbox):
             ID = attr(long)
             user = link(User)
@@ -37,18 +95,16 @@ class _regression_Test(unittest.TestCase):
             domain = link(Domain)
         User.domains.type = Domain
         User.sites.type = Site
-        Domain.__attrs__["site"].type = Site
-        dbMap = {
+        Domain.site.type = Site
+        dbMap = Schema({
             User:"user",
-            User.domains: (Domain, "userID"),
-            User.sites: (Site, "userID"),
             Domain:"domain",
-            Domain.user: (User, "userID"),
-            Domain.site: (Site, "siteID"),
+            Domain.user: "userID",
+            Domain.site: "siteID",
             Site:"site",
-            Site.user: (User, "userID"),
-            Site.domain: (Domain, "domainID"),
-            } 
+            Site.user: "userID",
+            Site.domain: "domainID",
+        })
        
         clerk = Clerk(MockStorage(), dbMap)
         u = clerk.store(User(username="ftempy"))
@@ -59,9 +115,8 @@ class _regression_Test(unittest.TestCase):
 
         # the bug was here: it only happened if User had .domains
         # I think because it was a linkset, and the linkset had
-        # an injector. Fixed by breaking the test for
-        # hasInjectors out of an "and" and into the body of the
-        # if block, in Clerk.store()
+        # an injector. Fixed by inlining the injector test into
+        # Clekr.store:
         assert d.user, "didn't follow link after fetch"
         assert d.user.ID == u.ID
 

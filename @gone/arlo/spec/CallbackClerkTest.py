@@ -1,7 +1,7 @@
 
 from strongbox import *
 from storage import MockStorage
-from arlo import CallbackClerk
+from arlo import CallbackClerk, Schema
 import unittest
 
 
@@ -17,7 +17,12 @@ class CallbackClerkTest(unittest.TestCase):
 
     def test_onStore(self):
         queue = []
-        clerk = CallbackClerk(MockStorage())
+        schema = Schema({
+            Thing: "thing",
+            OtherThing: "other",
+        })
+            
+        clerk = CallbackClerk(MockStorage(), schema)
         clerk.onStore(Thing, queue.append)
         
         clerk.store(Thing(x="a"))

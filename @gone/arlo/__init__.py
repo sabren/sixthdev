@@ -8,8 +8,8 @@ from LinkSetInjector import *
 from Clerk import *
 from CallbackClerk import *
 
-def MockClerk(dbmap={}):
+def MockClerk(dbmap=None):
     from storage import MockStorage
-    return Clerk(MockStorage(),dbmap)
+    return Clerk(MockStorage(), dbmap or AutoSchema())
 
 

@@ -16,8 +16,8 @@ class CallbackClerk(Clerk):
         self._callbacks.setdefault(klass,[])
         self._callbacks[klass].append(dowhat)
         
-    def store(self, thing, _othercols={}):
-        thing = super(CallbackClerk, self).store(thing, _othercols)
+    def store(self, thing):
+        thing = super(CallbackClerk, self).store(thing)
         klass = thing.__class__
         for callback in self._callbacks.get(klass, []):
             callback(thing)

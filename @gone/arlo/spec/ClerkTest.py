@@ -1,5 +1,5 @@
 
-from arlo import Clerk
+from arlo import Clerk, Schema
 from storage import MockStorage
 from strongbox import Strongbox, attr, link, linkset, forward
 import unittest
@@ -23,11 +23,13 @@ class ClerkTest(unittest.TestCase):
 
     def setUp(self):
         self.storage = MockStorage()
-        self.clerk = Clerk(self.storage)
-        # @TODO: figure out how to let me use Record.next here..
-        self.clerk.dbmap[Record.next] = (Record, 'nextID')
-        self.clerk.dbmap[Node.kids] = (Node, 'parentID')
-        self.clerk.dbmap[Node.parent] = (Node, 'parentID')
+        schema = Schema({
+            Node: "Node",
+            Node.parent: "parentID",
+            Record: "Record",
+            Record.next: "nextID",
+        })
+        self.clerk = Clerk(self.storage, schema)
 
 
     def test_store(self):
@@ -76,12 +78,10 @@ class ClerkTest(unittest.TestCase):
 
     def test_store_linksets(self):
         n1 = Node(data="a")
-        #@TODO: a Bidirectional LinkSets should do this for me:
-        (n1.kids << Node(data="aa")).parent = n1
-        (n1.kids << Node(data="ab")).parent = n1
-        (n1.kids[1].kids << Node(data="aba")).parent = n1.kids[1]
+        n1.kids << Node(data="aa")
+        n1.kids << Node(data="ab")
+        n1.kids[1].kids << Node(data="aba")
         self.clerk.store(n1)
-        del n1
         
         n = self.clerk.fetch(Node, data="a")
         assert n.ID == 1, "didn't save parent of linkset first!"
@@ -89,6 +89,8 @@ class ClerkTest(unittest.TestCase):
         assert n.kids[0].data=="aa", "didn't store link correctly"
         assert n.kids[1].data=="ab", "didn't store link correctly"
         assert n.kids[1].kids[0].data=="aba", "didn't store link correctly"
+        assert n.kids[0].parent is n
+        assert n.kids[1].parent is n
 
         n.kids[1].parent=None
         n.kids.remove(n.kids[1])

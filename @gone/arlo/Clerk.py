@@ -14,6 +14,95 @@ def getSlotsOfType(klass, t):
             yield (slot, attr)
 
 
+class BoxInspector(object):
+    def __init__(self, box):
+        self.box = box
+    def plainValues(self):
+        """
+        returns a dict of name:value pairs
+        with one enty per plain attribute
+        """
+        res = {}
+        for item in self.plainAttributes():
+            res[item] = getattr(self.box, item)
+        return res
+    def plainAttributes(self):
+        """
+        returns a list of plain attribute
+        names  on the box:  Attributes, but not
+        links, linksets, or virtual properties
+        """
+        return [
+            name
+            for (name,value) in self.box.__attrs__.items()
+            if type(value) == attr
+        ]
+    def linkNames(self):
+        return getSlotsOfType(self.box.__class__, link)
+    
+
+class Schema(object):
+    def __init__(self, dbmap=None):
+        """
+        optionally takes a dict that maps
+        strongbox.*Box classes to tables
+        and strongbox.Link instances to 
+        columns
+        """
+        self.dbmap = {}
+        if dbmap:
+            self.dbmap.update(dbmap)
+
+    # these two are given explictly:
+    def tableForClass(self, klass):
+        return self.dbmap[klass]
+    def columnForLink(self, ln):
+        return self.dbmap[ln]
+
+    # the rest are inferred:
+    def tableForLink(self, ln):
+        return self.tableForClass(ln.type)
+    def tableForLinkSet(self, ls):
+        return self.tableForClass(ls.type)
+    def columnForLinkSet(self, ls):
+        return self.columnForLink(getattr(ls.type, ls.back))
+
+
+## class AutoSchema(object): # @TODO: make this class
+##     """
+##     Automatically maps objects to tables,
+##     and Links to foreign key names.
+##     """
+##     def __getitem__(self, item):
+##         if isinstance(item, link):
+##             return item.type, item.__name__ + "ID"
+##         elif isinstance(item, linkset):
+##             assert item.back, "no .back found for %s.%s" \
+##                    % (item.__owner__.__name__ , item.__name__)
+##             return item.back.__name__ + "ID"
+##         else:
+##             return item.__name__
+
+## @TODO: need to put item.__name__ on links
+## ... also see if the keyerror throws the
+## classname so I don't have to do "no mapping found for ..."
+        
+##     def _unmap_class(self, klass):
+##         if klass in self:
+##             return self[klass]
+##         else:
+##             return klass.__name__
+
+##     def _unmap_link(self, klass, lnk, name):
+##         try:
+##             return self[lnk]
+##         except KeyError:
+##             raise ClerkError, "no mapping found for %s.%s" \
+##                   % (klass.__name__, name)
+    
+        
+    
+
 class Clerk(object):
     __ver__="$Id$"
     """
@@ -24,38 +113,47 @@ class Clerk(object):
     Constructor is: Clerk(storage) or Clerk(storage, dbmap)
     where dbmap is a dictionary mapping classes to table names.
     """
-   
-    def __init__(self, storage, dbmap=None):
+
+    def __init__(self, storage, schema):
         self.storage = storage
-        self.dbmap = dbmap or {}
-        self._memo = {} # used so we get the same object on multiple fetch
+        self.schema = schema
+        
+        # so we always return same instance for same row:
+        # @TODO: WeakValueDictionary() doesn't work with strongbox. Why?!
+        self.cache = {} 
 
     ## public interface ##############################################
         
-    def store(self, obj, _others={}):
+    def store(self, obj):
         # we do this the first time to prevent recursion
         obj.private.isDirty = 0
+
+        insp = BoxInspector(obj)
                 
-        d = self._object_attrs_as_dict(obj)
-        d.update(_others)
+        vals = insp.plainValues()
         klass = obj.__class__
-        tablename = self._unmap_class(klass)
+
+##         print
+##         print "storing %s" % obj.__class__.__name__
+##         print "1: %s" % vals.keys()
 
         # we need to save links first, because we depend on them:
-        for name, lnk in getSlotsOfType(klass,link):
-            fclass, column = self._unmap_link(klass, lnk, name)
+        for name, lnk in insp.linkNames():
+            column = self.schema.columnForLink(lnk)
             ref = getattr(obj, name)
             if (ref):
                 if ref.private.isDirty:
                     ref = self.store(ref)
-                d[column] = ref.ID
+                vals[column] = ref.ID
             else:
-                d[column] = 0
+                vals[column] = 0
+
+##         print "2. %s" % vals.keys()
 
         # now we update obj because of db-generated values
         # (such as autonumbers or timestamps)
         if hasattr(obj, "ID"): old_id = obj.ID
-        data_from_db = self.storage.store(tablename, **d)
+        data_from_db = self.storage.store(self.schema.tableForClass(klass), **vals)
         relevant_columns = self._attr_columns(klass, data_from_db)
         obj.update(**relevant_columns)
         id_has_changed = hasattr(obj,"ID") and (obj.ID != old_id)
@@ -68,32 +166,32 @@ class Clerk(object):
         obj.private.isDirty = 0
 
         # linkSETS, on the other hand, depend on us, so they go last:
-        for name, lnk in getSlotsOfType(klass,linkset):
-            fclass, column = self._unmap_link(klass, lnk, name)
+        for name, ls in getSlotsOfType(klass,linkset):
+            column = self.schema.columnForLinkSet(ls)
             for item in getattr(obj.private, name):
                 if id_has_changed or item.private.isDirty:
-                    self.store(item, _others={column:obj.ID})
+                    assert getattr(item, ls.back) is obj
+                    self.store(item)
 
-        self._make_memo(obj)
+        self._makeMemo(obj)
         return obj
 
-    def classToTable(self, klass):
-        return self._unmap_class(klass)
 
     def rowToInstance(self, row, klass):
         attrs, othercols = self._attr_and_other_columns(klass, row)
         obj = self._get_memo(klass, attrs.get("ID"))
         if not obj:
             obj = klass(**attrs)
-            self._add_injectors(obj, othercols)
+            self.addInjectors(obj, othercols)
             obj.private.isDirty = 0
-            self._make_memo(obj)
+            self._makeMemo(obj)
         return obj
 
 
     def match(self, klass, *args, **kwargs):
         return [self.rowToInstance(row, klass)
-                for row in self.storage.match(self.classToTable(klass), *args, **kwargs)]
+                for row in self.storage.match(self.schema.tableForClass(klass),
+                                              *args, **kwargs)]
    
     def fetch(self, klass, __ID__=None, **kw):
         if __ID__:
@@ -109,45 +207,29 @@ class Clerk(object):
         return res[0]
 
     def delete(self, klass, ID):
-        self.storage.delete(self._unmap_class(klass), ID)
+        self.storage.delete(self.schema.tableForClass(klass), ID)
         return None
-
-
-    ## @TODO: are these two methods ever used?
-
-    def fetch_or_new(self, klass, ID):
-        if ID:
-            return self.fetch(klass, ID)
-        else:
-            return klass()
-
-    def upsert(self, klass, ID, **vals):
-        """
-        update or insert a single row...
-        """
-        obj = self.fetch_or_new(klass, ID)
-        obj.update(**vals)
-        return self.store(obj)
 
 
     ### private stuff ###############################################
 
     def _get_memo(self, klass, key):
         uid = (klass, key)
-        return self._memo.get(uid)
+        return self.cache.get(uid)
 
-    def _make_memo(self, obj):
+    def _makeMemo(self, obj):
         if hasattr(obj, "ID"):
-            self._memo[(obj.__class__, obj.ID)]=obj
+            self.cache[(obj.__class__, obj.ID)]=obj
         else:
             raise Warning("couldn't memo %s because it had no ID attribute" % obj)
 
 
-    def _add_injectors(self, obj, othercols):
+    def addInjectors(self, obj, othercols):
         klass = obj.__class__
         ## linkinjectors:
         for name,lnk in getSlotsOfType(klass,link):
-            fclass, column = self._unmap_link(klass, lnk, name)
+            fclass = lnk.type
+            column = self.schema.columnForLink(lnk)
             fID = othercols.get(column)
             if fID:
                 stub = fclass(ID = fID)
@@ -156,34 +238,14 @@ class Clerk(object):
                 stub.addInjector(LinkInjector(self, fclass, fID).inject)
 
         ## linksetinjectors:
-        for name,lnk in getSlotsOfType(klass,linkset):
-            fclass, column = self._unmap_link(klass, lnk, name)
+        for name,ls in getSlotsOfType(klass,linkset):
+            fclass = ls.type
+            column = self.schema.columnForLinkSet(ls)
             #@TODO: there can just be one LSI instance per linkset attribute
             #(since it no longer keeps its own reference to the object)
             obj.addInjector(LinkSetInjector(name, self, fclass, column).inject)
 
 
-    def _unmap_class(self, klass):
-        if klass in self.dbmap:
-            return self.dbmap[klass]
-        else:
-            return klass.__name__
-
-    def _object_attrs_as_dict(self, obj):
-        #@TODO: should this be on all strongboxen?
-        d = {}
-        for attrName, attrObject in obj.__attrs__.items():
-            # we only want attrs, not links or linksets:
-            if type(attrObject) == attr:
-                d[attrName] = getattr(obj, attrName)
-        return d
-        
-    def _unmap_link(self, klass, lnk, name):
-        try:
-            return self.dbmap[lnk]
-        except KeyError:
-            raise ClerkError, "no mapping found for %s.%s" \
-                  % (klass.__name__, name)
 
     def _attr_columns(self, klass, rec):
         return self._attr_and_other_columns(klass, rec)[0]
@@ -197,26 +259,3 @@ class Clerk(object):
                 others[item]=rec[item]
         return attrs, others
 
-    def _hasInjectors(self, thing):
-        """
-        if a thing has injectors attached to it, it
-        hasn't been loaded from the database yet, so
-        it probably hasn't changed, and thus we don't
-        need to update it.    
-        """
-        if thing is None: return 0
-        if not hasattr(thing, "private"): return 0
-        for item in thing.private.observers:
-            # @TODO: this originally said (LinkInjector, item)
-            # @TODO: which could not EVER have worked. Why did it
-            # @TODO: take months before this threw an error??!?
-            try:
-                if isinstance(item[0], LinkInjector):
-                    return 1
-                if isinstance(item[0], LinkSetInjector):
-                    return 1
-            except Exception, e:
-                raise Exception, "'%s' is invalid injector(??): %s" \
-                      % (item[0], e)
-        return 0
-        
