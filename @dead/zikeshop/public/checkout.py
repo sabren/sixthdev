@@ -42,8 +42,10 @@ class CheckoutApp(zikeshop.PublicApp):
         if self.input.get('shipToBilling'):
             self.data['ship_addressID']=self.data['bill_addressID']
             
-    def act_get_billing(self):
-        import zebra
+    def act_get_billing(self,refresh=1):
+        import zebra, zdc, zikebase
+        if refresh:
+            self.consult(zdc.ObjectView(zikebase.Contact()))
         zebra.show('frm_billing', self.model)
 
     def act_set_billing(self):
@@ -54,8 +56,10 @@ class CheckoutApp(zikeshop.PublicApp):
         else:
             self.next='get_shipping'
 
-    def act_get_shipping(self):
-        import zebra
+    def act_get_shipping(self, refresh=1):
+        import zebra, zdc, zikebase
+        if refresh:
+            self.consult(zdc.ObjectView(zikebase.Contact()))
         zebra.show('frm_shipping', self.model)
 
     def act_set_shipping(self):
@@ -66,19 +70,32 @@ class CheckoutApp(zikeshop.PublicApp):
         import zikebase
         zikebase.load("Contact")
         context = self.input.get('context','bill')
+        errs = []
+        required=[
+            ('fname','first name'),
+            ('lname','last name'),
+            ('email','email'),
+            ('address1','address'),
+            ('city','city'),
+            ('stateCD','state'),
+            ('postal','ZIP/postal code')]
+        for item in required:
+            if self.input.get(item[0],"")=="":
+                errs.append("The '%s' field is required." % item[1])
         try:
             ed = zikebase.ObjectEditor(zikebase.Contact)
             ed.do("update")
+            #@TODO: should let you edit data already there (eg, BACK button)
             ed.object.save()
         except ValueError, err:
             errorMsg = ""
-            for item in err[0]:
-                errorMsg = errorMsg + item + "\n"
-            self.model["error"] = errorMsg
+            errs = errs + err[0]
+        if errs:
+            self.model["errors"] = map(lambda e: {"error":e}, errs)
             if context=='bill':
-                self.act_get_billing()
+                self.act_get_billing(0) # don't refresh data
             else:
-                self.act_get_shipping()
+                self.act_get_shipping(0) # don't refresh data
         else:
             if context=='bill':
                 self.data['bill_addressID']=ed.object.ID
