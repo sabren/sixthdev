@@ -43,6 +43,12 @@ class ResponseTest(unittest.TestCase):
         """
         if the first char of a redirect is ?, should redirect to
         the current url with the querystring.
-        """
+
+        BUT: this is actually handled by Engine, because Response
+        doesn't know anything at all about what page we're looking
+        at. That info is stored in the Request.
+
+        See EngineTest.test_redirectToQuerystring() for details.       
+        """       
         self.assertRaises(Finished, self.response.redirect, "?a=b")
 

@@ -121,9 +121,6 @@ class EngineTest(unittest.TestCase):
         assert eng.result == eng.REDIRECT, \
                "engine.result doesn't return REDIRECT on redirect."
 
-
-
-
     ## CGI-SPECIFIC (needs to move) ############################
 
     ## @TODO: this is really a test of Request
@@ -188,3 +185,12 @@ class EngineTest(unittest.TestCase):
         eng = Engine(script=open("spec/pathinfo.app"))
         assert eng.request.pathInfo == "spec/pathinfo.app", \
                "Engine doesn't set .pathInfo correctly for open()ed scripts."
+
+
+    def test_redirectToQuerystring(self):
+        eng = Engine("import weblib; raise weblib.Redirect('?x=1')",
+                     request=RequestBuilder().build(path="test.app"))
+        eng.run()
+        assert ('Location', 'test.app?x=1') in eng.response.headers
+
+    

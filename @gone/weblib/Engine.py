@@ -95,12 +95,12 @@ class Engine(object):
             self.result = self.FAILURE
             self.error = e
         except weblib.Redirect, e:
-            #@TODO: get rid of weblib.Redirect (gotta fix App first)
             self.result = self.REDIRECT
             try:
                 where = str(e)
                 if where[0]=="?":
-                    raise Exception("can't redirect to ?xxx (%s)" % where)
+                    # redirect to querystring goes to current page:
+                    where = self.request.path + where
                 self.response.redirect(where)
             except weblib.Finished:
                 pass
