@@ -14,5 +14,6 @@ class Clerk:
         return klass(self.store, "isclerk", **where)
 
     def save(self, instance):
-        pass
+        # just delegate for now:
+        instance.save()
 
