@@ -25,14 +25,14 @@ tpls = [
 which = weblib.request.get("which")
 
 zebra.show("dsp_head")
-print '<p align="center"><form action="templates.py" method="GET">'
-print '<b>Choose a template to edit:</b>'
+print '<form action="templates.py" method="GET">'
+print 'Choose a template to edit:'
 print '<select name="which">'
 for tpl in tpls:
     print '<option%s>%s</option>' % ((""," SELECTED")[tpl==which], tpl)
 print '</select>'
 print '<input type="submit" value="go">'
-print '</form></p>'
+print '</form>'
 
 
 

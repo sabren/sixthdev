@@ -1,7 +1,9 @@
 *# $Id$
 
 <b>categories</b>&nbsp;&nbsp;&nbsp;
-<b><a href="index.py?action=create&what=category">[add new]</a></b><br>
+<a class="action" href="index.py?action=create&what=category">[add new]</a>
+
+<br>&nbsp;<br>
 
 * for categories:
     <A HREF="index.py?action=edit&what=category&ID={:ID:}">{:path:}</a><br>

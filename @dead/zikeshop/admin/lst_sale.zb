@@ -11,20 +11,18 @@
 <input type="hidden" name="what" value="sale">
 <input type="hidden" name="is_search" value="1">
 <table border="0" cellspacing="0" cellpadding="2">
-  <tr><th align="left" colspan="2" style="color:white; background:#666">
-      Search
-      </th></tr>
+  <tr><th colspan="2">Search</th></tr>
   <!-- date -->
-  <tr><td bgcolor="#eeeeee">dates (y/m/d)</td>
-      <td bgcolor="#eeeeee">
+  <tr><td class="even">dates (y/m/d)</td>
+      <td class="even">
       <input type="text" name="dmin" size="10" maxlength="10" 
              value="{:dmin:}">
       <input type="text" name="dmax" size="10" maxlength="10"
              value="{:dmax:}">
   </td></tr>
   <!-- name -->
-  <tr><td bgcolor="#eeeeee">customer name:</td>
-      <td bgcolor="#eeeeee">
+  <tr><td class="even">customer name:</td>
+      <td class="even">
          <input type="text" name="name" value="{:name:}"></td></tr>
 
 *############### AFFILIATE STUFF @TODO: (later) #################
@@ -75,21 +73,28 @@ Jump to order #: <input type="text" name="ID" size="5">
 * el:
     <h2>search results</h2>
 
-
+* exec:
+    toggle = 1
 * for sales:
     * head:
-        <table border="1">
+        <table border="0" cellpadding="2" cellspacing="0" width="100%"
         <tr><th>ID</th>
             <th>Date</th>
             <th align="left">customer</th>
             <th>subtotal</th>
             <th>total</th></tr>
-    <tr><td><a href="index.py?action=show&what=sale&ID={:ID:}">{:ID:}</a></td>
-        <td>{:tsSold:}</td>
-        <td>{:lname:}, {:fname:}</td>
-        <td>{:subtotal:}</td>
-        <td>{:total:}</tr>
+    * exec:
+        toggle = not toggle
+        style = ("even", "odd")[toggle]
+    <tr><td class="{:style:}">
+            <a href="index.py?action=show&what=sale&ID={:ID:}">{:ID:}</a></td>
+        <td class="{:style:}">{:tsSold:}</td>
+        <td class="{:style:}">{:lname:}, {:fname:}</td>
+        <td class="{:style:}">{:subtotal:}</td>
+        <td class="{:style:}">{:total:}</tr>
     * foot:
         </table>
+        <br>&nbsp;<br>
 * none:
     No sales found.
+

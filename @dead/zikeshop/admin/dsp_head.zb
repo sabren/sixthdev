@@ -11,13 +11,27 @@ h1 {
   font-size: 24pt; font-weight: normal;
   padding-bottom: 2px
   }
+body, td, th, p {
+    font-family: verdana, arial;
+    font-size: 10pt;
+  }
+
+th { background: black; color: white; text-align: left }
+
+a.tool { text-decoration: none;  color:black }
+a.tool:hover { color: #336633; }
+
+a.action { text-decoration: none; font-weight:bold; color: blue; }
+
+td.even { background-color: #cccccc }
+td.odd { background-color: #ccffcc }
 -->
 </style>
 </head>
 <body bgcolor="#666666">
 <table width="600" border="0" align="center" cellspacing="0" cellpadding="2">
   <tr bgcolor="#000000"> 
-    <td colspan="4"> <font color="#FFFFFF" face="Impact" size="6">&nbsp;Zike<font color="#00FF66">$</font>hop</font><font color="#FFFFFF">
+    <td colspan="4"> <font color="#FFFFFF" face="Impact" size="6">&nbsp;Zike<font color="#00FF00">$</font>hop</font><font color="#FFFFFF">
       </font></td>
     <td valign="top" colspan="4" align="right">
       <font size="3" face="arial black">
@@ -33,13 +47,16 @@ h1 {
       </font></td>
   </tr>
   <tr bgcolor="#00FF00"> 
-    <td width="568" colspan="8"><font
-       face="Verdana, Arial, Helvetica, sans-serif" size="2">
-       <a href="index.py?action=list&what=category">categories</a> |
-       <a href="index.py?action=list&what=product">products</a> |
-       <a href="index.py?action=list&what=sale">sales</a> |
-       <a href="templates.py">templates</a> |
-       </font></td>
+    <td style="padding-left: 5px" colspan="8">
+       <a class="tool"
+          href="index.py?action=list&what=category">categories</a> |
+       <a class="tool"
+          href="index.py?action=list&what=product">products</a> |
+       <a class="tool"
+          href="index.py?action=list&what=sale">sales</a> |
+       <a class="tool"
+          href="templates.py">templates</a> |
+    </td>
   </tr>
   <tr bgcolor="#FFFFFF"> 
-    <td colspan="8"> 
+    <td colspan="8" style="padding: 5px">

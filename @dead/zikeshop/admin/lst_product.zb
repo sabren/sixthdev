@@ -7,7 +7,7 @@
 *# a dropdown for selecting which product to show...
 *# @TODO: break this off into a separate file?
 <form action="index.py" METHOD="get">
-show products in...
+show products in... &nbsp;
 *# @TODO: UGH! clean this up!
 * exec:
     # problem is with keyword (blank)
@@ -15,30 +15,36 @@ show products in...
     
 <input type="hidden" name="action" value="list">
 <input type="hidden" name="what" value="product">
-<input type="submit" value="go">
-
-
-*# by default, we show recent products..
-* if nodeID is None:
-    <b>recent products</b>
-    
-*# otherwise, show a link...
-* el:
-    &nbsp;
-    <a href="index.py?action=lst_product">[recent products]</a>
-    <br>&nbsp;<br>
-
-    * if nodeID == 0:
-        <b>products without a category</b>
-    * el:
-        <b>products in category [{:path:}]</b>
+&nbsp;<input style="padding: 0px" type="submit" value="go">
 
 *# link to add a product
-&nbsp;&nbsp;<a href="index.py?action=create&what=product">[add]</a><br>
+&nbsp;&nbsp;<a class="action" href="index.py?action=create&what=product">[add new]</a>
+
+<br>&nbsp;<br>
+
+*# @TODO: put recent products back in!
+*# by default, we show recent products..
+*# if nodeID is None:
+*#  <b>recent products</b>
+*#    
+*# otherwise, show a link...
+*#* el:
+*#    &nbsp;
+*#    <a href="index.py?action=lst_product">[recent products]</a>
+*#    <br>&nbsp;<br>
+
+* if nodeID == 0:
+    <b>products without a category:</b>
+* el:
+    <b>products in {:path:}:</b>
+
+<br>&nbsp<br>
 
 *# show the products:
+<table border="0" cellspacing="0" cellpadding="2">
 * for products:
-    <A HREF="index.py?action=show&what=product&ID={:ID:}">{:code:}</a>
-    &nbsp;{:name:} <br>
-
+    <tr>
+    <td><A HREF="index.py?action=show&what=product&ID={:ID:}">{:code:}</a></td>
+    <td>{:name:}</td></tr>
+</table>
 </form>
