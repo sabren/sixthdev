@@ -38,6 +38,23 @@ class TableTestCase(unittest.TestCase):
         assert rec["fish"] == 'squid', \
                "table.getRecord doesn't return the correct record."
        
+    def check_select(self):       
+        for item in ["haddock", "lamprey", "stingray", "trout"]:
+            self.cur.execute("INSERT INTO test_fish (fish) VALUES ('%s')"
+                             % item)
+
+        recs = self.table.select()
+        assert len(recs) == 4, \
+               "wrong records returned on select all: %s" % len(recs)
+
+        recs = self.table.select("fish <> 'trout'")
+        assert len(recs) == 3, \
+               "wrong records returned after SQL: %s" % len(recs)
+
+        recs = self.table.select(fish="haddock")
+        assert len(recs) == 1, \
+               "wrong records returned after keywords: %s" % len(recs)
+
 
     def tearDown(self):
         del self.cur

@@ -33,31 +33,58 @@ class Table(zdc.Object):
     def new(self):
         return zdc.Record(self)
 
+    def select(self, wclause=None, **wdict):
+        """
+        returns a list of records.. matching either a where
+        clause (if supported) or dictionary
+        """
+        ## build a where clause
+        if not ((wclause is None) ^ (wdict=={})): # xor
+            ## no criteria specified: get it all..
+            where = ""
+        elif wdict:
+            ## keywords specified: search for 'em
+            for k in wdict.keys():
+                if not self.fields.has_key(k):
+                    raise "no field called ", k
+            where = self._whereClause(wdict)
+        else:
+            ## sql where clause specified
+            where = " WHERE " + wclause
+
+        ## run the query..
+        sql = "SELECT * FROM " + self.name + where
+        cur = self.dbc.cursor()
+        cur.execute(sql)
+
+        ## loop through and build records..
+        res = []
+        for row in cur.fetchall():
+            rec = zdc.Record(self)
+            rec.isNew = 0 #@TODO: should happen by default, if i pass data in
+            for f in range(len(row)):
+                # we do this to get rid of the L at the end of longs:
+                if type(row[f]) == type(1L):
+                    rec[self.fields[f].name]=int(row[f])
+                else:
+                    rec[self.fields[f].name]=row[f]
+            res.append(rec)
+        return res
+
+
     def fetch(self, key):
         """
         fetch a single Record, given the key.
         """
         if key is None:
             raise TypeError, "argument to fetch() must be a primary key value"
-        rec = zdc.Record(self)
-        sql = "SELECT * FROM %s WHERE %s=%s" \
-              % (self.name, self.rowid,
-                 self._sqlQuote(self.fields[self.rowid], key))
-        cur = self.dbc.cursor()
-        cur.execute(sql)
-        row = cur.fetchone()
-        
-        if row is None:
-            raise LookupError, "record not found where" + `where`
-
-        for f in range(len(row)):
-            # we do this to get rid of the L at the end of longs:
-            if type(row[f]) == type(1L):
-                rec[self.fields[f].name]=int(row[f])
-            else:
-                rec[self.fields[f].name]=row[f]
-        rec.isNew = 0
-        return rec
+        recs = self.select("%s=%s" % (self.rowid, key))
+        if recs == []:
+            raise LookupError, "record not found for key %s" % key
+        elif len(recs) > 1:
+            raise LookupError, "mulitple records found for single key!!"
+        else:
+            return recs[0]
 
     def delete(self, key):
         sql = "DELETE FROM %s WHERE %s=%s" % (self.name, self.rowid, key)
@@ -166,30 +193,6 @@ class Table(zdc.Object):
             res = "'%s'" % res
         return res
 
-##     ## THIS WILL TURN INTO Table.select()
-##     def _fetch(self, **where):
-##         if not where:
-##             raise "don't know which record to fetch"
-##         else:
-##             for k in where.keys():
-##                 if not self.table.fields.has_key(k):
-##                     raise "no field called ", k
-
-##         self.isNew = 0
-##         sql = "SELECT * FROM " + self.table.name + self.table._whereClause(where)
-##         cur = self.table.dbc.cursor()
-##         cur.execute(sql)
-##         row = cur.fetchone()
-
-##         if row is None:
-##             raise LookupError, "record not found where" + `where`
-
-##         for f in range(len(row)):
-##             # we do this to get rid of the L at the end of longs:
-##             if type(row[f]) == type(1L):
-##                 self[self.table.fields[f].name]=int(row[f])
-##             else:
-##                 self[self.table.fields[f].name]=row[f]
 
 
 
