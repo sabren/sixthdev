@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+<doc>
+<title>Installing Zikeshop</title>
+
+<sec title="Zikeshop Components">
+   <p>Zikeshop requires the following components:</p>
+   <ul>
+     <li><a href="http://www.python.org/">Python</a> 2.0 
+          (1.52 should work, but may leak memory)</li>
+     <li><a href="http://www.mysql.com/">MySQL</a>
+          (other relational and nonrelational storage systems will work
+           if you write a driver...)</li>
+     <li><a href="http://www.dustman.net/andy/python/MySQLdb">MySQLdb</a> 
+          (win32 binary <a href="http://highqualdev.com">here</a>)</li>
+     <li><a href="http://www.pythonware.com/products/pil/index.htm">PIL</a>
+          (for generating thumbnails)</li>
+   </ul>
+
+   <p>Zikeshop itself consists of the following modules:</p>
+   <ul>
+     <li><b>weblib</b> 
+            (a high level wrapper for CGI)</li>
+     <li><b>zebra</b>
+            (a template system)</li>
+     <li><b>zdc</b> 
+            (an object oriented adaptor for databases)</li>
+     <li><b>zikebase</b>
+            (core web classes built using the libraries above)</li>
+     <li><b>zikeshop</b>
+            (the zikeshop-specific application and libraries)</li>
+   </ul>
+</sec>
+
+<sec title="Configuring the web server">
+  <p>Zikeshop is designed to run through the <code>weblib.cgi</code>
+     wrapper script (included with weblib). This script coordinates
+     persistent session handling, and provides an API for
+     communicating with the web server.</p>
+
+  <p>To use <code>weblib.cgi</code>, you need to tell your web server
+     to associate it with the <code>.py</code> extension. </p>
+
+  <sec title="configuring weblib.cgi under IIS">
+    <ul>
+    <li>In the Management Console, open the properties for the website
+       (or specific directories) that should use weblib.</li>
+    <li>On the "Home Directory" tab, click "Configuration..."</li>
+    <li>On the "App Mappings" tab of the Configuration Dialog, click "Add"</li>
+    <li>Fill in the fields as follows:
+       <ul>
+       <li><b>Executable</b> - the path to python, the path to 
+           <code>weblib.cgi</code>, and the string " %s %s".
+           eg: "<code>c:/python20/python.exe&amp;nbsp;c:/python/weblib/weblib.cgi&amp;nbsp;%s&amp;nbsp;%s</code>"</li>
+       <li><b>Extension</b> - "<code>.py</code>"</li>
+       <li><b>Method Exclusions</b> - this is really up to you, but
+           in general, exclude PUT and DELETE.</li>
+       </ul>
+    </li>
+    <li>Click "OK" on all of the open dialogs to save your changes.</li>
+    </ul>
+  </sec>
+
+  <sec title="configuring weblib.cgi under Apache">
+    <p>In a <code>.htacces</code> or top level apache config file,
+       add lines such as the following:</p>
+    <pre>
+    Action python-script /path/to/weblib.cgi
+    AddType python-script .py</pre>
+
+    <p>Also, be sure to update the <code>#!</code> line at the top of
+       <code>weblib.cgi</code> to use the correct python path.</p>
+  </sec>
+</sec>
+
+<sec title="Configuring MySQL">
+</sec>
+</doc>

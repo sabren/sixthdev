@@ -1,0 +1,6 @@
+/* stylesheet for zikeshop docs */
+body { font-family: arial, verdana; font-size: 10pt }
+h1, h2 { font-family: arial black; font-weight: normal }
+div.sec { margin-left: 25px }
+div.sec h2 { margin-left: -25px; color: #333333; font-size: 14pt; }
+div.sec div.sec h2 { color: #666666; font-size: 12pt; }
