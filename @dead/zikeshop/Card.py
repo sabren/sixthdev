@@ -24,6 +24,12 @@ class Card(zdc.RecordObject):
     def checkdigits(self, digits):
         return validate(digits)
 
+    def isExpired(self):
+        import time
+        # @TODO: does a card expire on the first or last of expiration month?
+        nowYear, nowMonth = time.localtime(time.time())[0:2]
+        return (nowYear, nowMonth) > (self.expYear, self.expMonth)
+
     def set_number(self, value):
         if self.checkdigits(value):
             self._data['number']=value
