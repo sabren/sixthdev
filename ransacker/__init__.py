@@ -6,6 +6,11 @@ $Id$
 from Index import *
 from WordHash import *
 
+from IdMap import *
+from MkIndex import *
+from AllMkIndex import *
+
+
 NEXTNUM = "\t:nextnum"
 
 
@@ -22,7 +27,9 @@ def strToIntList(str):
 
 
 def wordFreqs(text):
-    """Return a dict mapping words to frequencies"""
+    """
+    Return a dict mapping words to frequencies
+    """
     fd = {}
     for word in string.split(text):
         if fd.has_key(word):
@@ -32,7 +39,8 @@ def wordFreqs(text):
     return fd
 
 
-
 def uniqueWords(text):
-    """return a list of unique words in a text"""
+    """
+    return a list of unique words in a text
+    """
     return wordFreqs(text).keys()

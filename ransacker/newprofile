@@ -1,0 +1,34 @@
+#!/usr/bin/env python
+
+import ransacker, os, profile, sys, time
+now = time.asctime
+
+INDEX  = "spec/newprof"
+CLASS = ransacker.AllMkIndex
+FILE = "test/profile.this"
+
+# make sure we have a fresh index
+for ext in [".rki", ".rkw", ".rkp"]:
+    try:
+        os.unlink(INDEX + ext)
+    except:
+        pass
+
+
+txt = open(FILE).read()
+idx = CLASS(INDEX)
+
+
+print "START PASS1:", now()
+profile.run('idx.add("pass1", txt)')
+print "DONE:", now()
+
+# do it again, but with an existing word file
+del idx
+os.unlink(INDEX+".rki")
+idx = CLASS(INDEX)
+
+print "START PASS2:", now()
+profile.run('idx.add("pass2", txt)')
+print "DONE:", now()
+
