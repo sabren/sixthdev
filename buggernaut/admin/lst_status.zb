@@ -1,0 +1,6 @@
+<h1>status list</h1>
+[<a href="index.py?action=create&what=status">add new</a>]
+<ul>
+* for list:
+    <li><a href="index.py?action=edit&what=status&ID={:ID:}">{:label:}</a></li>
+</ul>
