@@ -1,14 +1,17 @@
+* exec:
+    from zebra.handy import xmlEncode
+
 <?xml version="1.0"?>
 <rss version="2.0" xmlns="http://backend.userland.com/rss2">
   <channel>
-    <title>{:title:}</title>
-    <link>{:url:}</link>
-    <description>{:description:}</description>
+    <title>{:xmlEncode(title):}</title>
+    <link>{:xmlEncode(url):}</link>
+    <description>{:xmlEncode(description):}</description>
     * for stories:
         <item>
-          <title>{:title:}</title>
-          <link>{:url:}</link>
-          <description>{:description:}</description>
+          <title>{:xmlEncode(title):}</title>
+          <link>{:xmlEncode(url):}</link>
+          <description>{:xmlEncode(description):}</description>
         </item>
   </channel>
 </rss>
