@@ -10,6 +10,13 @@ class Record(Strongbox):
     next = link(forward)
 Record.__attrs__["next"].type=Record
 
+class Node(Strongbox):
+    ID = attr(long)
+    data = attr(str)
+    parentID = attr(long)
+    kids = linkset(forward)
+Node.__attrs__["kids"].type=Node   
+
 
 class ClerkTest(unittest.TestCase):
 
@@ -18,6 +25,7 @@ class ClerkTest(unittest.TestCase):
         self.clerk = Clerk(self.storage)
         # @TODO: figure out how to let me use Record.next here..
         self.clerk.dbmap[Record.__attrs__["next"]] = (Record, 'nextID')
+        self.clerk.dbmap[Node.__attrs__["kids"]] = (Node, 'parentID')
 
 
     def check_store(self):
@@ -34,6 +42,33 @@ class ClerkTest(unittest.TestCase):
         r = self.clerk.fetch(Record, 1)
         r.val = "abc"
         self.clerk.store(r)
+
+    def check_store_link(self):
+        r = Record(val="a")
+        r.next = Record(val="b")
+
+        self.clerk.store(r)
+        del r
+        r = self.clerk.match(Record, val="a")[0]
+        assert r.ID == 2, "didn't save links first!"
+        assert r.next is not None, "didn't store the link"
+        assert r.next.val=="b", "didn't store link correctly"
+
+    def check_store_linksets(self):
+        n = Node(data="a")
+        n.kids << Node(data="aa")
+        n.kids << Node(data="ab")
+        n.kids[1].kids << Node(data="aba")
+
+        self.clerk.store(n)
+        del n
+        n = self.clerk.match(Node, data="a")[0]
+        assert n.ID == 1, "didn't save parent of linkset first!"
+        assert len(n.kids)== 2, "didn't store the linkset"
+        assert n.kids[0].data=="aa", "didn't store link correctly"
+        assert n.kids[1].data=="ab", "didn't store link correctly"
+        assert n.kids[1].kids[0].data=="aba", "didn't store link correctly"
+        
         
     def check_fetch(self):
         self.clerk.store(Record(val="howdy"))
@@ -61,16 +96,6 @@ class ClerkTest(unittest.TestCase):
 
 
     def check_linkset_injection(self):
-
-        class Node(Strongbox):
-            ID = attr(long)
-            data = attr(str)
-            parentID = attr(long)
-            kids = linkset(forward)
-        Node.__attrs__["kids"].type=Node
-
-        self.clerk.dbmap[Node.__attrs__["kids"]] = (Node, 'parentID')
-
         self.storage.store("Node", data="top", parentID=None)
         self.storage.store("Node", data="a",   parentID=1)
         self.storage.store("Node", data="a.a", parentID=2)

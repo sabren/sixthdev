@@ -20,16 +20,33 @@ class Clerk:
 
     ## public interface ##############################################
         
-    def store(self, obj):
+    def store(self, obj, _others={}):
         d = self._object_attrs_as_dict(obj)
+        d.update(_others)
         klass = obj.__class__
         tablename = self._unmap_class(klass)
+
+        # we need to save links first, because we depend on them:
+        for name, link in klass.__get_links__():
+            ref = getattr(obj, name)
+            if (ref) and (not self._hasInjectors(ref)):
+                robj = self.store(ref)
+                fclass, column = self._unmap_link(klass, link, name)
+                d[column] = robj.ID
 
         # now we update obj because of db-generated values
         # (such as autonumbers or timestamps)
         data_from_db = self.storage.store(tablename, **d)
         relevant_columns = self._attr_columns(klass, data_from_db)
         obj.update(**relevant_columns)
+
+        # linkSETS, on the other hand, depend on us, so they go last:
+        for name, link in klass.__get_linksets__():
+            refs = getattr(obj, name)
+            if not self._hasInjectors(refs):
+                fclass, column = self._unmap_link(klass, link, name)
+                for item in refs:
+                    self.store(item, _others={column:obj.ID})
         return obj
 
     def match(self, klass, **where):
@@ -114,62 +131,19 @@ class Clerk:
                 others[item]=rec[item]
         return attrs, others
 
-
-
-##### OLD STUFF - NO LONGER IMPLEMENTED ###############
-# @TODO: this is just here for reference until all tests pass
-
-    def new(self, klass):
-        raise NotImplementedError, "just use the constructor"
-##         if issubclass(klass, zdc.RecordObject):
-##             raise "zdc.RecordObject is deprecated"
-##         else:
-##             inst = klass()
-##             if hasattr(klass, "_links"):
-##                 raise "klass should not have _links!"
-##                 #for item in klass._links:
-##                 #    inst.__dict__[item]=IdxDict()
-##             return inst
-
-    def load(self, klass, **where):
-        raise NotImplementedError, "use fetch instead"
-##         assert where # (if no where clause, call new() instead)
-##         if issubclass(klass, zdc.RecordObject):
-##             raise "zdc.RecordObject is deprecated"
-##             return klass(self.storage, **where)
-
-    def select(self, klass, **wargs):
-        raise NotImplementedError #, "use match instead"
-##        return self.storage.select(self._unmap_class(klass), **wargs)
-
-    def save(self, obj):
-        raise NotImplementedError, "use store instead"
-##         # just delegate for now:
-##         if isinstance(obj, zdc.RecordObject):
-##             obj.save()
-##         else:
-##             #@TODO: put persistence here!
-##             raise NotImplementedError
-
-
-"""
-from duckbill.Customer:
-    def save(self):
-        super(Customer,self).save()
-        for acct in self.accounts:
-            acct.customerID = self.ID
-        self.accounts.save()
-
-from duckbill.Account:
-    def save(self):
-        super(Account, self).save()
-        self.events.save()
-        self.subscriptions.save()
-
-from duckbill.Subscription:
-    def save(self):
-        super(Subscription, self).save()
-        for e in self.events:
-            e.accountID = self.accountID
-        self.events.save()       
-"""
+    def _hasInjectors(self, thing):
+        """
+        if a thing has injectors attached to it, it
+        hasn't been loaded from the database yet, so
+        it probably hasn't changed, and thus we don't
+        need to update it.    
+        """
+        if thing is None: return 0
+        if not hasattr(thing, "private"): return 0
+        for item in thing.private.observers:
+            if isinstance(LinkInjector, item):
+                return 1
+            if isinstance(LinSetInjector, item):
+                return 1
+        return 0
+        
