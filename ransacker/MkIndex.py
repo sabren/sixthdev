@@ -21,19 +21,14 @@ class MkIndex(ransacker.Index):
             self.pages = ransacker.IdMap()
         self.index = self.db.getas("index[word:I,page:I,count:I]")        
         
-    def _remember(self, name, chunk, count):
-        self.index.append([self.words[chunk], self.pages[name], count])
+    def _storeFreq(self, name, word, count):
+        self.index.append([self.words[word], self.pages[name], count])
 
     def score(self, word):
-        """
-        return tuple of (page, count) matches (sort by relevance)
-        """
         res = self.index.select(word=self.words[word])
         res = res.sortrev([self.index.count], [self.index.count])
         return tuple([(self.pages[row.page], row.count) for row in res])
     
-    def match(self, word):
-        """
-        return tuple of pages that match (sort by relevance)
-        """
-        return tuple([x[0] for x in self.score(word)])
+
+    def contains(self, name):        
+        return self.pages.has_key(name)

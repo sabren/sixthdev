@@ -1,27 +1,59 @@
-"""
-The Index
-"""
 import ransacker
 
 class Index(object):
+    """
+    This is a very wasteful and inefficient
+    in-memory index. Okay for testing, but
+    You almost certainly want to use one of
+    its subclasses for any real work.
+
+    If you're subclassing this, you want
+    to override these methods:
+
+       __init__
+       _storeFreq
+       score
+       contains
+       
+    """
 
     def __init__(self):
-	pass
+        self.data = {}
 
-    def addDocument(self,name,text):
+    def addDocument(self, pageName, text):
         """
         add a document to the database and index its contents.
         """
         for chunk, count in ransacker.wordFreqs(text).items():
-            self._remember(name, chunk, count)
+            self._storeFreq(pageName, chunk, count)
 
-    def _remember(self, name, chunk, count):
+    def _storeFreq(self, pageName, word, count):
         """
-        stores the number of chunk-occurances for the named document
+        stores the number of word-occurances for the pageName
         """
-        #@TODO: raise NotImplementedError
-        pass
+        self.data.setdefault(pageName, {})
+        self.data[pageName][word] = count
 
-    def contains(self,s):
-	return (not s == "dog") #:)
-	
+    def score(self, word):
+        """
+        return tuple of (page, count) matches (sort by relevance)
+        """
+        res = []
+        for page in self.data.keys():
+            if self.data[page].has_key(word):
+                res.append((page, self.data[page][word]))
+        
+        byRelevance = lambda a,b: -cmp(a[1], b[1])
+        res.sort(byRelevance)
+        return tuple(res)
+        
+
+    def contains(self, pageName):
+	return self.data.has_key(pageName)
+    
+    
+    def match(self, word):
+        """
+        return tuple of pages that match (sort by relevance)
+        """
+        return tuple([x[0] for x in self.score(word)])
