@@ -8,7 +8,7 @@
 
 <form action="index.py?action=save&what=product" 
       enctype="multipart/form-data" method="POST">
-<table border="1" width="50%" style="background:silver">
+<table align="left" border="1" width="50%" style="background:silver">
 
 * if ID:
     <input type="hidden" name="ID" value="{:ID:}">
@@ -51,11 +51,10 @@ description:<br>
 
 <input value="save" type="submit">
 
-* if pictureID:
-    <td valign="top">Image:<br>
-    <img src="picture.py?ID={:pictureID:}">
-* el:
-    <td valign="top">
-
 </td></tr></table>
+
+* if pictureID:
+    Image:<br>
+    <img src="picture.py?ID={:pictureID:}">
+
 </form>
