@@ -3,8 +3,16 @@
 # 
 #
 
+from Request  import request
+from Response import response, normalPrint, stdout
+
+from Sess import *
+from SessPool import *
+from Auth import *
+from Perm import *
 
 
+### unique identifier generator, for sessions, etc #######
 
 def uid():
     """Returns a 32 character, printable, unique string"""
@@ -24,3 +32,4 @@ def uid():
         uid = uid + string.zfill(hex(ord(i))[2:],2)        
 
     return uid
+
