@@ -74,10 +74,11 @@ class BootstrapTestCase(unittest.TestCase):
             """
             <?xml version="1.0"?>
             <zebra>
-            <for series="names" glue=", ">
+            <for series="names">
             <if condition="name=='a'">Argentina</if>
             <ef condition="name=='b'">Bolivia</ef>
             <el>Chile</el>
+            <glue>, </glue>
             </for>
             </zebra>
             """)
@@ -114,10 +115,40 @@ class BootstrapTestCase(unittest.TestCase):
 
         goal = "Nothin's empty. Somethin's full."
 
-        #print '--------'
-        #print zebra.Bootstrap().compile(zbx)
-        #print '--------'
-        
         actual = zebra.Bootstrap().toObject(zbx).fetch(model)
         assert actual == goal, \
                "none doesn't work:\n%s" % actual
+
+
+    def check_headFootSimple(self):
+
+        # check the simple case, not the grouped version.
+        
+        model = {
+            "list": [
+            {"toy":"ball"},
+            {"toy":"yoyo"},
+            ]}
+
+        zbx = zebra.trim(
+            """
+            <?xml version="1.0"?>
+            <zebra>
+            <for series="list">
+            <head>Some toys: [</head>
+            <var>toy</var>
+            <glue>, </glue>
+            <foot>]</foot>
+            </for>
+            </zebra>
+            """)
+        
+        goal = "Some toys: [ball, yoyo]"
+
+##         print '--------'
+##         print zebra.Bootstrap().compile(zbx)
+##         print '--------'
+        
+        actual = zebra.Bootstrap().toObject(zbx).fetch(model)
+        assert actual == goal, \
+               "head/tails don't work:\n%s" % actual

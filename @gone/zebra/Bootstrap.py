@@ -97,24 +97,14 @@ class Bootstrap:
         res = zebra.trim(
             """
             _ = 0
-            __max__ = len(self.model["%s"])
-            for _ in range(__max__):
+            _max_ = len(self.model["%s"])
+            for _ in range(_max_):
                 #@TODO: take this out of the global namespace.
                 #(either figure out why local doesn't work, or
                 #just wrap it all in an exec()
                 globals().update(self.model["%s"][_])
             """ % (attrs["series"], attrs["series"]))
-        res = res + zebra.indent(self.walk(model), 1)
-
-        ## glue ##
-        if attrs.has_key("glue"):
-            res = res + zebra.trim(
-            """
-            # glue:
-                if _ + 1 < __max__:
-                    res = res + '%s'
-            """ % (zebra.escape(attrs["glue"])))       
-            
+        res = res + zebra.indent(self.walk(model), 1)            
         res = res + zebra.trim(
             """
             del _
@@ -124,7 +114,7 @@ class Bootstrap:
 
     ## <none> ##
     def handle_none(self, model, attrs):
-        res = "if not __max__:\n"
+        res = "if not _max_:\n"
         res = res + zebra.indent(self.walk(model), 1)
         return res
 
@@ -160,3 +150,24 @@ class Bootstrap:
     def handle_br(self, model, attrs):
         return 'res = res + "\\n"\n'
 
+
+    ## <head> ##
+    def handle_head(self, model, attrs):
+        # @TODO: handle grouped heads
+        res = "if _ == 0:\n"
+        res = res + zebra.indent(self.walk(model), 1)
+        return res
+
+    ## <foot> ##
+    def handle_foot(self, model, attrs):
+        # @TODO: handle grouped feet
+        res = "if _ + 1 == _max_:\n"
+        res = res + zebra.indent(self.walk(model), 1)
+        return res
+
+
+    ## <glue> ##
+    def handle_glue(self, model, attrs):
+        res = "if _ + 1 < _max_:\n"
+        res = res + zebra.indent(self.walk(model), 1)
+        return res
