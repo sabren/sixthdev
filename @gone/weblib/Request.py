@@ -14,13 +14,8 @@ get lumped together. Plus it's old and crufty. :) .. but it also
 
 
 class Request:
-    count = 0
     
     def __init__(self):
-
-        if self.__class__.count:
-            raise "Request is a Singleton! Don't try to instantiate it. Use request."
-        self.__class__.count = 1
         
         import os, string
         self.environ = os.environ

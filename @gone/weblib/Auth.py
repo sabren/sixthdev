@@ -19,22 +19,15 @@ PLEASELOGIN = 'Please log in.'
 
 class Auth:
 
-    count = 0
-    
     ## constructor #############################
     
     def __init__(self, authKey=None):
-        if self.__class__.count:
-            raise "SingletonError"
+        if authKey:
+            self.isLoggedIn = 1
         else:
-            self.__class__.count = 1
+            self.isLoggedIn = 0
 
-            if authKey:
-                self.isLoggedIn = 1
-            else:
-                self.isLoggedIn = 0
-
-            self.key = authKey
+        self.key = authKey
 
 
     ## public methods #########################

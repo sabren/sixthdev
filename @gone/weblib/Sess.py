@@ -15,19 +15,12 @@ except ImportError:
 
 class Sess:
 
-    count = 0
-
     ## attributes ##########################
 
     def __init__(self, pool):
 
-        if self.__class__.count:
-            raise "Sess is a singleton. Don't instantiate more than one."
-        else:
-            self.__class__.count = self.__class__.count + 1
-            import weblib
-            weblib.session = self
-            
+        import weblib
+        weblib.session = self
         
         self.sid = ""
         self.name = "weblib.Sess"

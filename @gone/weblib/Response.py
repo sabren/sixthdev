@@ -5,12 +5,8 @@ Response.py - loosely emulates the ASP Response object for python CGI's
 class Response:
     """Response object similar to the one from ASP"""
 
-    count = 0
-
     def __init__(self):
-        if self.__class__.count:
-            raise "Response class is a singleton. Don't try to instantiate it!"
-        self.__class__.count = 1
+
         self._headers = ""
         self._headerSent = 0
 
