@@ -1,9 +1,10 @@
 
-from strongbox import Strongbox, link
+from strongbox import Strongbox, attr, link, forward
 from unittest import TestCase
 
 class LinkedListMember(Strongbox):
-    next = link("LinkedListMember")
+    next = link(forward)
+LinkedListMember.__attrs__["next"].type=LinkedListMember
 
 class NonMember(Strongbox):
     pass
@@ -12,6 +13,15 @@ class NotEvenAStrongbox:
     pass
 
 class LinkTest(TestCase):
+
+    def check_simple(self):
+        class Child(Strongbox):
+            name = attr(str)
+        class Parent(Strongbox):
+            kid = link(Child)
+        p = Parent()
+        p.kid = Child(name="damien")
+        
 
     def check_typing(self):
         one = LinkedListMember()

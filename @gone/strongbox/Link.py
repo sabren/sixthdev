@@ -9,14 +9,11 @@ class Link(attr):
     """
     Represents a one-way link to another Strongbox.
     """
-
-    def __init__(self, classname):
-        self.type = classname
+    def __init__(self, klass):
+        self.type = klass
         self.default = None
         self.okay = None
         self.allowNone = 1
 
     def _typeok(self, value):
-        return isinstance(value, strongbox.Strongbox) \
-               and value.__class__.__name__==self.type
-    
+        return isinstance(value, self.type)    
