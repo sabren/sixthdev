@@ -59,8 +59,7 @@ class Attribute(property):
                 if value=="":
                     return None
                 else:
-                    raise TypeError, "%s: expected %s, got %s\n[%s]" \
-                          % (value, self.type, type(value), e)
+                    raise TypeError(self.__name__,value,self.type,e)
 
     def validate(self, value):
         if (value is None):
@@ -80,7 +79,7 @@ class Attribute(property):
         else:
             val = self.cast(value)
         if not self.validate(val):
-            raise ValueError, self.__name__ + ": " + repr(value) + " vs " + repr(self.okay)
+            raise ValueError(self.__name__, repr(value))
         return val # so the instance can store it
 
 
