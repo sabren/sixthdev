@@ -3,10 +3,11 @@ Junction - *:* relationships
 """
 __ver__="$Id$"
 
-import zdc
+from pytypes import IdxDict
+from zdc import Table
 
-class Junction(zdc.IdxDict):
-    __super = zdc.IdxDict
+class Junction(IdxDict):
+    __super = IdxDict
     """
     This does the grunt work for working with
     foreign keys in a *:* relationship.
@@ -21,7 +22,7 @@ class Junction(zdc.IdxDict):
         self.__super.__init__(self)
         self.owner = owner
         self.rClass = rClass
-        self.table = zdc.Table(self.owner._table.dbc, tablename)
+        self.table = Table(self.owner._table.dbc, tablename)
         self.lKey=lKey
         self.rKey=rKey
 

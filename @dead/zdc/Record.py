@@ -1,12 +1,12 @@
-"""
-zdc.Record -  makes it easy to edit records in a database.
-"""
-__ver__="$Id$"
-
 import zdc
 import UserDict
+from pytypes import IdxDict
 
 class Record(UserDict.UserDict):
+    """
+    Record -  makes it easy to edit records in a database.
+    """
+    __ver__="$Id$"
 
     ## class attributes ##########################################
 
@@ -29,7 +29,7 @@ class Record(UserDict.UserDict):
 
         # populate the data.. you probably don't want to do this,
         # either.. Rather, go through Table.
-        self.data = zdc.IdxDict()
+        self.data = IdxDict()
         if data:
             self.data.update(data)
         else:

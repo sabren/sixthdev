@@ -3,9 +3,9 @@ LinkSet - 1:* relationships.
 """
 __ver__="$Id$"
 
-import zdc
+from pytypes import IdxDict
 
-class LinkSet(zdc.IdxDict):
+class LinkSet(IdxDict):
     """
     This does the grunt work for working with
     foreign keys in a 1:* relationship.
@@ -15,7 +15,7 @@ class LinkSet(zdc.IdxDict):
     rKey is remote (or right-hand) key fieldname
     lID is the actual value for the local key
     """
-    __super = zdc.IdxDict
+    __super = IdxDict
 
     def __init__(self, owner, rClass, lKey=None, rKey="ID"):
         self.__super.__init__(self)

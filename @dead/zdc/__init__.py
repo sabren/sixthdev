@@ -3,8 +3,6 @@ zdc: zike data classes (wrapper for python db-api 2.0)
 """
 __ver__="$Id$"
 
-# the two basic classes:
-from IdxDict import IdxDict
 from Object import Object
 
 # these build on the above:
@@ -15,10 +13,7 @@ from RecordObject import RecordObject
 from ObjectView import ObjectView
 from LinkSet import LinkSet
 from Junction import Junction
-from FixedPoint import FixedPoint
 from Connection import Connection
-from Date import Date
-from DateTime import DateTime
 
     
 # @TODO: we need to know which module 'dbc' comes from, because
@@ -76,6 +71,7 @@ def sqlSet(*data):
 def toListDict(cur):
     """converts cursor.fetchall() results into a list of IdxDicts"""
     #@TODO: (is this still needed?)
+    from pytypes import IdxDict
     res = []
     for row in cur.fetchall():
         dict = IdxDict()
@@ -98,37 +94,3 @@ def viewToXML(view, itemLabel="item", listLabel="list"):
     res = res + "</%s>" % listLabel
     return res
 
-def toDate(thing):
-    """
-    ensures that a date is a Date object
-    """
-    if isinstance(thing, Date):
-        return thing
-    else:
-        return Date(thing)
-    
-
-def toDateTime(thing):
-    """
-    ensures that a datetime is a DateTime object
-    """
-    if isinstance(thing, DateTime):
-        return thing
-    else:
-        return DateTime(thing)
-    
-
-def dateRange(date1, date2):
-    """
-    returns a tuple of Date objects between two dates (inclusive)
-    """
-    d1 = toDate(date1)
-    d2 = toDate(date2)
-
-    d = d1
-    dates = []
-    while d <= d2:
-        dates.append(d)
-        d += 1
-    
-    return tuple(dates)

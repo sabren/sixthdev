@@ -2,7 +2,9 @@
 zdc driver for python DB-API 2.0 database modules.
 """
 __ver__="$Id$"
+
 import zdc
+from pytypes import IdxDict
 
 class DBAPI2Driver:
 
@@ -204,7 +206,7 @@ class DBAPI2Driver:
         if self._fieldcache.has_key(tablename):
             res = self._fieldcache[tablename]
         else:
-            res = zdc.IdxDict()
+            res = IdxDict()
             # @TODO: get defaults, keys, etc?
             # select a blank record:
             cur = self.execSQL("SELECT * FROM " + tablename + " WHERE 1=0")
