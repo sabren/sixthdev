@@ -61,7 +61,7 @@ class ObjectEditorTest(unittest.TestCase):
         """
         node = self.clerk.new(Node)
         node.name="fred"
-        node.save()
+        self.clerk.save(node)
 
         req = {"action":"save", "parentID":"1"}
         ed = ObjectEditor(Node, self.clerk, req, key=1)
@@ -191,7 +191,7 @@ class ObjectEditorTest(unittest.TestCase):
         """
         node = self.clerk.new(Node)
         node.name = 'general'
-        node.save()
+        self.clerk.save(node)
 
         nodeID = node.ID
         del node

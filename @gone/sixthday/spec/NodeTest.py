@@ -42,7 +42,7 @@ class NodeTest(unittest.TestCase):
     def check_path(self):
         node = self.clerk.load(Node, ID=2)
         node.name="subnode"
-        node.save()
+        self.clerk.save(node)
 
         assert node.path == "top/subnode", \
                "Node has wrong path after name change: %s" % node.path
@@ -69,7 +69,7 @@ class NodeTest(unittest.TestCase):
 
         node1 = self.clerk.load(Node, ID=1)
         node1.name="super"
-        node1.save()
+        self.clerk.save(node1)
 
         node2 = self.clerk.load(Node, ID=2)
         assert node2.path == "super/sub", \

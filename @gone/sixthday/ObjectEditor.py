@@ -26,8 +26,9 @@ class ObjectEditor(sixthday.App):
 
         ed = ObjectEditor(Person, ds, weblib.request.get('ID'))
         """
-        #@TODO: use "super" throughout...
         super(ObjectEditor, self).__init__(input)
+        self.clerk = clerk
+        
         import types
         if type(what) == types.InstanceType:
             self.whatClass = what.__class__
@@ -185,4 +186,4 @@ class ObjectEditor(sixthday.App):
         updates the object and then saves it.
         """
         self.act_update()
-        self.object.save()
+        self.clerk.save(self.object)
