@@ -1,8 +1,8 @@
 """
 Bootstrap compiler for Zebra.
-
-$Id$
 """
+__ver__="$Id$"
+
 import zebra
 import xml2mdl
 
@@ -125,6 +125,7 @@ class Bootstrap:
             _max_ = len(self.model["%(series)s"])
             scope_stack.append(scope)
             scope = copy.copy(scope)
+            scope.update(locals())
             for _ in range(_max_):
                 scope.update(self.model["%(series)s"][_])
             """ % attrs)
