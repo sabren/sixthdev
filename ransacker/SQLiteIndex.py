@@ -56,7 +56,6 @@ class SQLiteIndex(ransacker.Index):
         self.dbc.commit()
         
     def _storeFreq(self, pageID, word, count):
-        if pageID is None: raise hell
         self.cur.execute(
             """
             INSERT OR IGNORE INTO idx_word (word) VALUES ('%s')
