@@ -60,7 +60,7 @@ class Sess:
             self.sid = self._getSid()
         else:
             self.sid = sid
-        self.thaw()
+        self._thaw()
         self._gc()
 
 
@@ -84,33 +84,9 @@ class Sess:
         return oldurl
 
 
+    def stop(self):
+        self._freeze()
 
-
-    def freeze(self):
-        """freezes sess and dumps it into the sesspool. call at end of page"""
-
-        # first, merge warm and cool data:
-
-        for key in self._warmData.keys():
-            self._coldData[key] = dumps(self._warmData[key], 1)
-
-        # now, freeze the cold stuff
-        
-        self._pool.putSess(self.name, self.sid, dumps(self._coldData, 1)) # 1 for binary
-
-
-
-
-    def thaw(self):
-        """gets a frozen sess out of the sesspool and thaws it out"""
-        frozen = self._pool.getSess(self.name, self.sid)
-        if frozen is None:
-            self._coldData = {}
-        else:
-            self._coldData = loads(frozen)
-
-        # nothing is actually warm until you use it:
-        self._warmData = {}
 
 
     ## dictionary methods ####################
@@ -163,7 +139,7 @@ class Sess:
         
     
 
-    def get(self, name, failObj = None):
+    def get(self, key, failObj = None):
         try:
             return self[key]
         except KeyError:
@@ -208,6 +184,33 @@ class Sess:
         if (whrandom.random() * 100 <= self.gcProb):
             self._pool.drain(self.name, 0)
             
+
+    def _freeze(self):
+        """freezes sess and dumps it into the sesspool. call at end of page"""
+
+        # first, merge warm and cool data:
+
+        for key in self._warmData.keys():
+            self._coldData[key] = dumps(self._warmData[key], 1)
+
+        # now, freeze the cold stuff
+        
+        self._pool.putSess(self.name, self.sid, dumps(self._coldData, 1)) # 1 for binary
+
+
+
+
+    def _thaw(self):
+        """gets a frozen sess out of the sesspool and thaws it out"""
+        frozen = self._pool.getSess(self.name, self.sid)
+        if frozen is None:
+            self._coldData = {}
+        else:
+            self._coldData = loads(frozen)
+
+        # nothing is actually warm until you use it:
+        self._warmData = {}
+
 
 
 if __name__ == "__main__":

@@ -30,7 +30,7 @@ class SessTestCase(unittest.TestCase):
 
     def check_persistence(self):       
         self.sess["x"] = 10
-        self.sess.freeze()
+        self.sess.stop()
         sid = self.sess.sid
 
         del self.sess
