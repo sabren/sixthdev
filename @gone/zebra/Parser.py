@@ -10,13 +10,13 @@ class Parser (xmllib.XMLParser):
 
     The whole point of this parser is to read in the zebra template
     and create a data structure that can be passed to a code
-    generator. The data structure looks like this:
+    generator. The data structure is a dict that looks like this:
 
-        {'stripe' : self.stripe,      # a list of lists
-         'named' : self.named,        # a dict of named stripes
-         'skins' : self.skins,        # a dict of stripes
-         'queries' : self.queries,    # a dict of queries
-         'sources' : self.sources}    # a dict of data source definitions
+         'stripe' :  # a list of lists
+         'named' :   # a dict of named stripes
+         'skins' :   # a dict of stripes
+         'queries':  # a dict of queries
+         'sources':  # a dict of data source definitions
 
     xmllib.XMLParser is an event-based parser, so in order
     to keep track of where we are, we maintain stacks. See
@@ -39,10 +39,13 @@ class Parser (xmllib.XMLParser):
     
     """
 
-    ###############################################
+    ###[ constructor ]##############################
 
     def __init__(self):
         xmllib.XMLParser.__init__(self)
+
+
+    ###[ reset ]####################################
 
     def reset(self):
         """Resets internal variables.
@@ -50,9 +53,10 @@ class Parser (xmllib.XMLParser):
 
         xmllib.XMLParser.reset(self) # initiate base class
 
-        # there's a .stack internal to XMLParser, but it's semi-protected,
-        # and it changed from python 1.5.1 to 1.5.2 ... so I'm implementing
-        # my own.. Start with None because "zebra" tag has no parent
+        # there's a .stack internal to XMLParser, but it's
+        # semi-protected, and it changed from python 1.5.1 to 1.5.2
+        # ... so I'm implementing my own.. Start with None because
+        # "zebra" tag has no parent
         self.tagstack = [None]
 
         # datstack is a stack of various thingies (stripes/structures)
@@ -81,7 +85,9 @@ class Parser (xmllib.XMLParser):
         self.context = "show" # current context
         self.eval    = "" # python code to evaluate
 
-    ###############################################
+
+
+    ###[ internal stack handling ]##################
 
     def popStruct(self):
         """pops a struct off the datstack"""
@@ -99,7 +105,9 @@ class Parser (xmllib.XMLParser):
         self.stripe = self.datstack[-1]
         self.datstack = self.datstack[:-1]
 
-    ###############################################
+
+
+    ####[ handle_data ]#############################
         
     def handle_data(self, data):
         """this method adds text to the current stripe,
@@ -134,9 +142,34 @@ class Parser (xmllib.XMLParser):
             self.stripe[-1] = self.stripe[-1] + data
 
 
-    ###############################################
+    ##################################################
+### ##                                              ## #####################
+#-- ## --[ tag handlers begin here ]--------------- ## --------------------#
+### ##                                              ## #####################
+    ##################################################
+
+
+###[ sitemap related tags ]##################################################
+
+
+    ###[ * site ]###################################
 
     def start_site(self, attrs):
+        """ * site outdir='' crumb='' [href='']
+
+        @GROUP: sitemap
+        @PARAM: outdir "the directory that contains the (sub)site."
+        @PARAM: crumb  "a crumb in a breadcrumb trail describing this (sub)site."
+        @PARAM: href   "a url prefix for stuff in this (sub)site"
+
+        This was just a silly idea I came up with.
+        It probably ought to go away.. But the idea is
+        that you could describe your site in Zebra and
+        use it to build a sitemap...
+
+        Site describes a site or subsite.
+        """
+        
 
         # dir is required, but href is optional
         if attrs.has_key("href"):
@@ -160,9 +193,18 @@ class Parser (xmllib.XMLParser):
         for d in self.dirstack:
             os.chdir(d)
 
-    ###############################################
+
+    ###[ * page ]###################################
 
     def start_page(self, attrs):
+        """ * page src="" out=""
+
+        @GROUP: sitemap
+        @PARAM: src "the file containing the data for this page"
+        @PARAM: out "the filename into which to dump the compiled page."
+
+        A page within a site.
+        """
         pagetext = open(self.dirstack[0] + "/" + attrs["src"]).read()
         newZebra = Engine().compile(pagetext)
         outfile = open(attrs["out"],"w")
@@ -171,9 +213,60 @@ class Parser (xmllib.XMLParser):
     def end_page(self):
         pass
 
-    ###############################################
+
+###[ basic tags ]###########################################################
+
+
+    ###[ * zebra ]##################################
+
+    def start_zebra(self, attrs):
+        """ * zebra
+
+        Denotes that this is a zebra file. This tag is optional in
+        the outline syntax, but required for the XML syntax.
+        """
+        ## @TODO: handle language attribute.. (do i need one?)
+        pass
+
+
+    def end_zebra(self):
+        pass
+
+    ###[ * exec ]###################################
+
+##     def start_exec(self, attrs):
+##         """* exec
+
+##         Executes the enclosed (native-code) code at
+##         runtime.
+##         """
+##         pass
+
+##     def end_exec(self):
+##         pass
+    
+    ###[ * include ]################################
+    ###[ * show ]###################################
+    ###[ * insert ]#################################
+    ###[ * skin ]###################################
+    ###[ * stripe ]#################################
+    ###[ * wrap ]###################################
+    ###[ * zebra ]##################################
+
+    
+
+###[ advanced tags ]########################################################
+
+    ###[ * eval ]###################################
 
     def start_eval(self, attrs):
+        """ * eval
+
+        @GROUP: script
+
+        Evaluates the enclosed (python) code at compile-time.
+        """
+        
         self.contextstack.append(self.context)
         self.context = "eval"
         self.eval = ""
@@ -183,7 +276,11 @@ class Parser (xmllib.XMLParser):
         self.contextstack = self.contextstack[:-1]
         exec(self.eval)
 
-    ###############################################
+
+
+###[ database related tags ]#################################################
+
+    ###[ * source ]#################################
 
     def start_source(self, attrs):
         self.pushStruct()
@@ -199,8 +296,10 @@ class Parser (xmllib.XMLParser):
     def end_source(self):
         self.popStripe()
         self.popStruct()
+
+
     
-    ###############################################
+    ###[ * query ]##################################
 
     def start_query(self, attrs):
         self.pushStruct()
@@ -216,8 +315,12 @@ class Parser (xmllib.XMLParser):
     def end_query(self):
         self.popStripe()
         self.popStruct()
+
+
+
+###[ report-related tags ]##################################################
     
-    ###############################################
+    ###[ * report ]#################################
 
     def start_report(self, attrs):
         self.pushStruct()
@@ -238,15 +341,40 @@ class Parser (xmllib.XMLParser):
         self.stripe.append(self.struct)
         self.popStruct()
 
-    ###############################################
+
+
+    ###[ * group ]##################################
+    ###[ * head ]###################################
+    ###[ * body ]###################################
+    ###[ * foot ]###################################
+    ###[ * none ]###################################
+
+
+
+
+
+    ###[ * if ]#####################################
+    ###[ * ef ]#####################################
+    ###[ * el ]#####################################
+
+    ###[ * query ]##################################
+    ###[ * model ]##################################
+    ###[ * source ]#################################
+
+    ###[ * title ]##################################
+    ###[ * content ]################################
+    ###[ * keywords ]###############################
+    ###[ * description ]############################
+        
+
+    ####[ other tags ]##############################
 
     def unknown_starttag(self, tag, attrs):
 
         tag = string.replace (tag, "z:", "")
         self.tagstack.append(tag)
 
-        if tag == "zebra":
-            ## @TODO: handle language attribute.. (do i need one?)
+        if tag == "XXXXXXXX[TAKE THIS OUT]XXXXXXXXXXXXXX":
             pass
         elif tag in ["query", "head", "body", "foot", "none"]:
             ## then start a new stripe!
