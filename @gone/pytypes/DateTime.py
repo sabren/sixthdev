@@ -8,6 +8,11 @@ import copy
 import time
 import pytypes
 
+try:
+    import mx.DateTime as mxDateTime
+except ImportError:
+    mxDateTime = None
+
 class DateTime:
     """
     A class to represent datetimes.
@@ -17,8 +22,11 @@ class DateTime:
         Construct a DateTime from a string representation.
         """
         s = datestr
-        if type(s) != str:
-            raise TypeError, "usage: DateTime(string)"
+        if mxDateTime and type(s) == mxDateTime.DateTimeType:
+            s = str(s)[:-3] # strip off milliseconds
+        elif type(s) != str:
+            raise TypeError, "usage: DateTime(string) (got %s)" % type(s)
+        
         if s == "now":
             s = "%04i-%02i-%02i %02i:%02i:%02i" \
                 % time.localtime(time.time())[:6]
@@ -100,3 +108,6 @@ class DateTime:
 
     def __repr__(self):
         return "DateTime('%s')" % self.toUS()
+
+    def toDate(self):
+        return pytypes.Date(self.toUS()[:-9])
