@@ -13,22 +13,28 @@ from weblib import SessPool
 
 
 class SessTestCase(unittest.TestCase):
-
+    dict = {"":""} # @TODO: why doesn't it work with just {} ??
+    
     def setUp(self, sid=None):
-        self.sess = weblib.Sess(SessPool.SqlSessPool(weblib.test.dbc))
+        self.pool = SessPool.InMemorySessPool(SessTestCase.dict)
+        self.sess = weblib.Sess(self.pool,
+                                weblib.Request(),
+                                weblib.Response())
         self.sess.start(sid)
 
-    def check_engine(self):
-        assert self.sess.engine==weblib, \
-               "sess.engine doesn't default to weblib. :/"
-
-
     def check_sid(self):
+        """
+        A generated session id (sid) should be 32 chars.
+        """
         sid = self.sess.sid
         assert len(sid)==32, "sess.sid isn't right."
 
 
-    def check_persistence(self):       
+    def check_persistence(self):
+        """
+        If you add something to one Sess object, it should persist in
+        the next, provided the two Sess objects use the same SessPool.
+        """
         self.sess["x"] = 10
         self.sess.stop()
         sid = self.sess.sid
@@ -100,25 +106,29 @@ class SessTestCase(unittest.TestCase):
                "sess.url() doesn't encode correctly.."
         
 
-    def check_getSid(self):
-        oldreq = self.sess.engine.request
+    def check_CookieSid(self):
+        """
+        sess should read sid from the cookie.
+        """
         req = weblib.Request(cookie={"weblib.Sess":"123"},
                              querystring="weblib.Sess=ABC")
-
-        self.sess.engine.request = req
-        actual = self.sess._getSid()
+        sess = weblib.Sess(self.pool, req, weblib.Response())
+        
+        actual = sess._getSid()
         assert actual == "123", \
                "getSid doesn't read the cookie: %s.." % actual
 
+    def check_QuerySid(self):
+        """
+        if no cookie, sess should read from the querystring
+        """
         req = weblib.Request(querystring="weblib.Sess=ABC")
-        self.sess.engine.request = req
-        actual = self.sess._getSid()
+        sess = weblib.Sess(self.pool, req, weblib.Response())
+
+        actual = sess._getSid()
         assert actual == "ABC", \
                "getSid doesn't read the querystring (fallback): %s" % actual
 
-
-        # clean up so as not to affect other tests..
-        self.sess.engine.request = oldreq
 
     def tearDown(self):
         del self.sess

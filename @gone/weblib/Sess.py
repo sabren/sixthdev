@@ -29,13 +29,10 @@ class Sess:
 
     ## constructor ############################
 
-    def __init__(self, pool=None, engine=weblib):
+    def __init__(self, pool, request, response):
 
-        self.engine = engine
-
-        if pool is None:
-            from weblib.config import pool
-            
+        self._request = request
+        self._response = response
         self._pool = pool     # where to store the data
         self._warmData = {}   # unpickled, live data
         self._coldData = {}   # still-pickled data
@@ -187,9 +184,9 @@ class Sess:
             if sid is None:
                 try:
                     if mode == "cookie":
-                        sid = self.engine.request.cookie[self.name]
+                        sid = self._request.cookie[self.name]
                     elif mode == "get":
-                        sid = self.engine.request.query[self.name]
+                        sid = self._request.query[self.name]
                     else:
                         raise "Unknown mode: " + mode
                 except KeyError:
@@ -203,7 +200,7 @@ class Sess:
         #@TODO: add code for timeouts wrt setCookie
         if self.mode == "cookie":
             # always update the cookie
-            self.engine.response.addCookie(self.name, sid)
+            self._response.addCookie(self.name, sid)
                 
         return sid
 

@@ -33,6 +33,16 @@ class SessPool:
         pass
 
 
+class InMemorySessPool(SessPool):
+    """
+    just uses a dictionary.
+    """
+    def __init__(self, dict=None):
+        if dict:
+            self.storage = dict
+        else:
+            self.storage = {}
+
 
 class SqlSessPool:
     """
