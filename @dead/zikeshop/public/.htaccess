@@ -1,0 +1,16 @@
+RewriteEngine on
+
+# nifty urls for product codes:
+RewriteRule ^product/?$ product.py
+RewriteRule ^product/(.*)/$ product.py?code=$1
+RewriteRule ^product/(.*)$ product.py?code=$1
+RewriteRule ^product\.py.* - [L]
+
+# nifty urls for categories
+RewriteRule ^category/?$ category.py
+RewriteRule ^category/(.*)/$ category.py?path=$1
+RewriteRule ^category/(.*)$ category.py?path=$1
+RewriteRule ^category\.py.* - [L]
+
+# main page
+DirectoryIndex shop.py
