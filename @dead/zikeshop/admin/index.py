@@ -29,7 +29,7 @@ class ZikeShopAdminApp(zikebase.AdminApp):
     def list_product(self):
         # we want to see products in a particular node
         # (or in no nodes at all)
-        nID = self.model["nodeID"] = self.input.get("nodeID", 0)
+        nID = self.model["nodeID"] = int(self.input.get("nodeID", 0))
         import mdl_product
         mdl_product.nodeID = nID
         mdl_product.doit()
