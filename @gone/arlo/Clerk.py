@@ -82,9 +82,9 @@ class Clerk(object):
         return obj
 
 
-    def match(self, klass, **where):
+    def match(self, klass, *args, **kwargs):
         return [self.rowToInstance(row, klass)
-                for row in self.storage.match(self._unmap_class(klass), **where)]
+                for row in self.storage.match(self._unmap_class(klass), *args, **kwargs)]
    
     def fetch(self, klass, __ID__=None, **kw):
         if __ID__:
