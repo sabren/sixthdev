@@ -10,7 +10,8 @@ class LinkSet(zdc.IdxDict):
 
     @TODO: does this work unchanged for *:* relationships?
 
-    lKey is local (or left hand) key fieldname
+    @TODO: clarify this documentation.. it even confuses me.
+    lKey is local (or left hand) key fieldname (ON THE FOREIGN TABLE!)
     rKey is remote (or right-hand) key fieldname
     lID is the actual value for the local key
     """
@@ -33,8 +34,7 @@ class LinkSet(zdc.IdxDict):
                   % (self.rKey, table.name, self.lKey, int(lID))
             cur.execute(sql)
             for row in cur.fetchall():
-                #@TODO: unhardcode ID
-                self << self.rClass(ID=row[0])
+                exec "self << self.rClass(" + self.rKey + "=row[0])"
         self._loaded = 1
 
 
@@ -51,3 +51,6 @@ class LinkSet(zdc.IdxDict):
             self.load()
         return self.__super.__getitem__(self, key)
         
+    def __lshift__(self, other):
+        self.__super.__lshift__(self, other)
+        exec "other." + self.lKey + "=" + `self.owner.ID`
