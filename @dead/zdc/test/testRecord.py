@@ -134,9 +134,23 @@ class RecordTestCase(unittest.TestCase):
         
 
 
+    def check_manyRecs(self):
+        """Do multiple records accidentally conflict with each other?"""
+        import copy
+        
+        rec = zdc.Record(self.table)
+        rec['fish'] = 'snagglefish' # whassat?
+        rec.save()
+        firstID = copy.copy(rec['ID'])
+
+        rec2 = zdc.Record(self.table)
+        rec2['fish'] = 'babelfish'
+        rec2.save()
+
+        assert rec['ID'] == firstID, \
+               "uh-oh! rec's ID changed!: %s, %s" % (rec['ID'], firstID)
+
         
     def tearDown(self):
         pass
-
-
 

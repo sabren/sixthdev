@@ -14,7 +14,7 @@ class Record:
     ## attributes ################################################
 
     table = None
-    values = IdxDict()
+    values = None
     isNew = 0
     
     escapes = {  #@TODO: put this somewhere else? does the DB-API do this?
@@ -37,6 +37,8 @@ class Record:
         ## A record's table can be passed in the constructor or
         ## defined a subclass's definition... Most likely, you won't
         ## create records directly, but call someTable.getRecord()
+
+        self.values = IdxDict()
                
         if table:
             self.table = table
