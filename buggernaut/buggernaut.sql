@@ -61,15 +61,15 @@ CREATE TABLE plan_task (
   owner_userID int not null default 0,
   summary varchar(255),
   detail varchar(255),
-  typeID varchar(50),
+  typeID int,
+  statusID int,
   targetDate datetime,
   createDate datetime,
   risk   int not null default 5,
   reward int not null default 5,
   hrsOrig decimal(5,2),
   hrsCurr decimal(5,2),
-  hrsElapsed decimal(5,2),
-  status varchar(50),
+  hrsElap decimal(5,2),
   PRIMARY KEY (ID)
 );
 
