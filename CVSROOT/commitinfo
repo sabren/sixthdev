@@ -15,5 +15,5 @@
 # in addition to the first matching regex or "DEFAULT".
 
 # "list notification"
-notify CVSROOT/log %s -m notify@sabren.com
+notify CVSROOT/log %s -m notify@sabren.com -f CVSROOT/commitlog
 #test
