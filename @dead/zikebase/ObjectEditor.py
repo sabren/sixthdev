@@ -153,6 +153,7 @@ class ObjectEditor(weblib.Actor):
         merge collection data into the object..
         """
         #@TODO: this might not be the best way to factor this..
+        #       note, however that zikeshop.SaleEditor overrides it.
         for fld in self._newData.keys():
             for i in self._newData[fld].keys():
                 getattr(self.object, fld) << self._newData[fld][i]
