@@ -1,0 +1,59 @@
+0215.2002 Sixthday Vision statement
+
+              my software goals
+
+
+Sixthday is another step on the evolutionary ladder to a system for
+developing software applications for the web.  This system started
+with the plans for zikeshop a long time ago, and has been slowly
+evolving ever since.
+
+I've come a long way. I've learned so much about programming, and yet,
+in retrospect, I've not produced much software. What I have produced
+is a pretty darn good programmer. Me. I'm certainly not the best out
+there, but I'm good. So what am I doing with it?
+
+Web programming is probably my strongest skill, of everything I know
+how to do. But I don't do much web programming. I started cornerhost
+so I could have time to build the programs I wanted to build. Yet I'm
+not doing it. How strange.
+
+Well, so what?
+
+I don't know.
+
+The tools I have... sdunit, cvs, leo, sixthday... They should allow me
+to work on many projects simultaneously. So it would be nice to be
+able to allocate two hours to a particular project, and just be able
+to sit down with my issue tracker and work on whatever's at the top of
+the list for that project.
+
+It would also be nice to incorporate some reporting.. Like a
+timesheet, so I can see how much time I spent on a particular issue,
+or a particular project.
+
+Can I have this? I'm envisioning some enhancements to buggernaut.
+Possibly rewriting it to use metakit and wxwindows.
+
+Here would be a list of stories:
+
+  - left side shows tree of projects/goals
+  - bulk of window shows a list of bugs.
+  - click bug to see history
+  - double click to pop up new window
+  - users can add new goals
+  - users can add time to a goal
+  - users can estimate time spent on goal (gantt)
+  - data is stored in a database of some kind
+
+I think this is the thing I should be working on, along with
+duckbill, a control panel, linkwatcher, etc.. It's precisely
+BECAUSE I have so much on my plate that I need a tool like
+this. 
+
+Interesting. Most tools let many people work on one project.
+I need a tool to help me work on many projects.
+
+
+
+
