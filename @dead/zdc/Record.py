@@ -187,14 +187,18 @@ class Record:
         # I didn't have much luck trying to get the DB-SIG
         # to incorporate autonumbers.. I'll have to try
         # again later.. (or come up with an alternative)
+        #
+        # @TODO: generate our own autonumbers with max(ID)
        
         if self.table.rowid is not None:
-            # first use the newer mysql scheme:
+            # first try the newer mysqldb scheme:
             self.key = int(getattr(cur, "_insert_id", 0))
             if not self.key:
                 try:
+                    # but if that didn't work, try the old way:
                     self.key = int(self.table.dbc.insert_id())
                 except:
+                    # and if THAT didn't work, we're out of luck for now
                     raise "don't yet know how to do autonumbers except MySQL"
             self[self.table.rowid] = self.key
             self._where[self.table.rowid] = self.key
