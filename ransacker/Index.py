@@ -2,10 +2,12 @@ import ransacker
 
 class Index(object):
     """
-    This is a very wasteful and inefficient
-    in-memory index. Okay for testing, but
-    You almost certainly want to use one of
-    its subclasses for any real work.
+    This is a fairly wasteful in-memory index.
+    Okay for testing, but you almost certainly
+    want to use one of its subclasses for any
+    real work.
+
+    (Even so, it's 5x faster than MkIndex)
 
     If you're subclassing this, you want
     to override these methods:
