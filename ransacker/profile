@@ -1,0 +1,43 @@
+#!/usr/bin/env python
+
+import ransacker, os, profile, sys
+
+# make sure we have a fresh index
+try:
+    os.unlink("test/profile.rki")
+    os.unlink("test/profile.rkw")
+except:
+    pass
+
+
+
+if len(sys.argv) > 1:
+    filename = sys.argv[1]
+else:
+    # by default, we'll have it index its own source
+    filename = "Index.py"
+
+idx = ransacker.Index("test/profile.rki", "test.rkw")
+profile.run('idx.index("src", open("%s").read())' % filename)
+
+
+## import cPickle, struct, array
+
+## def pick(data):
+##     return cPickle.dumps(data)
+
+## def pack(data):
+##     return apply(struct.pack, ["I"*len(data)] + data)
+
+
+## def arra(data):
+##     return array.array("I", data).tostring()
+
+
+## def loop():
+##     for x in range(10000):
+##         stringify(range(100))
+
+## stringify = pick; print "** pick:"; profile.run('loop()')
+## stringify = pack; print "** pack:"; profile.run('loop()')
+## stringify = arra; print "** arra:"; profile.run('loop()')
