@@ -1,0 +1,28 @@
+<html>
+<head>
+<title>rantelope</title>
+
+<style type="text/css">
+body, p, table { 
+    font-family: verdana;
+    font-size:10pt;
+}
+th { 
+    text-align: left;
+}
+</style>
+
+</head>
+<body>
+
+<h1>Rantelope</h1>
+
+<a href="rantelope.app">home</a>
+
+<hr>
+
+* for errors:
+    * body:
+        {:error:}
+    * foot:
+        <hr>
