@@ -1,7 +1,6 @@
 import payment
 import urllib
 import string
-from M2Crypto import httpslib, SSL ## only until python 2 comes out 
 
 class AuthorizeNetPayment(payment.AbstractPayment):
     """
