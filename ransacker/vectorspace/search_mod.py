@@ -25,7 +25,10 @@ class VectorSearchEngine(object):
         self.build_vectors()
 
     def build_vectors(self):
-        assert 0, "for next time: get rid of reliance on self.index.docs"
+        # @TODO: assert 0, "get rid of reliance on self.index.docs"
+        # Basically, this class is making its own index.
+        # The goal now is to get this to run off of
+        # a ransacker.Index instead.
         for doc in self.index.docs:
             vec = self.make_vector(doc)
             # the perl used at this point is
@@ -148,8 +151,8 @@ def stem(word):
 
 def load_stop_list():
     all_from_file = []
-    # FIX-ME that path needs tweaking later
-    for line in open('/home/mario/dev/lib/ransacker/vectorspace/stop_list.txt').readlines():
+    # @TODO: unhardcode this path. 
+    for line in open('./vectorspace/stop_list.txt').readlines():
         mymatch = re.compile('\n')                
         all_from_file.append(mymatch.sub(r'',line))
     
