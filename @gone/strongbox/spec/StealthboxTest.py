@@ -30,7 +30,7 @@ class StealthboxTest(unittest.TestCase):
     # 
     # But it should look just like a normal class:
 
-    def check_looks_like_a_class(self):
+    def test_looks_like_a_class(self):
         class X(Strongbox):
             pass
         assert isinstance(X(), Strongbox)
@@ -39,7 +39,7 @@ class StealthboxTest(unittest.TestCase):
 
     # Attributes must be present in the class definition.
 
-    def check_slots(self):
+    def test_slots(self):
         class Slotmachine(Strongbox):
             a = attr(int, default=1)
             b = attr(int, default=2)
@@ -60,7 +60,7 @@ class StealthboxTest(unittest.TestCase):
     # some features. (link can be assigned to, linkset cannot)
     # I need to work this out.
 
-    def check_magicmeta(self):
+    def test_magicmeta(self):
         class X(Strongbox): pass
         class Y(Strongbox):
             a = attr(int)
@@ -78,7 +78,7 @@ class StealthboxTest(unittest.TestCase):
     # Specifically, it should automatically create properties from
     # methods called get_XXX and set_XXX:
 
-    def check_properties(self):
+    def test_properties(self):
         class X(Strongbox):
             def get_a(self): return 1
             get_b = lambda self: 2
@@ -91,7 +91,7 @@ class StealthboxTest(unittest.TestCase):
         assert instance.a == 1
         assert instance.b == 2
         instance.c = 3
-        assert instance.c == 0 # see check_default_defaults
+        assert instance.c == 0 # see test_default_defaults
         assert instance.d == 4, instance.d
 
         # e is a special case, because a default in duckbill.Account
@@ -99,7 +99,7 @@ class StealthboxTest(unittest.TestCase):
         # (but I think this issue is with Cyclic, not strongbox)
         assert instance.e == 5
 
-    def check_nestedError(self):
+    def test_nestedError(self):
         class NestedError(Strongbox):
             def get_a(self):
                 return self.b
@@ -120,7 +120,7 @@ class StealthboxTest(unittest.TestCase):
     # because self.xxx = yyy would cause an StrongboxError if xxx is
     # not defined up front as an attrbute)
 
-    def check_private(self):
+    def test_private(self):
         s = Strongbox()
         assert hasattr(s, "private")
         s.private.c = 1
@@ -129,13 +129,13 @@ class StealthboxTest(unittest.TestCase):
 
     ## Attributes have defaults, but can be initialized via the constructor
     
-    def check_defaults(self):
+    def test_defaults(self):
         class Foo(Strongbox):
             bar = attr(int, default=5)  
         foo = Foo()
         assert foo.bar ==5
     
-    def check_constructor(self):
+    def test_constructor(self):
         class Foo(Strongbox):
             bar = attr(int, default=5)  
         foo = Foo(bar=12)
@@ -144,7 +144,7 @@ class StealthboxTest(unittest.TestCase):
 
     ## Without explicit defaults, strings default to '', ints and longs to 0
 
-    def check_default_defaults(self):
+    def test_default_defaults(self):
         class Foo(Strongbox):
             m_str = attr(str)
             m_int = attr(int)
@@ -162,7 +162,7 @@ class StealthboxTest(unittest.TestCase):
 
     ## Other types pass defaults to the constructor
     
-    def check_othertypes(self):
+    def test_othertypes(self):
         class UpCase:
             def __init__(self, value): self.value = str(value).upper()
             def __cmp__(self, other): return cmp(self.value, other)
@@ -177,7 +177,7 @@ class StealthboxTest(unittest.TestCase):
 
     ## Attributes use static typing
     
-    def check_static_typing(self):
+    def test_static_typing(self):
         class Foo(Strongbox):
            bar = attr(int)
         foo = Foo()
@@ -189,7 +189,7 @@ class StealthboxTest(unittest.TestCase):
         assert goterr, "should get TypeError assigning string to int attr"
     
     
-    def check_okay_lambda(self):
+    def test_okay_lambda(self):
         class Foo(Strongbox):
             bar = attr(int, lambda x: 5 < x < 10)
         foo = Foo()
@@ -202,7 +202,7 @@ class StealthboxTest(unittest.TestCase):
         assert goterr, "the lambda should have rejected bar=10"
     
     
-    def check_okay_list(self):
+    def test_okay_list(self):
         class Paint(Strongbox):
             color = attr(str, ["red", "green", "blue"])
         p = Paint()
@@ -215,7 +215,7 @@ class StealthboxTest(unittest.TestCase):
         assert goterr, "values not in the list should be rejected"
     
         
-    def check_okay_regexp(self):
+    def test_okay_regexp(self):
         class UsCitizen(Strongbox):
             ssn = attr(str, r"\d{3}-?\d{2}-?\d{4}")
         
@@ -232,7 +232,7 @@ class StealthboxTest(unittest.TestCase):
 
     ## dealing with None / empty strings ########################
     
-    def check_allowNone(self):
+    def test_allowNone(self):
         """
         Attributes allow "None" by default
         """
@@ -246,7 +246,7 @@ class StealthboxTest(unittest.TestCase):
            goterr = 1
         assert not goterr, "assigning None didn't work!"    
    
-    def check_dontAllowNone(self):
+    def test_dontAllowNone(self):
         """
         We can disallow None if we want.
         """
@@ -260,7 +260,7 @@ class StealthboxTest(unittest.TestCase):
            goterr = 1
         assert goterr, "assigning None should have failed!"
 
-    def check_emptyString(self):
+    def test_emptyString(self):
         """
         Should convert empty strings to None, unless
         it actually IS a string. This is so we can
@@ -280,7 +280,7 @@ class StealthboxTest(unittest.TestCase):
         f.d = ""; assert f.d is None
 
         
-    def check_isDirty(self):
+    def test_isDirty(self):
         """
         this is for arlo...
         """
@@ -298,6 +298,17 @@ class StealthboxTest(unittest.TestCase):
         d.private.isDirty = 0
         d.x = "cat"
         assert d.private.isDirty
+
+    def test_inheritance(self):
+        class Dad(Strongbox):
+            nose = attr(str, default="big")
+        class Son(Dad):
+            pass
+        assert Son().nose == "big"
        
     def tearDown(self):
         pass
+    
+if __name__=="__main__":
+    unittest.main()
+    

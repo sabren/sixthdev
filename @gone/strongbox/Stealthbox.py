@@ -20,7 +20,7 @@ class Accessorize(type):
         for name in props.keys():
             fget = getattr(cls, "get_%s" % name, None)
             fset = getattr(cls, "set_%s" % name, None)
-            setattr(cls, name, property(fget, fset))
+            setattr(cls, name, property(fget, fset))            
 
     
 class Attributize(type):
@@ -32,10 +32,14 @@ class Attributize(type):
     def __init__(cls, name, bases, dict):
         super(Attributize, cls).__init__(name, bases, dict)
         cls.__attrs__ = {}
+        for b in bases:
+            if hasattr(b, "__attrs__"):
+                cls.__attrs__.update(b.__attrs__)
         for name in dict.keys():
-            if isinstance(dict[name], attr):
+            if isinstance(dict[name], attr) and not name in cls.__attrs__:
                 cls.__attrs__[name] = dict[name]
                 delattr(cls, name)
+        
 
 
 class PrivateNamespace(object):
