@@ -1,11 +1,12 @@
-#
-# testAuth.py - unit tests for Auth.py
-#
+"""
+testAuth.py - unit tests for weblib.Auth
 
+$Id$
+"""
 import unittest
 import weblib
 import string
-from ziketools import trim                                                         
+from weblib import trim                                                         
 
 class AuthTestCase(unittest.TestCase):
 

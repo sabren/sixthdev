@@ -1,10 +1,11 @@
-#
-# testEngine.py - unit tests for Engine.py
-#
+"""
+testEngine.py - unit tests for weblib.Engine
 
+$Id$
+"""
 import unittest
 import weblib
-from ziketools import trim
+from weblib import trim
 
 class EngineTestCase(unittest.TestCase):
 
@@ -87,7 +88,7 @@ class EngineTestCase(unittest.TestCase):
 
 
     def check_weblib_defaults(self):
-
+        
         """Engine should ALWAYS create a new copy of the objects in
         weblib.. The only time we use the ones in weblib is if we're
         not inside an Engine."""
