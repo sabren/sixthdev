@@ -30,7 +30,7 @@ class App(object):
         # if still here, show any associated templates
         if self.tiles.get(m):
             tile = self.tiles[m]() # call to clear the lambda
-            tile.write(ctx)
+            ctx.res.write(tile.render(ctx.model))
         else:
             raise Exception("no template defined for %s method." % m)
         return ctx # for easy testing
