@@ -50,8 +50,9 @@ class RecordObject(zdc.Object):
         self._record.save()
 
         # some fields may be calculated, so update our attributes:
+        # use __dict__ to avoid overhead/errors with setattr
         for f in self._table.fields:
-            setattr(self, f.name, self._record[f.name])
+            self.__dict__[f.name] = self._record[f.name]
 
 
     #@TODO: test delete(), too...
@@ -68,10 +69,13 @@ class RecordObject(zdc.Object):
     def _new(self):
         self._record = zdc.Record(self._table)
         for f in self._record.table.fields:
+            
+            # populate with default values.
+            # use __dict__ to avoid overhead/errors with setattr
             if self._defaults.has_key(f.name):
-                setattr(self, f.name, self._defaults[f.name])
+                self.__dict__[f.name] =  self._defaults[f.name]
             else:
-                setattr(self, f.name, None)
+                self.__dict__[f.name] = None
 
 
     #@TODO: TEST THIS - it was just an off-the-top-of-my-head thing
@@ -79,7 +83,8 @@ class RecordObject(zdc.Object):
     def _fetch(self, **where):
         self._record = apply(zdc.Record, (self._table,), where)
         for f in self._record.table.fields:
-            setattr(self, f.name, self._record[f.name])
+            # use __dict__ to avoid overhead/errors with setattr
+            self.__dict__[f.name] = self._record[f.name]
 
 
 
