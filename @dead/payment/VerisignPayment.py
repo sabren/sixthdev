@@ -26,7 +26,12 @@ class VerisignPayment(payment.AbstractPayment):
                "problem reading from verisign.net: %s, %s" \
                % (errcode, errmsg)
         fp = h.getfile()
-        content = fp.read()
+
+        content = ""
+        chunk = "start"
+        while len(chunk) != 0:
+            chunk = fp.read()
+            content += chunk
         fp.close()
 
         return content
@@ -61,7 +66,7 @@ class VerisignPayment(payment.AbstractPayment):
             "LOGIN": self.merchant[0],
             "PARTNER": self.merchant[1],
             "CARDNUM": self.card,
-            "EXPDATE": self.expires,
+            "EXPDATE": self.expires[:2] + self.expires[3:], # strip "/"
             
             ## finally, the amount:
             "AMOUNT": amount,
@@ -69,7 +74,13 @@ class VerisignPayment(payment.AbstractPayment):
             }
 
         content = self._submit(values)
-
-        # @TODO: now parse the results
-        # 0523.2001: I couldn't do this because
-        # I don't get any kind of error message back!!
+        open("vs.out","w").write(content)
+        if content.find("<title>Declined") > -1:
+            self.result = payment.DENIED
+            self.error = "Unknown Reason" #@TODO: can I fix this?
+        elif content.find("<title>Transaction Approved") > -1:
+            self.result = payment.APPROVED
+            self.error = None
+        else:
+            self.result = payment.ERROR
+            self.error = "Unexpected results!"
