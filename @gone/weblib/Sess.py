@@ -60,6 +60,10 @@ class Sess(UserDict.UserDict):
             self.sid = self._getSid()
         else:
             self.sid = sid
+        #@TODO: this was an emergiceny hack. fix me!
+        from Cookie import Morsel
+        if isinstance(self.sid, Morsel):
+            self.sid = self.sid.value
         self._thaw()        
         self._gc()
 

@@ -1,5 +1,6 @@
 __ver__="$Id$"
 from weblib import Finished
+from Cookie import SimpleCookie, Morsel
 
 class Response(object):
     """
@@ -40,7 +41,11 @@ class Response(object):
         self.headers.append((key, value))
 
     def addCookie(self, key, value):
-        self.addHeader("Set-Cookie", key + "=" + value)
+        # @TODO: this was an emergecny hack. fix me!
+        if isinstance(value, Morsel):
+            self.addHeader("Set-Cookie", key + "=" + value.coded_value)
+        else:
+            self.addHeader("Set-Cookie", key + "=" + value)
 
     def redirect(self, url):
         self.addHeader("Status", "303")
