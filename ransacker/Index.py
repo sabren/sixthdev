@@ -90,6 +90,10 @@ class Index:
         return self.rki["k:"+label][0]
 
 
+    def getLabel(self, pageID):
+        return self.rki["i:"+`pageID`]
+
+
     def wordIDsOnPage(self, label):
         return self.rki["k:"+label][1:]
 
@@ -103,22 +107,25 @@ class Index:
         # @TODO: check whether we NEED to delete (eg, word might be in new text)
 
         for wordID in self.wordIDsOnPage(label):
-            pageIDs = list(self.pageIDsForWordID(wordID))
+            pageIDs = self.pageIDsForWordID(wordID)
             pageIDs.remove(self.getPageID(label))
-            self.rki[`wordID`]= pageIDs
-
+            self.rki[`wordID`]= ransacker.intListToStr(pageIDs)
 
 
     def linkPageToWord(self, label, word):
         wordID = self.wordHash.get(word)
-        if self.rki.has_key(`wordID`):
-            self.rki[`wordID`] = self.rki[`wordID`] + (self.getPageID(label),)
-        else:
-            self.rki[`wordID`] = (self.getPageID(label),)
+
+        pageIDs = []
+        if self.rki.has_key(str(wordID)):
+            pageIDs = self.pageIDsForWordID(wordID)
+
+        pageIDs.append(self.getPageID(label))
+        self.rki[str(wordID)] = ransacker.intListToStr(pageIDs)
+
 
 
     def pageIDsForWordID(self, wordID):
-        return self.rki[str(wordID)]
+        return ransacker.strToIntList(self.rki[str(wordID)])
 
 
 
@@ -156,26 +163,22 @@ class Index:
 
         for word in searchwords:
             if self.wordHash.has_key(word):
-                for item in self.rki[`self.wordHash[word]`]:
-                    if hits.has_key(item):
-                        hits[item] = res[item]+1
-                    else:
-                        hits[item] = 1
-                                    
+                wordID = self.wordHash[word]
+                for pageID in self.pageIDsForWordID(wordID):
+                    hits[pageID] = hits.get(pageID, 0) + 1
             else:
                 # this word wasn't found.
                 pass
 
 
-        # now we know the itemID's
-        # next, lets sort by relevance
+        # sort results by relevance
         res = hits.keys()
         res.sort(lambda a,b,h=hits: cmp(h[a],h[b]))
         
-        
-        # ... and turn the itemIDs into the corresponding alphanumeric keys
+
+        # get the labels for the pageIDs
         for i in range(len(res)):
-            res[i] = self.rki["i:"+`res[i]`]
+            res[i] = self.getLabel(res[i])
 
         return tuple(res)
 

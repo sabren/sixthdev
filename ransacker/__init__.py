@@ -14,7 +14,7 @@ def intListToStr(intList):
 
 def strToIntList(str):
     import array
-    return array.array("I", str).tolist()
+    return map(int, array.array("I", str).tolist())
 
 
 def wordFreqs(text):
