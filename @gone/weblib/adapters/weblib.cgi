@@ -1,4 +1,4 @@
-#!c:/python22/python
+#!/usr/bin/python
 """
 weblib.cgi : a wrapper script for weblib
 inspired by http://www.webtechniques.com/archives/1998/02/kuchling/
@@ -13,6 +13,10 @@ USAGE (Apache):
 SITE_MAIL = None # eg, webmaster@yoursite.com
 SITE_NAME = None # eg, "yoursite intranet"
 
+## use this to add custom lib directories:
+import sys
+sys.path = ["/home/sei/web/secure.sabren.com/sei/lib"] + sys.path
+
 #############################################
 
 import cgi
@@ -20,7 +24,7 @@ import os
 import os.path
 import string
 import StringIO
-import sys
+
 
 def scriptDir():
     res = os.environ["PATH_TRANSLATED"] # full path to script
