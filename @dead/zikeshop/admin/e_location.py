@@ -9,16 +9,6 @@ import zikebase
 import weblib
 import zdc
 
-class Location(zdc.RecordObject):
-    _table = zdc.Table(zikeshop.dbc, "shop_location")
-    _defaults = {'name':''}
-
-    def delete(self):
-        cur = self._table.dbc.cursor()
-        cur.execute("DELETE FROM shop_inventory WHERE locationID=%s" % self.ID)
-        zdc.RecordObject.delete(self)
-        
-
 
 def show(location):
 
@@ -45,16 +35,13 @@ def show(location):
 if __name__=="__main__":
     weblib.auth.check()    
     import header
-
+    
     #####################################################################
     ### note to self: TAKE THIS OUT BEFORE CHECKING IN ##################
     #####################################################################
-    Location._defaults["siteID"]=weblib.auth.user.siteID
+    zikeshop.Location._defaults["siteID"]=weblib.auth.user.siteID
 
-    if weblib.request.get("ID"):
-        ed = zikebase.ObjectEditor(Location, ID=weblib.request["ID"])
-    else:
-        ed = zikebase.ObjectEditor(Location)
+    ed = zikebase.ObjectEditor(zikeshop.Location, weblib.request.get("ID"))
     ed.act()
 
 

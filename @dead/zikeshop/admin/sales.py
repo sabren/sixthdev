@@ -56,7 +56,7 @@ print '''
 ##     print " CHECKED"
 ## print '>[none]</option>'
 #############PHP##########33333
-##             <? $db = new ShopDB;
+##             <? $db = new ShopsiteID;
 ##                $db->query("select * from affiliate order by affiliate");
 ##                while ($db->next_record()) {
 ##                  print '<option value="' . $db->f("ID") . '"';
@@ -162,7 +162,7 @@ print '''
 ##   # clunky, but it works... (love that bloat..)
 ##
 ##   if ($affiliateID) {
-##     $db = new ShopDB;
+##     $db = new ShopsiteID;
 ##     $db->query($sql);
 ##     $total = 0;
 ##     while ($db->next_record()){

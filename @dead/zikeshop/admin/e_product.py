@@ -109,11 +109,7 @@ if __name__=="__main__":
     zikeshop.Product._defaults["siteID"]=weblib.auth.user.siteID
     
     
-    if weblib.request.get("ID"):
-        ed = zikebase.ObjectEditor(zikeshop.Product, ID=weblib.request["ID"])
-    else:
-        ed = zikebase.ObjectEditor(zikeshop.Product)
-
+    ed = zikebase.ObjectEditor(zikeshop.Product, weblib.request.get("ID"))
     
     ## @TODO: make ObjectEditor robust enough to do type-checking ##
     ## @TODO: ObjectEditor should allow user to empty out a field.

@@ -45,13 +45,9 @@ if __name__=="__main__":
     #####################################################################
     Style._defaults["siteID"]=weblib.auth.user.siteID
 
-    if weblib.request.get("ID"):
-        ed = zikebase.ObjectEditor(Style, ID=weblib.request["ID"])
-    else:
-        ed = zikebase.ObjectEditor(Style)
-    prodID = ed.object.productID # for the v_product line, below
+    ed = zikebase.ObjectEditor(Style, weblib.request.get("ID"))
     ed.act()
-
+    prodID = ed.object.productID # for the v_product line, below
 
     if not weblib.request.get("action"):
         show(ed.object)

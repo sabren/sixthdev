@@ -27,28 +27,14 @@ if weblib.request.get("action")=="save":
         if (item[:4] == "qty_") and weblib.request[item]:
             prodID, styleID = string.split(item, "_")[1:]
             quantity[styleID] = int(weblib.request[item])
-            #@TODO: make product.price return a fixedpoint (probably doesn't because of ZDC accessor issue)
             sale.subtotal = sale.subtotal + \
-                            ( zikeshop.FixedPoint(zikeshop.Product(ID=prodID).price) \
+                            ( zikeshop.Product(ID=prodID).price \
                               * quantity[styleID])
 
-
-
     ## calculate sales tax.
-    ## start with nothing:
-    sale.salestax = 0
-    ## BUT... if they charge tax..
-    if weblib.request.get("usetax")=="yes":
-        ## @TODO: consolidate this with Cashier.py
-        ## @TODO: allow for POS in more than one state
-        cur.execute("SELECT rate FROM shop_state WHERE storeID=%i" \
-                    % weblib.auth.user.siteID )
+    store = zikeshop.Store(ID=zikeshop.siteID)
+    sale.salestax = store.calcSalesTax(store.address, sale.subtotal)
 
-        ## and we know what to charge...
-        if cur.rowcount:
-            ## then charge it:
-            sale.salestax = sale.subtotal \
-                            * (zikeshop.FixedPoint(cur.fetchone()[0]) / 100)
 
     # @TODO: add some generic validation routines to weblib (date, number, etc)
     try:
@@ -70,9 +56,6 @@ if weblib.request.get("action")=="save":
     sale.siteID = weblib.auth.user.siteID
     sale.save()
 
-
-    cur.execute("UPDATE shop_sale set tsSold=now() WHERE ID=%i" % sale.ID)
-
     import zdc
     for styleID in quantity.keys():
         style = zikeshop.Style(ID=styleID)
@@ -83,7 +66,7 @@ if weblib.request.get("action")=="save":
             VALUES (%i, %i, '%s {%s}', %i, %s)
             """ \
             % (sale.ID, style.ID, prod.name, weblib.deNone(style.style),
-               quantity[styleID], prod.price)
+               quantity[styleID], str(prod.price))
             )
 
 
@@ -143,6 +126,4 @@ else:
 
     print '<input type="submit" name="action" value="save">'
     print '</form>'
-
-
 

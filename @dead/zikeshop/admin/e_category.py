@@ -73,10 +73,7 @@ if __name__=="__main__":
     zikebase.load("Node")
     zikebase.Node._defaults["siteID"]=weblib.auth.user.siteID
 
-    if weblib.request.get("ID"):
-        ed = zikebase.ObjectEditor(zikebase.Node, ID=weblib.request["ID"])
-    else:
-        ed = zikebase.ObjectEditor(zikebase.Node)
+    ed = zikebase.ObjectEditor(zikebase.Node, weblib.request.get("ID"))
     ed.act()
 
 
