@@ -4,7 +4,6 @@ A base class for web pages that act differently based on a parameter.
 __ver__ = "$Id$"
 
 #@TODO: subclass that uses Signature to pass values to act_XXX?
-import weblib
 
 class Actor:
     """
@@ -156,9 +155,13 @@ class Actor:
         if url:
             self.where["gohere"]=url
         else:
-            self.where["gohere"]="%s?action=%s" % \
-                                  (weblib.request.environ["REQUEST_URI"],
-                                   action)
+            import string, weblib
+            # this next bit is so, in case the current page is a GET with a ? in it..
+            # (otherwise, we'd pass the querystring to the next page - a recipe for disaster!)
+            me = string.split(weblib.request.environ["REQUEST_URI"], "?")[0]
+
+            # okay.. no go there.
+            self.where["gohere"]="%s?action=%s" % (me, action)
         self.next  = ("jump", {"where":"gohere"})
 
 
