@@ -4,14 +4,24 @@
 
 class Record:
 
-    def __init__(self, dbc, table):
+    def __init__(self, dbc, table, module=None, rowid='ID'):
         self.dbc = dbc
         self.table = table
-        self.key = None
+        self.rowid = "ID"   # this is the 'autonumber' field, if any
+        self.key = None     # either a numeric value for an "ID" field, or a dict
         self.fields = self._getFields()
-        self._values = {}
-        self._defaults = {}
-
+        self.values = {}
+        self.quoteEscape = "'"
+        if module:
+            self.dbcModule = module
+        else:
+            try:
+                module = dbc.__class__.__module__
+                exec('import ' + module)
+                self.dbcModule = eval(module)
+            except:
+                raise "Couldn't guess DB-API module. Pass module as 3rd parameter to Record()"
+ 
     ##############################
     # PUBLIC METHODS             #
     ##############################
@@ -28,16 +38,17 @@ class Record:
 
     def new(self):
         """Prepare to add a new record."""
-        self.key = ''
-        self.values = {}
+        self.key = None
+        for f in self.fields:
+            self.values[f.name] = f.default
 
 
-    def delete(self, key=''):
-        """Deletes the specified (defaultis current) record. """
-        if key != '':
+    def delete(self, key=None):
+        """Deletes the specified (default is current) record. """
+        if key is not None:
             self.key = key
         else:
-            pass  # we'll delete the current record.
+            pass  # because we'll just delete the current record.
 
         # and delete it
         sql = "DELETE FROM  " + self.table + \
@@ -47,7 +58,7 @@ class Record:
 
     def save(self):
         """Inserts or Updates the record."""
-        if self.key == '':
+        if self.key is None:
             self._insert()
         else:
             self._update()
@@ -57,11 +68,30 @@ class Record:
     # PRIVATE METHODS            #
     ##############################
 
-    def _sqlQuote(self, field, value):
-        """Figures out whether to put '' around a value or not."""
-        #@TODO: add quotes for strings..
-        #@TODO: make it escape quotes inside of strings
-        return value
+    def _sqlQuote(self, field, value=None):
+        """Figures out whether to put '' around a value or not.
+        field is an actual field object
+        value is the value to quote, or None to quote the record's value for the field
+        """
+
+        res = ''
+        if value is None:
+            value = self[field.name]
+        
+        #@TODO: handle BINARY/DATE types explicitly
+        if field.type == self.dbcModule.NUMBER:
+            res = `value`
+        else: # should be elif ... STRING
+            res = "'"
+            for c in value:
+                # escape quotes:
+                if c == "'":
+                    res = res + self.quoteEscape + c
+                else:
+                    res = res + c
+            res = res + "'"
+        
+        return res
 
     def _whereClause(self):
         res = ""
@@ -70,7 +100,8 @@ class Record:
         elif type(self.key) == type({}):
             #@TODO: handle quotes for strings, etc..
             for f in self.key.keys():
-                res = res + "AND " + f + "=" + self.keys[f]
+                print "#######F: ", f
+                res = res + "AND " + f + "=" + _sqlQuote(self.fields[f], self.keys[f])
             res = "(" + res[4:] + ")"
         else:
             raise "Invalid key."
@@ -99,21 +130,37 @@ class Record:
     def _update(self):
         pass
 
+
     def _insert(self):
-        pass
+        sql = "INSERT INTO " + self.table + " ("
+
+        vals = ''
+        # .. and the fieldnames :
+        for f in self.fields:
+            # @TODO: fix this to handle non-"ID"-style schemas (see _whereClause)
+            if f.name != "ID":
+                sql = sql + f.name + ","
+                # let's do fields and values at once
+                vals = vals + self._sqlQuote(f) + ","
+
+        # chop off those last commas:
+        sql = sql[:-1] + ") VALUES (" + vals[:-1] + ")"
+
+        cur = self.dbc.cursor()
+        self.dbc.insert_id()
+        cur.execute(sql)                    
 
 
     ##############################
     # DICTIONARY METHODS         #
     ##############################
 
-    def __getitem__(self, key):
-        return self._values[key]
+    def __getitem__(self, fld):
+        return self.values[fld]
     
-    def __setitem__(self, key, value):
-        self.values[key] = value
+    def __setitem__(self, fld, value):
+        self.values[fld] = value
 
-    def __delitem__(self, key):
-        del self.value[key]
-
+    def __delitem__(self, fld):
+        del self.value[fld]
 
