@@ -91,7 +91,9 @@ class Stealthbox(object):
         """
         This lets us initialize our attributes from the constructor.
         """
+        self.private.isDirty = 1  # start out dirty so we get saved.
         self.update(**args)
+        
 
     def update(self, **args):
         #@TODO: add "update" method to strongbox spec.
@@ -123,6 +125,7 @@ class Stealthbox(object):
             self.__values__[name] = self.__attrs__[name].sanitize(value)
         else:
             self.__invalid(name)
+        self.private.isDirty = 1
 
     def __getattr__(self, name):
         if self.__values__.has_key(name):

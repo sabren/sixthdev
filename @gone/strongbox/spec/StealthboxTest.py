@@ -279,6 +279,25 @@ class StealthboxTest(unittest.TestCase):
         f.s = ""; assert f.s is ""
         f.d = ""; assert f.d is None
 
+        
+    def check_isDirty(self):
+        """
+        this is for arlo...
+        """
+        class Dirt(Strongbox):
+            x = attr(str)
+        d = Dirt()
+        # we start out dirty so that we get saved
+        # (even if we're blank!)
+        assert d.private.isDirty
+        d = Dirt(x="dog")
+        assert d.private.isDirty
+
+        # but if something marks us clean, and then
+        # we change, we should be dirty again!
+        d.private.isDirty = 0
+        d.x = "cat"
+        assert d.private.isDirty
        
     def tearDown(self):
         pass
