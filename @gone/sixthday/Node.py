@@ -4,7 +4,7 @@ Generic class for hierarchical structures.
 __ver__="$Id$"
 
 import sixthday
-from strongbox import Strongbox, attr, link, forward
+from strongbox import *
 
 
 ##----------------------------------------------
@@ -19,11 +19,17 @@ class Node(Strongbox):
     path = attr(str)
     note = attr(str)
     parent = link(forward)
+    children = linkset(forward)
 
-    def set_path(self, value):
-        # only allow setting once
-        if self.__values__["path"]:
-            raise AttributeError, "Node.path is read only"
+    def __init__(self, **kwargs):
+        self.private.named = 0
+        super(Node, self).__init__(**kwargs)
+
+        
+##     def set_path(self, value):
+##         # only allow setting once
+##         if self.__values__["path"]:
+##             raise AttributeError, "Node.path is read only"
 
     def get_crumbs(self):
         res = []
@@ -38,18 +44,18 @@ class Node(Strongbox):
 ##         assert value is not self, \
 ##                "A node can't be its own parent!"
 
-##     def _updatePaths(self, parent=None):
-##         # this is a recursive version.. It's probably really slow.
-        
-##         if parent:
-##             self._data["path"] = parent.path + "/" + self.name
-##         else:
-##             self._data["path"] = self.name
+    def set_name(self, value):
+        self.__values__["name"]=str(value)
+        if self.private.named:
+            self._updatePath(self.crumbs)
+        self.private.named = 1
 
-##         super(Node,self).save()
         
-##         for kid in self.q_children():
-##             child = Node(self._ds, ID=kid["ID"])
-##             child._updatePaths(parent=self)
-##             child.save()  
+    def _updatePath(self, crumbs):
+        path = crumbs + [self]
+        self.path = "/".join([n.name for n in path])
+        for kid in self.children:
+            kid._updatePath(path)
+
 Node.__attrs__["parent"].type=Node
+Node.__attrs__["children"].type=Node

@@ -6,22 +6,23 @@ from sixthday import Node
 class NodeTest(unittest.TestCase):
 
     def setUp(self):
-        self.clerk = arlo.MockClerk()
+        self.clerk = arlo.MockClerk(dbmap={
+            Node.__attrs__["parent"]: (Node, "parentID"),
+            Node.__attrs__["children"]: (Node, "parentID"),
+            })
         s = self.clerk.storage
         
         # we use the storage object so we can define the
         # database without dealing with read-only attribures (path)
-        s.store("Node", name='top', path='top')
+        s.store("Node", name='top', path='top', parentID=0)
         s.store("Node", name='sub', path='top/sub', parentID=1)
         s.store("Node", name='subsub', path='top/sub/sub', parentID=2)
 
+        #import pdb; pdb.set_trace()
+
     def check_crumbs(self):
         node = self.clerk.fetch(Node, 1)
-
-        assert node.crumbs == 1
-        
-        goal = []
-        assert node.crumbs == goal, \
+        assert node.crumbs == [], \
                "Didn't get right crumbs for node 1."
 
         node = self.clerk.fetch(Node, ID=3)
@@ -31,13 +32,12 @@ class NodeTest(unittest.TestCase):
                "Didn't get right crumbs for node 3."
         
 
-##     def check_path(self):
-##         node = self.clerk.fetch(Node, 2)
-##         node.name="subnode"
-##         self.clerk.store(node)
-
-##         assert node.path == "top/subnode", \
-##                "Node has wrong path after name change: %s" % node.path
+    def check_path(self):
+        node = self.clerk.fetch(Node, 2)
+        node.name="subnode"
+        node = self.clerk.store(node)
+        assert node.path == "top/subnode", \
+               "Node has wrong path after name change: %s" % node.path
 
 
 
@@ -48,7 +48,6 @@ class NodeTest(unittest.TestCase):
 ##             node.path = "XXXX"
 ##         except TypeError:
 ##             gotError = 1
-
 ##         assert (gotError) and (node.path != "XXXX"), \
 ##                "Node.path is supposed to be read only!"
             
@@ -73,13 +72,13 @@ class NodeTest(unittest.TestCase):
 
         
 
-##     def check_parent(self):
-##         node = self.clerk.fetch(Node, 2)
-##         assert isinstance(node.parent, Node), \
-##                ".parent doesn't return a Node"    
+    def check_parent(self):
+        node = self.clerk.fetch(Node, 2)
+        assert isinstance(node.parent, Node), \
+               ".parent doesn't return a Node"    
 
 
-##     def check_recusionCheck(self):
+##     def check_recursionCheck(self):
 
 ##         # if you assign a node to itself, it's bad juju,
 ##         # because of the check for children, you can
