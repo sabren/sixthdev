@@ -162,6 +162,7 @@ def urlDecode(what):
 # disappears, and all the user sees is that weblib has
 # a bunch of classes defined.
 
+from Actor import Actor
 from Engine import Engine
 from Request import Request
 from Response import Response

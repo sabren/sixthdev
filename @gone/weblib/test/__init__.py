@@ -4,7 +4,7 @@ test framework for weblib
 $Id$
 """
 
-
+from testActor import *
 from testRequest import *
 from testResponse import *
 from testSess import *
@@ -21,6 +21,7 @@ from testScript import *
 from sqlTest import dbc
 
 suites = {
+    "actor" : unittest.makeSuite(ActorTestCase, "check_"),
     "request" : unittest.makeSuite(RequestTestCase, "check_"),
     "response" : unittest.makeSuite(ResponseTestCase, "check_"),
     "sess" : unittest.makeSuite(SessTestCase, "check_"),
