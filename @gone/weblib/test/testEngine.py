@@ -119,7 +119,6 @@ class EngineTestCase(unittest.TestCase):
             """))
 
         eng.run()
-        print eng.response.buffer
         
 
     def check_weblib_assigned(self):
