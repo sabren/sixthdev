@@ -27,8 +27,8 @@ class OutputDecorator(object):
 
     #@TODO: consolidate html and plain text error reports?
     def sendError(self):
-        SITE_MAIL = self.eng.locals["SITE_MAIL"]
-        SITE_NAME = self.eng.locals["SITE_NAME"]
+        SITE_MAIL = self.eng.globals["SITE_MAIL"]
+        SITE_NAME = self.eng.globals["SITE_NAME"]
         assert SITE_MAIL is not None, "must define SITE_MAIL first!"
         hr = "-" * 50 + "\n"
         msg = trim(
