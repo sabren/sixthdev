@@ -2,7 +2,8 @@
 # test framework for zikebase
 
 import MySQLdb
-from sqlTest import dbc
+import zikebase.config
+dbc = zikebase.config.test_dbc
 
 from testContent import *
 from testNode import *
