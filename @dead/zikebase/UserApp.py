@@ -11,8 +11,5 @@ class UserApp(zikebase.AppActor):
     def act_create(self):
 
         # create the user:
-        user = zikebase.User()
-        user.username = self.input['username']
-        user.password = self.input['password']
-        user.email = self.input['email']
-        user.save()
+        ed = zikebase.ObjectEditor(zikebase.User, input=self.input)
+        ed.do("save")

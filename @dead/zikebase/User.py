@@ -22,6 +22,8 @@ class User(zikebase.Contact):
         self._userRec = zdc.Record(
             zdc.Table(zikebase.dbc, "base_user"))
 
+    def getEditableAttrs(self):
+        return self.__super.getEditableAttrs(self) + ['username', 'password']
         
     def _fetch(self, key=None, **kw):
         keys = kw.keys()
