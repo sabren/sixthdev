@@ -3,11 +3,16 @@ import zdc
 import zikebase
 
 class Node(zdc.RecordObject):
+    __super = zdc.RecordObject
     _table = zdc.Table(zikebase.dbc, "base_node")
     _tuples = ["crumbs", "children"] # @TODO: clean this up!
-    _defaults = {"parentID" : 0,
-                 "path" : ""}
 
+    def _new(self):
+        self.__super._new(self)
+        self.name = ''
+        self.descript = ''
+        self.parentID = 0
+        self._data['path'] = ''
 
     def get_crumbs(self):
         #@TODO: how do i handle stuff like this????????????????
