@@ -169,17 +169,18 @@ else:
         print '<li>cookie: %s</li>' % eng.request.cookie
         print '</ul>'
 
-	print '<b>session data:</b><br>'
-        print '<ul>'
+        if eng.globals.has_key("SESS"):
+            print '<b>session data:</b><br>'
+            print '<ul>'
 
-	for item in eng.sess.keys():
-            print '<li>', item, ': '
-            try:
-               print eng.sess[item]
-            except:
-               print '(can\'t unpickle)'
-	    print '</li>'
-        print '</ul>'
+            for item in eng.globals["SESS"].keys():
+                print '<li>', item, ': '
+                try:
+                   print eng.globals["SESS"][item]
+                except:
+                   print '(can\'t unpickle)'
+                print '</li>'
+            print '</ul>'
 	
         print "<b>script output:</b>"
         print '<pre class="output">' + \
