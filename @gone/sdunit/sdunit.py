@@ -9,10 +9,9 @@ import unittest
 ## custom pyunit classes #########################
 
 class SixthDayTestResult(unittest._TextTestResult):
-    def printHeader(self):
-        if self.errors or self.failures:
-            print
-            print 
+    def __init__(self, stream):
+        unittest._TextTestResult.__init__(self, stream, 1, 1)
+
 
 class SixthDayTestRunner(unittest.TextTestRunner):
     def __init__(self):
@@ -21,8 +20,9 @@ class SixthDayTestRunner(unittest.TextTestRunner):
     def run(self, test):
         result = SixthDayTestResult(self.stream)
         test(result)
-        result.printResult()
+        result.printErrors()
         return result
+
 
 ## helper functions  #############################
 
@@ -57,6 +57,6 @@ if __name__=="__main__":
         for suite in testmodule.suites.keys():
             print "** testing", suite + ": ",
             SixthDayTestRunner().run(testmodule.suites[suite])
-            print
     else:
         print "no test suite found."
+
