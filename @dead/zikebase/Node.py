@@ -48,12 +48,8 @@ class Node(zdc.RecordObject):
     def q_children(self):
         #@TODO: raise "q_children is deprecated"
         res = []
-        cur = self._table.dbc.cursor()
         if self.ID is not None:
-            cur.execute("select ID from base_node where parentID=%s" % self.ID)
-            for row in cur.fetchall():
-                node = Node(ID=row[0])
-                res.append( {"ID": node.ID, "name": node.name, "path": node.path } )
+            res = self._table.select(parentID=self.ID)
         return res
 
 
