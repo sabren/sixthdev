@@ -9,24 +9,32 @@ class MockStorageTest(unittest.TestCase):
     def check_store_insert(self):
         row = self.s.store("test_person", name="fred")
         assert row == {"ID":1, "name":"fred"}
+
         row = self.s.store("test_person", name="wanda")
         assert row == {"ID":2, "name":"wanda"}
 
-    def check_store_update(self):
-        row = self.s.store("test_person", name="frid")
-        assert len(self.s.match("test_person")) == 1
+        assert self.wholedb()==[{"ID":1, "name":"fred"},
+                                {"ID":2, "name":"wanda"}]
 
-        row["name"] = "fred"
+    def populate(self):
+        self.check_store_insert()
+
+    def wholedb(self):
+        return self.s.match("test_person")
+
+    def check_store_update(self):
+        self.populate()
+        row = self.s.fetch("test_person", 1)
+        row["name"] = "frood"
         self.s.store("test_person", **row)
-        assert len(self.s.match("test_person")) == 1, "didn't update"
+        assert self.wholedb() == [{"ID":1, "name":"frood"},
+                                  {"ID":2, "name":"wanda"}]        
 
     def check_match(self):
-        assert self.s.match("test_person") == []
-        self.check_store_insert()
+        assert self.wholedb() == []
+        self.populate()
         results = self.s.match("test_person", ID=1)
-        assert len(results) == 1, results
-        fred = results[0]
-        assert fred["name"] == "fred"
+        assert results == [{"ID":1, "name":"fred"}], str(results)
 
     def check_fetch(self):
         self.check_store_insert()
