@@ -7,8 +7,9 @@ INDEX = "spec/newprof"
 FILE  = "test/profile.this"
 
 #CLASS = ransacker.AllMkIndex
-CLASS = ransacker.MkIndex
-
+#CLASS = ransacker.MkIndex
+#CLASS = ransacker.Index
+idx = ransacker.SQLiteIndex(INDEX + ".rk")
 
 # make sure we have a fresh index
 for ext in [".rki", ".rkw", ".rkp"]:
@@ -19,19 +20,22 @@ for ext in [".rki", ".rkw", ".rkp"]:
 
 
 txt = open(FILE).read()
-idx = CLASS(INDEX)
 
 
 print "START PASS1:", now()
-profile.run('idx.add("pass1", txt)')
+profile.run('idx.addDocument("pass1", txt)')
 print "DONE:", now()
 
-# do it again, but with an existing word file
-del idx
-os.unlink(INDEX+".rki")
-idx = CLASS(INDEX)
+#sys.exit()
 
-print "START PASS2:", now()
-profile.run('idx.add("pass2", txt)')
-print "DONE:", now()
+
+## # do it again, but with an existing word file
+## del idx
+## if os.path.exists(INDEX+".rki"):
+##     os.unlink(INDEX+".rki")
+## idx = CLASS(INDEX)
+
+## print "START PASS2:", now()
+## profile.run('idx.addDocument("pass2", txt)')
+## print "DONE:", now()
 
