@@ -15,7 +15,7 @@ class AuthorizeNetPaymentTestCase(unittest.TestCase):
                               test = 1,
                               merchant = test.merchant["AuthorizeNet"],
                               card = "4222222222222",
-                              expires = "02/03")
+                              expires = "02/2003")
 
         acct.charge(1)
         assert acct.result == payment.APPROVED, \

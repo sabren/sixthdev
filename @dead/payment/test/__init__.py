@@ -8,6 +8,7 @@ __ver__="$Id$"
 ## account, so you'll have to override this yourself:
 merchant = {
     "AuthorizeNet" : None,
+    "Verisign" : ("zikeinteract","accessbak"),
     }
 
 ## Here's a simple way to override it without
@@ -26,6 +27,7 @@ except:
 
 from testAbstractPayment import *
 from testAuthorizeNetPayment import *
+from testVerisignPayment import *
 import unittest
 
 suites = {
@@ -35,7 +37,7 @@ suites = {
 for key in merchant.keys():
     if merchant[key]:
         suites[key] = \
-            unittest.makeSuite(locals()[key + "AbstractPaymentTestCase"],
+            unittest.makeSuite(locals()[key + "PaymentTestCase"],
                                "check_")
     else:
         print "skipping %s since no test merchant defined." % key

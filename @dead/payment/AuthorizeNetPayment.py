@@ -46,8 +46,7 @@ class AuthorizeNetPayment(payment.AbstractPayment):
             ## then the Payment stuff:
             "x_login": self.merchant,
             "x_Card_Num": self.card,
-            "x_Exp_date": "0101",
-            
+            "x_Exp_date": self.expires,
 
             ## finally, the amount:
             "x_Amount": amount,
