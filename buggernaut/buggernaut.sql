@@ -30,9 +30,14 @@ CREATE TABLE base_contact (
 );
 
 CREATE TABLE plan_goal (
-  ID int(11) DEFAULT '0' NOT NULL auto_increment,
-  label varchar(32),
-  PRIMARY KEY (ID)
+  ID int(11) NOT NULL auto_increment,
+  parentID int(11) DEFAULT '0' NOT NULL,
+  label varchar(50) DEFAULT '' NOT NULL,
+  descript varchar(255),
+  path varchar(255) DEFAULT '' NOT NULL,
+  PRIMARY KEY (ID),
+  KEY parentID (parentID),
+  KEY path (path)
 );
 
 
