@@ -1,3 +1,5 @@
+*# form for editing contacts (addresses)
+*# $Id$
 * exec:
     REQ = '<span style="color:red">*</span> '
 
