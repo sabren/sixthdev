@@ -147,7 +147,7 @@ class Clerk:
             try:
                 if isinstance(item[0], LinkInjector):
                     return 1
-                if isinstance(item[0], LinSetInjector):
+                if isinstance(item[0], LinkSetInjector):
                     return 1
             except Exception, e:
                 raise Exception, "'%s' is invalid injector(??): %s" \
