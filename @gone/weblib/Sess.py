@@ -167,15 +167,17 @@ class Sess:
         sid = None
         
         # first try to get the sid from the browser..
-        try:
-            if self.mode == "cookie":
-                sid = self.engine.request.cookie[self.name]
-            elif self.mode == "get":
-                sid = self.engine.request.querystring[self.name]
-            else:
-                raise "Unknown Sess.mode: " + self.mode
-        except KeyError:
-            pass
+        for mode in (self.mode, self.fallbackMode):
+            if sid is None:
+                try:
+                    if mode == "cookie":
+                        sid = self.engine.request.cookie[self.name]
+                    elif mode == "get":
+                        sid = self.engine.request.query[self.name]
+                    else:
+                        raise "Unknown mode: " + mode
+                except KeyError:
+                    pass
 
         # if that didn't work, just make one up..
         if sid is None:

@@ -1,8 +1,7 @@
 """
 testSess.py - unit tests for weblib.Sess
-
-$Id$
 """
+__ver__="$Id$"
 
 import unittest
 import weblib
@@ -20,7 +19,8 @@ class SessTestCase(unittest.TestCase):
         self.sess.start(sid)
 
     def check_engine(self):
-        assert self.sess.engine==weblib, "sess.engine doesn't default to weblib. :/"
+        assert self.sess.engine==weblib, \
+               "sess.engine doesn't default to weblib. :/"
 
 
     def check_sid(self):
@@ -71,7 +71,8 @@ class SessTestCase(unittest.TestCase):
 
         del self.sess["cat"]
 
-        assert self.sess.get("cat") is None, "Didn't delete key from warmData"
+        assert self.sess.get("cat") is None, \
+               "Didn't delete key from warmData"
 
         self.sess["cat"] = "indy"
         self.sess.stop()
@@ -79,7 +80,8 @@ class SessTestCase(unittest.TestCase):
         self.setUp("deltest")
         del self.sess["cat"]
 
-        assert self.sess.get("cat") is None, "Didn't delete key from coldData"
+        assert self.sess.get("cat") is None, \
+               "Didn't delete key from coldData"
 
 
     def check_url(self):
@@ -90,6 +92,25 @@ class SessTestCase(unittest.TestCase):
                "sess.url() doesn't encode correctly.."
         
 
+    def check_getSid(self):
+        oldreq = self.sess.engine.request
+        req = weblib.Request(cookie={"weblib.Sess":"123"},
+                             querystring="weblib.Sess=ABC")
+
+        self.sess.engine.request = req
+        actual = self.sess._getSid()
+        assert actual == "123", \
+               "getSid doesn't read the cookie: %s.." % actual
+
+        req = weblib.Request(querystring="weblib.Sess=ABC")
+        self.sess.engine.request = req
+        actual = self.sess._getSid()
+        assert actual == "ABC", \
+               "getSid doesn't read the querystring (fallback): %s" % actual
+
+
+        # clean up so as not to affect other tests..
+        self.sess.engine.request = oldreq
 
     def tearDown(self):
         del self.sess
