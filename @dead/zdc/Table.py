@@ -5,16 +5,15 @@ __ver__="$Id$"
 
 import zdc
 
-class Table(zdc.Object):
+class Table:
 
     ## constructor ##############################################
                        
     def __init__(self, dbc, name, rowid="ID"):
-        super(Table,self).__init__()       
-        self._data["dbc"] = dbc
-        self._data["name"] = name
-        self._data["fields"] = self.dbc.fields(self.name)
-        self._data["rowid"] = rowid
+        self.name = name
+        self.rowid = rowid
+        self.dbc = dbc
+        self.fields = self.dbc.fields(self.name)
 
     ## public methods ###########################################
 

@@ -3,9 +3,6 @@ zdc: zike data classes (wrapper for python db-api 2.0)
 """
 __ver__="$Id$"
 
-from Object import Object
-
-# these build on the above:
 from Field import Field
 from Table import Table
 from Record import Record

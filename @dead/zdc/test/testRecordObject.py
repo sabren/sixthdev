@@ -6,9 +6,12 @@ __ver__="$Id$"
 import unittest
 import zdc.test
 import zdc
+from strongbox import attr
 
 class Fish(zdc.RecordObject):
     _tablename="test_fish"
+    ID = attr(long)
+    fish = attr(str)
 
 class RecordObjectTestCase(unittest.TestCase):
 

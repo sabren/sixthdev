@@ -5,12 +5,16 @@ __ver__="$Id$"
 import unittest
 import zdc
 
+
+class Whatever:
+    pass
+
 class LinkSetTestCase(unittest.TestCase):
 
     def setUp(self):
         # a link between two objects:
-        self.obj = zdc.Object()
-        self.lset = zdc.LinkSet(self.obj, zdc.Object)
+        self.obj = Whatever()
+        self.lset = zdc.LinkSet(self.obj, Whatever)
 
     def check_constructor(self):
         """
@@ -20,7 +24,7 @@ class LinkSetTestCase(unittest.TestCase):
                "wrong default length"
         assert self.lset.owner is self.obj, \
                "wrong owner"
-        assert self.lset.rClass is zdc.Object, \
+        assert self.lset.rClass is Whatever, \
                "wrong rClass"
 
     def check_lshift(self):
@@ -43,7 +47,7 @@ class LinkSetTestCase(unittest.TestCase):
 
         ## make sure the right thing does work
         try:
-            obj = zdc.Object()
+            obj = Whatever()
             gotError=0
             self.lset << obj
         except:

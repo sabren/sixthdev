@@ -1,18 +1,17 @@
-"""
-zdc.RecordObject - a simple Object that uses only one record for its data
-"""
-__ver__="$Id$"
-
-import zdc.Object
+import zdc
 import types
+from strongbox import Strongbox
 
-class RecordObject(zdc.Object):
+class RecordObject(Strongbox):
+    """
+    zdc.RecordObject - a simple Object that uses only one record for its data
+    """
+    __ver__="$Id$"
+
 
     ## static attributes ############################################
 
     _tablename = None
-    
-    _record = None
     _tuples = []
     __key__ = "ID"
 
@@ -43,6 +42,14 @@ class RecordObject(zdc.Object):
             self.__dict__['_ds'] = ds
             self.__dict__['_table'] = zdc.Table(self._ds, self._tablename)
 
+            # old-style compatability:
+            self.__dict__['_data'] = self.__values__
+            self.__dict__['_record'] = None
+
+        if where:
+            self._fetch(**where)
+        else:
+            self._new()
 
         # if all's well, go ahead with the init:
         super(RecordObject, self).__init__(**where)
@@ -113,7 +120,6 @@ class RecordObject(zdc.Object):
         just assigned. BUT, make sure your new version calls this one or
         otherwise handles defaults.
         """
-        
         self.__dict__['_record'] = zdc.Record(self._table)
         for f in self._record.table.fields:
             self._data[f.name] = None

@@ -4,6 +4,7 @@ unit tests for zdc.Junction
 __ver__="$Id$"
 import unittest
 import zdc
+from strongbox import attr
 
 class Left(zdc.RecordObject):
     """
@@ -11,6 +12,7 @@ class Left(zdc.RecordObject):
     """
     __super = zdc.RecordObject
     _tablename = "test_left"
+    ID = attr(long)
 
     def _new(self):
         self._super._new(self)
@@ -32,6 +34,7 @@ class Right(zdc.RecordObject):
     """
     __super = zdc.RecordObject
     _tablename = "test_right"
+    ID = attr(long)
 
     def _new(self):
         self._super._new(self)

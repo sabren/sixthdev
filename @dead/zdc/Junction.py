@@ -45,7 +45,7 @@ class Junction(IdxDict):
         load the junction data..
         """
         for row in self._getRows():
-            obj = self.rClass(self.owner._ds, "okfornow", ID=row[self.rKey])
+            obj = self.rClass(self.owner._ds, ID=row[self.rKey])
             self << obj
 
     def save(self):
