@@ -1,7 +1,3 @@
-#@+leo
-
-#@+node:0::@file StealthboxTest.py
-#@+body
 """
 test cases for Strongbox
 """
@@ -15,13 +11,9 @@ class StealthboxTest(unittest.TestCase):
 
     def setUp(self):
         pass
-        
 
-    #@+others
-    #@+node:1::Strongbox uses metaclasses to provide its magic
-    #@+body
-    #@+at
-    # 
+    ## Strongbox uses metaclasses to provide its magic
+
     # Strongbox is a Metaclass
     # 
     # What's a metaclass? It's a class representing a class.
@@ -37,24 +29,15 @@ class StealthboxTest(unittest.TestCase):
     # 
     # But it should look just like a normal class:
 
-    #@-at
-    #@@code
-    
     def check_looks_like_a_class(self):
         class X(Strongbox):
             pass
         assert isinstance(X(), Strongbox)
-    #@-body
-    #@-node:1::Strongbox uses metaclasses to provide its magic
-    #@+node:2::Strongbox attributes are defined as class variables
-    #@+body
-    #@+at
-    # 
+
+    ## Strongbox attributes are defined as class variables
+
     # Attributes must be present in the class definition.
 
-    #@-at
-    #@@code
-    
     def check_slots(self):
         class Slotmachine(Strongbox):
             a = attr(int, default=1)
@@ -68,18 +51,13 @@ class StealthboxTest(unittest.TestCase):
         except AttributeError:
            err = 1
         assert err, "assigning to nonexistent slot d should have failed."
-    #@-body
-    #@-node:2::Strongbox attributes are defined as class variables
-    #@+node:3::Strongbox turns accessors into properties
-    #@+body
-    #@+at
-    # 
+
+
+    ## Strongbox turns accessors into properties
+
     # Specifically, it should automatically create properties from
     # methods called get_XXX and set_XXX:
 
-    #@-at
-    #@@code
-    
     def check_properties(self):
         class X(Strongbox):
             def get_a(self): return 1
@@ -93,29 +71,23 @@ class StealthboxTest(unittest.TestCase):
         instance.c = 3
         assert instance.c == 0 # see check_default_defaults
         assert instance.d == 4, instance.d
-    #@-body
-    #@-node:3::Strongbox turns accessors into properties
-    #@+node:4::Private variables are explicitly private
-    #@+body
-    #@+at
-    # 
+
+
+    ## Private variables are explicitly private
+
     # All strongbox instances have a "private" namespace, which
     # lets them store private variables explicitly. (This is necessary
     # because self.xxx = yyy would cause an AttributeError if xxx is
     # not defined up front as an attrbute)
 
-    #@-at
-    #@@code 
     def check_private(self):
         s = Strongbox()
         assert hasattr(s, "private")
         s.private.c = 1
         assert s.private.c == 1
-    #@-body
-    #@-node:4::Private variables are explicitly private
-    #@+node:5::Attributes have defaults, but can be initialized via the constructor
-    #@+body
-    
+
+
+    ## Attributes have defaults, but can be initialized via the constructor
     
     def check_defaults(self):
         class Foo(Strongbox):
@@ -128,11 +100,10 @@ class StealthboxTest(unittest.TestCase):
             bar = attr(int, default=5)  
         foo = Foo(bar=12)
         assert foo.bar == 12
-    #@-body
-    #@-node:5::Attributes have defaults, but can be initialized via the constructor
-    #@+node:6::Without explicit defaults, strings default to '', ints and longs to 0
-    #@+body
-    
+
+
+    ## Without explicit defaults, strings default to '', ints and longs to 0
+
     def check_default_defaults(self):
         class Foo(Strongbox):
             m_str = attr(str)
@@ -148,10 +119,8 @@ class StealthboxTest(unittest.TestCase):
         assert foo.m_float == 0
         assert foo.n_int is None
         assert foo.n_str is None
-    #@-body
-    #@-node:6::Without explicit defaults, strings default to '', ints and longs to 0
-    #@+node:7::Other types pass defaults to the constructor
-    #@+body
+
+    ## Other types pass defaults to the constructor
     
     def check_othertypes(self):
         class UpCase:
@@ -164,10 +133,9 @@ class StealthboxTest(unittest.TestCase):
         foo = Foo()
         assert foo.bar == "XYZ", foo.bar
         assert foo.abc == "xyz", foo.abc
-    #@-body
-    #@-node:7::Other types pass defaults to the constructor
-    #@+node:8::Attributes use static typing
-    #@+body
+
+
+    ## Attributes use static typing
     
     def check_static_typing(self):
         class Foo(Strongbox):
@@ -218,18 +186,13 @@ class StealthboxTest(unittest.TestCase):
             elmer.ssn = "867-5309"
         except ValueError:
             goterr = 1
-        assert goterr, "ssn regexp should reject even the most famous phone number in america..."
-    #@-body
-    #@-node:8::Attributes use static typing
-    #@+node:9::Attributes allow "None" by default
-    #@+body
-    #@+at
-    # 
-    # But of course, we can turn it off...
-    # 
+        assert goterr, \
+               "ssn regexp should reject phone numbers - even famous ones"
 
-    #@-at
-    #@@code
+
+    ## Attributes allow "None" by default
+
+    # But of course, we can turn it off...
     
     def check_allowNone(self):
         class Foo(Strongbox):
@@ -253,13 +216,7 @@ class StealthboxTest(unittest.TestCase):
         except ValueError:
            goterr = 1
         assert goterr, "assigning None should have failed!"
-    #@-body
-    #@-node:9::Attributes allow "None" by default
-    #@-others
 
        
     def tearDown(self):
         pass
-#@-body
-#@-node:0::@file StealthboxTest.py
-#@-leo

@@ -1,13 +1,5 @@
-#@+leo
-
-#@+node:0::@file StrongboxTest.py
-#@+body
-#@+at
-# 
 # Subject from the GoF Observer pattern.
 
-#@-at
-#@@code
 __ver__="$Id$"
 
 import unittest
@@ -20,10 +12,7 @@ class StrongboxTest(unittest.TestCase):
         pass
         
 
-    #@+others
-    #@+node:1::Observers manage themselves with attach() and detatch()
-    #@+body
-    
+    ## Observers manage themselves with attach() and detatch()
     
     def check_attach(self):
         subject = Strongbox()
@@ -38,12 +27,10 @@ class StrongboxTest(unittest.TestCase):
         subject.attach(object, onset="on_set")
         subject.detach(object)
         assert len(subject.private.observers) == 0
-    #@-body
-    #@-node:1::Observers manage themselves with attach() and detatch()
-    #@+node:2::setattr and getattr trigger messages to the observers
-    #@+body
-    #@+at
-    # 
+
+
+    ## setattr and getattr trigger messages to the observers
+
     # First the setter. Setters are easy. This is very useful for
     # transparent persistence (a la ZODB) and also for general
     # Model/View/Controller and Observer pattern stuff.
@@ -51,9 +38,6 @@ class StrongboxTest(unittest.TestCase):
     # As such, the events are fired AFTER the value is set
     # in the object. (Contrast to getter events, below...)
 
-    #@-at
-    #@@code
-    
     def check_set_event(self):
         class Observer:
             def __init__(self):
@@ -73,17 +57,13 @@ class StrongboxTest(unittest.TestCase):
         assert obs.value == "fred"
     
 
-    #@+at
-    # 
+
     # Getters, on the other hand are useful for lazy loading.
     # As such, the events get fired BEFORE the value is returned.
     # 
     # Of course, you couldn't call anything after you returned
     # a value anyway :)
 
-    #@-at
-    #@@code
-    
     def check_get_event(self):
         class Observer:
             def __init__(self):
@@ -98,17 +78,11 @@ class StrongboxTest(unittest.TestCase):
         sub = Subject(name="wanda")
         sub.attach(obs, onget="getter_called")
         value = sub.name
-        assert obs.called==1, "should have been called 1 time (vs %i)" % obs.called
+        assert obs.called==1, \
+               "should have been called 1 time (vs %i)" % obs.called
         assert obs.name == "name"
         assert value == "wilma"
-
-    #@-body
-    #@-node:2::setattr and getattr trigger messages to the observers
-    #@-others
 
        
     def tearDown(self):
         pass
-#@-body
-#@-node:0::@file StrongboxTest.py
-#@-leo

@@ -1,0 +1,96 @@
+* strongbox module overview 
+Strongbox is a tool for strongly-typed data objects in python.
+
+* persistence
+Persistence is not actually handled by strongbox. It will be handled
+by an outside module, which defines the process of mapping strongboxes
+to tables in a relational database (or to some other form of
+persistence storage).
+
+I'm worried about working with relationships though.
+
+Imagine a simple Team/Player/Sport model:
+
+   Team has players
+   Players may be on several teams
+   Each team has one sport
+
+Here are the relationships:
+
+   player.teams / team.players (junction)
+   sport.teams (simple list)
+   team.sport (simple reference)
+
+The question is, if we remove the persistence ability from Strongbox,
+how do we get the related objects?
+
+For example:
+
+>>> aTeam = clerk.load(Team, ID=123)
+>>> aTeam.sport
+???
+
+What is sport? It's a Sport object, of course. But we can't just load
+dependent objects all at once, because they could be connected in a
+huge graph. (Eg, we load player 1, who's on several teams with
+multiple players each, and those players are on multiple teams, and so
+on....)  If we loaded dependent objects as soon as we loaded the main
+object, we'd wind up with the whole database in memory. That might be
+okay for a small database or an app server that stayed up for weeks,
+but it's no good at all in a CGI script.
+
+Instead, we want to load the main object, and only load dependent
+objects if we need them.
+
+So in the example above, we don't want aTeam.sport to actually be a
+sport, but some object representing a reference to a Sport in the same
+datastore that came from.
+
+class ref(strongbox):
+   _class = attr(type)
+   _id = attr(long)
+   _clerk = attr(object)
+
+so maybe something like this:
+
+class Sport(strongbox):
+   pass
+class Team(strongbox):
+   sport = link(Sport)
+class Player(strongbox):
+   teams = join(Team)
+
+Sport.teams = join(Team)
+Team.players = join(Player)
+
+* replacing zdc
+@
+how do I go from zdc to strongbox?
+
+- replace dbc with clerk.load() or clerk.new() (except cursors)
+- double check by adding a required parameter that only clerk passes
+- remove parameter when done testing...
+
+- replace xxx.save() with clerk.save()
+
+- look for dbc.cursor lines and replace with storing to a map
+
+
+eventually: force load to have a where clause!
+
+save() should be dbc.save(obj), which doesn't exist yet,
+but which is probably similar to Recordobject.save....
+In any case, we can just make dbc.save call obj.save for
+now.
+
+Those are pretty much the only changes we need to make.
+It's a lot of them, but it shouldn't be too hard. (Actually,
+it'll probably mostly be test cases)
+
+This should also localize the need for robj(ds), as it will
+always be passed in from dbc.load()
+
+We can also move all the _tablename nonsense, but I guess that can
+wait a minute or two, until we start pulling in attributes.
+
+Okay, well... Let's try it.
