@@ -10,11 +10,11 @@ import zikeshop
 
 class Product(zdc.RecordObject):
     _table = zdc.Table(zikeshop.dbc, "shop_product")
-    _defaults = {}
+    _defaults = {
+        "price": 0,
+        }
     _tuples = ['nodeIDs']
     _pic = None
-    
-    nodeIDs = ()
 
     ### Magic RecordObject Methods ############################
 
@@ -41,8 +41,8 @@ class Product(zdc.RecordObject):
                 
 
     def get_price(self):
-        return zikeshop.FixedPoint(self.__dict__['price'])
-                
+        return zikeshop.FixedPoint(self._data['price'])
+
 
     def set_nodeIDs(self, value):
         msg = "Product.nodeIDs should be an int or sequence of ints."
@@ -56,7 +56,7 @@ class Product(zdc.RecordObject):
                 vals.append(int(item))
         else:
             raise TypeError, msg + ".. not %s" % type(value)
-        self.__dict__["nodeIDs"] = tuple(vals)
+        self._data["nodeIDs"] = tuple(vals)
         
 
     ### picture handling stufff #####################
@@ -166,5 +166,3 @@ class Product(zdc.RecordObject):
         cur.execute("DELETE FROM shop_product_node WHERE productID=%s" \
                     % int(self.ID))
         self.nodeIDs = ()
-        
-
