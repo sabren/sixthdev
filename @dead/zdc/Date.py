@@ -78,7 +78,7 @@ class Date:
         return res
 
     def __str__(self):
-        return self.toUS()
+        return self.toSQL()
 
     def __repr__(self):
         return "Date('%s')" % self.toUS()
