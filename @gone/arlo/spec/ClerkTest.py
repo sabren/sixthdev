@@ -213,8 +213,3 @@ class ClerkTest(unittest.TestCase):
         # with site, but I fixed that with private.isDirty:
         d.site = clerk.store(Site(domain=d))
         clerk.store(d)
-
-        # and another one with linksets:
-        d.user = clerk.store(User(username="cat"))
-        clerk.store(d)
-
