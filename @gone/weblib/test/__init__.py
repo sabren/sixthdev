@@ -9,9 +9,11 @@ from testPerm import *
 from testEngine import *
 #from testUser import *
 
-import MySQLdb
-from sqlTest import * # a module that defines the following four variables
-dbc = MySQLdb.connect(db=DB, host=HOST, user=USER, passwd=PASSWD)
+# you should have a module called
+# sqlTest that defines a DB-API 2.0 compliant
+# connection object named dbc.
+
+from sqlTest import dbc 
 
 suites = {
     "request" : unittest.makeSuite(RequestTestCase, "check_"),
