@@ -27,8 +27,10 @@ class Request:
 
         ## querystring:
         ## @TODO: handle urlencoding/decoding
-        self.querystring = {}
+        self.query = {}
+        self.querystring = ""
         if os.environ.has_key("QUERY_STRING"):
+            self.querystring = os.environ["QUERY_STRING"]
             for pair in string.split(os.environ["QUERY_STRING"], "&"):
                 l = string.split(pair, "=", 1)
                 k = l[0]
@@ -72,28 +74,5 @@ class Request:
                 self.form[k]=v
         except:
             pass
-
-
-
-request = Request()
-
-################## OLD STUFF (NO LONGER IN USE) ####################
-
-#import cgi, Cookie, os
-
-class oldRequest:
-    def __init__(self):
-        self.environ = os.environ
-        self.cookie = Cookie.SmartCookie()
-        if os.environ.has_key("HTTP_COOKIE"):
-            self.cookie.load(os.environ["HTTP_COOKIE"])
-
-        # @TODO: seperate form/querystring
-        self.form = \
-        self.querystring = \
-        self._dict = cgi.FieldStorage()
-        
-        def __getitem__(self, key):
-            return self._dict[key]
 
 
