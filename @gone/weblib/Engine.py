@@ -135,3 +135,7 @@ class Engine(object):
         self.runDotWeblibPy()
         self.runScript()
         self._exit()
+
+    def hadProblem(self):
+        assert self.result
+        return self.result in (Engine.FAILURE, Engine.EXCEPTION)

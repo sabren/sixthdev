@@ -157,9 +157,16 @@ class EngineTest(unittest.TestCase):
             assert eng.result == eng.SUCCESS, eng.result
         finally:
             del weblib.MYFORM
+
+    def test_hadProblem(self):
+        e = Engine(script="x = 1"); e.run()
+        assert not e.hadProblem()
+        e = Engine(script="raise hell"); e.run()
+        assert e.hadProblem()
+        e = Engine(script="assert 0"); e.run()
+        assert e.hadProblem()
+        
             
-
-
 
     # engine needs to set pathinfo so that response
     # can redirect to ?lsakdfjlsdkafj
