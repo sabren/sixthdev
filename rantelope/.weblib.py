@@ -1,2 +1,2 @@
 import sys
-sys.path = ["/web/lib", "/home/sabren/lib/"] + sys.path
+sys.path = ["/web/lib"] + sys.path
