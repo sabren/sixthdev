@@ -1,13 +1,16 @@
-
+"""
+zikeshop.Sale - for representing Sale events
+"""
+__ver__="$Id$"
 
 import zdc
 import zikeshop
 
 class Sale(zdc.RecordObject):
+    __super = zdc.RecordObject
     _table = zdc.Table(zikeshop.dbc, "shop_sale")
     _defaults = {}
     _tuples = []
-
 
     def get_shipAddress(self):
         return zikeshop.Address(ID=self.ship_addressID)
@@ -38,3 +41,13 @@ class Sale(zdc.RecordObject):
 
     def set_status(self):
         raise "status is read only."
+
+    def save(self):
+        # @TODO: add support for timestamps to ZDC directly.
+        doTS = not(self.ID)
+        self.__super.save(self)
+        if doTS:
+            cur = self._table.dbc.cursor()
+            cur.execute("UPDATE shop_sale set tsSold=now() WHERE ID=%i" \
+                        % self.ID)
+
