@@ -63,14 +63,17 @@ class Auth:
                 self.prompt(Auth.PLEASELOGIN, self._getAction(), self._getHidden())
                 self.engine.response.end()
         else:
-            self.fetch(self.key) 
+            self.login(self.key) 
     
 
     def login(self, key):
         """Force a login with the specified key."""
         self.key = key
-        self.fetch(key)
+        self.fetch(self.key)
+        self.engine.sess['__auth_key'] = self.key
         self.onLogin()
+
+                
 
 
 
@@ -152,10 +155,9 @@ class Auth:
         # now pass it to validate() and see if we get in:
         self.key = self.validate(dict)
         if self.key is not None:
-            self.engine.sess['__auth_key'] = self.key
-            self.fetch(self.key)
+            self.login(self.key)
             res = 1
-                
+
         return res
 
 
