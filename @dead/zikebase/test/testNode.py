@@ -9,7 +9,8 @@ class NodeTestCase(unittest.TestCase):
         self.cur = zikebase.test.dbc.cursor()
 
         self.cur.execute("DELETE FROM base_node")
-        self.cur.execute("INSERT INTO base_node (name, path) VALUES ('top', 'top')")
+        self.cur.execute("INSERT INTO base_node (name, path) "
+                         "VALUES ('top', 'top')")
         self.cur.execute("INSERT INTO base_node (name, path, parentID) "
                          "VALUES ('sub', 'top/sub', 1)")
         self.cur.execute("INSERT INTO base_node (name, path, parentID) "
@@ -112,7 +113,5 @@ class NodeTestCase(unittest.TestCase):
             gotError = 1
 
         assert gotError, \
-               "didn't get error assigning a node to itself when using a string"
+               "didn't get error assigning a node to itself when using string"
 
-        
-        
