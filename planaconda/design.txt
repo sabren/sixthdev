@@ -1,0 +1,79 @@
+
+                     =========================
+                     PLANACONDA 1.0 DESIGN DOC
+                     =========================
+PAGES
+-----
+
+# Front page. 
+
+Flat list of all nodes where type==project.
+
+   - corner
+   - version
+   - tangent
+   - webapp
+   - slush
+
+   Click a project to go deeper
+
+
+# node page.
+
+Title / detail at the top
+Flat list of immediate children
+Flat list of history underneath
+
+# add/edit node page
+
+# split node page
+
+
+# tree page
+
+Recursive descent of all nodes from (some) top node
+Checkbox on each line for add/remove from plate
+Submit to update plate at bottom
+
+
+# plate page
+
+Flat list of all nodes where isOnPlate==True
+
+
+
+OBJECT MODEL
+------------
+
+class Node:
+   parent : Node
+   project: Node
+   isOnPlate: True/False
+   type: project | goal | task
+   status: unclear| to do | in progress | complete | rejected
+   summary:
+   content:
+   importance: 0..9
+  
+
+class Comment:
+   node : Node
+   posted : date
+   content: str
+   
+
+DATABASE SCHEMA
+---------------
+
+plan_node 
+   ID
+   parentID
+   projectID
+   type
+
+plan_comment
+   ID
+   nodeID
+   posted
+   comment
+
