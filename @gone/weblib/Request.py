@@ -18,6 +18,20 @@ import os
 import string
 import weblib
 
+
+def tupleMerge(head, tail):
+    """tupleMerge(head, tail)
+    converts head and tail into tuples (if they're not) and merges them"""
+
+    if type(head) != type(()):
+        head = (head,)
+
+    if type(tail) != type(()):
+        tail = (tail,)
+
+    return head + tail
+
+
 class Request:
     
     def __init__(self, querystring=None, form=None, environ=None,
@@ -53,12 +67,7 @@ class Request:
             else:
                 v = ''
             if self.query.has_key(k):
-                if type(self.query[k]) == type((0,)):
-                    # already a tuple
-                    self.query[k] = tuple(self.query[k] + (v,))
-                else:
-                    # convert it to a tuple
-                    self.query[k] = tuple((self.query[k],) + (v,))
+                self.query[k] = tupleMerge(self.query[k], v)
             else:
                 self.query[k]=v
 
@@ -114,13 +123,10 @@ class Request:
 
         for dict in [self.query, self.form, self.cookie, self.environ]:
             if dict.has_key(key):
-                res = dict[key]
-                break
-
-        # if a tuple, grab the first value:
-        if type(res) == type((0,)):
-            res = res[0]
-
+                if res is None:
+                    res = dict[key]
+                else:
+                    res = tupleMerge(res, dict[key])
 
         if res is None:
             raise KeyError, key

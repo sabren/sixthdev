@@ -41,12 +41,6 @@ class EngineTestCase(unittest.TestCase):
         del weblib.MYFORM
 
 
-    def check_environ(self):
-        myenv = {"A":"B"}
-        eng = weblib.Engine(request=weblib.Request(environ=myenv))
-        assert eng.request["A"] == "B", "engine has wrong passed-in environ"
-
-
 
     def check_simple(self):
         engine = weblib.Engine(script="print 'hello'")

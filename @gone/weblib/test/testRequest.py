@@ -34,15 +34,15 @@ class RequestTestCase(unittest.TestCase):
                                           "z3":"environ", "z4":"environ"})
 
         assert request["a"] == "1", "getitem scews up on querystring"
-        assert request["aa"] == "2", "getitem screws up on multiple values"
+        assert request["aa"] == ("2", "3"), "getitem screws up on multiple values"
         assert request["b"] == "2", "getitem screws up on forms"
         assert request["c"] == "3", "getitem screws up on cookies"
         assert request["e"] == "mc2", "getitem screws up on environ"
 
         # it should fetch things in this order:
-        assert request["z1"] == "querystring", "getitem goes in wrong order (z1)"
-        assert request["z2"] == "form", "getitem goes in wrong order (z2)"
-        assert request["z3"] == "cookie", "getitem goes in wrong order (z3)"
+        assert request["z1"][0] == "querystring", "getitem goes in wrong order (z1)"
+        assert request["z2"][0] == "form", "getitem goes in wrong order (z2)"
+        assert request["z3"][0] == "cookie", "getitem goes in wrong order (z3)"
         assert request["z4"] == "environ", "getitem goes in wrong order (z4)"
 
 
@@ -52,3 +52,11 @@ class RequestTestCase(unittest.TestCase):
 
         assert request.get("a") == "1", "get breaks for valid keys"
         assert request.get("b") is None, "get breaks for non-present keys"
+
+
+
+    def check_environ(self):
+        myenv = {"A":"B"}
+        eng = weblib.Engine(request=weblib.Request(environ=myenv))
+        assert eng.request["A"] == "B", "request has wrong passed-in environ"
+
