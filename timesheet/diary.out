@@ -20,3 +20,25 @@ We can replace the code of showForm(...) with a zebra template.
 ...
 Done. It brought us down to 80 lines, and broke the app into
 three files.
+
+* [0527.2002 06:07] step 2: outsource the SQL
+We got rid of the HTML, but we've still got SQL all
+through the code. It's not even safe SQL, because we
+didn't do error checking. For example, what happens
+if someone tries to put "cat" in for the number of
+hours? Or includes a single quote in one of the fields?
+Both will cause a nasty error!
+
+Let's bypass all that and use the storage module instead.
+....
+Done. That was easy enough. Just made a few little changes,
+plus I had to compensate a little bit and:
+  - convert the ID on the querystring to an int
+  - strip out junk from the input on save
+
+I also made a few small formatting changes to form.zb
+
+We're down to 54 lines, and it's all python. Things
+are looking brighter now.
+
+* [0527.2002 06:31] refactor!
