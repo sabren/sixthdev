@@ -23,6 +23,9 @@ class Attribute(object):
         else:
             raise TypeError, "okay must be lambda, list, or string"
 
+    def initialValue(self):
+        return self.cast(self.default)
+
     def _determineDefault(self, typ, default):
         self.default = default
         if default is Notgiven:
