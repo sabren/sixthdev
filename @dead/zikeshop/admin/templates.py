@@ -13,7 +13,7 @@ tpls = [
     'head',
     'login',
     'product',
-    'receipt'
+    'receipt',
     'sslfoot',
     'sslhead',
     ]
