@@ -16,6 +16,7 @@ from testConnection import *
 from testDBAPI2Driver import *
 from testObjectView import *
 from testFunctions import *
+from testDate import *
 
 suites = {
     "Connection" : unittest.makeSuite(ConnectionTestCase, "check_"),
@@ -29,5 +30,6 @@ suites = {
     "DBAPI2Driver": unittest.makeSuite(DBAPI2DriverTestCase, "check_"),
     "ObjectView": unittest.makeSuite(ObjectViewTestCase, "check_"),
     "Functions": unittest.makeSuite(FunctionsTestCase, "check_"),
+    "Date": unittest.makeSuite(DateTestCase, "check_"), 
     }
 
