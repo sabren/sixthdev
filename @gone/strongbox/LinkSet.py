@@ -23,7 +23,7 @@ class TypedList(list):
     
     def __lshift__(self, value):
         self.append(value)
-
+        return value
 
 class LinkSet(attr):
 
