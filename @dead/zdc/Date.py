@@ -6,6 +6,7 @@ __ver__="$Id$"
 import calendar
 import copy
 import time
+import zdc
 
 class Date:
     """
@@ -51,6 +52,11 @@ class Date:
     def __cmp__(self, other):
         if isinstance(other, Date):
             return cmp([self.y, self.m, self.d], [other.y, other.m, other.d])
+        elif other is zdc.TIMESTAMP:
+            #@TODO: this is sort of a kludge... timestamp should
+            # probably just be a sort of datetime singleton...
+            # meanwhile, timestamp always wins
+            return -1 
         else:
             return cmp(self, Date(other))
 
