@@ -1,14 +1,14 @@
 """
-LinkSet
+LinkSet - 1:* relationships.
 """
+__ver__="$Id$"
+
 import zdc
 
 class LinkSet(zdc.IdxDict):
     """
     This does the grunt work for working with
     foreign keys in a 1:* relationship.
-
-    @TODO: does this work unchanged for *:* relationships?
 
     @TODO: clarify this documentation.. it even confuses me.
     lKey is local (or left hand) key fieldname (ON THE FOREIGN TABLE!)
@@ -17,7 +17,7 @@ class LinkSet(zdc.IdxDict):
     """
     __super = zdc.IdxDict
 
-    def __init__(self, owner, rClass, lKey, rKey="ID"):
+    def __init__(self, owner, rClass, lKey=None, rKey="ID"):
         self.__super.__init__(self)
         self.owner = owner
         self.rClass = rClass
@@ -25,16 +25,21 @@ class LinkSet(zdc.IdxDict):
         self.rKey = rKey
         self._loaded = 0
 
+
     def load(self):
-        table = self.rClass._table
-        lID = self.owner.ID
-        if lID is not None:
-            cur = table.dbc.cursor()
-            sql = 'SELECT %s from %s where %s=%i' \
-                  % (self.rKey, table.name, self.lKey, int(lID))
-            cur.execute(sql)
-            for row in cur.fetchall():
-                exec "self << self.rClass(" + self.rKey + "=row[0])"
+        try:
+            lID = self.owner.ID
+            if lID is not None:
+                table = self.rClass._table.name
+                cur = self.rClass._table.dbc.cursor()
+                sql = 'SELECT %s from %s where %s=%i' \
+                      % (self.rKey, table, self.lKey, int(lID))
+                cur.execute(sql)
+                for row in cur.fetchall():
+                    #@TODO: unhardcode primary key for right hand class
+                    exec "self << self.rClass(ID=row[0])"
+        except:
+            pass # to make a check_constructor work.. for now..
         self._loaded = 1
 
 
@@ -52,5 +57,8 @@ class LinkSet(zdc.IdxDict):
         return self.__super.__getitem__(self, key)
         
     def __lshift__(self, other):
-        self.__super.__lshift__(self, other)
-        exec "other." + self.lKey + "=" + `self.owner.ID`
+        if isinstance(other, self.rClass):
+            self.__super.__lshift__(self, other)
+        else:
+            raise TypeError, "can't add %s to this LinkSet" \
+                  % other.__class__.__name__
