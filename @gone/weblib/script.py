@@ -48,4 +48,3 @@ weblib.sess.start()
 weblib.auth = weblib.Auth()
 weblib.auth.start()
 
-weblib.perm = weblib.Perm()

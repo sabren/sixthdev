@@ -167,7 +167,6 @@ from Request import Request
 from Response import Response
 from Sess import Sess
 from Auth import Auth
-from Perm import Perm
 
 
 # note that the actual singletons (request, response, etc)

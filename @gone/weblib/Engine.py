@@ -14,13 +14,12 @@ class Engine:
     putting a #!/python line up top, and making it executable.. But,
     as an alternative, you can run it inside an Engine class. this is
     especially useful for testing or for restricted execution, etc..
-    
     """
 
     globals = {'__name__':'__main__'}
     locals  = globals
 
-    parts=("request", "response", "sess", "auth", "perm")
+    parts=("request", "response", "sess", "auth")
 
     script = None
     result = None
@@ -44,7 +43,7 @@ class Engine:
         ###
         ### but maybe that's just a stupid way to do things,
         ### and I ought to give Auth a start() method just
-        ### like sess... ? Probably same for Perm(), too.. (?)
+        ### like sess... ?
 
         self.script = script       
 
@@ -75,7 +74,7 @@ class Engine:
                 self.sess = weblib.Sess(pool, engine=self)
 
             else:
-                # use a new copy of the default (eg, self.perm=weblib.Perm())
+                # use a new copy of the default (eg, self.auth=weblib.Auth())
                 setattr(self, item,
                         weblib.__dict__[string.capitalize(item)](engine=self))
 
@@ -101,7 +100,7 @@ class Engine:
 
     def startParts(self):
         """
-        
+        Starts all the internal parts.
         """
         self.response.start()
         self.sess.start()
@@ -109,11 +108,16 @@ class Engine:
 
 
     def stopParts(self):
+        """
+        Calls stop for all the internal parts.
+        """
         self.sess.stop()
 
 
     def injectParts(self):
-        """Injects our parts into the weblib namespace"""
+        """
+        Injects our parts into the weblib namespace.
+        """
 
         self._oldParts = {}
        
@@ -123,7 +127,9 @@ class Engine:
 
 
     def restoreParts(self):
-        """Restore the old weblib parts.."""
+        """
+        Restore the old weblib parts..
+        """
 
         for part in Engine.parts:
             if self._oldParts[part]:
@@ -160,10 +166,15 @@ class Engine:
 
 
     def _execute(self, script):
-        """This is so you can restrict execution in a subclass if you like."""
+        """
+        This is so you can restrict execution in a subclass if you like.
+        """
         exec(script, self.globals, self.locals)
 
     def execute(self, script):
+        """
+        Call this to execute a chunk of code.
+        """
         self.result = self.SUCCESS
         try:
             self._execute(script)
@@ -182,6 +193,9 @@ class Engine:
 
 
     def run(self):
+        """
+        Run the engine!
+        """
         self.start()
         try:
             self.execute(self.script)

@@ -1,8 +1,8 @@
 """
 testEngine.py - unit tests for weblib.Engine
-
-$Id$
 """
+__ver__="$Id$"
+
 import unittest
 import weblib
 from weblib import trim
@@ -10,7 +10,7 @@ from weblib import trim
 class EngineTestCase(unittest.TestCase):
 
     def setUp(self):
-        parts = ["request", "perm", "sess", "auth", "response"]
+        parts = ["request", "sess", "auth", "response"]
         for part in parts:
             if hasattr(weblib, part):
                 delattr(weblib, part)
@@ -80,7 +80,6 @@ class EngineTestCase(unittest.TestCase):
         eng2 = weblib.Engine(script="print 'eng2'")
         eng2.sess=weblib.Sess(engine=eng2)
         eng2.auth=weblib.Auth(engine=eng2)
-        eng2.perm=weblib.Perm(engine=eng2)
         eng2.request=weblib.Request(engine=eng2)
         eng2.response=weblib.Response(engine=eng2)
                              
@@ -91,7 +90,7 @@ class EngineTestCase(unittest.TestCase):
         for eng in (eng1, eng2, eng3):
             eng.run()
             name = eng.response.buffer
-            for what in ("auth","sess","perm","request","response"):
+            for what in ("auth","sess","request","response"):
                 assert getattr(eng, what).engine is eng, \
                        ".engine screws up for " + name + "." + what
                 assert getattr(getattr(eng, what).engine, what) \
@@ -111,7 +110,6 @@ class EngineTestCase(unittest.TestCase):
         __builtin__.orig = {
             "auth": getattr(weblib, "auth", None),
             "sess": getattr(weblib, "sess", None),
-            "perm": getattr(weblib, "perm", None),
             "request": getattr(weblib, "request", None), 
             "response": getattr(weblib, "response", None)}
 
@@ -123,8 +121,6 @@ class EngineTestCase(unittest.TestCase):
                   'weblib.auth isn\'t fresh!'
             assert weblib.sess is not orig['sess'], \
                   'weblib.sess isn\'t fresh!'
-            assert weblib.perm is not orig['perm'], \
-                  'weblib.perm isn\'t fresh!'
             assert weblib.request is not orig['request'], \
                   'weblib.request isn't fresh!'
             assert weblib.response is not orig['response'], \
@@ -147,7 +143,6 @@ class EngineTestCase(unittest.TestCase):
 
         self.sess = weblib.Sess(engine=self)
         self.auth = weblib.Auth(engine=self)
-        self.perm = weblib.Perm(engine=self)
         self.request = weblib.Request(engine=self)
         self.response = weblib.Response(engine=self)
 
@@ -155,7 +150,6 @@ class EngineTestCase(unittest.TestCase):
         __builtin__.good = {
             "sess" : self.sess,
             "auth" : self.auth,
-            "perm" : self.perm,
             "request" : self.request,
             "response" : self.response
             }
@@ -163,7 +157,6 @@ class EngineTestCase(unittest.TestCase):
         weblib.Engine(
             auth = good["auth"],
             sess = good["sess"],
-            perm = good["perm"],
             request = good["request"],
             response = good["response"],
             
@@ -175,8 +168,6 @@ class EngineTestCase(unittest.TestCase):
                    'weblib.auth is wrong!'
             assert weblib.sess is good['sess'], \
                    'weblib.sess is wrong!'
-            assert weblib.perm is good['perm'], \
-                   'weblib.perm is wrong!'
             assert weblib.request is good['request'], \
                    'weblib.request is wrong!'
             assert weblib.response is good['response'], \
