@@ -1,3 +1,7 @@
+"""
+Genierc class for hierarchical structures.
+"""
+__ver__="$Id$"
 
 import zdc
 import zikebase
@@ -76,7 +80,7 @@ class Node(zdc.RecordObject):
             
 
     def delete(self):
-        assert not self.q_children(), \
+        assert len(self.children)==0, \
                "Cannot delete a Node that has children."
         zdc.RecordObject.delete(self)
 
