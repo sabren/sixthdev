@@ -235,16 +235,16 @@ class Auth:
         but we want to remember their data while they're logging back in!
         """
         res = ""
-        for item in self._sess._request.form.keys():
+        for item in self._sess._request.keys():
             # form should be an IdxDict..
             if item[:5] == "auth_":
                 pass # Ignore auth stuff here, too
             else:
                 # value should either be a string or a tuple
                 # of strings. (for multi-select boxes or whatever)
-                if type(self._sess._request.form[item]) == type(()):
+                if type(self._sess._request[item]) == type(()):
                     # for tuples, loop through all the values:
-                    for subitem in self._sess._request.form[item]:
+                    for subitem in self._sess._request[item]:
                         res = res + '<input type="hidden" name="' + \
                               weblib.htmlEncode(item) + '" value="' + \
                               weblib.htmlEncode(subitem) + \
@@ -253,7 +253,7 @@ class Auth:
                     # only one value:
                     res = res + '<input type="hidden" name="' + \
                           weblib.htmlEncode(item) + '" value="' + \
-                          weblib.htmlEncode(self._sess._request.form[item]) + \
+                          weblib.htmlEncode(self._sess._request[item]) + \
                           '">\n'
 
         return res
