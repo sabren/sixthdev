@@ -3,6 +3,8 @@
 * exec:
     import weblib
     from weblib import html
+    from buggernaut import date
+
 <form action="tasks.py" method="POST">
 <input type="hidden" name="what" value="task">
 * if ID:
@@ -46,8 +48,14 @@
 </tr>
 
 <tr><td colspan="2"><hr/></td></tr>
+<tr><td colspan="2">
+    <b>target date: </b>
+    {:html.text("targetDate", date.sql2us(targetDate), 'size="10"'):}</td></tr>
+
+<tr><td colspan="2"><hr/></td></tr>
 </table>
 <input type="submit" name="action" value="save">
-* if ID:
+* if 0:
+    ID:
     &nbsp;&nbsp;<input type="submit" name="action" value="delete">
 </form>

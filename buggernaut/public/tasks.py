@@ -38,14 +38,30 @@ class TaskAdminApp(zikebase.AdminApp):
     ## actions ##########################################
 
     def qry_task(self):
-        if self.input.get("project") in self.model["opt_project"]:
-            whereClause = "project='%s'" % self.input["project"]
-        else:
-            whereClause = None
+        self.model["project"]=self.input.get("project")
+        self.model["status"]=self.input.get("status","open")
+        self.model["owner"]=self.input.get("owner")
+        self.model["targetDate"]=self.input.get("targetDate")
+
+        wc = "1=1 "
+        if self.model["project"] in self.model["opt_project"]:
+            wc = wc + "AND project='%s' " % self.model["project"]
+        if self.model["status"] in self.model["opt_status"]:
+            wc = wc + "AND status='%s' " % self.model["status"]
+        if self.model["owner"] in self.model["opt_owner"]:
+            wc = wc + "AND owner='%s' " % self.model["owner"]
+
+        # @TODO: validate targetdate is real date..
+        if self.model["targetDate"]:
+            from buggernaut import date
+            wc = wc + "AND targetDate<='%s' " % date.us2sql(self.model["targetDate"])
+            
+        whereClause = wc
         return map(zdc.ObjectView,
                    zikebase.dbc.select(zikeplan.Task,
                                        where=whereClause,
-                                       order="priority DESC, risk DESC"))
+                                       orderBy="isnull(targetDate), targetDate, " \
+                                              +"priority DESC, risk DESC"))
 
 if __name__=="__main__":
     TaskAdminApp().act()

@@ -67,6 +67,20 @@ class Task(zdc.RecordObject):
         return self.__super.getEditableAttrs(self) + ['hrsLeft']
 
 
+    def set_targetDate(self, value):
+        import date
+        self._data["targetDate"]=date.us2sql(value)
+
+## this should work, but there's a line in RecordObject.save()
+## that calls getattr instead of reading from ._data directly.
+## unforunately, a lot of code is depending on that bug, so I
+## put off making the change for now.  (0310.2001)
+##
+##     def get_targetDate(self):
+##         import date
+##         return date.sql2us(self._data["targetDate"])
+
+
     ##### options for select boxes ################
 
     def opt_status(self):
