@@ -43,7 +43,8 @@ class ZikeShopAdminApp(zikebase.AdminApp):
         # hold must not be null..
         if not self.input["hold"]:
             self.input["hold"] = 0
-        self.generic_save("style")
+        self.generic_save("product")
+        self.redirect(action="show&what=product&ID=%s" % self.objectID)
 
     ## style stuff ######################################
     def create_style(self):
