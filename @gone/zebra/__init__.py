@@ -11,6 +11,17 @@ from Bootstrap import Bootstrap
 
 ###[ Utility Functions ]#######################################
 
+def show(template, model={}):
+    #@TODO: clean this up and optimize it!
+    ifp = open(template + ".zbr", "r")
+    data = Z2X().translate(ifp.read())
+    ofp = open(template + ".zbc", "w")
+    ofp.write(Bootstrap().compile(data))
+    ofp.close()
+    namespace = {}
+    execfile(template + ".zbc", namespace)
+    namespace['show'](model)
+    
 def escape(s):
     "Escape backslashes, quotes, and newlines"
 
