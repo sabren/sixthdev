@@ -87,7 +87,6 @@ class Engine(object):
         """
         self.result = self.SUCCESS
         try:
-            self.script = script
             self.setPathInfo() 
             self._exec(script)
         except weblib.Finished:
@@ -127,7 +126,9 @@ class Engine(object):
         # self.result is None if nothing's been run yet
         # it would be error or exception if dotWeblibPy had a problem
         if (self.result is None) or (self.result == self.SUCCESS):
-            self.execute(self.script)               
+            self.execute(self.script)
+        else:
+            print self.result
 
     def run(self):
         assert not self.result, "can't use an Engine more than once"
