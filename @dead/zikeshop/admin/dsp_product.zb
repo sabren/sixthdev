@@ -18,7 +18,8 @@
 * none:
     Not in any categories.<br>
 
-<b>description:</b><br>{:descript:}<br>
+<b>brief description:</b><br>{:brief:}<br>
+<b>long description:</b><br>{:descript:}<br>
 
 <b>picture:</b><br>
 * if pictureID:

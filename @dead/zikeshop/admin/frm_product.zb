@@ -36,7 +36,11 @@ categories:<br>
 </td></tr>
 
 <tr><td colspan="2">
-description:<br>
+brief description:<br>
+<textarea cols="30" rows="2" name="brief">{:brief:}</textarea><br>
+</td></tr>
+<tr><td colspan="2">
+long description:<br>
 <textarea cols="30" rows="5" name="descript">{:descript:}</textarea><br>
 </td></tr>
 
