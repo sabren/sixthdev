@@ -1,0 +1,269 @@
+* tags
+
+** group name="basics"
+*** item tag="exec"
+*** item tag="include"
+*** item tag="show"
+*** item tag="insert"
+*** item tag="skin"
+*** item tag="stripe"
+*** item tag="wrap"
+*** item tag="zebra"
+
+** group name="code generation"
+*** item tag="ef"
+*** item tag="el"
+*** item tag="group"
+*** item tag="if"
+*** item tag="report"
+
+** group name="prenamed"
+*** item tag="content"
+*** item tag="description"
+*** item tag="keywords"
+*** item tag="title"
+
+** group name="scripting"
+*** item tag="eval"
+
+** group name="substripes"
+*** item tag="body"
+*** item tag="head"
+*** item tag="none"
+*** item tag="tail"
+
+** split
+
+** tag name="body"
+*** desc
+The innermost part of a @@report@@ or @@group@@.
+The body stripe is repeated for each 
+record in the results.
+*** example
+\* report
+\** query source="myDB"
+select item from table
+\** body
+&lt;li&gt;{item}
+** tag name="content"
+*** desc
+This is a prenamed stripe for use by content authors.
+It simply marks its children as being the actual content
+of a page.
+*** example
+\* title
+A story.
+\* content
+Once upon a time, something happened. The end.
+** tag name="description"
+*** desc
+A prenamed stripe that marks its children as being
+the description of a page (to be inserted into an HTML META
+tag, for example)
+*** example
+\* title
+A story
+\* description
+A humorous tale of love, adventure, and danger.
+\* content
+Once upon a time, something happened. The end.
+** tag name="ef"
+*** desc
+A logic tag that implements an "else if".
+Must follow an @@if@@.
+*** example
+\* if native="$x > 50"
+Too low.
+\* ef native="$x < 50"
+Too high.
+\* el native="$x = 50"
+Just right!
+*** attr name="native" desc="Allows for testing in the native language. Disallowed in safe mode."
+*** attr name="test" desc="A test in ZebraScript. Will be translated to the native language. (not yet implemented)"
+** tag name="el"
+*** desc
+A logic tag that implements "else". Must follow @@if@@ or @@ef@@.
+See @@ef@@ for example.
+*** attr name="native" desc="Allows for testing in the native language. Disallowed in safe mode."
+*** attr name="test" desc="A test in ZebraScript. Will be translated to the native language. (not yet implemented)"
+** tag name="eval"
+*** desc
+Indicates that the enclosed data is to be treated as 
+(python) code to be evaluated at compile time by zebra. 
+<br>&nbsp;<br>
+The eval tag may be used to build stripes on the fly.
+Simply populate a variable called STRIPE. If STRIPE
+is set to anything other than None when the code
+is finished evaluating, then a STRIPE will be inserted
+into the current context. 
+<br>&nbsp;<br>
+At some point, this tag will be used to make zebra documents
+scriptable. For now it should not be used to modify the zebra document
+that is being parsed, because the interface to the zebra parser will
+probably change.
+<br>&nbsp;<br>
+<b>Note:</b> eval may not contain any other stripes, nor
+will interpolation of {$variables}, {fields}, and {!stripes} 
+work within an eval.
+*** example
+\* zebra
+\** eval
+# python stuff
+STRIPE = "Four plus four is " + `4+4`
+** tag name="exec"
+*** desc
+Indicates that the enclosed stripes are to be treated as executable
+code to be run by the web server. For example, when making a 
+PHP3 application, the PHP3 should go here.
+*** example
+\* zebra
+This gets shown.
+\** exec
+print "And so does this"; # assuming PHP3, perl, etc..
+** tag name="group"
+*** desc
+Group implements headers and footers in a @@report@@.
+May be nested inside another group.
+Its "head" is shown whenever the content of the current record's
+grouping field is different from that of the previous
+record. Its "tail" is shown whenever the content of the current record's
+grouping field is different from that of the next record.
+See @@report@@ for an example.
+*** attr name="field" desc="The field on which to group."
+** tag name="head"
+*** desc
+A header. The part of a @@skin@@, @@report@@, or @@group@@ tag that
+gets shown before the contents of the stripe.
+** tag name="if"
+*** desc
+A logic tag that implements an "if". May be used with @@ef@@ and
+@@el@@ to produce complex conditional logic. May be nested.
+*** example
+X is definitely 
+\* if test="not {xIsTrue}"
+NOT
+\* show
+true.
+*** attr name="native" desc="Allows for testing in the native language. Disallowed in safe mode."
+*** attr name="test" desc="A test in ZebraScript. Will be translated to the native language. (not yet implemented)"
+** tag name="include"
+*** desc
+Include one zebra file within another.
+*** example
+\* include file="bubba.zi"
+*** attr name="file" desc="the name of the file to be included. Conventionally, *.zi"
+** tag name="insert"
+*** desc
+Inserts a named stripe. Empty tag, so it requires a "/".
+May (and should) be abbreviated with {!stripename}
+*** example
+\* zebra
+\** stripe name="fred"
+This is fred
+\** show
+Here's fred:
+\*** insert stripe="fred" /
+Here's fred again: {!fred}
+*** attr name="stripe" desc="the name of the stripe"
+** tag name="keywords"
+*** desc
+A prenamed stripe to contain keywords for describing a document. Used, for example,
+to populate the "description" META tag in HTML.
+*** example
+\* title
+A story.
+\* keywords
+adventure, story, stories, plot
+\* content
+Once upon a time, something happened. The end.
+** tag name="none"
+*** desc
+In a @@report@@, this stripe is displayed if the @@query@@ returns no records.
+*** example
+\* report
+\** query
+select something from table where (1=2)
+\** head
+This won't ever get shown.
+\** body
+Neither will this.
+\** none
+Nothing shown because 1 never equals 2.
+** tag name="report"
+*** desc
+The report tag generates code to format the results of a @@query@@. 
+*** example
+\* zebra
+\** report
+\*** query source="myDB"
+select person, department from employees order by department
+\*** group field="department"
+\**** head
+People in the {department} department:
+&lt;ul&gt;
+\**** body
+&lt;li&gt;{person}
+\**** tail
+&lt;/ul&gt;
+*** attr name="query" desc="a (predefined) query to use (optional, not yet implemented)"
+** tag name="show"
+*** desc
+Indicates that the enclosed data is meant to be shown to
+the web browser. Often translates into a "print" statement,
+depending on the language. Mostly used to avoid a "* /"
+for @@exec@@ or @@eval@@, since zebra is in "show" context
+by default.
+*** example
+\* zebra
+in show context
+\** exec
+print "in exec context";
+\** show
+back in show context.
+** tag name="skin"
+*** desc
+Defines a skin for wrapping stripes.
+*** example
+\* skin name="brackets"
+\** head
+[[[[[[
+\** tail
+]]]]]]]
+\* wrap skin="brackets"
+This will be in brackets.
+*** attr name="name" desc="the name of the skin"
+** tag name="stripe"
+*** desc
+A mechanism for naming stripes.
+*** example
+\* zebra
+\** stripe name="fred"
+This is the stripe called "Fred".
+\** show
+Here's fred: {!fred}
+*** attr name="name" desc="the name of the stripe"
+** tag name="tail"
+*** desc
+A footer. The part of a @@skin@@, @@report@@, or @@group@@ tag that
+gets shown after the contents of the stripe.
+** tag name="title"
+*** desc
+A prenamed stripe to contain title of a document. Used, for example,
+to populate the TITLE tag in HTML.
+*** example
+\* title
+A story.
+\* keywords
+adventure, story, stories, plot
+\* content
+Once upon a time, something happened. The end.
+** tag name="wrap"
+*** desc
+Wraps the enclosed stripe in a skin. See @@skin@@ for example.
+*** attr name="skin" desc="the name of the skin to use"
+** tag name="zebra"
+*** desc
+Top level tag. Indicates that this is a Zebra file.
+*** example
+\* zebra
+hello, world!
