@@ -4,16 +4,18 @@ test suite for zikebase.UserApp
 __ver__="$Id$"
 
 import unittest
-import zikebase
 import weblib
 import sixthday
+import sixthday.spec
 from sixthday import Auth
+from sixthday import SignupApp
+from sixthday import User
 
 class SignupAppTest(unittest.TestCase):
 
     def setUp(self):
-        self.ds = zikebase.test.dbc
-        self.cur = zikebase.test.dbc.cursor()
+        self.ds = sixthday.spec.dbc
+        self.cur = self.ds.cursor()
         self.cur.execute("delete from base_user")
         self.cur.execute("delete from base_contact")
 
@@ -24,7 +26,7 @@ class SignupAppTest(unittest.TestCase):
             'password':'tempy',
             'email':'fred@tempyco.com',
             }
-        app = zikebase.UserApp(req, self.ds, Auth({},{}))
+        app = SignupApp(req, self.ds, Auth({},{}))
         #import pdb; pdb.set_trace()
         app.do("save")
         assert not app.errors, \
@@ -32,13 +34,12 @@ class SignupAppTest(unittest.TestCase):
                
         #@TODO: I want to search by a field besides the key, but can't
         # until I finish refactoring zdc..
-        fred = zikebase.User(self.ds, username='fred')
-
+        fred = User(self.ds, username='fred')
         assert fred.email == 'fred@tempyco.com', \
                "email is wrong: %s" % fred.email
         
         # try to save again..
-        app = zikebase.UserApp(req, self.ds, weblib.Auth({},{}))
+        app = SignupApp(req, self.ds, Auth({},{}))
         app.do("save")
         assert app.errors, \
                "didn't get errors saving duplicate fred"

@@ -6,7 +6,7 @@ __ver__="$Id$"
 
 import unittest
 import zdc
-from sixthday.spec import dbc
+import sixthday.spec
 from sixthday import ObjectEditor
 from sixthday import Node
 
@@ -30,13 +30,11 @@ class TestObjectClass(zdc.Object):
         pass
 
 
-
-
 class ObjectEditorTest(unittest.TestCase):
 
     def setUp(self):
-        self.ds = zikebase.test.dbc
-        self.cur = zikebase.test.dbc.cursor()
+        self.ds = sixthday.spec.dbc
+        self.cur = self.ds.cursor()
         self.cur.execute("delete from base_node")
 
     def check_simple(self):

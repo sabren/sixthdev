@@ -26,13 +26,6 @@ class ObjectEditor(sixthday.App):
 
         ed = ObjectEditor(Person, ds, weblib.request.get('ID'))
         """
-        ## @TODO REMOVE THIS:
-        if type(input) in [type(1), type(1L)]:
-            raise "wrong param order for ObjectEditor"
-        if input is None:
-            raise "input can no longer be None"
-        ## 
-
         #@TODO: use "super" throughout...
         super(ObjectEditor, self).__init__(input)
         import types
@@ -44,16 +37,17 @@ class ObjectEditor(sixthday.App):
             if key:
                 # get the instance based on the key:
                 kFld = self.whatClass.__key__
-                self.object = self.whatClass(ds, **{kFld:key})
+                self.object = ds.select(self.whatClass, **{kFld:key})[0]
             else:
                 # just make a new instance:
-                self.object = self.whatClass(ds)
+                self.object = self.whatClass(ds=ds)
 
 
     ## public methods ####################################
 
     def tuplize(self, input):
-        if type(input) != type(()):
+        #@TODO: what is this for?
+        if type(input) != tuple:
             return (input)
         else:
             return input

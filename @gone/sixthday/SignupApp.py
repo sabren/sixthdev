@@ -4,21 +4,22 @@ App to let users signup, login, request passwords, etc.
 __ver__="$Id$"
 
 import weblib
-import zikebase
 import zebra
 import zdc
+from handy import sendmail
 from sixthday import App
 from sixthday import ObjectEditor
+from sixthday import User
 
 class SignupApp(App):
-    userClass = zikebase.User
+    userClass = User
     editorClass = ObjectEditor
     tplDir = "."
 
     def __init__(self, input, ds, auth):
         self.ds = ds
         self.auth = auth
-        super(SignupApp, self).__init__(self, input)
+        super(SignupApp, self).__init__(input)
         
 
     def act_(self):
@@ -37,7 +38,7 @@ class SignupApp(App):
 
     def act_save(self):
         try:
-            ed = zikebase.ObjectEditor(
+            ed = ObjectEditor(
                      self.userClass, self.ds, self.input, self.input.get("ID"))
             ed.do("save")
         except ValueError, err:
