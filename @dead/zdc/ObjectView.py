@@ -13,7 +13,12 @@ class ObjectView:
         # this used to have a try..except block, but it made it
         # very hard to debug!
         res = getattr(self.object, name)
-        if (type(res) == type([])) or isinstance(res, zdc.LinkSet):
+        try:
+            hasLen = 1
+            len(res)
+        except:
+            hasLen = 0
+        if (hasLen) and not (type(res) == type("")):
             lst = []
             for item in res:
                 lst.append(zdc.ObjectView(item))
