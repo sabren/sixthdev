@@ -16,10 +16,7 @@ class NodeTest(unittest.TestCase):
     def test_path(self):
         t = Node(name="top")
         n = Node(name="asdf", parent=t)
-        n.name = "asdf" # @TODO: this line should not be required!!
         assert n.path=="/top/asdf", n.path
-        raise "skip"
-
 
     def test_recursion_bug(self):
         p = Node(name="project")

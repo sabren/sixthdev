@@ -6,6 +6,8 @@ import sixthday
 class Node(sixthday.Node):
     ID = attr(int, default=0)
     data = attr(str)
+    name = attr(str)
+    path = attr(str)
     ntype = attr(str, okay=["project","goal","task"], default="task")
     estimate = attr(FixedPoint)
     revised = attr(FixedPoint)
@@ -15,18 +17,19 @@ class Node(sixthday.Node):
     status = attr(str, default="unclear",
                   okay=["unclear", "to do", "in progress",
                         "complete", "rejected"])
-    
+    parent = link(forward("planaconda.Node"))
     comments = linkset(forward("planaconda.Comment"), "node")
 
-
-    def set_path(self, value):
-        self.__values__["path"] = value
-    def get_path(self):
-        p = self.__values__["path"]
-        if p.startswith("/"):
-            return p
+    def set_name(self, value):
+        self.private.name = value
+        if self.parent:
+            self.private.path = self.parent.path + "/" + value
         else:
-            return "/" + p
+            self.path = "/" + value
+
+    def set_parent(self, value):
+        self.private.parent = value
+        self.name = self.name
 
 
 class Comment(Strongbox):
@@ -35,9 +38,9 @@ class Comment(Strongbox):
     posted = attr(DateTime, default="now")
     content = attr(str)
 
-Node.__attrs__["parent"].type = Node
-Node.__attrs__["children"].type = Node
-Node.__attrs__["comments"].type = Comment
+Node.parent.type = Node
+Node.children.type = Node
+Node.comments.type = Comment
     
 
 class PlanApp(sixthday.AdminApp):
