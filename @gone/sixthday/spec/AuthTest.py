@@ -6,14 +6,17 @@ __ver__="$Id$"
 import unittest
 import weblib
 import string
-from weblib import trim
+from weblib import trim, Finished
 from sixthday import Auth
 
 class AuthTest(unittest.TestCase):
 
     def setUp(self):
-        self.myReq = weblib.Request(method="GET",query={}, form={},
-                                    cookie={},content={})
+        self.myReq = weblib.RequestBuilder().build(
+            method="GET",querystring="",
+            path="/",
+            form={},
+            cookie={},content={})
         self.myRes = weblib.Response()
         self.sess = weblib.Sess(weblib.SessPool.InMemorySessPool(),
                                 self.myReq,
@@ -24,7 +27,7 @@ class AuthTest(unittest.TestCase):
             auth = Auth(self.sess, {})
             auth.check()
             gotExit = 0
-        except SystemExit:
+        except Finished:
             gotExit = 1
         assert gotExit, \
                "didn't get systemExit (from response.end)"
@@ -34,21 +37,23 @@ class AuthTest(unittest.TestCase):
 
     def check_login_invalid(self):
         """
-        Invalid login should show error, display form, and raise SystemExit.
+        Invalid login should show error, display form, and raise Finished.
         """
-        req = weblib.Request(querystring="auth_check_flag=1",
-                             form={"auth_username":"wrong_username",
-                                   "auth_password":"wrong_password"})
+        req = weblib.RequestBuilder().build(
+            querystring="auth_check_flag=1",
+            path="/",
+            form={"auth_username":"wrong_username",
+                  "auth_password":"wrong_password"})
         sess = weblib.Sess(weblib.SessPool.InMemorySessPool(),
                            req, self.myRes)
         try:
             auth = Auth(sess, {'username':'password'})
             auth.check()
             gotExit = 0
-        except SystemExit:
+        except Finished:
             gotExit = 1
         assert gotExit, \
-               "invalid login didn't get SystemExit"
+               "invalid login didn't get Finished"
         assert string.find(self.myRes.buffer, auth.LOGINFAILED) > -1, \
                "invalid login doesn't give LOGINFAILED!"
 
@@ -58,22 +63,24 @@ class AuthTest(unittest.TestCase):
         """
         Valid login should have no side effects.
         """
-        req = weblib.Request(query={"auth_check_flag":"1"},
-                             form={"auth_username":"username",
-                                   "auth_password":"password"})
+        req = weblib.RequestBuilder().build(
+            querystring="auth_check_flag=1",
+            path="/",
+            form={"auth_username":"username",
+                  "auth_password":"password"})
         sess = weblib.Sess(weblib.SessPool.InMemorySessPool(),
                            req, self.myRes)
         try:
             auth = Auth(sess, {"username":"password"})
             auth.check()
             gotExit = 0
-        except SystemExit:
+        except Finished:
             gotExit = 1
         assert self.myRes.buffer == "", \
                "valid login shouldn't output anything! [vs '%s']" \
                % self.myRes.buffer
         assert not gotExit, \
-               "valid login still got SystemExit"
+               "valid login still threw Finished"
 
 
     # @TODO: write tests for this stuff:
