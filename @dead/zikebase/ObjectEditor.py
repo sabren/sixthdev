@@ -53,9 +53,26 @@ class ObjectEditor(weblib.Actor):
         
 
     def act_save(self):
+        import string
+        
+        expected = {}
+        __expect__ = self.input.get("__expect__", ())
+        if type(__expect__) == type(""):
+            field, value = string.split(__expect__, ";")
+            expected[field]=value
+        else:
+            # it's a tuple
+            for item in __expect__:
+                field, value = string.split(item, ";")
+                expected[field] = value
+                
         for field in self.object.getEditableAttrs():
             if self.input.has_key(field):
                 setattr(self.object, field, self.input[field])
+            elif expected.has_key(field):
+                setattr(self.object, field, expected[field])
+
+        #@TODO: get rid of editable tuples, or add __expect__
         for field in self.object.getEditableTuples():
             if self.input.has_key(field):
                 setattr(self.object, field, self.tuplize(self.input[field]))
