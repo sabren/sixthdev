@@ -1,20 +1,20 @@
-# zdc.IdxDict - indexed dictionary
-
+"""
+an indexed dictionary (cross between list and dict)
+"""
+__ver__="$Id$"
 import UserDict
 
-def _isNum(x):
-    return type(x)==type(0)
-
 class IdxDict(UserDict.UserDict):
+    __super = UserDict.UserDict
 
     def __init__(self):
-        UserDict.UserDict.__init__(self)
+        self.__super.__init__(self)
         self.idx = []
 
     def _toStringKey(self, key):
         """Convert numeric keys into string keys. Leaves string keys as is"""
         # handle numeric keys:
-        if _isNum(key):
+        if type(key)==type(0):
             if not (0 <= key < len(self.idx)):
                 ## oddly enough, it is this IndexError here
                 ## that allows you to do "for x in myIdxDict:"
@@ -73,6 +73,10 @@ class IdxDict(UserDict.UserDict):
     #### these are so we can treat it like its a list ######
     def __len__(self):
         return len(self.idx)
+
+    def clear(self):
+        self.__super.clear(self)
+        self.idx = []
     
     def __getslice__(self, i, j):
         i = max(i, 0); j = max(j, 0)

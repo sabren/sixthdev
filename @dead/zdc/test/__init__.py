@@ -22,8 +22,8 @@ suites = {
 
 import zikebase.test
 import zikeshop.test
-suites.update(zikebase.test.suites)
-suites.update(zikeshop.test.suites)
+#suites.update(zikebase.test.suites)
+#suites.update(zikeshop.test.suites)
 
 
 #@TODO: why not have some sort of scheme where if suite=="ALL"

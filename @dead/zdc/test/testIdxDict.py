@@ -1,5 +1,7 @@
-#
-# testIdxDict.py - test cases for zdc.IdxDict
+"""
+test cases for zdc.IdxDict
+"""
+__ver__="$Id$"
 
 import unittest
 import zdc
@@ -40,3 +42,18 @@ class IdxDictTestCase(unittest.TestCase):
                "keys are wrong: %s" % str(idx.keys())
         assert idx.values() == ["x", "y", "z"], \
                "values are wrong: %s" % str(idx.values())
+
+
+    def check_looping(self):
+        idx = zdc.IdxDict()
+        for item in idx:
+            assert 0, "there shouldn't be anything in idx"
+
+        idx << 1
+        for item in idx:
+            assert item==1, "wrong item"
+
+        idx.clear()
+        for item in idx:
+            assert 0, "there shouldn't be anything in idx after .clear()"
+        
