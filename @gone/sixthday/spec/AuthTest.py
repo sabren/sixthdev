@@ -12,12 +12,8 @@ from sixthday import Auth
 class AuthTest(unittest.TestCase):
 
     def setUp(self):
-        # auth requires a PATH_INFO variable.. otherwise,
-        # it doesn't know where to redirect the form.
-        #
-        # @TODO: is PATH_INFO correct? I think standard might be SCRIPT_NAME
-        #
-        self.myReq = weblib.Request(environ={"PATH_INFO":"dummy.py"})
+        self.myReq = weblib.Request(method="GET",query={}, form={},
+                                    cookie={},content={})
         self.myRes = weblib.Response()
         self.sess = weblib.Sess(weblib.SessPool.InMemorySessPool(),
                                 self.myReq,
@@ -40,8 +36,7 @@ class AuthTest(unittest.TestCase):
         """
         Invalid login should show error, display form, and raise SystemExit.
         """
-        req = weblib.Request(environ = {"PATH_INFO":"sadfaf"},
-                             querystring="auth_check_flag=1",
+        req = weblib.Request(querystring="auth_check_flag=1",
                              form={"auth_username":"wrong_username",
                                    "auth_password":"wrong_password"})
         sess = weblib.Sess(weblib.SessPool.InMemorySessPool(),
@@ -63,8 +58,7 @@ class AuthTest(unittest.TestCase):
         """
         Valid login should have no side effects.
         """
-        req = weblib.Request(environ = {"PATH_INFO":"sadfaf"},
-                             querystring="auth_check_flag=1",
+        req = weblib.Request(query={"auth_check_flag":"1"},
                              form={"auth_username":"username",
                                    "auth_password":"password"})
         sess = weblib.Sess(weblib.SessPool.InMemorySessPool(),
