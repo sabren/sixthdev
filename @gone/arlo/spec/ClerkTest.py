@@ -139,8 +139,19 @@ class ClerkTest(unittest.TestCase):
         except AttributeError:
             self.fail("shouldn't die when columns outnumber attributes")
 
+    def check_dirt(self):
+        # dirty by default (already tested in strongbox)
+        r = Record()
+        assert r.private.isDirty
 
+        # but not after a store:
+        r = self.clerk.store(r)
+        assert not r.private.isDirty
 
+        # and not after a fetch:
+        r = self.clerk.fetch(Record, ID=1)
+        assert not r.private.isDirty
+        
 
 
     def check_user(self):
@@ -155,17 +166,27 @@ class ClerkTest(unittest.TestCase):
         class User(Strongbox):
             ID = attr(long)
             username = attr(str)
-            domains = linkset(forward)
+            domains = linkset(forward)            
         class Domain(Strongbox):
             ID = attr(long)
             domain = attr(str)
             user = link(User)
+            site = link(forward)
+        class Site(Strongbox):
+            ID = attr(long)
+            domain = link(Domain)
+            user = link(User)
         User.__attrs__["domains"].type = Domain
+        Domain.__attrs__["site"].type = Site
         dbMap = {
             User:"user",
             User.__attrs__["domains"]: (Domain, "userID"),
             Domain:"domain",
             Domain.__attrs__["user"]: (User, "userID"),
+            Domain.__attrs__["site"]: (Site, "siteID"),
+            Site:"site",
+            Site.__attrs__["user"]: (User, "userID"),
+            Site.__attrs__["domain"]: (Domain, "domainID"),
             }
        
         clerk = Clerk(MockStorage(), dbMap)
@@ -182,3 +203,8 @@ class ClerkTest(unittest.TestCase):
         # if block, in Clerk.store()
         assert d.user, "didn't follow link after fetch"
         assert d.user.ID == u.ID
+
+        # ah, but then we had an infinite recursion problem
+        # with site, but I fixed that with private.isDirty:
+        d.site = clerk.store(Site(domain=d))
+        clerk.store(d)

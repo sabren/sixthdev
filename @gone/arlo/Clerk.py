@@ -30,9 +30,7 @@ class Clerk:
         for name, link in klass.__get_links__():
             ref = getattr(obj, name)
             if (ref):
-                if (not self._hasInjectors(ref)):
-                    # no injectors, so live data.
-                    # @TODO: set up some kind of "isDirty" flag
+                if ref.private.isDirty:
                     ref = self.store(ref)
                 fclass, column = self._unmap_link(klass, link, name)
                 d[column] = ref.ID
@@ -50,6 +48,7 @@ class Clerk:
                 fclass, column = self._unmap_link(klass, link, name)
                 for item in refs:
                     self.store(item, _others={column:obj.ID})
+        obj.private.isDirty = 0
         return obj
 
     def match(self, klass, **where):
@@ -62,7 +61,9 @@ class Clerk:
         return res
    
     def fetch(self, klass, ID):
-        return self.match(klass, ID=ID)[0]
+        obj = self.match(klass, ID=ID)[0]
+        obj.private.isDirty = 0
+        return obj
 
     def fetch_or_new(self, klass, ID):
         if ID:
