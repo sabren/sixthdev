@@ -1,6 +1,8 @@
 """
 User.py - emulate PHPLIB's user-session support in python.
 
+$Id$
+
 @TODO: license
 """
 

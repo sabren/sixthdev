@@ -1,5 +1,8 @@
+"""
+SessPool.py : for holding frozen Sesses :)
 
-## SessPool : for holding frozen Sesses :) ##########################
+$Id$
+"""
 
 class DbmSessPool:
 

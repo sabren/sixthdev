@@ -1,6 +1,8 @@
-#
-# tstSess.py - unit tests for Sess.py
-#
+"""
+testSess.py - unit tests for weblib.Sess
+
+$Id$
+"""
 
 import unittest
 import weblib

@@ -1,4 +1,8 @@
+"""
+weblib.script - import this so that print = weblib.response.write()
 
+$Id$
+"""
 import weblib
 
 class ScriptResponse(weblib.Response):

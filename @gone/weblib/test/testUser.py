@@ -1,7 +1,9 @@
-#
-# testUser.py - unit tests for User.py
-#
+"""
+testUser.py - unit tests for weblib.User
 
+
+$Id$
+"""
 import unittest
 from weblib import User
 

@@ -1,7 +1,8 @@
-#
-# testResponse.py - unit tests for Response.py
-#
+"""
+testResponse.py - unit tests for weblib.Response
 
+$Id$
+"""
 import unittest
 import weblib
 

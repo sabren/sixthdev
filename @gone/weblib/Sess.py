@@ -1,6 +1,8 @@
 """
 Sess.py : emulates PHPLIB's session support in python
 
+$Id$
+
 @TODO: python-style license lingo
 """
 

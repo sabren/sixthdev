@@ -1,6 +1,8 @@
-#
-# testRequest.py - unit tests for Request.py
-#
+"""
+testRequest.py - unit tests for Request.py
+
+$Id$
+"""
 
 import unittest
 import weblib

@@ -1,5 +1,8 @@
 """
 Response.py - loosely emulates the ASP Response object for python CGI's
+
+$Id$
+
 """
 import weblib
 

@@ -1,4 +1,9 @@
-# test framework for weblib
+"""
+weblib.test - test framework for weblib
+
+$Id$
+"""
+
 
 from testRequest import *
 from testResponse import *

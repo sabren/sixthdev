@@ -1,4 +1,8 @@
-# weblib.Engine
+"""
+weblib.Engine - a wrapper object for running weblib.scripts
+
+$Id$
+"""
 
 import weblib
 import string

@@ -1,7 +1,8 @@
-#
-# testPerm.py - unit tests for Perm.py
-#
+"""
+testPerm.py - unit tests for Perm.py
 
+$Id$
+"""
 import unittest
 import weblib
 

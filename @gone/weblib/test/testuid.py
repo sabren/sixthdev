@@ -1,6 +1,8 @@
-#
-# testuid.py - unit tests for uid.py
-#
+"""
+testuid.py - unit test for weblib.uid()
+
+$Id$
+"""
 
 import unittest
 from weblib import uid

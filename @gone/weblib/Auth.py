@@ -2,6 +2,8 @@
 Auth.py - generic authentication framework for python cgi.
           loosely based on Auth.inc from PHPLIB...
 
+$Id$
+
 @TODO: license, etc..
 """
 

@@ -1,4 +1,7 @@
-"""weblib/config.py - configuration module for weblib
+"""
+weblib/config.py - configuration module for weblib
+
+$Id$
 
 This module stores local configuration options for weblib.
 It should define the following variables:
