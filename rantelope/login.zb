@@ -1,0 +1,31 @@
+
+<html>
+<head>
+<title>rantelope login</title>
+
+<style type="text/css">
+body, p, table { 
+    font-family: verdana;
+    font-size:10pt;
+}
+th { 
+    text-align: left;
+}
+</style>
+
+</head>
+<body>
+
+<h1>Rantelope!</h1>
+
+<b>Please log in.</b>
+
+<form action="{:action:}" method="post">
+   {:hidden:}
+   <table>
+   <tr><td>username:</td>
+       <td><input type="text" name="auth_username" value="admin"></td></tr>
+   <tr><td>password:</td>
+       <td><input type="password" name="auth_password" value="admin"></td></tr>
+   <tr><td>&nbsp;</td><td><input type="submit" value="log in"></td></tr>
+</form>

@@ -5,6 +5,7 @@ __ver__="$Id$"
 
 from sixthday import Auth
 from rantelope import Author
+import zebra
 
 class AuthorAuth(Auth):
 
@@ -12,6 +13,13 @@ class AuthorAuth(Auth):
         self.clerk = clerk
         Auth.__init__(self, sess, {})
 
+    def prompt(self, message, action, hidden):
+        model = {"message": message,
+                 "action": action,
+                 "hidden": hidden, }
+        #@TODO: make this return a string
+        self._sess._response.write(zebra.fetch("login", model))
+        
 
     def fetch(self, key):
         #@TODO: need to define strict semantics for *Auth.fetch()
