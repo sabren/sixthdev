@@ -151,29 +151,33 @@ class Engine:
             
 
 
-    def execute(self, script):
+    def _execute(self, script):
         """This is so you can restrict execution in a subclass if you like."""
         exec(script, self.globals, self.locals)
 
+    def execute(self, script):
+        self.result = self.SUCCESS
+        try:
+            self._execute(script)
+        except SystemExit:
+            pass # don't really quit on response.end()
+        except AssertionError, e:
+            self.result = self.FAILURE
+            self.error = e
+        except:
+            self.result = self.EXCEPTION
+            import traceback, sys, string
+            self.error = string.join(traceback.format_exception(
+                sys.exc_type,
+                sys.exc_value,
+                sys.exc_traceback), '')
+
+        
 
     def run(self):
         self.setUp()
         try:
-            self.result = self.SUCCESS
-            try:
-                self.execute(self.script)
-            except SystemExit:
-                pass # don't really quit on response.end()
-            except AssertionError, e:
-                self.result = self.FAILURE
-                self.error = e
-            except:
-                self.result = self.EXCEPTION
-                import traceback, sys, string
-                self.error = string.join(traceback.format_exception(
-                    sys.exc_type,
-                    sys.exc_value,
-                    sys.exc_traceback), '')
-                
+            self.execute(self.script)
         finally:
             self.tearDown()
+            

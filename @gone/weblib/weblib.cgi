@@ -31,17 +31,27 @@ dir = string.join(string.split(path,os.sep)[:-1], os.sep)
 sys.path.append(dir)
 
 
+## build the engine ##############################################
+eng = weblib.Engine()
+eng.setUp()
+
 ## run .weblib.py ################################################
 
-if os.path.exists(dir+os.sep+".weblib.py"):
-    execfile(dir+os.sep+".weblib.py")
+whichfile = dir+os.sep+".weblib.py"
+if os.path.exists(whichfile):
+    # we use execute instead of run because we only want
+    # to run the setup once.
+    eng.execute(open(whichfile))
 
 ## run the script ################################################
 
-eng = weblib.Engine()
-eng.script=open(os.environ["PATH_TRANSLATED"])
-eng.run()
+if eng.result == eng.SUCCESS:
+    whichfile = os.environ["PATH_TRANSLATED"]
+    eng.execute(open(whichfile))
 
+
+## close down shop and show the results  ########################
+eng.tearDown()
 
 if eng.result == eng.SUCCESS:
     ## print the results    
@@ -73,7 +83,7 @@ else:
     elif eng.result == eng.EXCEPTION:
     
         print "<b>pyweb error while running %s</b><br>" \
-              % os.environ["PATH_TRANSLATED"]
+              % whichfile
         print '<pre class="traceback">' \
               + weblib.htmlEncode(eng.error) + "</pre>"
 
