@@ -16,8 +16,9 @@ class ObjectEditor(weblib.Actor):
 
     ## constructor #######################################
 
-    def __init__(self, what, **args):
+    def __init__(self, what, input=None, **args):
         """ex: objed=ObjectEditor(Person, fName="fred", lName="smith")"""
+        weblib.Actor.__init__(self, input)
         self.what = what
         self.object = apply(self.newObject, (), args)
 
