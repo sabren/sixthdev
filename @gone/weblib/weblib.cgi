@@ -45,7 +45,8 @@ if os.path.exists(whichfile):
 
 ## run the script ################################################
 
-if eng.result == eng.SUCCESS:
+# eng.result is None if nothing's been run yet
+if (eng.result is None) or (eng.result == eng.SUCCESS):
     whichfile = os.environ["PATH_TRANSLATED"]
     eng.execute(open(whichfile))
 
