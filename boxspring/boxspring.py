@@ -1,27 +1,37 @@
 #!/usr/bin/python
-from PythonCardPrototype import model, dialog
+from PythonCard import model, dialog
 from boxspring import Drawing, Box
 from wxPython.wx import *
+import wx
 import pickle
 
 class MyBox(Box):
     def __init__(self, x, y):
         """
         x and y are the center coordinates
-        """
+        """        
         super(MyBox, self).__init__(x-50, y-25, 100, 50)
-
-    def draw(self, canvas):
-        canvas.setFillColor(self.fillColor)
-        canvas.DrawRectangle(self.x, self.y, self.w, self.h)
-        
+        self.text = "boxspring"
+       
     def toggle(self):
         if self.fillColor == "white":
             self.fillColor = "red"
         else:
             self.fillColor = "white"
-        
-    
+
+    def draw(self, canvas):   # @TODO: test case (how??)
+        canvas.fillColor = self.fillColor
+        canvas.drawRectangle((self.x, self.y), (self.w, self.h))
+
+        #@TODO: break into smaller chunk here:
+        # center the text in the box:
+        #canvas.font = wx.Font(12, wx.ROMAN, wx.ITALIC, wx.BOLD, True)
+
+        #@TODO: strategy pattern here for text-align/valign
+        # center the text:
+        w, h  = canvas._bufImage.GetTextExtent(self.text)
+        canvas.drawText(self.text, ((self.x + (self.w - w)/2.0),
+                                    (self.y + (self.h - h)/2.0)))
         
 class Arrow:
     def __init__(self, start):
@@ -32,8 +42,8 @@ class Arrow:
         pass
 
     def draw(self):
-        canvas._setForegroundColor("silver")
-        canvas.DrawLine(self.start.x, self.start.y, self.end.x, self.end.y)        
+        canvas.foregroundColor = "silver"
+        canvas.drawLine(self.start.x, self.start.y, self.end.x, self.end.y)        
 
     def bounds(self):
         l = min(self.start.x, self.end.x)
@@ -67,8 +77,7 @@ class BoxSpring(model.Background):
         pickle.dump(self.drawing, file)
         file.close()
 
-    def on_openBackground(self, event):
-        # this seems to be the place to initalize things.
+    def on_initialize(self, event):
         self.newDrawing()
         self.canvas = self.components.canvas
         
@@ -84,16 +93,16 @@ class BoxSpring(model.Background):
     def on_menuFileOpen_select(self, event):
         result = dialog.openFileDialog(self, 'Open',
                                        self.defaultPath(), '', '*.box' )
-        if result['accepted']:
-            path = result['paths'][0]            
+        if result.accepted:
+            path = result.paths[0]            
             self.openDrawing(path)
             self.refresh()
 
     def on_menuFileSaveAs_select(self, event):
         result = dialog.saveFileDialog(self, 'Save As',
                                        self.defaultPath(), '', '*.box' )
-        if result['accepted']:
-            path = result['paths'][0]            
+        if result.accepted:
+            path = result.paths[0]            
             self.saveDrawing(path)
 
     def on_menuFileSave_select(self, event):
@@ -147,13 +156,13 @@ class BoxSpring(model.Background):
         
         
     def erase(self, x, y, w, h):
-        self.canvas._setForegroundColor("white")
-        self.canvas.setFillColor("white")
-        self.canvas.drawRectangle(x,y,w,h)
-        self.canvas._setForegroundColor("black")
+        self.canvas.foregroundColor = "white"
+        self.canvas.fillColor = "white"
+        self.canvas.drawRectangle((x,y),(w,h))
+        self.canvas.foregroundColor = "black"
 
     def refresh(self):
-        self.canvas.Clear()
+        self.canvas.clear()
         for g in self.drawing.glyphs:
             g.draw(self.canvas)
         
@@ -170,5 +179,5 @@ class BoxSpring(model.Background):
                         break
 
 if __name__ == '__main__':
-    app = model.PythonCardApp(BoxSpring)
+    app = model.Application(BoxSpring)
     app.MainLoop()
