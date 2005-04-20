@@ -1,10 +1,19 @@
 """
 ensemble: load perl/ruby/whatever modules from python
 """
+##################################################
+
 import os, sys, imp, new, xmlrpclib, pexpect
 from xmlrpclib import Transport, ServerProxy, Fault, Binary
 
 BANNER = "## ensemble v1.0 ##"
+
+# in python2.2, xmlrpclib turns long numeric strings
+# (eg credit card numbers) into ints, even if they're
+# enclosed in <string> tags. Then the cast to int would
+# overflow. So:
+xmlrpclib.int = long
+
 
 ##################################################
 
@@ -41,14 +50,21 @@ class Director(ServerProxy):
     I'm the top-level object you create to talk
     to child processes.
     """
-    def __init__(self, child_command):
-        self.transport = EnsembleTransport(self.connect(child_command))
+    def __init__(self, child_command, debug=False):
+        """
+        if debug is True, all communication will be
+        logged to sys.stderr
+        """
+        self.transport = EnsembleTransport(
+            self.connect(child_command, debug))
         ServerProxy.__init__(self, "http://ensemble/", # just to avoid error
                              transport=self.transport)
 
-    def connect(self, child_command):
+    def connect(self, child_command, debug=False):
         child = pexpect.spawn(child_command)
         child.expect(BANNER)
+        if debug:
+            child.setlog(sys.stderr)
         return child
 
 
