@@ -1,3 +1,4 @@
+import weblib
 from platonic import Intercept, Redirect
 
 class App(object):
@@ -36,9 +37,9 @@ class App(object):
         f = self.buildFeature(a)
         try:            
             m.update(f.handle(req, res))
-        except platonic.Redirect, e:
+        except Redirect, e:
             raise weblib.Redirect(e.where)
-        except platonic.Intercept, e:
+        except Intercept, e:
             if e.data:
                 m.update(e.data)
             f = self.buildFeature(e.where)
