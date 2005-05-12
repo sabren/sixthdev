@@ -149,6 +149,59 @@ def xmlEncode(s):
     return res
 
 
+def deNone(s, replacement=''):
+    """
+    replaces None with the replacement string
+    """
+    # if s won't be zero, you might as well use:
+    # "s or ''" instead of "deNone(s)"
+    if s is None:
+        return replacement
+    else:
+        return s
+
+
+def urlDecode(what):
+    res = None
+    import urllib
+
+    if type(what) == type(""):
+        import string
+        res = urllib.unquote(string.replace(what, "+", " "))
+
+    elif type(what) == type({}):
+        res = urllib.urldecode(what)
+    else:
+        raise "urlDecode doesn't know how to deal with this kind of data"
+
+    return res
+
+
+### HTML encoder #########################################
+
+import htmlentitydefs
+
+#@TODO: is there really no built-in way to turn a hash inside out?
+_entitymap = {}
+for i in htmlentitydefs.entitydefs.keys():
+    _entitymap[htmlentitydefs.entitydefs[i]] = i
+del i
+
+
+def htmlEncode(s):
+    res = ""
+    if s is not None:
+        for ch in s:
+            if _entitymap.has_key(ch):
+                res = res + "&" + _entitymap[ch] + ";"
+            else:
+                res = res + ch
+    return res
+        
+
+
+
+
 if __name__=="__main__":
     #print edit("testing...")
     assert sum((1,2,3)) == 6
