@@ -22,36 +22,36 @@ def checkbox(name, isChecked, onValue=1, offValue=0, attrs=''):
     An html checkbox. Also adds a hidden __expect__ variable
     since the browser doesn\'t often send unchecked checkboxes.
     '''
-    return '<input type="hidden" name="__expect__" value="%s:%s">' \
-           '<input type="checkbox" name="%s" %s %s value="%s">' \
-           % (name, offValue, name, attrs, ['','CHECKED'][isChecked], onValue)
+    return '<input type="hidden" name="__expect__" value="%s:%s"/>' \
+           '<input type="checkbox" name="%s" %s %s value="%s"/>' \
+           % (name, offValue, name, attrs, ['','checked="checked"'][isChecked], onValue)
 
 def radio(name, isChecked, value=1, attrs=''):
     '''
     An html radio button. 
     '''
-    return '<input type="radio" name="%s" %s %s value="%s">' \
-           % (name, attrs, ['','CHECKED'][isChecked], value)
+    return '<input type="radio" name="%s" %s %s value="%s"/>' \
+           % (name, attrs, ['','checked="checked"'][isChecked], value)
 
 def text(name, value, attrs=''):
     '''
     Returns the HTML code for a text INPUT tag.
     '''
-    return '<input type="text" name="%s" %s value="%s">' \
+    return '<input type="text" name="%s" %s value="%s"/>' \
            % (name, attrs, deNone(value))
 
 def password(name, value, attrs=''):
     '''
     Returns the HTML code for a text PASSWORD tag.
     '''
-    return '<input type="password" name="%s" %s value="%s">' \
+    return '<input type="password" name="%s" %s value="%s"/>' \
            % (name, attrs, deNone(value))
 
 def hidden(name, value, attrs=''):
     '''
     Returns HTML code for a hidden input tag.
     '''
-    return '<input type="hidden" name="%s" %s value="%s">' \
+    return '<input type="hidden" name="%s" %s value="%s"/>' \
            % (name, attrs, deNone(value))
 
 
@@ -102,7 +102,7 @@ def select(name, options, value=None, attrs=''):
     for option in  opts:
         res = res + '<option value="%s"' % option[0]
         if option[2]:
-            res = res + ' SELECTED'
+            res = res + ' selected="selected"'
         res = res + '>%s</option>' % option[1]
     return res + '</select>'
 
