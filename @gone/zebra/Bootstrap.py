@@ -11,8 +11,22 @@ import xml2mdl
 class Bootstrap:
     "A class to compile zebra reports until zebra can compile itself."
 
-    parserClass = xml2mdl.X2M
+    def __init__(self):
+        self.counter = {}
+        self.loopvars = []
+        self.lastLoopvar = None
 
+    def gensym(self, prefix):
+        """
+        Return a unique symbol for variable names in generated code.
+        """
+        self.counter.setdefault(prefix,0)
+        sym = "%s%i" % (prefix, self.counter[prefix]) 
+        self.counter[prefix] += 1
+        return sym
+
+
+    parserClass = xml2mdl.X2M
 
     def toObject(self, zbx):
         "bstrap.toObject(zbx) => a python Report object"
@@ -148,30 +162,35 @@ class Bootstrap:
 
 
     def handle_for(self, model, attrs):
+        loopvar = self.gensym("loopvar")
+        self.loopvars.append(loopvar)
+        data = {"loopvar":loopvar}
+        data.update(attrs)
         res = zebra.trim(
             '''
-            _ = 0
-            _max_ = len(scope["%(series)s"])
-            for _ in range(_max_):
+            _%(loopvar)s_max_ = len(scope["%(series)s"])
+            for %(loopvar)s in range(_%(loopvar)s_max_):
                 # handle scope inside the loop in case we have
                 # recursive names (eg, children->children->children)
                 scope_stack.append(copy.copy(scope))
                 
                 # can't do .update if it's a UserDict:
-                mdl = scope["%(series)s"][_]
+                mdl = scope["%(series)s"][%(loopvar)s]
                 for item in mdl.keys():
                     scope[item]=mdl[item]
-            ''' % attrs)
+            ''' % data)
         res = res + zebra.indent(self.walk(model), 1)            
         res = res + zebra.trim(
             '''
             #   ## close for-%(series)s loop ##########
                 globals().update(scope_stack.pop())
             ''' % attrs)
+        self.lastLoopvar = self.loopvars.pop()
         return res
 
     def handle_none(self, model, attrs):
-        res = "if not _max_:\n"
+        assert self.lastLoopvar, "found none without for!"
+        res = "if not _%s_max_:\n" % self.lastLoopvar
         res = res + zebra.indent(self.walk(model), 1)
         return res
 
@@ -213,8 +232,7 @@ class Bootstrap:
         return 'zres = zres + "\\n"\n'
 
     def handle_head(self, model, attrs):
-        # @TODO: handle grouped heads
-        res = "if _ == 0:\n"
+        res = "if %s == 0:\n" % self.loopvars[-1]
         res = res + zebra.indent(self.walk(model), 1)
         return res
 
@@ -223,13 +241,14 @@ class Bootstrap:
         return self.walk(model)
 
     def handle_foot(self, model, attrs):
-        # @TODO: handle grouped feet
-        res = "if _ + 1 == _max_:\n"
+        res = "if %s + 1 == _%s_max_:\n" % (self.loopvars[-1],
+                                            self.loopvars[-1])
         res = res + zebra.indent(self.walk(model), 1)
         return res
 
     def handle_glue(self, model, attrs):
-        res = "if _ + 1 < _max_:\n"
+        res = "if %s + 1 < _%s_max_:\n" % (self.loopvars[-1],
+                                           self.loopvars[-1])
         res = res + zebra.indent(self.walk(model), 1)
         return res
 

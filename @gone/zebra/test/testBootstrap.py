@@ -199,6 +199,30 @@ class BootstrapTestCase(unittest.TestCase):
         assert actual == goal, \
                "head/tails don't work:\n%s" % actual
 
+    def check_nested_for(self):
+        model = {"all": [{"subs":[{"value":"a"}]},
+                         {"subs":[{"value":"b"}]}]}
+        zbx = zebra.trim(
+            """
+            <?xml version="1.0"?>
+            <zebra>
+            <for series="all">
+            <head>[</head>
+            <for series="subs">
+            <head>{</head>
+            <var>value</var>
+            <foot>}</foot>
+            </for>
+            <foot>]</foot>
+            </for>
+            </zebra>
+            """)
+        goal = "[{a}{b}]"
+        actual = zebra.Bootstrap().toObject(zbx).fetch(model)
+        self.assertEquals(actual, goal)
+        
+
+
     def check_include(self):
         zbx = zebra.trim(
             """
