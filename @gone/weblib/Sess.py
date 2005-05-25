@@ -45,6 +45,9 @@ class Sess(UserDict.UserDict):
         self.gcTime = 1440   # purge sessions older than 24 hrs (1440 mins)
         self.gcProb = 1      # probability of garbage collection as a %
 
+        # a function to make new sids
+        self.sidmaker = weblib.uid
+
 
     ## public methods ########################
 
@@ -103,12 +106,20 @@ class Sess(UserDict.UserDict):
 
     ## internal methods ####################
 
+    def newUniqueSid(self):
+        sid = None        
+        while sid is None:
+            sid = self.sidmaker()
+            if self._pool.getSess(self.name, sid):
+                sid = None
+        return sid
 
     def _getSid(self):
-        """figures out which session id to use"""
-
+        """
+        figures out which session id to use
+        """
         sid = None
-        
+
         # first try to get the sid from the browser..
         for mode in (self.mode, self.fallbackMode):
             if sid is None:
@@ -124,7 +135,7 @@ class Sess(UserDict.UserDict):
 
         # if that didn't work, just make one up..
         if sid is None:
-            sid = weblib.uid()
+            sid = self.newUniqueSid()
 
         #@TODO: add code for timeouts wrt setCookie
         if self.mode == "cookie":
@@ -136,20 +147,26 @@ class Sess(UserDict.UserDict):
 
 
     def _gc(self):
-        """occasionally drains the sesspool"""
+        """
+        occasionally drains the sesspool
+        """
         if (whrandom.random() * 100 <= self.gcProb):
             self._pool.drain(self.name, 0)
             
 
     def _freeze(self):
-        """freezes sess and dumps it into the sesspool. call at end of page"""
+        """
+        freezes sess and dumps it into the sesspool. call at end of page
+        """
 
         # freeze the data stuff:
         self._pool.putSess(self.name, self.sid,
                            dumps(self.data, 0)) # 1=binary, 0=ascii
 
     def _thaw(self):
-        """gets a frozen sess out of the sesspool and thaws it out"""
+        """
+        gets a frozen sess out of the sesspool and thaws it out
+        """
         frozen = self._pool.getSess(self.name, self.sid)
         if frozen is None:
             self.data = {}

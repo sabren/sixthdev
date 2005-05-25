@@ -7,16 +7,13 @@ import unittest
 import weblib
 
 #@TODO: there ought to be test cases for each type of SessPool
-
 from weblib import SessPool, RequestBuilder
 
-
 class SessTest(unittest.TestCase):
-    dict = {"":""} # @TODO: why doesn't it work with just {} ??
     
     def setUp(self, sid=None):
         self.builder = weblib.RequestBuilder()
-        self.pool = SessPool.InMemorySessPool(SessTest.dict)
+        self.pool = SessPool.InMemorySessPool({})
         self.sess = weblib.Sess(self.pool,
                                 self.builder.build(),
                                 weblib.Response())
@@ -129,6 +126,22 @@ class SessTest(unittest.TestCase):
         assert actual == "ABC", \
                "getSid doesn't read the querystring (fallback): %s" % actual
 
+
+    def test_newUniqueSid(self):
+        """
+        sids should be uniqe
+        """
+        self.sess.sidmaker = [2,1,1].pop # remember, pop starts at the end
+        self.assertEquals(1, self.sess.newUniqueSid())
+
+        # but if you do that when the sess exists, it should keep
+        # skipping until it gets a unique one:
+        self.pool.putSess("weblib.Sess",1, "fake frozen sess data")
+        self.sess.sidmaker = [2,1,1].pop # remember, pop starts at the end
+        self.assertEquals(2, self.sess.newUniqueSid())
+
+        #@TODO: while unlikely, identical sids could be generated simultaneously
+        
 
     def tearDown(self):
         del self.sess
