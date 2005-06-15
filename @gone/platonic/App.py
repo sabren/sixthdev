@@ -29,6 +29,9 @@ class App(object):
     def prepareModel(self,req):
         return {}
 
+    def invokeFeature(self, f, req, res):
+        return f.handle(req,res)
+
     # this is the main function that gets called from the
     # app file
     def dispatch(self, req, res=None):
@@ -36,14 +39,14 @@ class App(object):
         m = self.prepareModel(req)
         f = self.buildFeature(a)
         try:            
-            m.update(f.handle(req, res))
+            m.update(self.invokeFeature(f, req, res))
         except Redirect, e:
             raise weblib.Redirect(e.where)
         except Intercept, e:
             if e.data:
                 m.update(e.data)
             f = self.buildFeature(e.where)
-            m.update(f.handle(req,res))
+            m.update(self.invokeFeature(f, req,res))
         f.render(m, res)
 
         # i thought about letting you chain intercepts and whatnot,
