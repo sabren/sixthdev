@@ -51,6 +51,11 @@ class Sess(UserDict.UserDict):
 
     ## public methods ########################
 
+    def pop(self, key):
+        res = self.data[key]
+        del self.data[key]
+        return res
+
     def start(self, sid=None):
         """
         starts the session. call at the top of the page.
