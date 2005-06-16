@@ -97,14 +97,16 @@ class MySQLStorage(Storage):
         import MySQLdb
         self.maxAttempts = 3
         attempt = 0
-        while attempt < self.maxAttempts:
-            # trap for OperationalError: usually means the db is down.
+        while True:
             try:
                 self.cur.execute(sql)
                 break
             except MySQLdb.OperationalError:
+                # trap for OperationalError:
+                # usually means the db is down.
+                # (might also be bad sql though)
                 attempt += 1
+                if attempt >= self.maxAttempts:
+                    raise 
             except Exception, e:
                 raise Exception, str(e) + ":" + sql
-        else:
-            raise Exception, "couldn't connect after %s tries" % attempt
