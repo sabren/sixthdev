@@ -1,0 +1,24 @@
+######################################################################
+
+"""
+Trailblazer Methodology
+=======================
+
+   design: design doc        |  transition tree
+   coding: modules           |  stories
+debugging: change modules    |  change history
+tutorials: how things are    |  how things got to be this way
+reference:                   |  testable use cases
+ 
+implementation plan becomes the rough draft
+
+people publish patches as stories.
+
+roads not taken (alternate histories)
+
+revisit earlier decisions (changing history)
+
+how to cope with an existing codebase?
+
+
+"""
