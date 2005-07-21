@@ -1,0 +1,21 @@
+
+"""
+
+trailblazer 
+  - designed for open source projects.
+  - literate programming + versioning = narrative
+  -
+
+however, it could help companies, too:
+brook's law repealed?
+
+adding people to a late project makes it later.
+:: adding people to a project slows things down
+
+why? rampup time, communication clashes, etc...
+
+but: 
+
+if people had the full history to look back on...
+
+"""
