@@ -1,0 +1,214 @@
+#!/bin/env python
+"""
+trailblazer: a narrative programming tool
+(c) copyright 2005 sabren enterprises inc. all rights reserved.
+"""
+
+
+######################################################################
+
+"""
+<h1>Introduction: The Right Question</h1>
+
+<pre>
+And you may find yourself living in a shotgun shack
+And you may find yourself in another part of the world
+And you may find yourself behind the wheel of a large automobile
+And you may find yourself in a beautiful house, with a beautiful wife
+And you may ask yourself:
+
+  Well, how did I get here?
+
+-- Talking Heads, <em>Once in a Lifetime</em>
+</pre>
+
+
+<h1>The Problem</h1>
+
+Getting new developers up to speed on a software project takes time. A
+recruit\'s learning curve can be flattened considerably through
+practices such as mentoring and pair programming, but when it comes to
+open source projects, these tools are not enough. This is because the
+very decision of whether or not to participate in the project (rather
+than using some competing tool or creating a new one from scratch)
+often relies on the potential recruit\'s ability to understand the
+code.
+
+The learning curve can be steep even when the software is well
+designed - in fact, a quick and dirty hack is often easier to
+understand than a more elegant solution - and may therefore attract
+more attention from potential recruits.
+
+This paradox is inherent in the way we traditionally build software.
+Generally, when software is designed, a set of requirements are
+established, and the design evolves incrementally, either as a design
+document (in traditional methods) or as working code (in more modern,
+agile methods). After several iterations of design decisions and
+refactorings, a solution is found. All too often, though, the thinking
+that lead from "square one" to the current state is lost.
+
+Eventually, as more people join the project and more changes are made,
+the team develops a solid understanding of <em>how things are</em>,
+but (to borrow a phrase from Daniel Quinn) almost nobody remembers
+<em>how things came to be this way</em>.
+
+
+The Trouble with Docs
+---------------------
+
+This mentality is obvious from our documention (or, all too often, our
+lack of it!). Occasionally you will see a few paragraphs of "project
+history" on a project\'s website, mostly of the "who wrote it and why"
+variety. The rest of the documentation generally describes <em>how
+things are</em> in the software - or at least how things were the last
+time anybody bothered to update the docs.
+
+An understanding of <em>how things are</em> is essential for a
+recruit\'s assimilation into the development team. Once the recruit
+becomes a productive member of the team, the docs are no longer
+required. The developer now maintains a mental model of the project,
+and can consult the source code when questions arise. The state of the
+source code is literally <em>how things are</em> for the project, and
+it is therefore no surprise that many developers prefer writing clean,
+readable code to writing documentation.
+
+
+The Literate Approach
+---------------------
+
+In the 1980\'s, legendary programmer Donald Knuth took the idea of
+"readable code" to the extreme when he introduced the idea of
+<em>literate programming</em>, in which code and documentation are
+intertwined and arranged for maximum clarity. For example, you can <a
+href="http://www.ctan.org/tex-archive/systems/knuth/tex/?">browse the
+source code</a> online. Knuth invented a language called "WEB" that
+allowed him to rearrange the code to suit his exposition:
+
+Here are two excerpts from <code>tex.web</code> (I have removed some
+of his markup code)
+
+<blockquote>
+A large piece of software like TeX has inherent
+complexity that cannot be reduced below a certain level of difficulty,
+although each individual part is fairly simple by itself. The WEB
+language is intended to make the algorithms as readable as possible,
+by reflecting the way the individual program pieces fit together and
+by providing the cross-references that connect different parts.
+Detailed comments about what is going on, and about why things
+were done in certain ways, have been liberally sprinkled throughout
+the program.
+</blockquote>
+
+<blockquote>
+[T]he best way to understand this program is to follow
+pretty much the order of TeX\'s components as they appear in the
+WEB description you are now reading, since the present
+ordering is intended to combine the advantages of the
+"bottom up" and "top down" approaches to the problem
+of understanding a somewhat complicated system.
+</blockquote>
+
+As he says at the end of the first quote, Knuth makes some attempt to
+explain why certain design choices were made. For the most part,
+though, Knuth sees TeX as a finished system, and the WEB source code
+as a <em>description</em> of that system. The literate code showcases
+his finished ideas and attempts to explain them to the reader. In
+other words, the literate approach is designed to explain <em>how
+things are</em>.
+
+Despite famous examples like TeX, literate programming (like good
+documentation in general) is a rarity in the development world.
+
+
+Well, How Did We Get Here?
+--------------------------
+
+Why is documentation so neglected?
+
+I would like to propose that the reason is simple. Most modern
+documenation efforts answer the wrong question. Rather than attempting
+to explain <em>how things are</em> (a constantly moving target),
+documentation should explain <em>how things came to be this way</em>.
+
+Not only is this a much easier topic to nail down, it actually better
+serves the most important purpose of documentation: to bring a new
+recruit up to speed.
+
+So how do you document <em>how things came to be this way</em>?
+
+Simple. You start telling stories.
+
+
+Back to Square One
+------------------
+
+Once upon a time, nobody knew anything about your software project -
+not even you. That\'s because your software didn\'t exist.
+
+Then one day you had an idea. Maybe you got annoyed with your current
+tool. Maybe you wanted a feature from some other system. Or maybe the
+idea just popped into your mind. For whatever reason, you decided to
+write some software.
+
+Suddenly, you were faced with questions: How should I break down the
+problem? Which algorithms best suit my needs? Which features are most
+important? <em>Why isn\'t my code doing what I told it to?</em>
+
+With each new thought, you moved further and further from square one,
+and closer to the solution. Pretty soon you had some cool new
+software, and you decided to invite someone else to join the project.
+
+Unfortunately, at this point, all the other developers out there are
+still back on square one. If your project is interesting, then some
+people will make the effort to read through your work, and figure out
+on their own how to catch up with you. But what if you\'d left a
+trail?
+
+
+Archaeology
+-----------
+
+Now, most projects do leave trails. They\'re just faint.
+
+For example, it\'s common for projects to publish a changelog with
+each release, but these are more like snapshots of <em>how things
+are</em> rather than stories of <em>how things got to be this
+way</em>. Rarely do they document the thinking that went into making
+those changes happen.
+
+In theory, you can see <em>how things got to be this way</em> for a
+project simply by digging through its cvs or subversion repository,
+releasesstarting with the first version and comparing it to each
+subsequent release. However, this sort of archeological work is
+tedious, and hardly worth the effort.
+
+A better approach might be to glean a project\'s history from blogs
+and newsgroups. These have the advantage of being written in human
+language for humans. The downside is the low signal to noise ratio.
+So many ideas get tossed around that it\'s hard to know whether
+anything you read ever got implemented, and if so, whether the
+information is still up to date.
+
+So what\'s a developer to do?
+
+
+The Trailblazer Experiment
+--------------------------
+
+I suspect:
+
+<ul>
+  <li>That the ability to clearly present a project\'s history will
+      give that project a competitive advantage in gaining mindshare.</li>
+  <li>That a recruit who learns <em>how things came to be this way</em>
+      will also learn <em>how things are</em> without even trying.</li>
+  <li>That by combining the concept of literate programming with the
+      concept of project history, software can take the form of an
+      engaging narrative, and that <em>people will want to read it</em>.</li>
+</ul>
+
+And so, I introduce to you the trailblazer experiment, in which we put
+these ideas to the test and create a simple narrative programming
+tool.
+
+"""
