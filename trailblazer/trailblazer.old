@@ -1,0 +1,402 @@
+#!/bin/env python
+"""
+trailblazer: a narrative programming tool
+(c) copyright 2005 sabren enterprises inc. all rights reserved.
+"""
+
+"""
+<h1>the trailblazer experiment</h1>
+
+Narrative programming is like literate programming with version
+control and refactoring built in. That is, instead of simply
+presenting the finished parts of the program, we present instructions
+for building the finished program, starting from scratch.
+
+Trailblazer is a narrative programming tool, and it is itself written
+in a narrative style. Unit tests and code are woven through this
+document. The document that you are reading at this very moment is the
+actual source code for trailblazer. It is meant to be read from
+beginning to end, like an essay.
+
+Some of the code in this implementation is rather kludgy simply
+because of the bootstrapping problem: I am attempting to use a
+narrative programming style without actually having a narrative
+programming tool. Instead I am leaning heavily on python's dynamic
+programming features, rearranging classes and methods at runtime.
+
+Future narrative programs, written with the help of this very tool,
+will be much cleaner. :)
+
+Let's begin.
+"""
+
+######################################################################
+
+"""
+<h1>Trails</h1>
+
+A trail is just a thread of text or code chunks woven through our
+narrative.
+
+A simple trail has two parts: a head and a tail, which can be null.
+For example:
+"""
+
+import unittest
+class TrailTest(unittest.TestCase):
+    def test_simple(self):
+        s = Trail("hello")
+        self.assertEquals("hello", str(s))
+
+    def test_complete(self):
+        s = Trail("hello", "(world)")
+        self.assertEquals("hello(world)", str(s))
+
+"""
+That test will fail because we don't have trails yet. So:
+"""
+
+class Trail(object):
+    def __init__(self, head, tail=""):
+        self.head = head
+        self.tail = tail
+    
+    def __str__(self):
+        # stringify everything so we can use any type:
+        return str(self.head) + str(self.tail)
+
+"""
+One thing you can do with trails is extend them. You extend trails
+with other trails:
+"""
+
+class TrailExtensionTest(unittest.TestCase):
+    def test_extend(self):
+        s = Trail("HEAD[","]TAIL")
+        s.extend(Trail("head:","tail"))
+        self.assertEquals("HEAD[head:tail]TAIL", str(s))
+
+
+"""
+This test fails because we haven't implemented Trail.extend.
+
+At this point, we have a bootstrap problem because we actually need
+the feature we're implementing. Do you see it? We've already defined
+the Trail class. Now we want to add a method. Now, it would be pretty
+easy for me, as I write this, to just jump back a few lines in my text
+editor and add the method to the Trail class. That's how programming
+normally works.
+
+But the point of the narrative approach is to explain how the code
+works in little chunks. If I were sitting with you at a computer and
+trying to demonstrate this idea, I'd introduce a problem in the form
+of a test case, explain why it fails, and then present the solution by
+going back and editing the code.
+
+So there's our conflict: I want to edit the class, which would
+normally lead me to scroll up there in my editor and change it
+directly, but that would break the narrative flow.
+
+Thankfully python lets us add a method to a class after the fact.  All
+we have to do is define a freestanding function and glue it onto the
+class:
+"""
+
+def _Trail_extend(self, other):
+    self.head=Trail(self.head, other)
+    
+Trail.extend = _Trail_extend
+
+"""
+Well, that was easy enough. If python lets us do that, why bother with
+trailblazer at all? Simply because we often want to do the same thing
+for things besides python. For example, we might want to include
+changes to the documentation in our narrative, or we might need to use
+code from other languages - even multiple other languages. Trailblazer
+solves the generic problem.
+
+Anyway, with that simple change, the tests now pass. Now that we can
+represent a Trail, how should we handle them?
+"""
+
+######################################################################
+
+"""
+<h2>TrailBlazing</h2>
+
+To blaze a trail is to mark it so that others can follow. Before a
+trail is blazed, it's no different than the surrounding landscape.
+The trailblazer's job, therefore, is to scout ahead and find a good
+path from the beginning to the end, and mark that path so that others
+can follow.
+
+At times, we might seem to be making progress, only to find that our
+way is blocked, and that we need to backtrack and try a different
+approach. Slowly, we extend the trail until we reach the goal.
+
+When we program, we start with a problem and search for a solution.
+If we don't leave a trail for others to follow, we may very well find
+a solution, but we may have a hard time telling someone else where it
+is. Too often, documentation (if it exists) simply describes what the
+solution looks like, but never tells anyone how to get there.
+
+Right now, we're blazing a trail for future programmers,, but our
+tools are still crude. Consider:
+
+We were able to go back and extend the Trail class because python lets
+us refer to both classes and functions by name.  It's easy to add
+methods to classes, but what if we wanted to add another statement to
+a method? For example, if we wanted to add a plot twist to a story
+written in python...
+"""
+
+def StoryExample():
+    once_upon_a_time()
+    the_end()
+
+"""
+... we'd have to rewrite the whole thing:
+"""
+
+def StoryExample():
+    once_upon_a_time()
+    something_happened()
+    the_end()
+
+"""
+There's no way to tell python to just stick something in the middle
+like that. In python, classes, methods, and functions are first class
+citizens but individual statements are not.
+
+Actually, we could use the <code>compiler</code> module to get at the
+individual statements, but of course that would only let us deal with
+python source code, and even then it would be a lot of work.
+
+Because they are generic, Trails handle this case easily. By treating
+the code as a Trail, we can create an arbitrary extension point:
+"""
+
+del StoryExample
+
+class StoryExampleTest(unittest.TestCase):
+    def test(self):
+        story=Trail(
+            # head:
+            ("def story():\n"
+             "    once_upon_a_time()\n"),
+
+            # == extension point ==
+            
+            # tail:
+            ("    the_end()\n"))
+
+        # now add the line:
+        story.extend("    something_happened()\n")
+        self.assertEquals(("def story():\n"
+                           "    once_upon_a_time()\n"
+                           "    something_happened()\n"
+                           "    the_end()\n"),
+                          str(story))
+                         
+        """
+        Easy! 
+        
+        But wait a second. Suppose we want to add a foreword to our
+        story, or a postscript. Since there's only one extension
+        point, we're out of luck. If we call <code>story.extend</code>
+        again, it'll just keep adding stuff before
+        <code>the_end()</code>:
+        """
+
+        story.extend("    another_exciting_plot_twist()\n")
+        story.extend("    and_so_on()\n")
+        self.assertEquals(("def story():\n"
+                           "    once_upon_a_time()\n"
+                           "    something_happened()\n"
+                           "    another_exciting_plot_twist()\n"
+                           "    and_so_on()\n"
+                           "    the_end()\n"),
+                          str(story))
+
+
+"""
+Obviously, we're not going to get very far with only one extension
+point. No problem: if we give the trails names as we add them, we can
+extend the system however we like:
+"""
+
+class SolfegeExample(unittest.TestCase):
+    # http://en.wikipedia.org/wiki/Solfege
+    def test(self):
+       
+        # the major scale (white keys):
+        scale = Trail("[","]")
+        do = Trail("C:") ; scale.extend(do)
+        re = Trail("D:") ; scale.extend(re)
+        mi = Trail("E:") ; scale.extend(mi)
+        fa = Trail("F:") ; scale.extend(fa)
+        so = Trail("G:") ; scale.extend(so)
+        la = Trail("A:") ; scale.extend(la)
+        ti = Trail("B:") ; scale.extend(ti)
+        scale.extend("C")
+        self.assertEquals("[C:D:E:F:G:A:B:C]", str(scale))
+
+        # the chromatic scale (adds the black keys)
+        di = Trail("C#:") ; do.extend(di)
+        ri = Trail("Eb:") ; re.extend(ri)
+        fi = Trail("F#:") ; fa.extend(fi)
+        si = Trail("Ab:") ; so.extend(si)
+        li = Trail("Bb:") ; la.extend(li)
+        self.assertEquals("[C:C#:D:Eb:E:F:F#:G:Ab:A:Bb:B:C]", str(scale))
+        
+
+"""
+This test runs fine, so, in theory, we already have the power we're
+looking for.  However it would be cumbersome to write each narrative
+as a python script. Ideally, we'd write the narrative in some
+author-friendly markup language, and decorate the trails with blazes
+(markers) as we go along. 
+
+Here's how TrailBlazer ought to work:
+"""
+
+
+class SolfegeTest(unittest.TestCase):
+    def makeScale(self):
+        scale = TrailBlazer(Trail("[","]"))
+        scale["do"] = Trail("c:")
+        scale["re"] = Trail("d:")
+        scale["mi"] = Trail("e:")
+        scale["fa"] = Trail("f:")
+        scale["so"] = Trail("g:")
+        scale["la"] = Trail("a:")
+        scale["ti"] = Trail("b:")
+        scale["DO"] = Trail("C")
+        return scale
+    
+    def test(self):
+        self.assertEquals("[c:d:e:f:g:a:b:C]", str(self.makeScale()))
+
+"""
+It's easy enough to pass the test:
+"""
+
+class TrailBlazer(dict):
+    def __init__(self, trail):
+        self.trail = trail
+
+    def __str__(self):
+        return str(self.trail)
+
+    def __setitem__(self, key, value):
+        seg = TrailBlazer(value)
+        self.trail.extend(seg)
+        dict.__setitem__(self, key, seg)
+
+
+"""
+However, there is a problem at this point:
+"""
+
+bug = TrailBlazer(Trail("{","}"))
+bug["foo"]=Trail("abc.")
+bug["foo"]=Trail("123.")
+bug["foo"]=Trail("xyz")
+assert str(bug["foo"]) == "xyz"
+
+# unfortunately:
+assert str(bug) == "{abc.123.xyz}"
+
+"""
+The code lets us reassign the marker to a new trail, but the old trail
+sticks around. In reality, the same thing happens with python: the old
+method sticks around until it gets garbage collected.
+
+In our case, it's not enough to simply remove the old version, because
+the order in which trails are defined could be important, either for
+technical or narrative reasons (eg, if we were generating reference
+docs inline)
+
+What we really want is to replace the trail if it already exists:
+"""
+
+class ReplaceTest(SolfegeTest):
+    def test(self):
+        scale = self.makeScale()
+        for note in scale:
+            scale[note] = Trail(note," ")
+        self.assertEquals("[do re mi fa so la ti DO ]", str(scale))
+
+        # remove the final space:
+        scale["DO"] = Trail("DO")
+        self.assertEquals("[do re mi fa so la ti DO]", str(scale))
+
+"""
+Now, we want to keep the original behavior if we're blazing a trail
+for the first time, so we can rename the old
+<code>TrailBlazer.__setitem__</code> to <code>.blaze</code>
+"""
+TrailBlazer.blaze = TrailBlazer.__setitem__
+
+"""
+Now we can replace <code>__setitem__</code> with something like this:
+"""
+
+def _TrailBlazer___setitem__(self, key, value):
+    if key in self:
+        self.replace(key, value)
+    else:
+        self.blaze(key, value)
+       
+def _TrailBlazer_replace(self, key, value):
+    self[key].trail = value
+
+TrailBlazer.__setitem__ = _TrailBlazer___setitem__
+TrailBlazer.replace = _TrailBlazer_replace
+
+
+"""
+@TODO: implement deletion. meanwhile: trail.replace("deleted", Trail(""))
+"""
+
+
+
+######################################################################
+
+"""
+At this point, we have everything we need to build our trails as
+we go along. But if you really think about it, you'll realize we
+need two trails: one for people to follow and one for our compiler
+to follow.
+
+The people trail takes the form of plain old words in our markup
+language. The narrative <em>is</em> the people trail.
+
+We also need a trail so that the computer can follow along and read
+our instructions and build the final program. So far python's doing
+that job, but now that we have the features needed for trailblazer, we
+can implement a simple trail-follower to pick up the trail for us.
+
+@TODO: so let's cook us up some good old fashioned xml
+"""
+
+
+######################################################################
+"""
+how to use this file:
+
+- import as a python module
+- run as a command line tool:
+    - trailblazer.py filename
+    - trailblazer.py --selftest  
+"""
+if __name__=="__main__":
+    import sys
+    arg = sys.argv.pop()
+    if arg == "--selftest":
+        import unittest
+        unittest.main()
+
+"""
+happy trails.
+"""
