@@ -1,0 +1,70 @@
+
+
+######################################################################
+"""
+
+Really, trailblazer the tool is pretty simple. You take
+an xml file, turn it into a dom. If it says import, then
+you import that file too.
+
+
+Then you walk the tree, and you build a grove of output
+streams. You declare your streams with <stream> tags.
+
+By default, a file produces output on stdout.
+
+All content goes inside a "flow" tag.
+Content is alway flowing into one one or more streams.
+
+goals
+=====
+keep output flexible because it is likely to change (so use python)
+keep input simple (only a few xml tags)
+
+
+tags
+====
+
+blaze.py (custom python file per project)
+-----------------------------------------
+
+import trailblaser
+
+blazer = trailblazer.TrailBlazer()
+
+blazer.explore(filename):
+   - blaze (read) a specific trail
+
+blazer.report(pattern):
+   - render the output
+
+
+trail file (xml)
+-----------------
+
+generally html with extra tags in trailblazer namespace:
+
+-- phase 1 --/
+
+trail:blaze(name)
+    blaze a chunk of the narrative. everything enclosed in this tag can be
+    replaced later. Generally corresponds to a class or function. 
+
+trail:extend(chunk):
+    Append / insert into chunk  
+
+trail:point(): 
+    this lets us define an extension point in the middle of a chunk.
+    if not present, we extend at the end.
+
+
+-- phase 2 --
+
+trail:replace(chunk):
+    replace the chunk
+
+trail:delete(chunk):
+    delete the chunk
+
+    
+"""
