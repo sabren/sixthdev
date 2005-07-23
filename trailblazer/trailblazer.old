@@ -323,6 +323,11 @@ What we really want is to replace the trail if it already exists:
 class ReplaceTest(SolfegeTest):
     def test(self):
         scale = self.makeScale()
+
+        # original version:
+        self.assertEquals("[c:d:e:f:g:a:b:C]", str(self.makeScale()))
+
+        # change the trails:
         for note in scale:
             scale[note] = Trail(note," ")
         self.assertEquals("[do re mi fa so la ti DO ]", str(scale))
@@ -333,13 +338,13 @@ class ReplaceTest(SolfegeTest):
 
 """
 Now, we want to keep the original behavior if we're blazing a trail
-for the first time, so we can rename the old
-<code>TrailBlazer.__setitem__</code> to <code>.blaze</code>
+for the first time. We can preserve that behavior by renaming the old
+<code>TrailBlazer.__setitem__</code> to <code>.blaze</code>...
 """
 TrailBlazer.blaze = TrailBlazer.__setitem__
 
 """
-Now we can replace <code>__setitem__</code> with something like this:
+... and replacing <code>__setitem__</code> with something like this:
 """
 
 def _TrailBlazer___setitem__(self, key, value):
@@ -364,18 +369,19 @@ TrailBlazer.replace = _TrailBlazer_replace
 ######################################################################
 
 """
-At this point, we have everything we need to build our trails as
-we go along. But if you really think about it, you'll realize we
-need two trails: one for people to follow and one for our compiler
-to follow.
+At this point, we have everything we need to build our trails as we go
+along. But if you really think about it, you'll realize we need two
+trails: one for people to follow and one for our compiler to follow.
 
 The people trail takes the form of plain old words in our markup
 language. The narrative <em>is</em> the people trail.
 
 We also need a trail so that the computer can follow along and read
 our instructions and build the final program. So far python's doing
-that job, but now that we have the features needed for trailblazer, we
-can implement a simple trail-follower to pick up the trail for us.
+that job, but we've had to do a lot of tedious work at runtime to make
+it happen. Now that we have TrailBlazer, we can implement a something
+to sniff out trails that we've defined in an external file, and lead
+the compiler along after us. Let's call it a <code>BlazeHound</code>.
 
 @TODO: so let's cook us up some good old fashioned xml
 """
