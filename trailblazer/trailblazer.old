@@ -325,7 +325,7 @@ class ReplaceTest(SolfegeTest):
         scale = self.makeScale()
 
         # original version:
-        self.assertEquals("[c:d:e:f:g:a:b:C]", str(self.makeScale()))
+        self.assertEquals("[c:d:e:f:g:a:b:C]", str(scale))
 
         # change the trails:
         for note in scale:
