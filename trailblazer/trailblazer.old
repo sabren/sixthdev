@@ -359,6 +359,23 @@ def _TrailBlazer_replace(self, key, value):
 TrailBlazer.__setitem__ = _TrailBlazer___setitem__
 TrailBlazer.replace = _TrailBlazer_replace
 
+"""
+We can extend any sub trail by using the qualified name.
+We might also want to extend the master trail:
+"""
+
+class TrailBlazerExtendTest(unittest.TestCase):
+    def test(self):
+        trail = TrailBlazer(Trail("[",";"))
+        trail.extend("]")
+        self.assertEquals(str(trail), "[];")
+
+def _TrailBlazer_extend(self, content):
+    self.trail.extend(content)
+
+TrailBlazer.extend = _TrailBlazer_extend
+
+
 
 """
 @TODO: implement deletion. meanwhile: trail.replace("deleted", Trail(""))
@@ -383,8 +400,78 @@ it happen. Now that we have TrailBlazer, we can implement a something
 to sniff out trails that we've defined in an external file, and lead
 the compiler along after us. Let's call it a <code>BlazeHound</code>.
 
-@TODO: so let's cook us up some good old fashioned xml
+How a BlazeHound works kind of depends on the markup language we're
+using. From the outside, all we want is to is to load a file. How we
+parse that file kind of depends on what sort of markup language we
+choose. We're going to implement a simple XML BlazeHound.
+
+Let's start with a simple test:
 """
+
+import xml.sax
+
+def normalizeWhiteSpace(s):    
+    return " ".join(str(s).split())
+
+class BlazeHoundTest(unittest.TestCase):
+    def test(self):
+        hound = BlazeHound()
+        hound.parseString(            
+            '<xml>[<trail:blaze name="abc">xyz</trail:blaze>]</xml>')
+        self.assertEquals("[xyz]", normalizeWhiteSpace(hound.trail))
+        self.assertEquals("xyz", normalizeWhiteSpace(hound.trail["abc"]))
+
+"""
+This is a simple test, but it actually takes quite a bit of work:
+"""
+
+class BlazeHound(xml.sax.ContentHandler):
+    def __init__(self):
+        self.stack = []
+        self.this  = Trail("")
+        self.trail = TrailBlazer(self.this)
+
+    def startElement(self, name, attrs):
+        # this isn't the right way to do namespaces, but
+        # since we're just bootstrapping here, we'll let
+        # it slide:
+        if name=="trail:blaze":
+            self.stack.append(self.this)
+            self.this = new = Trail("")
+            self.trail[attrs["name"]]=new
+            
+    def endElement(self, name):
+        if name=="trail:blaze":
+            self.this = self.stack.pop()
+        
+    def parseString(self, s):
+        xml.sax.parseString(s, self)
+
+    def characters(self, content):
+        self.this.extend(content)
+        
+        
+class BlazeHoundFullTest(unittest.TestCase):
+    def test_something(self):
+        xml =\
+        '''
+        <xml>
+          <trail:blaze name="story">
+          Once upon a time.
+          <trail:split/>
+          The end.
+          </trail:blaze>
+          <trail:extend trail="story">
+          Something happened.
+          </trail:extend>
+        </xml>        
+        '''
+        hound = BlazeHound()
+        hound.parseString(xml)
+        self.assertEquals(
+            "Once upon a time. Something happened. The end.",
+            normalizeWhiteSpace(hound.trail))
+        
 
 
 ######################################################################
