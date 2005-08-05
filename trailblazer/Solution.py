@@ -1,4 +1,6 @@
 #**** Solution 
+import atexit, unittest
+atexit.register(unittest.main)
 
 #*** the solution compiler should be easy:
 # just "for x in solution" or list(solution)

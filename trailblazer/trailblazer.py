@@ -28,18 +28,11 @@ from __future__ import generators
 #**** simpe example: atexit
 # we want this to run, but not until the very end.
 # but the computer can remember for us.
-import atexit, unittest
-atexit.register(unittest.main)
 
 #** how to model narratives?
 #*** refactoring language / narrative style
 #*** nouns are user supplied: trailblazing (or espionage)
-#***** stick with small objects / composition
 #*** verbs: patchwork (extend, delete, patch)
-
-from Solution import *
-from saxophone import *
-from BlazeHound import *
 
 #* custom blazefile
 #** compare to ant/make
