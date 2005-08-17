@@ -10,31 +10,38 @@
 #*** want with small objects / composition
 #*** PyDispatch gets it right but let's do xml-specific
 
+# we'll need this DOCUMENT variable later. It's
+# just a fake tag that we use to describe the
+# document as a whole. It's just a node that
+# contains the root element, just like the
+# document node in the W3C DOM.
+DOCUMENT = "*top*" 
 
 # okay. so we're going to build our dispatch
 # tool as an xml.sax.ContentHandler.
-
 import xml.sax
-
-ROOT = "*top*" # fake tag for document node
-
 ############################################################
-class SAXophone(xml.sax.ContentHandler):
+class Saxophone(xml.sax.ContentHandler):
 ############################################################
     
 # We're going to pass all content to a TagHandler,
 # so we start up with a default handler:
 
     def __init__(self, byDefault=None):
+        # (first version)
         self.byDefault = byDefault
 
-    def startDocument(self):        
-        self.handler = self.getTagHandler(ROOT, {})
+    def startDocument(self):
+        # here's where we use that DOCUMENT tag.
+        # pretending its a real tag just simplifies
+        # the implementation a bit.
+        self.handler = self.getTagHandler(DOCUMENT, {})
 
 # TagHandlers will need .chars() and .space()
 
     def characters(self, ch):
         self.handler.chars(ch)
+
     def whitespace(self, sp):
         self.handler.space(sp)
 
@@ -42,6 +49,7 @@ class SAXophone(xml.sax.ContentHandler):
 # we need a dictionary
 
     def __init__(self, byDefault=None):
+        # (second version)
         self.byDefault = byDefault
         self.tagMap = {}
 
@@ -51,6 +59,7 @@ class SAXophone(xml.sax.ContentHandler):
 # since tags are nested, we need a stack:
 
     def __init__(self, byDefault=None):
+        # (third and final version)
         self.byDefault = byDefault
         self.tagMap = {}
         self.stack = []
@@ -77,7 +86,7 @@ class SAXophone(xml.sax.ContentHandler):
         self.handler = self.stack.pop()
         self.handler.child(result)
 
-# utility methods because xml.sax is ugly:
+# finally, some utility methods because xml.sax is ugly:
 
     def parse(self, filename_or_stream):
         xml.sax.parse(filename_or_stream, self)
@@ -91,7 +100,7 @@ class SAXophone(xml.sax.ContentHandler):
 ############################################################
 class TagHandler(object):
 ############################################################
-# so here's our base class, with a
+# so here's our base Tag Handler class, with a
 # simple default implementation:
 
     def __init__(self, tag, attrs):
@@ -109,7 +118,7 @@ class TagHandler(object):
         self.data.append(data)
 
 # what you return at the end is up to you.
-# here's a simple default implementation:
+# here again is a simple default implementation:
 
     def close(self):
         return self
@@ -121,17 +130,18 @@ class TagHandler(object):
         res = []
 
         # open the tag:
-        # but not for the * element, which is the top
-        if self.tag != ROOT:
+        # but not for the virtual DOCUMENT element
+        if self.tag != DOCUMENT:
             res.append("<%s" % self.tag)
             # add the attributes
             for key, value in self.attrs.items():
                 # note: because attrs is a dict, and
                 # dict keys are ordered arbitrarily, this
                 # won't match input exactly. :/
-                res.append(' %s="%s"' % (key,
-                                        # also we need to re-encode the data:
-                                        xmlEncode(value)))
+                res.append(' %s="%s"' %
+                           (key,
+                            # also we need to re-encode the data:
+                            xmlEncode(value)))
             res.append(">")
        
         # walk the tree recursively:
@@ -139,7 +149,7 @@ class TagHandler(object):
             res.append(str(item))
             
         # close the tag and squish it all together:
-        if self.tag != ROOT:
+        if self.tag != DOCUMENT:
             res.append("</%s>" % self.tag)
             
         return "".join(res)
@@ -149,24 +159,21 @@ def xmlEncode(s):
     """
     xmlEncode(s) ->  s with >, <, and & escaped as &gt;, &lt; and &amp;
     """
-    res = ""
-    for ch in s:
-        if ch == ">":
-            res = res + "&gt;"
-        elif ch=="<":
-            res = res + "&lt;"
-        elif ch=="&":
-            res=res + "&amp;"
-        else:
-            res = res + ch
-    return res
+    ents = {
+        ">": "&gt;",
+        "<": "&lt;",
+        "&": "&amp;"
+    }
+    return "".join([ents.get(ch,ch) for ch in s])
 
 
-# here's how it should work:
+# okay, we're done. I dind't know how to write this test
+# first and incementally. It's kind of a gestalt.
+# but, here's how it should work:
 import unittest
 class SaxophoneTest(unittest.TestCase):
     def test(self):
-        s = SAXophone(TagHandler)
+        s = Saxophone(TagHandler)
         xml = """<data><a>
            here is some <xml version="1.0">xml</xml>
               </a>  
@@ -178,5 +185,6 @@ class SaxophoneTest(unittest.TestCase):
         self.assertEquals(xml, str(s.parseString(xml)))
         
 
+# If you run this file, it should pass the tests.
 if __name__=="__main__":
     unittest.main()
