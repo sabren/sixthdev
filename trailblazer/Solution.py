@@ -16,6 +16,7 @@ class SolutionTest(unittest.TestCase):
         s.append("b")
         s.append("c")
         assert list(s) == ["a","b","c"]
+        assert str(s) == "abc"
 
 class Solution(object):
     def __init__(self):
@@ -24,9 +25,11 @@ class Solution(object):
     def append(self, x):
         self.parts.append(x)
 
-
     def __iter__(self):
         return self.parts.__iter__()
+
+    def __str__(self):
+        return "".join(self)
 
 
 #*** want to give big picture and fill details in later
