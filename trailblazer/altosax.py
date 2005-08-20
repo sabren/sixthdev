@@ -167,7 +167,7 @@ def xmlEncode(s):
     return "".join([ents.get(ch,ch) for ch in s])
 
 
-# okay, we're done. I dind't know how to write this test
+# okay, we're done. I didn't know how to write this test
 # first and incementally. It's kind of a gestalt.
 # but, here's how it should work:
 import unittest
