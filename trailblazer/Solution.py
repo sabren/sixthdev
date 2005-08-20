@@ -182,3 +182,29 @@ def _Solution_clear(self, trail=None):
         self.blazes = {}
 Solution.clear = _Solution_clear
 
+
+
+# finally, we wan to be able to merge two solutions together
+# a list uses the extend method for this,
+
+class ExtendTest(unittest.TestCase):
+    def test(self):
+         a = Solution()
+         a.blaze("a")
+         a.at("a").append("a")
+
+         b = Solution()
+         b.blaze("b")
+         b.at("b").append("b")
+
+         a.extend(b)
+         self.assertEquals("b", str(a["b"]))
+
+
+# but because of the nested structures and names, we need to a little
+# more work:
+def _Solution_extend(self, other):
+    self.parts.extend(other.parts)
+    for k, v in other.blazes.items():
+        self.blazes[k] = v
+Solution.extend = _Solution_extend
