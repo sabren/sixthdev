@@ -11,13 +11,16 @@
 _TEST_NARRATIVE =\
 """\
 <xml>
-  <trail:blaze trail="number">123</trail:blaze>
-  <trail:blaze trail="alpha">XYZ</trail:blaze>
-  <trail:replace trail="alpha">ABC</trail:replace>
-  <trail:extend trail="number">456</trail:extend>
-  <trail:extend trail="alpha">DEF</trail:extend>
+  <trail:blaze trail="char">
+    <trail:blaze trail="alpha">XYZ</trail:blaze>
+    <trail:blaze trail="number">123</trail:blaze>
+  </trail:blaze>
+  <trail:replace trail="char.alpha">ABC</trail:replace>
+  <trail:extend trail="char.number">456</trail:extend>
+  <trail:extend trail="char.alpha">DEF</trail:extend>
 </xml>\
 """
+_TEST_SOLUTION_CHAR ="ABCDEF123456"
 _TEST_SOLUTION_ALPHA ="ABCDEF"
 _TEST_SOLUTION_NUMBER ="123456"
 
@@ -54,15 +57,41 @@ TAG_EXTEND = "trail:extend"
 # Now the basic TagHandler almost does what we want,
 # but not quite. Why? Because it's appending to a
 # list as we go along, but what we really want to
-# do is append to a Solution. But that's easy:
+# do is append to a Solution.
+
+# ah, but which solution? if all we had were blaze
+# tags, then we could just make up a new solution
+# at the start of each tag and build up the tree
+# using anonymous instances.
+
+# but, since we want to be able to modify the tree
+# as we go (using the replace and extend tags)
+# then we need to be able to walk the tree. which
+# means we need to hold on to the root.
+
+# it also means that we can't have a separate
+# solution for each tag.
+
+# if we want nested blaze tags, then we need the
+# concept of a "current" solution as well as the
+# "root" solution. so we need exactly one root
+# Solution, plus one Solution per trail: tag.
+
+# But that's all easy os far as SolutionBuilder
+# is concerned. just replace the .data attribute
+# with a Solution, either a specific one that
+# we pass in, or a brand new one:
 
 class SolutionBuilder(TagHandler):
-    def __init__(self, tag, attrs):
+    def __init__(self, tag, attrs, solution):
         super(SolutionBuilder, self).__init__(tag, attrs)
-        self.data = Solution()
+        self.data = solution
 
-# Now, we have three tags we need to handle: blaze,
-# extend, and replace. We could implement each one as
+# by default, all tags and data (for example, html content)
+# will go to this generic tog. 
+
+# But, we have three tags we need to handle specially:
+# blaze, extend, and replace. We could implement each one as
 # a TagHandler and pass the same Solution object around
 # but since Solution is a recursive data structure anyway,
 # it's easier to just use SolutionBuilder.
@@ -84,13 +113,7 @@ class SolutionBuilder(TagHandler):
     def child(self, child):
         if child.tag == TAG_BLAZE:
             self.onBlaze(child)
-        elif child.tag == TAG_EXTEND:
-            self.onExtend(child)
-        elif child.tag == TAG_REPLACE:
-            self.onReplace(child)
-        elif self.tag == DOCUMENT:
-            self.data = child.data
-        else:
+        elif child is not None:
             # not a trail tag so we can just collapse the
             # solution into a string:
             self.data.append(str(child))
@@ -123,64 +146,96 @@ class SolutionBuilder(TagHandler):
 # enough. Here's the Blaze handler:
 
     def onBlaze(self, child):
-        # @TODO: prevent duplicate trail names on blaze?
-        trail = child.attrs["trail"]
-        logging.debug("blazing %s" % trail)
+        trail=child.attrs["trail"]
         self.data.blaze(trail)
-        # @TODO: We really need a Solution.extend() here.
-        # The .append() method works fine for recursive
-        # iteration but what about nested blazes? I don't
-        # think you can follow across an "anonymous" sub
-        # solution like that, so any blazes in the child
-        # would be lost with .append()... This is only an
-        # issue if we want recursive blazes after all, so
-        # I'm not sure it matters. Meanwhile, here's a
-        # compromise:
-        # (I may extract this later to be Solution.extend)
-        for item in child.data:
-            logging.debug("appending %s at %s" % (item, trail))
-            self.data.at(trail).append(item)
+        self.data.at(trail).extend(child.data)
 
-# The extend tag works the same way.
-# I guess we probably do need extend, huh?
-
-    def onExtend(self, child):
-        trail = child.attrs["trail"]
-        for item in child.data:
-            logging.debug("appending %s at %s" % (item, trail))
-            self.data.at(trail).append(item)
-            
-# Replace also works this way, but clears the trail first.
-# Only I don't think this is going to work either because
-# we don't have the entire tree.
-#
-# GAH. Doing all this in child() seems so much more
-# elegant than passing in the parent data to each tag,
-# but it looks like we need that data after all if we
-# want to use dotted trail names in extend and replace.
-# ugh. 
-
-    def onReplace(self, child):
-        trail = child.attrs["trail"]
-        logging.debug("clearing %s" % trail)
-        self.data.at(trail).clear()
-        for item in child.data:
-            logging.debug("appending %s at %s" % (item, trail))
-            self.data.at(trail).append(item)
-    
+    def child(self, data):
+        ## self.data.append(data)
+        pass
 
 # so really this should all work for our test but
 # not yet for dotted paths. I'll have to rethink
 # this. But let's go ahead and implement the test:
 import unittest 
-class SolutionBuilderTest(unittest.TestCase):
+class BlazeHoundTest(unittest.TestCase):
     def test(self):
-        sxp = Saxophone(SolutionBuilder)
+        sxp = BlazeHound()
         sol = sxp.parseString(_TEST_NARRATIVE).data
         logging.debug(sol.getBlazes())
         logging.debug(list(sol))
-        self.assertEquals(str(sol["alpha"]), _TEST_SOLUTION_ALPHA)
-        self.assertEquals(str(sol["number"]), _TEST_SOLUTION_NUMBER)      
+        print sxp.getSolution()
+        self.assertEquals(str(sol["chars.alpha"]), _TEST_SOLUTION_ALPHA)
+        self.assertEquals(str(sol["chars.number"]), _TEST_SOLUTION_NUMBER)      
+
+
+
+
+
+###############################################################
+
+class BlazeHoundTag(SolutionBuilder):
+    def __init__(self, hound, tag, attrs):
+        solution = Solution()
+        super(BlazeHoundTag, self).__init__(tag, attrs, solution)
+        self.hound = hound
+        self.hound.pushContext(solution)
+        self.trail = attrs["trail"]
+
+
+class ExtendTag(BlazeHoundTag):
+    def close(self):
+        self.hound.popContext()
+        self.hound.getSolution().at(self.trail).extend(self.data)
+        return None
+    
+class ReplaceTag(BlazeHoundTag):
+    def close(self):
+        self.hound.popContext()
+        print self.hound.getSolution()
+        self.hound.getSolution().at(self.trail).clear()
+        self.hound.getSolution().at(self.trail).extend(self.data)
+        return None
+
+class BlazeHound(Saxophone):
+
+    def __init__(self, sol=None):
+        # by default, use self.onAny, below
+        super(BlazeHound, self).__init__(self.onAny)
+
+        # the other tags are easy:
+        self.onTag(TAG_EXTEND,
+                   lambda tag, attrs: ExtendTag(self, tag, attrs))
+        self.onTag(TAG_REPLACE,
+                   lambda tag, attrs: ReplaceTag(self, tag, attrs))
+
+
+# now, we need to be able to get to our solution as we go along
+# this means we can't wait for the top level tag to close in order
+# to get at it. so... we need to create the root solution
+# ourselves and hold on to it.
+
+        self.rootSolution = sol or Solution()
+        self.contexts = [self.rootSolution] # solution stack
+
+# Saxophone.byDefault needs to be a callable that returns
+# a TagHandler. There's no reason it con't just be a method:
+
+    def onAny(self, tag, attrs):
+        return SolutionBuilder(tag, attrs, self.getContext())
+
+    def getSolution(self):
+        return self.rootSolution
+
+
+    def getContext(self):
+        return self.contexts[-1]
+
+    def pushContext(self, solution):
+        self.contexts.append(solution)
+
+    def popContext(self):
+        return self.contexts.pop()
 
 # run the tests
 if __name__=="__main__":
