@@ -21,7 +21,7 @@ DOCUMENT = "*top*"
 # tool as an xml.sax.ContentHandler.
 import xml.sax
 ############################################################
-class Saxophone(xml.sax.ContentHandler):
+class Saxophone(object, xml.sax.ContentHandler):
 ############################################################
     
 # We're going to pass all content to a TagHandler,
