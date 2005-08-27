@@ -205,6 +205,6 @@ class ExtendTest(unittest.TestCase):
 # more work:
 def _Solution_extend(self, other):
     self.parts.extend(other.parts)
-    for k, v in other.blazes.items():
-        self.blazes[k] = v
+    for k, v in other.getBlazes().items():
+        self.getBlazes()[k] = v
 Solution.extend = _Solution_extend
