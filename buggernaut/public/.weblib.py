@@ -2,8 +2,11 @@ import sys
 #print "content-type: text/plain"
 #print 
 #sys.stderr = sys.stdout
-sys.path.extend(["/home/sabren/lib","/home/sabren/work/"])
-from sqlGuru import dbc
+
+
+sys.path.extend(["/home/blaze/lib"])
+from buggernaut.sqlBuggernaut import connect
+dbc = connect()
 from strongbox import *
 
 class Story(Strongbox):
@@ -22,10 +25,11 @@ class Story(Strongbox):
 
 from buggernaut import Task
 
-dbmap = {
-    Story: "plan_story",
-    Task: "proj_task",
-    }
 import arlo, storage
+
+dbmap = arlo.Schema({
+    #Story: "plan_story",
+    Task: "bug_task",
+    })
 CLERK = arlo.Clerk(storage.MySQLStorage(dbc), dbmap)
 

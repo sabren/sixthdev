@@ -20,8 +20,9 @@ class TrackerApp(sixthday.AdminApp):
         
     def list_task(self):
         #self.model["status"] = "*"
-        self.model["list"] = map(BoxView,
-                                 self.clerk.match(Task, status='open'))
+        tasks = map(BoxView,
+                    self.clerk.match(Task)) #, status='open'))
+        self.model["list"] = tasks
         self.model["opt_area"] = ['asdf']
         self.model["opt_status"] = ['open','urgent','active','closed']
         print >> self, zebra.fetch("lst_task", self.model)

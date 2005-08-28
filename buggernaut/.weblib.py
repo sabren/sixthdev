@@ -1,8 +1,14 @@
 import sys
-sys.path.extend(["/home/sabren/lib","/home/sabren/work"])
+#print "content-type: text/plain"
+#print
+#sys.stderr = sys.stdout
+
+sys.path.extend(["/home/blaze/lib"])
 
 from buggernaut import *
-import storage, arlo, sqlTangentCode
-CLERK = arlo.Clerk(storage.MySQLStorage(sqlTangentCode.dbc),
-                   {Task : "bug_task",
-                    Area : "bug_area",})
+import storage, arlo, sqlBuggernaut
+CLERK = arlo.Clerk(storage.MySQLStorage(sqlBuggernaut.connect()),
+                   arlo.Schema({
+                       Task : "bug_task",
+                       Area : "bug_area",
+                   }))

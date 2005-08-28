@@ -12,6 +12,8 @@ class Task(Strongbox):
     ID = attr(int, default=auto)
     task = attr(str)
     detail = attr(str)
+    owner = attr(str, okay=[])
+    risk = attr(str)
     status = attr(str, default='open',
                   okay=['open', 'urgent', 'active', 'closed'])
     

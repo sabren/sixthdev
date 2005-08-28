@@ -10,11 +10,9 @@
 <tr>
   <td>[<a href="tracker.app?action=create&what=task">add task</a>]</td>
   <td>
-<!--
     <b>filter</b>
     status:  {:html.select("status", ['[any]'] + opt_status, status):}
     <input type="submit" value="go">
--->
   </td>
 </tr>
 </table>

@@ -36,7 +36,7 @@
           <th width="50">Target</th>
         </tr>
     <tr class="{:status:}">
-      <th width="5" class="{:priority:}">{:owner[0]:}</td>
+ <!--     <th width="5" class="{:priority:}">{:owner[0]:}</td> -->
       <td width="*">
           <a href="tasks.py?action=edit&what=task&ID={:ID:}">{:task:}</a>
       </td>
