@@ -50,7 +50,6 @@ we want to create a Saxophone with some TagHandlers
 that build a Solution object from the xml tags.
 """
 from Solution import Solution
-from altosax import Saxophone, TagHandler, DOCUMENT
 
 """
 Since state machines are kind of tricky, we can
