@@ -1,7 +1,4 @@
-#**** Solution 
-import atexit, unittest
-if __name__=="__main__":
-    atexit.register(unittest.main)
+import unittest
 
 #*** the solution compiler should be easy:
 # just "for x in solution" or list(solution)
@@ -102,14 +99,10 @@ class BlazeExtensionTest(BlazeTest):
         self.solution["end"].append(">")
         self.assertEquals("<[{*-*}]>", "".join(self.solution))
 
-
-def _Solution___getitem__(self, key):    
-    return self.getBlazes()[key]
-Solution.__getitem__ = _Solution___getitem__
-
-#**** would like cleaner way to revisit a point
-#***** we have trail[x][y][z] but this is ugly
-#***** so, solution.find(trail="x.y.z")
+"""
+Now, we could just return the key from the getBlaze()[key]
+but that doesn't allow us to follow a trail. Consider:
+"""
 
 class AtTest(unittest.TestCase):
     def test(self):
@@ -121,33 +114,33 @@ class AtTest(unittest.TestCase):
         for x in alphabet:
             words.blaze(x)
             for y in alphabet:
-                words.at(x).blaze(y)
+                words[x].blaze(y)
 
         # add some words to the tree:
-        words.at("t.w").append("twas")
-        words.at("a._").append("a")
-        words.at("d.a").append("dark")
-        words.at("a.n").append("and")
-        words.at("s.t").append("stormy")
-        words.at("n.i").append("night")
+        words["t.w"].append("twas")
+        words["a._"].append("a")
+        words["d.a"].append("dark")
+        words["a.n"].append("and")
+        words["s.t"].append("stormy")
+        words["n.i"].append("night")
 
         # they should be alphabetized now:
         self.assertEquals("a and dark night stormy twas",
                            " ".join(words))
 
        
-# here's how we did it:
+# so here's how we do that:
 
-def _Solution_at(self, trail):
+def _Solution___getitem__(self, trail):
     split = trail.split(self.splitter, 1)
     head, tail = split[0], split[1:]
     assert len(tail) in [0,1] # because of 1 in trail.split()
     if tail:
-        return self[head].at(tail[0])
+        return self.getBlazes()[head][tail[0]]
     else:
-        return self[head]
+        return self.getBlazes()[head]
     
-Solution.at = _Solution_at
+Solution.__getitem__ = _Solution___getitem__
 
 #***** make split char configurable (but classwide)
 Solution.splitter = "."
@@ -164,19 +157,19 @@ class ClearTest(unittest.TestCase):
         s = Solution()
         s.append("[")
         s.blaze("content")
-        s.at("content").append("before")
+        s["content"].append("before")
         s.append("]")
 
         self.assertEquals("[before]", "".join(s))
         s.clear("content")
         self.assertEquals("[]", "".join(s))
-        s.at("content").append("after")
+        s["content"].append("after")
         self.assertEquals("[after]", "".join(s))
 
 
 def _Solution_clear(self, trail=None):
     if trail:
-        self.at(trail).clear()
+        self[trail].clear()
     else:
         self.parts = []
         self.blazes = {}
@@ -191,11 +184,11 @@ class ExtendTest(unittest.TestCase):
     def test(self):
          a = Solution()
          a.blaze("a")
-         a.at("a").append("a")
+         a["a"].append("a")
 
          b = Solution()
          b.blaze("b")
-         b.at("b").append("b")
+         b["b"].append("b")
 
          a.extend(b)
          self.assertEquals("b", str(a["b"]))
@@ -208,3 +201,10 @@ def _Solution_extend(self, other):
     for k, v in other.getBlazes().items():
         self.getBlazes()[k] = v
 Solution.extend = _Solution_extend
+
+
+"""
+run the tests:
+"""
+if __name__=="__main__":
+    unittest.main()
