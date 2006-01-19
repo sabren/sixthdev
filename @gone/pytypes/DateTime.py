@@ -13,6 +13,11 @@ try:
 except ImportError:
     mxDateTime = None
 
+try:
+    import datetime
+except ImportError:
+    datetime = None
+
 class DateTime:
     """
     A class to represent datetimes.
@@ -24,6 +29,8 @@ class DateTime:
         s = datestr
         if mxDateTime and type(s) == mxDateTime.DateTimeType:
             s = str(s)[:-3] # strip off milliseconds
+        elif datetime and isinstance(s, datetime.datetime):
+            s = s.strftime("%Y-%m-%d %H:%M:%S")
         elif type(s) != str:
             raise TypeError, "usage: DateTime(string) (got %s)" % type(s)
         
