@@ -3,7 +3,7 @@ Misc handy routines
 """
 import os
 import sys
-import whrandom
+import random
 import string
 import tempfile
 import operator
@@ -12,7 +12,7 @@ def randpass(length=5):
     okay = "abcdefghijkmnopqrstuvwxyz2345678923456789"
     res = ""
     for i in range(length+1):
-        res += okay[whrandom.randrange(0, len(okay))]
+        res += okay[random.randrange(0, len(okay))]
     return res
 
 
@@ -92,12 +92,12 @@ def uid():
     unique identifier generator, for sessions, etc
     Returns a 32 character, printable, unique string
     """
-    import md5, whrandom, string
+    import md5, string
     tmp, uid = "", ""
     
     # first, just get some random numbers
     for i in range(64):
-        tmp = tmp + chr(whrandom.randint(0,255))
+        tmp = tmp + chr(random.randint(0,255))
 
     # then make a 16-byte md5 digest...
     tmp = md5.new(tmp).digest()
