@@ -239,8 +239,8 @@ class HotColdSess:
 
     def _gc(self):
         """occasionally drains the sesspool"""
-        import whrandom
-        if (whrandom.random() * 100 <= self.gcProb):
+        import random
+        if (random.random() * 100 <= self.gcProb):
             self._pool.drain(self.name, 0)
             
 

@@ -14,7 +14,7 @@ __ver__="$Id$"
 import string
 import UserDict
 import weblib
-import whrandom
+import random
 
 try:
     from cPickle import loads, dumps
@@ -155,7 +155,7 @@ class Sess(UserDict.UserDict):
         """
         occasionally drains the sesspool
         """
-        if (whrandom.random() * 100 <= self.gcProb):
+        if (random.random() * 100 <= self.gcProb):
             self._pool.drain(self.name, 0)
             
 
