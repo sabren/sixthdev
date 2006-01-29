@@ -124,3 +124,8 @@ class DateTime:
         assert mxDateTime, "mx.DateTime is not installed"
         return mxDateTime.DateTime(self.y, self.m, self.d,
                                    self.hh, self.mm, self.ss)
+
+    def to_datetime(self):
+        assert datetime, "datetime is requried here"
+        return datetime.datetime(self.y, self.m, self.d,
+                                 self.hh, self.mm, self.ss)

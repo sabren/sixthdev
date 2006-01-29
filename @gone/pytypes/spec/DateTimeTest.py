@@ -112,6 +112,16 @@ class DateTimeTest(unittest.TestCase):
             print "[mxDate not installed, skipping test...]"
             
 
+    def test_to_datetime(self):
+        try:
+            import datetime
+            dtNow = DateTime("1/1/2000")
+            pyNow = dtNow.to_datetime()
+            assert pyNow == datetime.datetime(2000,1,1)
+        except ImportError:
+            print "[mxDate not installed, skipping test...]"
+
+
 if __name__=="__main__":
     unittest.main()
 
