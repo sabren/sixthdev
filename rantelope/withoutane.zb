@@ -1,0 +1,12 @@
+* exec:
+    from zebra.handy import xmlEncode
+
+* for stories:
+    <div class="entry">
+    <h1>{:xmlEncode(title):}</h1>
+    {:description:}
+    * if url:
+        <div class="tagline"><a href="/rants/{:url:}">{:posted:}</a></div>
+    * el:
+        <div class="tagline">{:posted:}</div>
+    </div>
