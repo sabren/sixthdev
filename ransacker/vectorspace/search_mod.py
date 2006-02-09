@@ -6,7 +6,10 @@ This should index and search and do all kinds of fun stuff
 """
 
 import sys
-from Numeric import *
+try:
+    from Numeric import *
+except:
+    from numpy import *
 import re
 from string import lower
 from stemmer import PorterStemmer

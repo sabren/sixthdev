@@ -2,7 +2,17 @@
 vector math routines
 """
 __ver__="$Id$"
-import Numeric, math
+try:
+    import Numeric
+except:
+    Numeric = None
+
+if Numeric is None:
+    try: import numpy as Numeric
+    except ImportError: raise ImportError ("no numeric like thing found")
+
+    
+import math
 
 def magnitude(vec):
     """
