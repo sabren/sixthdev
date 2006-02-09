@@ -1,5 +1,5 @@
 * exec:
-    from zebra.handy import xmlEncode
+    from handy import xmlEncode
 
 * for stories:
     <div class="entry">

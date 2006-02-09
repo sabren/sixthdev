@@ -1,5 +1,5 @@
 * exec:
-    from zebra.handy import xmlEncode
+    from handy import xmlEncode
 
 <?xml version="1.0"?>
 <rss version="2.0" xmlns="http://backend.userland.com/rss2">

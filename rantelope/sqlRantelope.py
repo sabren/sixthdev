@@ -2,9 +2,9 @@
 this module configures database mapping for rantelope
 """
 __ver__="$Id$"
-import sys; sys.path.insert(0,"/home/sabren/lib")
+#import sys; sys.path.insert(0,"/home/sabren/lib")
 import storage
-import arlo
+import clerks as arlo
 from rantelope import *
 
 ## database connection ############################

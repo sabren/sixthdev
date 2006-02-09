@@ -5,18 +5,18 @@ This program is free software,
 licensed under the GNU GPL.
 """
 
-from Node import Node
-from arlo import Schema, MockClerk
+from clerks import Schema, MockClerk
 from pytypes import DateTime
 from sixthday import Auth
 from strongbox import *
-import arlo
+import clerks as arlo
 import crypt
 import ransacker
 import sixthday
 import unittest
 import zebra
-from weblib import Sess, SessPool, RequestBuilder, Response
+from weblib import RequestBuilder, Response
+from sesspool import Sess, SessPool
 
 # NOTE: all ID attributes must default
 # to "None" for SQLite's autonumbering
@@ -386,14 +386,26 @@ class RantelopeApp(sixthday.AdminApp):
         
     def edit_story(self):
         s = self.clerk.fetch(Story, self.input["ID"])
-        c = self.studyChannel(s.channelID)
+        c = self.studyChannel(s.channel.ID)
         self.model["siteurl"] = c.url
         self.model["stories"] = []
+        self.model["channelID"] = c.ID
         self.generic_show(Story, "frm_story")
 
     def save_story(self):
         ## first save to database:
+        
+        c = self.studyChannel(self.input.get("channelID"))
+        """
+        ugh. this next part has to come after the studyChannel call
+        or you can't update. that's messed up. I think it's
+        because getInstance doesn't deal with the arlo caching
+        correctly or something. But it really doesn't matter
+        since this whole _getInstance thing needs to go away
+        completely anyway.
+        """
         story = self._getInstance(Story)
+        c.stories << story
         if not story.author:
             story.author = self.user
         self.clerk.store(story)
@@ -413,7 +425,7 @@ class RantelopeApp(sixthday.AdminApp):
 
         ## go back to the channel:
         self.redirect(action='create&what=story&channelID='
-                            + str(story.channelID))        
+                            + str(story.channel.ID))        
         
     def show_story(self):
         self.generic_show(Story, "sho_story")
