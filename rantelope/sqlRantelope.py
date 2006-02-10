@@ -4,7 +4,7 @@ this module configures database mapping for rantelope
 __ver__="$Id$"
 #import sys; sys.path.insert(0,"/home/sabren/lib")
 import storage
-import clerks as arlo
+import clerks
 from rantelope import *
 
 ## database connection ############################
@@ -16,7 +16,7 @@ from rantelope import *
 from sqlGuru import dbc
 sto = storage.MySQLStorage(dbc)
 
-clerk = arlo.CallbackClerk(sto, SCHEMA)
+clerk = clerks.CallbackClerk(sto, SCHEMA)
 
 ## search engine stuff ############################
 import atexit
