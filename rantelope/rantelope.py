@@ -41,17 +41,6 @@ class Author(Strongbox):
     def isPassword(self, value):
         return self.cryptpwd == crypt.crypt(value, self.cryptpwd[:2])
     
-# * Comment
-class Comment(Strongbox):
-    """
-    A comment posted by a reader.
-    """
-    ID = attr(long, default=auto)
-    story = link(forward)
-    name = attr(str)
-    mail = attr(str)
-    url = attr(str)
-    note = attr(str)
     
 # * Story
 class Story(Strongbox):
@@ -65,7 +54,6 @@ class Story(Strongbox):
     title = attr(str)
     url = attr(str)
     description = attr(str)
-    comments = linkset(Comment, "story")
     author = link(Author)
     format = attr(str, default="")
     
@@ -153,7 +141,6 @@ class Channel(Strongbox):
 Story.channel.type = Channel
 Story.category.type = Category
 Category.channel.type = Channel
-Comment.story.type = Story
 
 SCHEMA = Schema({
     Channel: "rnt_channel",
@@ -162,12 +149,9 @@ SCHEMA = Schema({
     Category: "rnt_category",
     Category.channel: "channelID",
     Story: "rnt_story",
-    Story.comments: "storyID",
     Story.author: "authorID",
     Story.channel: "channelID",
     Story.category: "categoryID",
-    Comment: "rnt_comment",
-    Comment.story : "storyID",
     Author: "rnt_author",
 })
 
@@ -429,14 +413,6 @@ class RantelopeApp(sixthday.AdminApp):
         
     def show_story(self):
         self.generic_show(Story, "sho_story")
-
-    ## comments ########################
-        
-    def save_comment(self):
-        cmt = self.generic_save(Comment)
-        self.redirect(action='show&what=story&ID='
-                      + str(cmt.storyID))
-
 
     ## publishing ######################
         
