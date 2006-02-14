@@ -1,11 +1,12 @@
 #!/usr/bin/python
 """
-A simple class to represent a Quicken (QIF) file, and a parser to
-load a QIF file into a sequence of those classes.
+qif parser
 
-It's enough to be useful for writing conversions.
+based on :
+    http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/306103
 """
-
+from pytypes import Date
+import cash2led
 import sys
  
 class QifItem:
@@ -59,9 +60,14 @@ def parseQif(infile):
             items.append(curItem)
             curItem = QifItem()
         elif line[0] == 'D':
-            curItem.date = line[1:-1]
+            curItem.date = cash2led.fmtDate(Date(
+                line[1:-1].replace("' ","/200").replace(" ","")))
         elif line[0] == 'T':
             curItem.amount = line[1:-1]
+        elif line[0] == "U":
+            pass # same as T
+        elif line[0] == "N":
+            curItem.num = line[1:-1]
         elif line[0] == 'C':
             curItem.cleared = line[1:-1]
         elif line[0] == 'P':
