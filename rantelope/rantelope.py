@@ -1,3 +1,4 @@
+#!/usr/bin/python2.4
 """
 Rantelope!
 (c)2002-2006 Sabren Enterprises, Inc.
@@ -6,6 +7,7 @@ licensed under the GNU GPL.
 """
 
 from clerks import Schema, MockClerk
+from optparse import OptionParser
 from pytypes import DateTime
 from sixthday import Auth
 from strongbox import *
@@ -13,15 +15,62 @@ import clerks as arlo
 import crypt
 import ransacker
 import sixthday
+import os
+import sys
 import unittest
 import zebra
+import storage
+import sqlGuru
 from weblib import RequestBuilder, Response
-from sesspool import Sess, SessPool
+from sesspool import Sess, InMemorySessPool
+
+
+ROOT = "/home/sabren/web/withoutane.com/"
 
 # NOTE: all ID attributes must default
 # to "None" for SQLite's autonumbering
 # this doesn't effect MySQL's auto_increment 
 auto = None
+
+# * parse rant files
+class RantParser(object):
+    def __init__(self, path):
+        self.url = path
+        self._parse(open(path).read())
+
+    def _parse(self, data):
+        self.data = []
+        lines = data.split("\n")
+        topline = lines[0]
+        if topline.startswith("["):
+            # new style dates
+            self.date, self.title = topline.split("]",1)
+            self.date = self.date + "]"
+        else:
+            self.date, self.title = topline.split(" ",1)
+        para = []
+        for line in lines[1:]:
+            if line.strip()=="":
+                if para:
+                    self.data.append(" ".join(para))
+                para = []
+            else:
+                para.append(line + "\n")
+        if para:
+            self.data.append(" ".join(para))
+
+
+
+def toHTML(rant, comments):
+    res = []
+    for chunk in rant.data:
+        if not chunk.strip(): continue
+        if chunk.strip().startswith("<"):
+            res.append(chunk)
+        else:
+            res.append("<p>%s</p>" % chunk)
+    return "".join(res)
+
 
 # * Author
 class Author(Strongbox):
@@ -43,6 +92,15 @@ class Author(Strongbox):
     
     
 # * Story
+
+class TagTest(unittest.TestCase):
+    def test(self):
+        s = Story(csvtags=" apples, banANA CREME pie, etc." )
+        assert s.tags == ["apples", "banana creme pie", "etc."]
+        s = Story()
+        assert s.tags == []
+
+
 class Story(Strongbox):
     """
     A document, blog entry, or other text.
@@ -55,7 +113,23 @@ class Story(Strongbox):
     url = attr(str)
     description = attr(str)
     author = link(Author)
-    format = attr(str, default="")
+    csvtags = attr(str)
+    location = attr(str, default="internal", okay=["internal","external"])
+
+    def get_tags(self):
+        if self.csvtags:
+            return [t.strip().lower() for t in self.csvtags.split(",")]
+        return []
+
+    def get_content(self):
+        if self.location =="internal":
+            return self.description
+        else:
+            return toHTML(RantParser(ROOT + self.url), [])
+
+    def get_updated(self):
+        #@TODO: capture timezone from config?
+        return self.posted.to_datetime().isoformat()+"-05:00"
     
 # * Category
 class Category(Strongbox):
@@ -110,6 +184,10 @@ class Channel(Strongbox):
         self.sort()
         return zebra.fetch("rss", BoxView(self))
 
+    def toAtom(self):
+        self.sort()
+        return zebra.fetch("atom.zb", BoxView(self))
+
     def OLD_toHTML(self, input=None):  #@TODO: get rid of this?
         RSS = input or self.toRSS()
         res = transform(RSS, self.template)
@@ -126,15 +204,38 @@ class Channel(Strongbox):
         return zebra.fetch(self.template, model)
         
 
+    def archiveList(self):
+        res = []
+        self.sort()
+        for s in self.stories[10:]:
+            url = s.url
+            if not url.startswith("rants"):
+                url = "rants/" + url
+            res.append('<p class="archive"><a href="/' + url + '">'
+                         + s.title + "</a></p>")
+        return "\n".join(res)
+
+
+    def get_updated(self):
+        self.sort()
+        if self.stories:
+            return self.stories[0].updated
+        else:
+            return None
+
     def writeFiles(self):
         """
-        ## @TODO: not true? temporarily disabled: use blog.app instead
         """
         rss = self.toRSS()
         if self.rssfile:
-            print >> open(self.path + self.rssfile, "w"), rss
+            print >> open(self.path + self.rssfile, "w"), rss            
         if self.htmlfile and self.template:
             print >> open(self.path + self.htmlfile, "w"), self.toHTML()
+        #@TODO: clean this up!!
+        print >> open(self.path + "archive.inc.php", "w"), self.archiveList()
+        print >> open(self.path + "feed.atom", "w"), self.toAtom()
+        
+        
 
         
 # * db mapping
@@ -168,7 +269,7 @@ class AuthorAuthTest(unittest.TestCase):
 
         clerk = MockClerk(SCHEMA)
         clerk.store(Author(username='fred', password='wanda'))
-        sess = Sess(SessPool.InMemorySessPool(),RequestBuilder().build(),Response())
+        sess = Sess(InMemorySessPool(),RequestBuilder().build(),Response())
         aa = AuthorAuth(sess, clerk)
         
         assert aa.fetch(1).username == 'fred'
@@ -270,7 +371,6 @@ class StoryIndex(ransacker.SQLiteIndex):
         return tuple([ (self.clerk.fetch(Story, ID) ,count)
                        for ID, count in self.cur.fetchall()])
 
-
     def search(self, query):
         #@TODO: strongboxen need to be hashable!
         matchIDs = {}
@@ -340,14 +440,15 @@ class RantelopeApp(sixthday.AdminApp):
 
     def save_channel(self):
         chan = self.generic_save(Channel)
-        chan.writeFiles()
+        if chan.stories:
+            chan.writeFiles()
         self.redirect(action='show&what=channel&ID=%s' % chan.ID)
 
     ## categories ######################
 
     def save_category(self):
         cat = self.generic_save(Category)
-        self.redirect(action='show&what=channel&ID=%s' % cat.channelID)
+        self.redirect(action='show&what=channel&ID=%s' % cat.channel.ID)
 
     def edit_category(self):
         self.generic_show(Category, "frm_category")  
@@ -418,13 +519,81 @@ class RantelopeApp(sixthday.AdminApp):
         
     def act_publish(self):
         ## now write the XML file:
-        chan=self.clerk.fetch(Channel, self.input["channelID"])
-        chan.writeFiles()
+        publish(self.clerk, self.input["channelID"])
         self.redirect(action="create&what=story&status=published&channelID="
                       + self.input["channelID"])
 
 
+# * runTests
+def runTests(*x):
+    sys.argv.remove("--test")
+    unittest.main()
+
+
+# * addFile
+def sqlDate(rantDate):
+    if rantDate.startswith("["):
+        # new style: [2006.0210 20:17]
+        return "%s-%s-%s %s" % (rantDate[1:5], rantDate[6:8],
+                                rantDate[8:10], rantDate[11:-1])
+    else:
+        # old style: 0210.2006
+        return "%s-%s-%s" % (rantDate[5:], rantDate[:2], rantDate[2:4])
+
+assert sqlDate("0210.2006") == "2006-02-10"
+assert sqlDate("[2006.0210 20:16:23]") == "2006-02-10 20:16:23", \
+       sqlDate("[2006.0210 20:16:23]")
+
+def addFile(filename):
+    """
+    add a new file to the system
+    """
+    if os.path.exists(".rantelope"):
+        path = open(".rantelope").read().strip()
+        x =os.path.join(path, filename)
+        while x.startswith("/"): x=x[1:]
+        print x
+        sto = storage.MySQLStorage(sqlGuru.dbc)
+        rant = RantParser(ROOT + x)
+        row = {
+            "channelID": 1,
+            "categoryID":3,
+            "posted": sqlDate(rant.date),
+            "title": rant.title,
+            "url": x,
+            "authorID": 2,
+            "location": "external",
+            }
+        sto.store("rnt_story", **row)
+    else:
+        print ".rantelope file not found: can't determine relative path"
+
+# * publish
+def publish(CLERK, channelID):
+    chan=CLERK.fetch(Channel, channelID)
+    chan.writeFiles()
+    
+
+# * parseCommandLine
+
+def parseCommandLine():
+    parser = OptionParser()
+    parser.add_option("--test", action="callback", callback=runTests)
+    parser.add_option("-p", "--publish", action="store_true", dest="publish", default=False)
+    parser.add_option("--add", action="store", dest="addFile", default=None)
+    (options, args) = parser.parse_args()
+    
+    return options, args
+
 # * --
 if __name__=="__main__":
-    unittest.main()
-    
+    options, args = parseCommandLine()
+    if options.addFile:
+        addFile(options.addFile)
+    if options.publish:
+        #@TODO: fix path kludge
+        os.chdir("/home/sabren/web/withoutane.com/rantelope")
+        from sqlRantelope import clerk
+        clerk.schema = SCHEMA
+        #import pdb; pdb.set_trace()
+        publish(clerk, 1)
