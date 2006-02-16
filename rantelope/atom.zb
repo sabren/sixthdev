@@ -1,0 +1,31 @@
+* exec:
+    from handy import xmlEncode
+    entries = stories[:10]
+    top = url
+
+<?xml version="1.0"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>{:xmlEncode(title):}</title>
+  <link rel="self" href="{:xmlEncode(url):}feed.atom"/>
+  <link rel="alternate" href="{:xmlEncode(url):}"/>
+  <updated>{:updated:}</updated>
+  <author>
+    <name>{:author.fname:} {:author.lname:}</name>
+  </author>
+  <id>http://withoutane.com/</id>
+  <subtitle>{:xmlEncode(description).strip():}</subtitle>
+  <generator>rantelope</generator>
+
+* for entries:
+  <entry>
+    <title>{:xmlEncode(title):}</title>
+    <id>{:top:}{:url:}</id>
+    <link href="{:top:}{:url:}" rel="alternate"/>
+    <updated>{:updated:}</updated>
+    * exec:
+        the_tags = [{"tag":t} for t in tags]
+    * for the_tags:
+        <category term="{:tag:}"/>
+    <content type="xhtml"><div xmlns="http://www.w3.org/1999/xhtml">{:content:}</div></content>
+  </entry>
+</feed>
