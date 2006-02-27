@@ -24,8 +24,8 @@
         <td>{:html.text("title",title,'size="40"'):}</td></tr>
     <tr><th>url:</th>
         <td>{:html.text("url",url,'size="40"'):}</td></tr>
-    <tr><th>format:</th>
-        <td>{:html.text("format",format,'size="40"'):}</td></tr>
+    <tr><th>tags:</th>
+        <td>{:html.text("csvtags", csvtags, 'size="40"'):}</td></tr>
     <tr><th>posted:</th>
         <td>{:html.text("posted", posted, 'size="20"'):}</td></tr>
     <tr><td colspan="2"><textarea name="description"
