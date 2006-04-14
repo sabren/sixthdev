@@ -68,33 +68,35 @@ class TransactionTest(unittest.TestCase):
 
     def test_str(self):
         t = Transaction(posted="2005/01/01",
+                        checknum="232",
                         party="asdf",
                         isReconciled = True,
                         memo=": xxx", items = [
             Item(account="asset:cash", amount="-600"),
             Item(account="expense:a",  amount="2"),
             Item(account="expense:b",  amount="3"),
-            Item(account="expense:c",  amount="595"),])        
+            Item(account="expense:c",  amount="595", implied=True),])
         self.assertEquals(str(t), trim(
             """
-            2005/01/01 * asdf : xxx
+            2005/01/01 * (232) asdf : xxx
                 asset:cash                               -600.00
                 expense:a                                   2.00
                 expense:b                                   3.00
-                expense:c                                 595.00
+                expense:c
             """))
         
       
 class Item(Strongbox):
     account = attr(str)
     amount = attr(Decimal)
+    implied = attr(bool, default=False)
 
     def clone(self):
         return Item(account=self.account, amount=Decimal(self.amount))
         
 
 class Transaction:
-    def __init__(self, posted, party, memo=None,
+    def __init__(self, posted, party, checknum=None, memo=None,
                  cleared=None, isReconciled=False,
                  items = None):
         self.posted = posted
@@ -105,18 +107,28 @@ class Transaction:
         self.items = items or []
         self.validate()
         self.comment = Comment()
+        self.checknum = checknum
 
     def __str__(self):
         res = []
         res.append(self.posted + " ")
         if self.isReconciled:
             res.append("* ")
+        if self.checknum:
+            res.append("(%s) " % self.checknum)
         res.append(self.party)
+        if self.cleared:
+            res.append(" {%s}" % self.cleared)
         if self.memo:
             res.append(" " + self.memo)
         res.append("\n")
         for i in self.items:
-            res.append("    %-38s %9.2f\n" % (i.account, i.amount))
+            if i.implied:
+                res.append("    %s\n" % i.account)
+            else:
+                res.append("    %-38s %9.2f\n" % (i.account, i.amount))
+        if self.comment:
+            res.append(str(self.comment))
         return "".join(res)
         
 
@@ -127,11 +139,14 @@ class Transaction:
                            items = [i.clone() for i in self.items])
 
     def addItem(self, account, amount_in):
+        implied = False
         amount = amount_in
         if amount is None:
+            implied = True
             amount = -self.total()
         self.items.append(Item(account=account,
-                               amount=Decimal(amount)))
+                               amount=Decimal(amount),
+                               implied=implied))
 
     def bankDate(self):
         if self.cleared:
@@ -190,19 +205,23 @@ class ParserTest(unittest.TestCase):
         assert book[2].items[0].amount == -50
         assert book[2].items[1].amount ==  50
         assert isinstance(book[3], Transaction)
+        assert book[3].memo.count("unreconciled")
+        self.assertEquals("1000", book[3].checknum)
         assert book[3].items[0].amount == 10
         assert book[3].items[1].amount ==  5
+        assert book[3].items[1].implied == False
         assert book[3].items[2].amount == -15
+        assert book[3].items[2].implied == True
 
 reHeadLine = re.compile(
     r"""
     (?P<date>\d{4}/\d{2}/\d{2})
     (?P<star>\s+[*])?
-    (\s+[(]\d+[)])? # check number.. discard for now
+    (\s+[(](?P<checknum>\d+)[)])? # check number.. discard for now
     \s+
-    (?P<party>(\w|[ ])+)
+    (?P<party>([^:{])+)
     (\{(?P<cleared>\d{4}/\d{2}/\d{2})\}\s*)?
-    (?P<memo>:(\s|\w)+)?
+    (?P<memo>:.*)?
     """, re.VERBOSE)
 
 reItemLine = re.compile(
@@ -233,6 +252,7 @@ def parseLedger(text):
                                 isReconciled = bool(match["star"]),
                                 party = match["party"].strip(),
                                 cleared = match["cleared"],
+                                checknum = match["checknum"],
                                 memo = match["memo"])
         elif reItemLine.match(line):
             match = reItemLine.match(line).groupdict()
