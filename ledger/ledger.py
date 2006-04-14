@@ -24,7 +24,7 @@ class Comment:
         self.lines = []
 
     def __str__(self):
-        return "\n".join(self.lines)
+        return "\n".join(self.lines + [""])
         
     def addCommentLine(self, line):
         self.lines.append(line)
@@ -129,6 +129,8 @@ class Transaction:
                 res.append("    %-38s %9.2f\n" % (i.account, i.amount))
         if self.comment:
             res.append(str(self.comment))
+        else:
+            res.append("\n")
         return "".join(res)
         
 
@@ -195,10 +197,11 @@ class ParserTest(unittest.TestCase):
             """)
 
         book = parseLedger(ledger)
+        self.assertEquals(4, len(book))
         assert isinstance(book[0], Comment)
         assert len(book[0].lines) == 1
         assert isinstance(book[1], Comment)
-        assert len(book[1].lines) == 3
+        self.assertEquals(len(book[1].lines), 3)
         assert isinstance(book[2], Transaction)
         assert book[2].posted == "2006/01/01"
         self.assertEquals(book[2].cleared, "2006/01/02")
@@ -243,7 +246,7 @@ def parseLedger(text):
                 res.append(entry)
             entry = None
         elif line.startswith(";"):
-            if not entry:
+            if entry is None:
                 entry = Comment()
             entry.addCommentLine(line)
         elif reHeadLine.match(line):
