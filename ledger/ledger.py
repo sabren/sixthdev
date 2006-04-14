@@ -78,10 +78,10 @@ class TransactionTest(unittest.TestCase):
         self.assertEquals(str(t), trim(
             """
             2005/01/01 * asdf : xxx
-            asset:cash -600.00
-            expense:a 2.00
-            expense:b 3.00
-            expense:c 595.00
+                asset:cash                               -600.00
+                expense:a                                   2.00
+                expense:b                                   3.00
+                expense:c                                 595.00
             """))
         
       
@@ -116,7 +116,7 @@ class Transaction:
             res.append(" " + self.memo)
         res.append("\n")
         for i in self.items:
-            res.append("%s %0.2f\n" % (i.account, i.amount))
+            res.append("    %-38s %9.2f\n" % (i.account, i.amount))
         return "".join(res)
         
 
@@ -169,14 +169,14 @@ class ParserTest(unittest.TestCase):
             ;           comment
 
             2006/01/01 * paycheck {2006/01/02} : this one is reconciled
-            ; a transaction comment
-            income:whatever                         -50.00
-            asset:checking
+                income:whatever                         -50.00
+                asset:checking
+            ;   a transaction comment
 
             2006/01/02 (1000) whatever mart : unreconciled check 1000
-            expense:groceries                        10.00
-            expense:hardware                          5.00
-            asset:checking
+                expense:groceries                        10.00
+                expense:hardware                          5.00
+                asset:checking
             """)
 
         book = parseLedger(ledger)
@@ -291,8 +291,8 @@ class BankViewTest(unittest.TestCase):
         book = parseLedger(trim(
             """
             2005/01/01 * asdf {2005/02/01}
-            expense:asdf 10.00
-            asset:checking
+                expense:asdf                               10.00
+                asset:checking
             """))
 
         assert bankView(book)[0].posted == "2005/02/01"
@@ -300,8 +300,8 @@ class BankViewTest(unittest.TestCase):
         self.assertEquals(str(bankView(book)[0]), trim(
             """
             2005/02/01 * asdf
-            expense:asdf 10.00
-            asset:checking -10.00
+                expense:asdf                               10.00
+                asset:checking                            -10.00
             """))
 
 def bankView(book):
