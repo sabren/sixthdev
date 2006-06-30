@@ -48,6 +48,6 @@ class Response(object):
             self.addHeader("Set-Cookie", key + "=" + value)
 
     def redirect(self, url):
-        self.addHeader("Status", "303")
+        self.addHeader("Status", "303 Moved")
         self.addHeader("Location", url)
         self.end()
