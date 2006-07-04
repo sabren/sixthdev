@@ -3,7 +3,7 @@ seismq: sei's message queue
 """
 __ver__="$Id$"
 
-import sqlite
+from pysqlite2 import dbapi2 as sqlite
 import time
    
 def open(filename):
