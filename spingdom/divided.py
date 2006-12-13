@@ -35,9 +35,9 @@ class DividedShapeControlPoint(ControlPoint):
         dc.SetBrush(wx.TRANSPARENT_BRUSH)
 
         dividedObject = self._shape
-        x1 = dividedObject.GetX() - dividedObject.GetWidth() / 2.0
+        x1 = dividedObject.x - dividedObject.w / 2.0
         y1 = y
-        x2 = dividedObject.GetX() + dividedObject.GetWidth() / 2.0
+        x2 = dividedObject.x + dividedObject.w / 2.0
         y2 = y
 
         dc.DrawLine(x1, y1, x2, y2)
@@ -53,9 +53,9 @@ class DividedShapeControlPoint(ControlPoint):
 
         dividedObject = self._shape
         
-        x1 = dividedObject.GetX() - dividedObject.GetWidth() / 2.0
+        x1 = dividedObject.x - dividedObject.w / 2.0
         y1 = y
-        x2 = dividedObject.GetX() + dividedObject.GetWidth() / 2.0
+        x2 = dividedObject.x + dividedObject.w / 2.0
         y2 = y
 
         dc.DrawLine(x1, y1, x2, y2)
@@ -80,8 +80,8 @@ class DividedShapeControlPoint(ControlPoint):
         # Find the old top and bottom of this region,
         # and calculate the new proportion for this region
         # if legal.
-        currentY = dividedObject.GetY() - dividedObject.GetHeight() / 2.0
-        maxY = dividedObject.GetY() + dividedObject.GetHeight() / 2.0
+        currentY = dividedObject.y - dividedObject.h / 2.0
+        maxY = dividedObject.y + dividedObject.h / 2.0
 
         # Save values
         theRegionTop = 0
@@ -90,7 +90,7 @@ class DividedShapeControlPoint(ControlPoint):
         for i in range(len(dividedObject.GetRegions())):
             region = dividedObject.GetRegions()[i]
             proportion = region._regionProportionY
-            yy = currentY + dividedObject.GetHeight() * proportion
+            yy = currentY + dividedObject.h * proportion
             actualY = min(maxY, yy)
 
             if region == thisRegion:
@@ -114,12 +114,12 @@ class DividedShapeControlPoint(ControlPoint):
         dividedObject.EraseLinks(dc)
 
         # Now calculate the new proportions of this region and the next region
-        thisProportion = float(y - thisRegionTop) / dividedObject.GetHeight()
-        nextProportion = float(nextRegionBottom - y) / dividedObject.GetHeight()
+        thisProportion = float(y - thisRegionTop) / dividedObject.h
+        nextProportion = float(nextRegionBottom - y) / dividedObject.h
 
         thisRegion.SetProportions(0, thisProportion)
         nextRegion.SetProportions(0, nextProportion)
-        self._yoffset = y - dividedObject.GetY()
+        self.yoffset = y - dividedObject.y
 
         # Now reformat text
         for i, region in enumerate(dividedObject.GetRegions()):
@@ -129,8 +129,7 @@ class DividedShapeControlPoint(ControlPoint):
 
         dividedObject.SetRegionSizes()
         dividedObject.Draw(dc)
-        dividedObject.GetEventHandler().OnMoveLinks(dc)
-        
+        dividedObject.handler.OnMoveLinks(dc)
 
 
 class DividedShape(RectangleShape):
@@ -153,11 +152,11 @@ class DividedShape(RectangleShape):
             defaultProportion = 1.0 / len(self.GetRegions())
         else:
             defaultProportion = 0.0
-        currentY = self._ypos - self._height / 2.0
-        maxY = self._ypos + self._height / 2.0
+        currentY = self.y - self.h / 2.0
+        maxY = self.y + self.h / 2.0
 
-        leftX = self._xpos - self._width / 2.0
-        rightX = self._xpos + self._width / 2.0
+        leftX = self.x - self.w / 2.0
+        rightX = self.x + self.w / 2.0
 
         if self._pen:
             dc.SetPen(self._pen)
@@ -186,13 +185,13 @@ class DividedShape(RectangleShape):
             else:
                 proportion = region._regionProportionY
 
-            y = currentY + self._height * proportion
+            y = currentY + self.h * proportion
             actualY = min(maxY, y)
 
-            centreX = self._xpos
+            centreX = self.x
             centreY = currentY + (actualY - currentY) / 2.0
 
-            DrawFormattedText(dc, region._formattedText, centreX, centreY, self._width - 2 * xMargin, actualY - currentY - 2 * yMargin, region._formatMode)
+            DrawFormattedText(dc, region._formattedText, centreX, centreY, self.w - 2 * xMargin, actualY - currentY - 2 * yMargin, region._formatMode)
 
             if y <= maxY and region != self.GetRegions()[-1]:
                 regionPen = region.GetActualPen()
@@ -204,8 +203,8 @@ class DividedShape(RectangleShape):
 
     def SetSize(self, w, h, recursive = True):
         self.SetAttachmentSize(w, h)
-        self._width = w
-        self._height = h
+        self.w = w
+        self.h = h
         self.SetRegionSizes()
 
     def SetRegionSizes(self):
@@ -219,8 +218,8 @@ class DividedShape(RectangleShape):
             defaultProportion = 1.0 / len(self.GetRegions())
         else:
             defaultProportion = 0.0
-        currentY = self._ypos - self._height / 2.0
-        maxY = self._ypos + self._height / 2.0
+        currentY = self.y - self.h / 2.0
+        maxY = self.y + self.h / 2.0
         
         for region in self.GetRegions():
             if region._regionProportionY <= 0:
@@ -228,14 +227,14 @@ class DividedShape(RectangleShape):
             else:
                 proportion = region._regionProportionY
 
-            sizeY = proportion * self._height
+            sizeY = proportion * self.h
             y = currentY + sizeY
             actualY = min(maxY, y)
 
             centreY = currentY + (actualY - currentY) / 2.0
 
-            region.SetSize(self._width, sizeY)
-            region.SetPosition(0, centreY - self._ypos)
+            region.SetSize(self.w, sizeY)
+            region.SetPosition(0, centreY - self.y)
 
             currentY = actualY
 
@@ -248,10 +247,10 @@ class DividedShape(RectangleShape):
         n = len(self.GetRegions())
         isEnd = line and line.IsEnd(self)
 
-        left = self._xpos - self._width / 2.0
-        right = self._xpos + self._width / 2.0
-        top = self._ypos - self._height / 2.0
-        bottom = self._ypos + self._height / 2.0
+        left = self.x - self.w / 2.0
+        right = self.x + self.w / 2.0
+        top = self.y - self.h / 2.0
+        bottom = self.y + self.h / 2.0
 
         # Zero is top, n + 1 is bottom
         if attachment == 0:
@@ -267,9 +266,9 @@ class DividedShape(RectangleShape):
                     else:
                         x = point[0]
                 else:
-                    x = left + (nth + 1) * self._width / (no_arcs + 1.0)
+                    x = left + (nth + 1) * self.w / (no_arcs + 1.0)
             else:
-                x = self._xpos
+                x = self.x
         elif attachment == n + 1:
             y = bottom
             if self._spaceAttachments:
@@ -283,9 +282,9 @@ class DividedShape(RectangleShape):
                     else:
                         x = point[0]
                 else:
-                    x = left + (nth + 1) * self._width / (no_arcs + 1.0)
+                    x = left + (nth + 1) * self.w / (no_arcs + 1.0)
             else:
-                x = self._xpos
+                x = self.x
         else: # Left or right
             isLeft = not attachment < (n + 1)
             if isLeft:
@@ -301,8 +300,8 @@ class DividedShape(RectangleShape):
                     x = right
 
                 # Calculate top and bottom of region
-                top = self._ypos + region._y - region._height / 2.0
-                bottom = self._ypos + region._y + region._height / 2.0
+                top = self.y + region.y - region.h / 2.0
+                bottom = self.y + region.y + region.h / 2.0
 
                 # Assuming we can trust the absolute size and
                 # position of these regions
@@ -317,9 +316,9 @@ class DividedShape(RectangleShape):
                         else:
                             y = point[1]
                     else:
-                        y = top + (nth + 1) * region._height / (no_arcs + 1.0)
+                        y = top + (nth + 1) * region.h / (no_arcs + 1.0)
                 else:
-                    y = self._ypos + region._y
+                    y = self.y + region.y
             else:
                 return False
         return x, y
@@ -348,17 +347,17 @@ class DividedShape(RectangleShape):
         self.MakeMandatoryControlPoints()
 
     def MakeMandatoryControlPoints(self):
-        currentY = self.GetY() - self._height / 2.0
-        maxY = self.GetY() + self._height / 2.0
+        currentY = self.y - self.h / 2.0
+        maxY = self.y + self.h / 2.0
 
         for i, region in enumerate(self.GetRegions()):
             proportion = region._regionProportionY
 
-            y = currentY + self._height * proportion
+            y = currentY + self.h * proportion
             actualY = min(maxY, y)
 
             if region != self.GetRegions()[-1]:
-                controlPoint = DividedShapeControlPoint(self._canvas, self, i, CONTROL_POINT_SIZE, 0, actualY - self.GetY(), 0)
+                controlPoint = DividedShapeControlPoint(self._canvas, self, i, CONTROL_POINT_SIZE, 0, actualY - self.y, 0)
                 self._canvas.AddShape(controlPoint)
                 self._controlPoints.append(controlPoint)
 
@@ -372,8 +371,8 @@ class DividedShape(RectangleShape):
         self.ResetMandatoryControlPoints()
 
     def ResetMandatoryControlPoints(self):
-        currentY = self.GetY() - self._height / 2.0
-        maxY = self.GetY() + self._height / 2.0
+        currentY = self.y - self.h / 2.0
+        maxY = self.y + self.h / 2.0
 
         i = 0
         for controlPoint in self._controlPoints:
@@ -381,11 +380,11 @@ class DividedShape(RectangleShape):
                 region = self.GetRegions()[i]
                 proportion = region._regionProportionY
 
-                y = currentY + self._height * proportion
+                y = currentY + self.h * proportion
                 actualY = min(maxY, y)
 
-                controlPoint._xoffset = 0
-                controlPoint._yoffset = actualY - self.GetY()
+                controlPoint.xoffset = 0
+                controlPoint.yoffset = actualY - self.y
 
                 currentY = actualY
 

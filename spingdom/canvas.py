@@ -23,8 +23,8 @@ KEY_SHIFT, KEY_CTRL = 1, 2
 
 # Helper function: True if 'contains' wholly contains 'contained'.
 def WhollyContains(contains, contained):
-    xp1, yp1 = contains.GetX(), contains.GetY()
-    xp2, yp2 = contained.GetX(), contained.GetY()
+    xp1, yp1 = contains.x, contains.y
+    xp2, yp2 = contained.x, contained.y
     
     w1, h1 = contains.GetBoundingBoxMax()
     w2, h2 = contained.GetBoundingBoxMax()
@@ -113,7 +113,7 @@ class ShapeCanvas(wx.ScrolledWindow):
 
             # If the object isn't m_draggable, transfer message to canvas
             if self._draggedShape.Draggable():
-                self._draggedShape.GetEventHandler().OnBeginDragLeft(x, y, keys, self._draggedAttachment)
+                self._draggedShape.handler.OnBeginDragLeft(x, y, keys, self._draggedAttachment)
             else:
                 self._draggedShape = None
                 self.OnBeginDragLeft(x, y, keys)
@@ -122,22 +122,22 @@ class ShapeCanvas(wx.ScrolledWindow):
 
         elif dragging and self._draggedShape and self._dragState == ContinueDraggingLeft:
             # Continue dragging
-            self._draggedShape.GetEventHandler().OnDragLeft(False, self._oldDragX, self._oldDragY, keys, self._draggedAttachment)
-            self._draggedShape.GetEventHandler().OnDragLeft(True, x, y, keys, self._draggedAttachment)
+            self._draggedShape.handler.OnDragLeft(False, self._oldDragX, self._oldDragY, keys, self._draggedAttachment)
+            self._draggedShape.handler.OnDragLeft(True, x, y, keys, self._draggedAttachment)
             self._oldDragX, self._oldDragY = x, y
 
         elif evt.LeftUp() and self._draggedShape and self._dragState == ContinueDraggingLeft:
             self._dragState = NoDragging
             self._checkTolerance = True
 
-            self._draggedShape.GetEventHandler().OnDragLeft(False, self._oldDragX, self._oldDragY, keys, self._draggedAttachment)
-            self._draggedShape.GetEventHandler().OnEndDragLeft(x, y, keys, self._draggedAttachment)
+            self._draggedShape.handler.OnDragLeft(False, self._oldDragX, self._oldDragY, keys, self._draggedAttachment)
+            self._draggedShape.handler.OnEndDragLeft(x, y, keys, self._draggedAttachment)
             self._draggedShape = None
 
         elif dragging and self._draggedShape and self._dragState == StartDraggingRight:
             self._dragState = ContinueDraggingRight
             if self._draggedShape.Draggable:
-                self._draggedShape.GetEventHandler().OnBeginDragRight(x, y, keys, self._draggedAttachment)
+                self._draggedShape.handler.OnBeginDragRight(x, y, keys, self._draggedAttachment)
             else:
                 self._draggedShape = None
                 self.OnBeginDragRight(x, y, keys)
@@ -145,16 +145,16 @@ class ShapeCanvas(wx.ScrolledWindow):
 
         elif dragging and self._draggedShape and self._dragState == ContinueDraggingRight:
             # Continue dragging
-            self._draggedShape.GetEventHandler().OnDragRight(False, self._oldDragX, self._oldDragY, keys, self._draggedAttachment)
-            self._draggedShape.GetEventHandler().OnDragRight(True, x, y, keys, self._draggedAttachment)
+            self._draggedShape.handler.OnDragRight(False, self._oldDragX, self._oldDragY, keys, self._draggedAttachment)
+            self._draggedShape.handler.OnDragRight(True, x, y, keys, self._draggedAttachment)
             self._oldDragX, self._oldDragY = x, y
 
         elif evt.RightUp() and self._draggedShape and self._dragState == ContinueDraggingRight:
             self._dragState = NoDragging
             self._checkTolerance = True
 
-            self._draggedShape.GetEventHandler().OnDragRight(False, self._oldDragX, self._oldDragY, keys, self._draggedAttachment)
-            self._draggedShape.GetEventHandler().OnEndDragRight(x, y, keys, self._draggedAttachment)
+            self._draggedShape.handler.OnDragRight(False, self._oldDragX, self._oldDragY, keys, self._draggedAttachment)
+            self._draggedShape.handler.OnEndDragRight(x, y, keys, self._draggedAttachment)
             self._draggedShape = None
 
         # All following events sent to canvas, not object
@@ -216,12 +216,12 @@ class ShapeCanvas(wx.ScrolledWindow):
                     # N.B. Only register a click if the same object was
                     # identified for down *and* up.
                     if nearest_object == self._draggedShape:
-                        nearest_object.GetEventHandler().OnLeftClick(x, y, keys, attachment)
+                        nearest_object.handler.OnLeftClick(x, y, keys, attachment)
                     self._draggedShape = None
                     self._dragState = NoDragging
 
                 elif evt.LeftDClick():
-                    nearest_object.GetEventHandler().OnLeftDoubleClick(x, y, keys, attachment)
+                    nearest_object.handler.OnLeftDoubleClick(x, y, keys, attachment)
                     self._draggedShape = None
                     self._dragState = NoDragging
 
@@ -234,7 +234,7 @@ class ShapeCanvas(wx.ScrolledWindow):
 
                 elif evt.RightUp():
                     if nearest_object == self._draggedShape:
-                        nearest_object.GetEventHandler().OnRightClick(x, y, keys, attachment)
+                        nearest_object.handler.OnRightClick(x, y, keys, attachment)
                     self._draggedShape = None
                     self._dragState = NoDragging
 

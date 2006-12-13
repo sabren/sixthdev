@@ -116,7 +116,7 @@ class CompositeDivisionShape(ogl.CompositeShape):
         shape3 = ogl.CircleShape(40)
         shape3.SetBrush(wx.CYAN_BRUSH)
         self.GetDivisions()[1].AddChild(shape3)
-        shape3.SetX(self.GetDivisions()[1].GetX())
+        shape3.x = self.GetDivisions()[1].x
 
         for division in self.GetDivisions():
             division.SetSensitivityFilter(0)
@@ -213,14 +213,14 @@ class MyEvtHandler(ogl.ShapeEvtHandler):
         self.statbarFrame = frame
 
     def UpdateStatusBar(self, shape):
-        x, y = shape.GetX(), shape.GetY()
+        x, y = shape.x, shape.y
         width, height = shape.GetBoundingBoxMax()
         self.statbarFrame.SetStatusText("Pos: (%d, %d)  Size: (%d, %d)" %
                                         (x, y, width, height))
 
 
     def OnLeftClick(self, x, y, keys=0, attachment=0):
-        shape = self.GetShape()
+        shape = self.shape
         canvas = shape.GetCanvas()
         dc = wx.ClientDC(canvas)
         canvas.PrepareDC(dc)
@@ -252,7 +252,7 @@ class MyEvtHandler(ogl.ShapeEvtHandler):
 
 
     def OnEndDragLeft(self, x, y, keys=0, attachment=0):
-        shape = self.GetShape()
+        shape = self.shape
         self.prev.OnEndDragLeft(x, y, keys, attachment)
 
         if not shape.Selected():
@@ -263,16 +263,16 @@ class MyEvtHandler(ogl.ShapeEvtHandler):
 
     def OnSizingEndDragLeft(self, pt, x, y, keys, attch):
         self.prev.OnSizingEndDragLeft(pt, x, y, keys, attch)
-        self.UpdateStatusBar(self.GetShape())
+        self.UpdateStatusBar(self.shape)
 
 
     def OnMovePost(self, dc, x, y, oldX, oldY, display):
         self.prev.OnMovePost(dc, x, y, oldX, oldY, display)
-        self.UpdateStatusBar(self.GetShape())
+        self.UpdateStatusBar(self.shape)
 
 
     def OnRightClick(self, *dontcare):
-        self.log.WriteText("%s\n" % self.GetShape())
+        self.log.WriteText("%s\n" % self.shape)
 
 
 #----------------------------------------------------------------------
@@ -380,8 +380,8 @@ class TestWindow(ogl.ShapeCanvas):
         else:
             shape.SetDraggable(True, True)
         shape.SetCanvas(self)
-        shape.SetX(x)
-        shape.SetY(y)
+        shape.x = x
+        shape.y = y
         if pen:    shape.SetPen(pen)
         if brush:  shape.SetBrush(brush)
         if text:
@@ -392,9 +392,9 @@ class TestWindow(ogl.ShapeCanvas):
         shape.Show(True)
 
         evthandler = MyEvtHandler(self.log, self.frame)
-        evthandler.SetShape(shape)
-        evthandler.SetPreviousHandler(shape.GetEventHandler())
-        shape.SetEventHandler(evthandler)
+        evthandler.shape = shape
+        evthandler.prev = shape.handler
+        shape.handler = evthandler
 
         self.shapes.append(shape)
         return shape

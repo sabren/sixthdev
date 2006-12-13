@@ -118,26 +118,26 @@ class OpSetClipping(DrawOp):
     def __init__(self, theOp, theX1, theY1, theX2, theY2):
         DrawOp.__init__(self, theOp)
 
-        self._x1 = theX1
-        self._y1 = theY1
-        self._x2 = theX2
-        self._y2 = theY2
+        self.x1 = theX1
+        self.y1 = theY1
+        self.x2 = theX2
+        self.y2 = theY2
 
     def Do(self, dc, xoffset, yoffset):
         if self._op == DRAWOP_SET_CLIPPING_RECT:
-            dc.SetClippingRegion(self._x1 + xoffset, self._y1 + yoffset, self._x2 + xoffset, self._y2 + yoffset)
+            dc.SetClippingRegion(self.x1 + xoffset, self.y1 + yoffset, self.x2 + xoffset, self.y2 + yoffset)
         elif self._op == DRAWOP_DESTROY_CLIPPING_RECT:
             dc.DestroyClippingRegion()
 
     def Scale(self, scaleX, scaleY):
-        self._x1 *= scaleX
-        self._y1 *= scaleY
-        self._x2 *= scaleX
-        self._y2 *= scaleY
+        self.x1 *= scaleX
+        self.y1 *= scaleY
+        self.x2 *= scaleX
+        self.y2 *= scaleY
 
     def Translate(self, x, y):
-        self._x1 += x
-        self._y1 += y
+        self.x1 += x
+        self.y1 += y
 
 
 class OpDraw(DrawOp):
@@ -145,77 +145,77 @@ class OpDraw(DrawOp):
     def __init__(self, theOp, theX1, theY1, theX2, theY2, theRadius = 0.0, s = ""):
         DrawOp.__init__(self, theOp)
 
-        self._x1 = theX1
-        self._y1 = theY1
-        self._x2 = theX2
-        self._y2 = theY2
-        self._x3 = 0.0
-        self._y3 = 0.0
+        self.x1 = theX1
+        self.y1 = theY1
+        self.x2 = theX2
+        self.y2 = theY2
+        self.x3 = 0.0
+        self.y3 = 0.0
         self._radius = theRadius
         self._textString = s
 
     def Do(self, dc, xoffset, yoffset):
         if self._op == DRAWOP_DRAW_LINE:
-            dc.DrawLine(self._x1 + xoffset, self._y1 + yoffset, self._x2 + xoffset, self._y2 + yoffset)
+            dc.DrawLine(self.x1 + xoffset, self.y1 + yoffset, self.x2 + xoffset, self.y2 + yoffset)
         elif self._op == DRAWOP_DRAW_RECT:
-            dc.DrawRectangle(self._x1 + xoffset, self._y1 + yoffset, self._x2, self._y2)
+            dc.DrawRectangle(self.x1 + xoffset, self.y1 + yoffset, self.x2, self.y2)
         elif self._op == DRAWOP_DRAW_ROUNDED_RECT:
-            dc.DrawRoundedRectangle(self._x1 + xoffset, self._y1 + yoffset, self._x2, self._y2, self._radius)
+            dc.DrawRoundedRectangle(self.x1 + xoffset, self.y1 + yoffset, self.x2, self.y2, self._radius)
         elif self._op == DRAWOP_DRAW_ELLIPSE:
-            dc.DrawEllipse(self._x1 + xoffset, self._y1 + yoffset, self._x2, self._y2)
+            dc.DrawEllipse(self.x1 + xoffset, self.y1 + yoffset, self.x2, self.y2)
         elif self._op == DRAWOP_DRAW_ARC:
-            dc.DrawArc(self._x2 + xoffset, self._y2 + yoffset, self._x3 + xoffset, self._y3 + yoffset, self._x1 + xoffset, self._y1 + yoffset)
+            dc.DrawArc(self.x2 + xoffset, self.y2 + yoffset, self.x3 + xoffset, self.y3 + yoffset, self.x1 + xoffset, self.y1 + yoffset)
         elif self._op == DRAWOP_DRAW_ELLIPTIC_ARC:
-            dc.DrawEllipticArc(self._x1 + xoffset, self._y1 + yoffset, self._x2, self._y2, self._x3 * 360 / (2 * math.pi), self._y3 * 360 / (2 * math.pi))
+            dc.DrawEllipticArc(self.x1 + xoffset, self.y1 + yoffset, self.x2, self.y2, self.x3 * 360 / (2 * math.pi), self.y3 * 360 / (2 * math.pi))
         elif self._op == DRAWOP_DRAW_POINT:
-            dc.DrawPoint(self._x1 + xoffset, self._y1 + yoffset)
+            dc.DrawPoint(self.x1 + xoffset, self.y1 + yoffset)
         elif self._op == DRAWOP_DRAW_TEXT:
-            dc.DrawText(self._textString, self._x1 + xoffset, self._y1 + yoffset)
+            dc.DrawText(self._textString, self.x1 + xoffset, self.y1 + yoffset)
     def Scale(self, scaleX, scaleY):
-        self._x1 *= scaleX
-        self._y1 *= scaleY
-        self._x2 *= scaleX
-        self._y2 *= scaleY
+        self.x1 *= scaleX
+        self.y1 *= scaleY
+        self.x2 *= scaleX
+        self.y2 *= scaleY
 
         if self._op != DRAWOP_DRAW_ELLIPTIC_ARC:
-            self._x3 *= scaleX
-            self._y3 *= scaleY
+            self.x3 *= scaleX
+            self.y3 *= scaleY
 
         self._radius *= scaleX
         
     def Translate(self, x, y):
-        self._x1 += x
-        self._y1 += y
+        self.x1 += x
+        self.y1 += y
 
         if self._op == DRAWOP_DRAW_LINE:
-            self._x2 += x
-            self._y2 += y
+            self.x2 += x
+            self.y2 += y
         elif self._op == DRAWOP_DRAW_ARC:
-            self._x2 += x
-            self._y2 += y
-            self._x3 += x
-            self._y3 += y
+            self.x2 += x
+            self.y2 += y
+            self.x3 += x
+            self.y3 += y
 
     def Rotate(self, x, y, theta, sinTheta, cosTheta):
-        newX1 = self._x1 * cosTheta + self._y1 * sinTheta + x * (1 - cosTheta) + y * sinTheta
-        newY1 = self._x1 * sinTheta + self._y1 * cosTheta + y * (1 - cosTheta) + x * sinTheta
+        newX1 = self.x1 * cosTheta + self.y1 * sinTheta + x * (1 - cosTheta) + y * sinTheta
+        newY1 = self.x1 * sinTheta + self.y1 * cosTheta + y * (1 - cosTheta) + x * sinTheta
 
         if self._op == DRAWOP_DRAW_LINE:
-            newX2 = self._x2 * cosTheta - self._y2 * sinTheta + x * (1 - cosTheta) + y * sinTheta
-            newY2 = self._x2 * sinTheta + self._y2 * cosTheta + y * (1 - cosTheta) + x * sinTheta;
+            newX2 = self.x2 * cosTheta - self.y2 * sinTheta + x * (1 - cosTheta) + y * sinTheta
+            newY2 = self.x2 * sinTheta + self.y2 * cosTheta + y * (1 - cosTheta) + x * sinTheta;
 
-            self._x1 = newX1
-            self._y1 = newY1
-            self._x2 = newX2
-            self._y2 = newY2
+            self.x1 = newX1
+            self.y1 = newY1
+            self.x2 = newX2
+            self.y2 = newY2
 
         elif self._op in [DRAWOP_DRAW_RECT, DRAWOP_DRAW_ROUNDED_RECT, DRAWOP_DRAW_ELLIPTIC_ARC]:
             # Assume only 0, 90, 180, 270 degree rotations.
             # oldX1, oldY1 represents the top left corner. Find the
             # bottom right, and rotate that. Then the width/height is
             # the difference between x/y values.
-            oldBottomRightX = self._x1 + self._x2
-            oldBottomRightY = self._y1 + self._y2
+            oldBottomRightX = self.x1 + self.x2
+            oldBottomRightY = self.y1 + self.y2
             newBottomRightX = oldBottomRightX * cosTheta - oldBottomRightY * sinTheta + x * (1 - cosTheta) + y * sinTheta
             newBottomRightY = oldBottomRightX * sinTheta + oldBottomRightY * cosTheta + y * (1 - cosTheta) + x * sinTheta
 
@@ -225,27 +225,27 @@ class OpDraw(DrawOp):
             maxX = max(newX1, newBottomRightX)
             maxY = max(newY1, newBottomRightY)
 
-            self._x1 = minX
-            self._y1 = minY
-            self._x2 = maxX - minX # width
-            self._y2 = maxY - minY # height
+            self.x1 = minX
+            self.y1 = minY
+            self.x2 = maxX - minX # width
+            self.y2 = maxY - minY # height
 
             if self._op == DRAWOP_DRAW_ELLIPTIC_ARC:
                 # Add rotation to angles
-                self._x3 += theta
-                self._y3 += theta
+                self.x3 += theta
+                self.y3 += theta
         elif self._op == DRAWOP_DRAW_ARC:
-            newX2 = self._x2 * cosTheta - self._y2 * sinTheta + x * (1 - cosTheta) + y * sinTheta
-            newY2 = self._x2 * sinTheta + self._y2 * cosTheta + y * (1 - cosTheta) + x * sinTheta
-            newX3 = self._x3 * cosTheta - self._y3 * sinTheta + x * (1 - cosTheta) + y * sinTheta
-            newY3 = self._x3 * sinTheta + self._y3 * cosTheta + y * (1 - cosTheta) + x * sinTheta
+            newX2 = self.x2 * cosTheta - self.y2 * sinTheta + x * (1 - cosTheta) + y * sinTheta
+            newY2 = self.x2 * sinTheta + self.y2 * cosTheta + y * (1 - cosTheta) + x * sinTheta
+            newX3 = self.x3 * cosTheta - self.y3 * sinTheta + x * (1 - cosTheta) + y * sinTheta
+            newY3 = self.x3 * sinTheta + self.y3 * cosTheta + y * (1 - cosTheta) + x * sinTheta
 
-            self._x1 = newX1
-            self._y1 = newY1
-            self._x2 = newX2
-            self._y2 = newY2
-            self._x3 = newX3
-            self._y3 = newY3
+            self.x1 = newX1
+            self.y1 = newY1
+            self.x2 = newX2
+            self.y2 = newY2
+            self.x3 = newX3
+            self.y3 = newY3
 
 
 class OpPolyDraw(DrawOp):
@@ -317,8 +317,8 @@ class PseudoMetaFile(object):
     def __init__(self):
         self._currentRotation = 0
         self._rotateable = True
-        self._width = 0.0
-        self._height = 0.0
+        self.w = 0.0
+        self.h = 0.0
         self._outlinePen = None
         self._fillBrush = None
         self._outlineOp = -1
@@ -361,8 +361,8 @@ class PseudoMetaFile(object):
         return self._fillBrush
 
     def SetSize(self, w, h):
-        self._width = w
-        self._height = h
+        self.w = w
+        self.h = h
 
     def SetRotateable(self, rot):
         self._rotateable = rot
@@ -384,8 +384,8 @@ class PseudoMetaFile(object):
         for op in self._ops:
             op.Scale(sx, sy)
 
-        self._width *= sx
-        self._height *= sy
+        self.w *= sx
+        self.h *= sy
 
     def Translate(self, x, y):
         for op in self._ops:
@@ -413,8 +413,8 @@ class PseudoMetaFile(object):
 
     # Scale to fit size
     def ScaleTo(self, w, h):
-        scaleX = w / self._width
-        scaleY = h / self._height
+        scaleX = w / self.w
+        scaleY = h / self.h
 
         self.Scale(scaleX, scaleY)
 
@@ -423,53 +423,53 @@ class PseudoMetaFile(object):
 
         for op in self._ops:
             if op.GetOp() in [DRAWOP_DRAW_LINE, DRAWOP_DRAW_RECT, DRAWOP_DRAW_ROUNDED_RECT, DRAWOP_DRAW_ELLIPSE, DRAWOP_DRAW_POINT, DRAWOP_DRAW_TEXT]:
-                if op._x1 < minX:
-                    minX = op._x1
-                if op._x1 > maxX:
-                    maxX = op._x1
-                if op._y1 < minY:
-                    minY = op._y1
-                if op._y1 > maxY:
-                    maxY = op._y1
+                if op.x1 < minX:
+                    minX = op.x1
+                if op.x1 > maxX:
+                    maxX = op.x1
+                if op.y1 < minY:
+                    minY = op.y1
+                if op.y1 > maxY:
+                    maxY = op.y1
                 if op.GetOp() == DRAWOP_DRAW_LINE:
-                    if op._x2 < minX:
-                        minX = op._x2
-                    if op._x2 > maxX:
-                        maxX = op._x2
-                    if op._y2 < minY:
-                        minY = op._y2
-                    if op._y2 > maxY:
-                        maxY = op._y2
+                    if op.x2 < minX:
+                        minX = op.x2
+                    if op.x2 > maxX:
+                        maxX = op.x2
+                    if op.y2 < minY:
+                        minY = op.y2
+                    if op.y2 > maxY:
+                        maxY = op.y2
                 elif op.GetOp() in [ DRAWOP_DRAW_RECT, DRAWOP_DRAW_ROUNDED_RECT, DRAWOP_DRAW_ELLIPSE]:
-                    if op._x1 + op._x2 < minX:
-                        minX = op._x1 + op._x2
-                    if op._x1 + op._x2 > maxX:
-                        maxX = op._x1 + op._x2
-                    if op._y1 + op._y2 < minY:
-                        minY = op._y1 + op._y2
-                    if op._y1 + op._y2 > maxX:
-                        maxY = op._y1 + op._y2
+                    if op.x1 + op.x2 < minX:
+                        minX = op.x1 + op.x2
+                    if op.x1 + op.x2 > maxX:
+                        maxX = op.x1 + op.x2
+                    if op.y1 + op.y2 < minY:
+                        minY = op.y1 + op.y2
+                    if op.y1 + op.y2 > maxX:
+                        maxY = op.y1 + op.y2
             elif op.GetOp() == DRAWOP_DRAW_ARC:
                 # TODO: don't yet know how to calculate the bounding box
                 # for an arc. So pretend it's a line; to get a correct
                 # bounding box, draw a blank rectangle first, of the 
                 # correct size.
-                if op._x1 < minX:
-                    minX = op._x1
-                if op._x1 > maxX:
-                    maxX = op._x1
-                if op._y1 < minY:
-                    minY = op._y1
-                if op._y1 > maxY:
-                    maxY = op._y1
-                if op._x2 < minX:
-                    minX = op._x2
-                if op._x2 > maxX:
-                    maxX = op._x2
-                if op._y2 < minY:
-                    minY = op._y2
-                if op._y2 > maxY:
-                    maxY = op._y2
+                if op.x1 < minX:
+                    minX = op.x1
+                if op.x1 > maxX:
+                    maxX = op.x1
+                if op.y1 < minY:
+                    minY = op.y1
+                if op.y1 > maxY:
+                    maxY = op.y1
+                if op.x2 < minX:
+                    minX = op.x2
+                if op.x2 > maxX:
+                    maxX = op.x2
+                if op.y2 < minY:
+                    minY = op.y2
+                if op.y2 > maxY:
+                    maxY = op.y2
             elif op.GetOp() in [DRAWOP_DRAW_POLYLINE, DRAWOP_DRAW_POLYGON, DRAWOP_DRAW_SPLINE]:
                 for point in op._points:
                     if point[0] < minX:
@@ -500,8 +500,8 @@ class PseudoMetaFile(object):
         self.SetSize(w, h)
         
         if shape:
-            shape.SetWidth(self._width)
-            shape.SetHeight(self._height)
+            shape.SetWidth(self.w)
+            shape.SetHeight(self.h)
 
     # Set of functions for drawing into a pseudo metafile
     def DrawLine(self, pt1, pt2):
@@ -523,7 +523,7 @@ class PseudoMetaFile(object):
 
     def DrawArc(self, centrePt, startPt, endPt):
         op = OpDraw(DRAWOP_DRAW_ARC, centrePt[0], centrePt[1], startPt[0], startPt[1])
-        op._x3, op._y3 = endPt
+        op.x3, op.y3 = endPt
 
         self._ops.append(op)
 
@@ -532,8 +532,8 @@ class PseudoMetaFile(object):
         endAngleRadians = endAngle * math.pi * 2 / 360
 
         op = OpDraw(DRAWOP_DRAW_ELLIPTIC_ARC, rect[0], rect[1], rect[2], rect[3])
-        op._x3 = startAngleRadians
-        op._y3 = endAngleRadians
+        op.x3 = startAngleRadians
+        op.y3 = endAngleRadians
 
         self._ops.append(op)
 
@@ -638,31 +638,31 @@ class DrawnShape(RectangleShape):
             if self._shadowBrush:
                 self._metafiles[self._currentAngle]._fillBrush = self._shadowBrush
             self._metafiles[self._currentAngle]._outlinePen = wx.Pen(wx.WHITE, 1, wx.TRANSPARENT)
-            self._metafiles[self._currentAngle].Draw(dc, self._xpos + self._shadowOffsetX, self._ypos + self._shadowOffsetY)
+            self._metafiles[self._currentAngle].Draw(dc, self.x + self._shadowOffsetX, self.y + self._shadowOffsetY)
 
         self._metafiles[self._currentAngle]._outlinePen = self._pen
         self._metafiles[self._currentAngle]._fillBrush = self._brush
-        self._metafiles[self._currentAngle].Draw(dc, self._xpos, self._ypos)
+        self._metafiles[self._currentAngle].Draw(dc, self.x, self.y)
 
     def SetSize(self, w, h, recursive = True):
         self.SetAttachmentSize(w, h)
 
-        if self.GetWidth() == 0.0:
+        if self.w == 0.0:
             scaleX = 1
         else:
-            scaleX = w / self.GetWidth()
+            scaleX = w / self.w
 
-        if self.GetHeight() == 0.0:
+        if self.h == 0.0:
             scaleY = 1
         else:
-            scaleY = h / self.GetHeight()
+            scaleY = h / self.h
 
         for i in range(4):
             if self._metafiles[i].IsValid():
                 self._metafiles[i].Scale(scaleX, scaleY)
 
-        self._width = w
-        self._height = h
+        self.w = w
+        self.h = h
         self.SetDefaultRegionSize()
 
     def Scale(self, sx, sy):
@@ -698,11 +698,11 @@ class DrawnShape(RectangleShape):
         cosTheta = math.cos(actualTheta)
 
         for point in self._attachmentPoints:
-            x1 = point._x
-            y1 = point._y
+            x1 = point.x
+            y1 = point.y
 
-            point._x = x1 * cosTheta - y1 * sinTheta + x * (1.0 - cosTheta) + y * sinTheta
-            point._y = x1 * sinTheta + y1 * cosTheta + y * (1.0 - cosTheta) + x * sinTheta
+            point.x = x1 * cosTheta - y1 * sinTheta + x * (1.0 - cosTheta) + y * sinTheta
+            point.y = x1 * sinTheta + y1 * cosTheta + y * (1.0 - cosTheta) + x * sinTheta
 
         self._rotation = theta
 
@@ -729,7 +729,7 @@ class DrawnShape(RectangleShape):
     def OnDrawOutline(self, dc, x, y, w, h):
         if self._metafiles[self._currentAngle].GetOutlineOp() != -1:
             op = self._metafiles[self._currentAngle].GetOps()[self._metafiles[self._currentAngle].GetOutlineOp()]
-            if op.OnDrawOutline(dc, x, y, w, h, self._width, self._height):
+            if op.OnDrawOutline(dc, x, y, w, h, self.w, self.h):
                 return
 
         # Default... just use a rectangle
@@ -740,7 +740,7 @@ class DrawnShape(RectangleShape):
     def GetPerimeterPoint(self, x1, y1, x2, y2):
         if self._metafiles[self._currentAngle].GetOutlineOp() != -1:
             op = self._metafiles[self._currentAngle].GetOps()[self._metafiles[self._currentAngle].GetOutlineOp()]
-            p = op.GetPerimeterPoint(x1, y1, x2, y2, self.GetX(), self.GetY(), self.GetAttachmentMode())
+            p = op.GetPerimeterPoint(x1, y1, x2, y2, self.x, self.y, self.GetAttachmentMode())
             if p:
                 return p
             

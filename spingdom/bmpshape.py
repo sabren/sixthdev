@@ -24,8 +24,8 @@ class BitmapShape(RectangleShape):
         if not self._bitmap.Ok():
             return
 
-        x = self._xpos - self._bitmap.GetWidth() / 2.0
-        y = self._ypos - self._bitmap.GetHeight() / 2.0
+        x = self.x - self._bitmap.GetWidth() / 2.0
+        y = self.y - self._bitmap.GetHeight() / 2.0
         dc.DrawBitmap(self._bitmap, x, y, True)
 
     def SetSize(self, w, h, recursive = True):
@@ -35,8 +35,8 @@ class BitmapShape(RectangleShape):
 
         self.SetAttachmentSize(w, h)
 
-        self._width = w
-        self._height = h
+        self.w = w
+        self.h = h
 
         self.SetDefaultRegionSize()
 

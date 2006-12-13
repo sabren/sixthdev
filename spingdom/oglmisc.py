@@ -204,8 +204,8 @@ def CentreText(dc, text_list, xpos, ypos, width, height, formatMode):
             x = xoffset
         y = i * char_height + yoffset
 
-        line.SetX(x - xOffset)
-        line.SetY(y - yOffset)
+        line.x = (x - xOffset)
+        line.y = (y - yOffset)
         
 
 
@@ -224,7 +224,7 @@ def DrawFormattedText(dc, text_list, xpos, ypos, width, height, formatMode):
     dc.SetClippingRegion(xpos - width / 2.0, ypos - height / 2.0, width + 1, height + 1)
 
     for line in text_list:
-        dc.DrawText(line.GetText(), xoffset + line.GetX(), yoffset + line.GetY())
+        dc.DrawText(line.GetText(), xoffset + line.x, yoffset + line.y)
 
     dc.DestroyClippingRegion()
 

@@ -29,8 +29,8 @@ LINE_ALIGNMENT_NONE =               0
 class LineControlPoint(ControlPoint):
     def __init__(self, theCanvas = None, object = None, size = 0.0, x = 0.0, y = 0.0, the_type = 0):
         ControlPoint.__init__(self, theCanvas, object, size, x, y, the_type)
-        self._xpos = x
-        self._ypos = y
+        self.x = x
+        self.y = y
         self._type = the_type
         self._point = None
         self._originalPos = None
@@ -40,13 +40,13 @@ class LineControlPoint(ControlPoint):
 
     # Implement movement of Line point
     def OnDragLeft(self, draw, x, y, keys = 0, attachment = 0):
-        self._shape.GetEventHandler().OnSizingDragLeft(self, draw, x, y, keys, attachment)
+        self._shape.handler.OnSizingDragLeft(self, draw, x, y, keys, attachment)
 
     def OnBeginDragLeft(self, x, y, keys = 0, attachment = 0):
-        self._shape.GetEventHandler().OnSizingBeginDragLeft(self, x, y, keys, attachment)
+        self._shape.handler.OnSizingBeginDragLeft(self, x, y, keys, attachment)
 
     def OnEndDragLeft(self, x, y, keys = 0, attachment = 0):
-        self._shape.GetEventHandler().OnSizingEndDragLeft(self, x, y, keys, attachment)
+        self._shape.handler.OnSizingEndDragLeft(self, x, y, keys, attachment)
 
 
 
@@ -58,8 +58,8 @@ class ArrowHead(object):
             self._arrowType = type
             self._arrowEnd = end
             self._arrowSize = size
-            self._xOffset = dist
-            self._yOffset = 0.0
+            self.xOffset = dist
+            self.yOffset = 0.0
             self._spacing = 5.0
 
             self._arrowName = name
@@ -78,10 +78,10 @@ class ArrowHead(object):
         self._arrowEnd = pos
 
     def GetXOffset(self):
-        return self._xOffset
+        return self.xOffset
 
     def GetYOffset(self):
-        return self._yOffset
+        return self.yOffset
     
     def GetSpacing(self):
         return self._spacing
@@ -92,7 +92,7 @@ class ArrowHead(object):
     def SetSize(self, size):
         self._arrowSize = size
         if self._arrowType == ARROW_METAFILE and self._metaFile:
-            oldWidth = self._metaFile._width
+            oldWidth = self._metaFile.w
             if oldWidth == 0:
                 return
 
@@ -104,10 +104,10 @@ class ArrowHead(object):
         return self._arrowName
 
     def SetXOffset(self, x):
-        self._xOffset = x
+        self.xOffset = x
 
     def SetYOffset(self, y):
-        self._yOffset = y
+        self.yOffset = y
 
     def GetMetaFile(self):
         return self._metaFile
@@ -137,8 +137,8 @@ class LabelShape(RectangleShape):
         if self._lineShape and not self._lineShape.GetDrawHandles():
             return
 
-        x1 = self._xpos - self._width / 2.0
-        y1 = self._ypos - self._height / 2.0
+        x1 = self.x - self.w / 2.0
+        y1 = self.y - self.h / 2.0
 
         if self._pen:
             if self._pen.GetWidth() == 0:
@@ -148,9 +148,9 @@ class LabelShape(RectangleShape):
         dc.SetBrush(wx.TRANSPARENT_BRUSH)
 
         if self._cornerRadius > 0:
-            dc.DrawRoundedRectangle(x1, y1, self._width, self._height, self._cornerRadius)
+            dc.DrawRoundedRectangle(x1, y1, self.w, self.h, self._cornerRadius)
         else:
-            dc.DrawRectangle(x1, y1, self._width, self._height)
+            dc.DrawRectangle(x1, y1, self.w, self.h)
 
     def OnDrawContents(self, dc):
         pass
@@ -169,10 +169,10 @@ class LabelShape(RectangleShape):
 
     # Divert left and right clicks to line object
     def OnLeftClick(self, x, y, keys = 0, attachment = 0):
-        self._lineShape.GetEventHandler().OnLeftClick(x, y, keys, attachment)
+        self._lineShape.handler.OnLeftClick(x, y, keys, attachment)
 
     def OnRightClick(self, x, y, keys = 0, attachment = 0):
-        self._lineShape.GetEventHandler().OnRightClick(x, y, keys, attachment)
+        self._lineShape.handler.OnRightClick(x, y, keys, attachment)
         
 
 
@@ -379,7 +379,7 @@ class LineShape(Shape):
         actualW = w
         actualH = h
         if region.GetFormatMode() & FORMAT_SIZE_TO_CONTENTS:
-            actualW, actualH = GetCentredTextExtent(dc, region.GetFormattedText(), self._xpos, self._ypos, w, h)
+            actualW, actualH = GetCentredTextExtent(dc, region.GetFormattedText(), self.x, self.y, w, h)
             if actualW != w or actualH != h:
                 xx, yy = self.GetLabelPosition(i)
                 self.EraseRegion(dc, region, xx, yy)
@@ -394,7 +394,7 @@ class LineShape(Shape):
                     self._labelObjects[i].Select(True, dc)
                     self._labelObjects[i].Draw(dc)
 
-        CentreText(dc, region.GetFormattedText(), self._xpos, self._ypos, actualW, actualH, region.GetFormatMode())
+        CentreText(dc, region.GetFormattedText(), self.x, self.y, actualW, actualH, region.GetFormatMode())
         self._formatted = True
 
     def DrawRegion(self, dc, region, x, y):
@@ -499,8 +499,8 @@ class LineShape(Shape):
         self._lineControlPoints[-1] = wx.RealPoint(x2, y2)
 
         # Find centre point
-        self._xpos = (x1 + x2) / 2.0
-        self._ypos = (y1 + y2) / 2.0
+        self.x = (x1 + x2) / 2.0
+        self.y = (y1 + y2) / 2.0
 
     # Get absolute positions of ends
     def GetEnds(self):
@@ -722,7 +722,7 @@ class LineShape(Shape):
                 #
                 x, y = GetPointOnLine(startPositionX, startPositionY,
                                    positionOnLineX, positionOnLineY,
-                                   arrow.GetMetaFile()._width / 2.0)
+                                   arrow.GetMetaFile().w / 2.0)
                 # Calculate theta for rotating the metafile.
                 #
                 # |
@@ -794,12 +794,13 @@ class LineShape(Shape):
         # Drawing over the line only seems to work if the line has a thickness
         # of 1.
         if old_pen and old_pen.GetWidth() > 1:
-            dc.DrawRectangle(self._xpos - bound_x / 2.0 - 2, self._ypos - bound_y / 2.0 - 2,
+            dc.DrawRectangle(self.x - bound_x / 2.0 - 2,
+                             self.y - bound_y / 2.0 - 2,
                              bound_x + 4, bound_y + 4)
         else:
             self._erasing = True
-            self.GetEventHandler().OnDraw(dc)
-            self.GetEventHandler().OnEraseControlPoints(dc)
+            self.handler.OnDraw(dc)
+            self.handler.OnEraseControlPoints(dc)
             self._erasing = False
 
         if old_pen:
@@ -870,7 +871,7 @@ class LineShape(Shape):
         self.SetPen(dottedPen)
         self.SetBrush(wx.TRANSPARENT_BRUSH)
 
-        self.GetEventHandler().OnDraw(dc)
+        self.handler.OnDraw(dc)
 
         if old_pen:
             self.SetPen(old_pen)
@@ -913,7 +914,7 @@ class LineShape(Shape):
         # manually if necessary
         end_x, end_y, other_end_x, other_end_y = self.FindLineEndPoints()
 
-        oldX, oldY = self._xpos, self._ypos
+        oldX, oldY = self.x, self.y
 
         # pi: The first time we go through FindLineEndPoints we can't
         # use the middle points (since they don't have sane values),
@@ -933,8 +934,8 @@ class LineShape(Shape):
         self.SetEnds(end_x, end_y, other_end_x, other_end_y)
 
         # Try to move control points with the arc
-        x_offset = self._xpos - oldX
-        y_offset = self._ypos - oldY
+        x_offset = self.x - oldX
+        y_offset = self.y - oldY
 
         # Only move control points if it's a self link. And only works
         # if attachment mode is ON
@@ -943,7 +944,7 @@ class LineShape(Shape):
                 point[0] += x_offset
                 point[1] += y_offset
 
-        self.Move(dc, self._xpos, self._ypos)
+        self.Move(dc, self.x, self.y)
 
     def FindLineEndPoints(self):
         """Finds the x, y points at the two ends of the line.
@@ -967,18 +968,18 @@ class LineShape(Shape):
                 nth, no_arcs = self.FindNth(self._from, False) # Not incoming
                 end_x, end_y = self._from.GetAttachmentPosition(self._attachmentFrom, nth, no_arcs, self)
             else:
-                end_x, end_y = self._from.GetPerimeterPoint(self._from.GetX(), self._from.GetY(), second_point[0], second_point[1])
+                end_x, end_y = self._from.GetPerimeterPoint(self._from.x, self._from.y, second_point[0], second_point[1])
 
             if self._to.GetAttachmentMode() != ATTACHMENT_MODE_NONE:
                 nth, no_arch = self.FindNth(self._to, True) # Incoming
                 other_end_x, other_end_y = self._to.GetAttachmentPosition(self._attachmentTo, nth, no_arch, self)
             else:
-                other_end_x, other_end_y = self._to.GetPerimeterPoint(self._to.GetX(), self._to.GetY(), second_last_point[0], second_last_point[1])
+                other_end_x, other_end_y = self._to.GetPerimeterPoint(self._to.x, self._to.y, second_last_point[0], second_last_point[1])
         else:
-            fromX = self._from.GetX()
-            fromY = self._from.GetY()
-            toX = self._to.GetX()
-            toY = self._to.GetY()
+            fromX = self._from.x
+            fromY = self._from.y
+            toX = self._to.x
+            toY = self._to.y
 
             if self._from.GetAttachmentMode() != ATTACHMENT_MODE_NONE:
                 nth, no_arcs = self.FindNth(self._from, False)
@@ -993,10 +994,10 @@ class LineShape(Shape):
                 toY = other_end_y
 
             if self._from.GetAttachmentMode() == ATTACHMENT_MODE_NONE:
-                end_x, end_y = self._from.GetPerimeterPoint(self._from.GetX(), self._from.GetY(), toX, toY)
+                end_x, end_y = self._from.GetPerimeterPoint(self._from.x, self._from.y, toX, toY)
 
             if self._to.GetAttachmentMode() == ATTACHMENT_MODE_NONE:
-                other_end_x, other_end_y = self._to.GetPerimeterPoint(self._to.GetX(), self._to.GetY(), fromX, fromY)
+                other_end_x, other_end_y = self._to.GetPerimeterPoint(self._to.x, self._to.y, fromX, fromY)
 
         return end_x, end_y, other_end_x, other_end_y
 
@@ -1106,8 +1107,8 @@ class LineShape(Shape):
             for i in range(min(len(self._controlPoints), len(self._lineControlPoints))):
                 point = self._lineControlPoints[i]
                 control = self._controlPoints[i]
-                control.SetX(point[0])
-                control.SetY(point[1])
+                control.x = point[0]
+                control.y = point[1]
 
     # Override select, to create / delete temporary label-moving objects
     def Select(self, select, dc = None):
@@ -1154,8 +1155,8 @@ class LineShape(Shape):
         if pt._type == CONTROL_POINT_LINE:
             x, y = self._canvas.Snap(x, y)
 
-            pt.SetX(x)
-            pt.SetY(y)
+            pt.x = x
+            pt.y = y
             pt._point[0] = x
             pt._point[1] = y
             
@@ -1165,7 +1166,7 @@ class LineShape(Shape):
             self.SetPen(dottedPen)
             self.SetBrush(wx.TRANSPARENT_BRUSH)
 
-            self.GetEventHandler().OnMoveLink(dc, False)
+            self.handler.OnMoveLink(dc, False)
             
             self.SetPen(old_pen)
             self.SetBrush(old_brush)
@@ -1190,8 +1191,8 @@ class LineShape(Shape):
             self.SetDisableLabel(True)
             dc.SetLogicalFunction(OGLRBLF)
 
-            pt._xpos = x
-            pt._ypos = y
+            pt.x = x
+            pt.y = y
             pt._point[0] = x
             pt._point[1] = y
 
@@ -1202,7 +1203,7 @@ class LineShape(Shape):
             self.SetPen(dottedPen)
             self.SetBrush(wx.TRANSPARENT_BRUSH)
 
-            self.GetEventHandler().OnMoveLink(dc, False)
+            self.handler.OnMoveLink(dc, False)
 
             self.SetPen(old_pen)
             self.SetBrush(old_brush)
@@ -1227,8 +1228,8 @@ class LineShape(Shape):
             # if it decides it wants. We only moved the position
             # during user feedback so we could redraw the line
             # as it changed shape.
-            pt._xpos = pt._originalPos[0]
-            pt._ypos = pt._originalPos[1]
+            pt.x = pt._originalPos[0]
+            pt.y = pt._originalPos[1]
             pt._point[0] = pt._originalPos[0]
             pt._point[1] = pt._originalPos[1]
 
@@ -1250,13 +1251,13 @@ class LineShape(Shape):
 
     # This is called only when a non-end control point is moved
     def OnMoveMiddleControlPoint(self, dc, lpt, pt):
-        lpt._xpos = pt[0]
-        lpt._ypos = pt[1]
+        lpt.x = pt[0]
+        lpt.y = pt[1]
 
         lpt._point[0] = pt[0]
         lpt._point[1] = pt[1]
 
-        self.GetEventHandler().OnMoveLink(dc)
+        self.handler.OnMoveLink(dc)
 
         return True
 
@@ -1442,7 +1443,7 @@ class LineShape(Shape):
         startX, startY, endX, endY = self.GetEnds()
 
         # Find distances from centre, start and end. The smallest wins
-        centreDistance = math.sqrt((x - self._xpos) * (x - self._xpos) + (y - self._ypos) * (y - self._ypos))
+        centreDistance = math.sqrt((x - self.x) * (x - self.x) + (y - self.y) * (y - self.y))
         startDistance = math.sqrt((x - startX) * (x - startX) + (y - startY) * (y - startY))
         endDistance = math.sqrt((x - endX) * (x - endX) + (y - endY) * (y - endY))
 
@@ -1511,7 +1512,7 @@ class LineShape(Shape):
 
     
     def OnLabelMovePre(self, dc, labelShape, x, y, old_x, old_y, display):
-        labelShape._shapeRegion.SetSize(labelShape.GetWidth(), labelShape.GetHeight())
+        labelShape._shapeRegion.SetSize(labelShape.w, labelShape.h)
 
         # Find position in line's region list
         i = self._regions.index(labelShape._shapeRegion)
@@ -1520,8 +1521,8 @@ class LineShape(Shape):
         # Set the region's offset, relative to the default position for
         # each region.
         labelShape._shapeRegion.SetPosition(x - xx, y - yy)
-        labelShape.SetX(x)
-        labelShape.SetY(y)
+        labelShape.x = x
+        labelShape.y = y
 
         # Need to reformat to fit region
         if labelShape._shapeRegion.GetText():

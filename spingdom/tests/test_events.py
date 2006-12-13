@@ -53,7 +53,7 @@ def test_previous_handlers(test):
 
         # Once we set the previousHandler, though,
         # the handler should pass the event to it.
-        handler.SetPreviousHandler(echo)
+        handler.prev = echo
         handler_onEvent(*args, **kw)
         assert echo.echo == [event_name, args, kw], echo.echo
 
@@ -87,9 +87,12 @@ def test_previous_handlers(test):
     test_event(hand, "OnBeginDragRight", x, y, keys = 0, attachment = 0)
     test_event(hand, "OnEndDragRight", x, y, keys = 0, attachment = 0)
     pt = "pt"
-    test_event(hand, "OnSizingDragLeft", pt, draw, x, y, keys = 0, attachment = 0)
-    test_event(hand, "OnSizingBeginDragLeft", pt, x, y, keys = 0, attachment = 0)
-    test_event(hand, "OnSizingEndDragLeft", pt, x, y, keys = 0, attachment = 0)
+    test_event(hand, "OnSizingDragLeft", pt, draw, x, y,
+               keys = 0, attachment = 0)
+    test_event(hand, "OnSizingBeginDragLeft", pt, x, y,
+               keys = 0, attachment = 0)
+    test_event(hand, "OnSizingEndDragLeft", pt, x, y,
+               keys = 0, attachment = 0)
     w = "w"
     h = "h"
     ## @TODO: why don't Begin/EndSize work like the others? 

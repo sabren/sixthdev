@@ -129,8 +129,8 @@ class Constraint(object):
       wxObject
     """
     def __init__(self, type, constraining, constrained):
-        self._xSpacing = 0.0
-        self._ySpacing = 0.0
+        self.xSpacing = 0.0
+        self.ySpacing = 0.0
 
         self._constraintType = type
         self._constrainingObject = constraining
@@ -145,8 +145,8 @@ class Constraint(object):
 
     def SetSpacing(self, x, y):
         """Sets the horizontal and vertical spacing for the constraint."""
-        self._xSpacing = x
-        self._ySpacing = y
+        self.xSpacing = x
+        self.ySpacing = y
         
     def Equals(self, a, b):
         """Return TRUE if x and y are approximately equal (for the purposes
@@ -160,8 +160,8 @@ class Constraint(object):
         """Evaluate this constraint and return TRUE if anything changed."""
         maxWidth, maxHeight = self._constrainingObject.GetBoundingBoxMax()
         minWidth, minHeight = self._constrainingObject.GetBoundingBoxMin()
-        x = self._constrainingObject.GetX()
-        y = self._constrainingObject.GetY()
+        x = self._constrainingObject.x
+        y = self._constrainingObject.y
 
         dc = wx.ClientDC(self._constrainingObject.GetCanvas())
         self._constrainingObject.GetCanvas().PrepareDC(dc)
@@ -174,11 +174,11 @@ class Constraint(object):
                 totalObjectHeight += height2
 
             # Check if within the constraining object...
-            if totalObjectHeight + (n + 1) * self._ySpacing <= minHeight:
+            if totalObjectHeight + (n + 1) * self.ySpacing <= minHeight:
                 spacingY = (minHeight - totalObjectHeight) / (n + 1.0)
                 startY = y - minHeight / 2.0
             else: # Otherwise, use default spacing
-                spacingY = self._ySpacing
+                spacingY = self.ySpacing
                 startY = y - (totalObjectHeight + (n + 1) * spacingY) / 2.0
 
             # Now position the objects
@@ -186,8 +186,8 @@ class Constraint(object):
             for constrainedObject in self._constrainedObjects:
                 width2, height2 = constrainedObject.GetBoundingBoxMax()
                 startY += spacingY + height2 / 2.0
-                if not self.Equals(startY, constrainedObject.GetY()):
-                    constrainedObject.Move(dc, constrainedObject.GetX(), startY, False)
+                if not self.Equals(startY, constrainedObject.y):
+                    constrainedObject.Move(dc, constrainedObject.x, startY, False)
                     changed = True
                 startY += height2 / 2.0
             return changed
@@ -199,11 +199,11 @@ class Constraint(object):
                 totalObjectWidth += width2
 
             # Check if within the constraining object...
-            if totalObjectWidth + (n + 1) * self._xSpacing <= minWidth:
+            if totalObjectWidth + (n + 1) * self.xSpacing <= minWidth:
                 spacingX = (minWidth - totalObjectWidth) / (n + 1.0)
                 startX = x - minWidth / 2.0
             else: # Otherwise, use default spacing
-                spacingX = self._xSpacing
+                spacingX = self.xSpacing
                 startX = x - (totalObjectWidth + (n + 1) * spacingX) / 2.0
 
             # Now position the objects
@@ -211,8 +211,8 @@ class Constraint(object):
             for constrainedObject in self._constrainedObjects:
                 width2, height2 = constrainedObject.GetBoundingBoxMax()
                 startX += spacingX + width2 / 2.0
-                if not self.Equals(startX, constrainedObject.GetX()):
-                    constrainedObject.Move(dc, startX, constrainedObject.GetY(), False)
+                if not self.Equals(startX, constrainedObject.x):
+                    constrainedObject.Move(dc, startX, constrainedObject.y, False)
                     changed = True
                 startX += width2 / 2.0
             return changed
@@ -227,19 +227,19 @@ class Constraint(object):
                 totalObjectHeight += height2
 
             # Check if within the constraining object...
-            if totalObjectHeight + (n + 1) * self._xSpacing <= minWidth:
+            if totalObjectHeight + (n + 1) * self.xSpacing <= minWidth:
                 spacingX = (minWidth - totalObjectWidth) / (n + 1.0)
                 startX = x - minWidth / 2.0
             else: # Otherwise, use default spacing
-                spacingX = self._xSpacing
+                spacingX = self.xSpacing
                 startX = x - (totalObjectWidth + (n + 1) * spacingX) / 2.0
 
             # Check if within the constraining object...
-            if totalObjectHeight + (n + 1) * self._ySpacing <= minHeight:
+            if totalObjectHeight + (n + 1) * self.ySpacing <= minHeight:
                 spacingY = (minHeight - totalObjectHeight) / (n + 1.0)
                 startY = y - minHeight / 2.0
             else: # Otherwise, use default spacing
-                spacingY = self._ySpacing
+                spacingY = self.ySpacing
                 startY = y - (totalObjectHeight + (n + 1) * spacingY) / 2.0
 
             # Now position the objects
@@ -249,7 +249,7 @@ class Constraint(object):
                 startX += spacingX + width2 / 2.0
                 startY += spacingY + height2 / 2.0
 
-                if not self.Equals(startX, constrainedObject.GetX()) or not self.Equals(startY, constrainedObject.GetY()):
+                if not self.Equals(startX, constrainedObject.x) or not self.Equals(startY, constrainedObject.y):
                     constrainedObject.Move(dc, startX, startY, False)
                     changed = True
 
@@ -261,19 +261,19 @@ class Constraint(object):
             for constrainedObject in self._constrainedObjects:
                 width2, height2 = constrainedObject.GetBoundingBoxMax()
 
-                x3 = x - minWidth / 2.0 - width2 / 2.0 - self._xSpacing
-                if not self.Equals(x3, constrainedObject.GetX()):
+                x3 = x - minWidth / 2.0 - width2 / 2.0 - self.xSpacing
+                if not self.Equals(x3, constrainedObject.x):
                     changed = True
-                    constrainedObject.Move(dc, x3, constrainedObject.GetY(), False)
+                    constrainedObject.Move(dc, x3, constrainedObject.y, False)
             return changed
         elif self._constraintType == CONSTRAINT_RIGHT_OF:
             changed = False
 
             for constrainedObject in self._constrainedObjects:
                 width2, height2 = constrainedObject.GetBoundingBoxMax()
-                x3 = x + minWidth / 2.0 + width2 / 2.0 + self._xSpacing
-                if not self.Equals(x3, constrainedObject.GetX()):
-                    constrainedObject.Move(dc, x3, constrainedObject.GetY(), False)
+                x3 = x + minWidth / 2.0 + width2 / 2.0 + self.xSpacing
+                if not self.Equals(x3, constrainedObject.x):
+                    constrainedObject.Move(dc, x3, constrainedObject.y, False)
                     changed = True
             return changed
         elif self._constraintType == CONSTRAINT_ABOVE:
@@ -282,10 +282,10 @@ class Constraint(object):
             for constrainedObject in self._constrainedObjects:
                 width2, height2 = constrainedObject.GetBoundingBoxMax()
 
-                y3 = y - minHeight / 2.0 - height2 / 2.0 - self._ySpacing
-                if not self.Equals(y3, constrainedObject.GetY()):
+                y3 = y - minHeight / 2.0 - height2 / 2.0 - self.ySpacing
+                if not self.Equals(y3, constrainedObject.y):
                     changed = True
-                    constrainedObject.Move(dc, constrainedObject.GetX(), y3, False)
+                    constrainedObject.Move(dc, constrainedObject.x, y3, False)
             return changed
         elif self._constraintType == CONSTRAINT_BELOW:
             changed = False
@@ -293,78 +293,78 @@ class Constraint(object):
             for constrainedObject in self._constrainedObjects:
                 width2, height2 = constrainedObject.GetBoundingBoxMax()
 
-                y3 = y + minHeight / 2.0 + height2 / 2.0 + self._ySpacing
-                if not self.Equals(y3, constrainedObject.GetY()):
+                y3 = y + minHeight / 2.0 + height2 / 2.0 + self.ySpacing
+                if not self.Equals(y3, constrainedObject.y):
                     changed = True
-                    constrainedObject.Move(dc, constrainedObject.GetX(), y3, False)
+                    constrainedObject.Move(dc, constrainedObject.x, y3, False)
             return changed
         elif self._constraintType == CONSTRAINT_ALIGNED_LEFT:
             changed = False
             for constrainedObject in self._constrainedObjects:
                 width2, height2 = constrainedObject.GetBoundingBoxMax()
-                x3 = x - minWidth / 2.0 + width2 / 2.0 + self._xSpacing
-                if not self.Equals(x3, constrainedObject.GetX()):
+                x3 = x - minWidth / 2.0 + width2 / 2.0 + self.xSpacing
+                if not self.Equals(x3, constrainedObject.x):
                     changed = True
-                    constrainedObject.Move(dc, x3, constrainedObject.GetY(), False)
+                    constrainedObject.Move(dc, x3, constrainedObject.y, False)
             return changed
         elif self._constraintType == CONSTRAINT_ALIGNED_RIGHT:
             changed = False
             for constrainedObject in self._constrainedObjects:
                 width2, height2 = constrainedObject.GetBoundingBoxMax()
-                x3 = x + minWidth / 2.0 - width2 / 2.0 - self._xSpacing
-                if not self.Equals(x3, constrainedObject.GetX()):
+                x3 = x + minWidth / 2.0 - width2 / 2.0 - self.xSpacing
+                if not self.Equals(x3, constrainedObject.x):
                     changed = True
-                    constrainedObject.Move(dc, x3, constrainedObject.GetY(), False)
+                    constrainedObject.Move(dc, x3, constrainedObject.y, False)
             return changed
         elif self._constraintType == CONSTRAINT_ALIGNED_TOP:
             changed = False
             for constrainedObject in self._constrainedObjects:
                 width2, height2 = constrainedObject.GetBoundingBoxMax()
-                y3 = y -  minHeight / 2.0 + height2 / 2.0 + self._ySpacing
-                if not self.Equals(y3, constrainedObject.GetY()):
+                y3 = y -  minHeight / 2.0 + height2 / 2.0 + self.ySpacing
+                if not self.Equals(y3, constrainedObject.y):
                     changed = True
-                    constrainedObject.Move(dc, constrainedObject.GetX(), y3, False)
+                    constrainedObject.Move(dc, constrainedObject.x, y3, False)
             return changed
         elif self._constraintType == CONSTRAINT_ALIGNED_BOTTOM:
             changed = False
             for constrainedObject in self._constrainedObjects:
                 width2, height2 = constrainedObject.GetBoundingBoxMax()
-                y3 = y + minHeight / 2.0 - height2 / 2.0 - self._ySpacing
-                if not self.Equals(y3, constrainedObject.GetY()):
+                y3 = y + minHeight / 2.0 - height2 / 2.0 - self.ySpacing
+                if not self.Equals(y3, constrainedObject.y):
                     changed = True
-                    constrainedObject.Move(dc, constrainedObject.GetX(), y3, False)
+                    constrainedObject.Move(dc, constrainedObject.x, y3, False)
             return changed
         elif self._constraintType == CONSTRAINT_MIDALIGNED_LEFT:
             changed = False
             for constrainedObject in self._constrainedObjects:
                 x3 = x - minWidth / 2.0
-                if not self.Equals(x3, constrainedObject.GetX()):
+                if not self.Equals(x3, constrainedObject.x):
                     changed = True
-                    constrainedObject.Move(dc, x3, constrainedObject.GetY(), False)
+                    constrainedObject.Move(dc, x3, constrainedObject.y, False)
             return changed
         elif self._constraintType == CONSTRAINT_MIDALIGNED_RIGHT:
             changed = False
             for constrainedObject in self._constrainedObjects:
                 x3 = x + minWidth / 2.0
-                if not self.Equals(x3, constrainedObject.GetX()):
+                if not self.Equals(x3, constrainedObject.x):
                     changed = True
-                    constrainedObject.Move(dc, x3, constrainedObject.GetY(), False)
+                    constrainedObject.Move(dc, x3, constrainedObject.y, False)
             return changed
         elif self._constraintType == CONSTRAINT_MIDALIGNED_TOP:
             changed = False
             for constrainedObject in self._constrainedObjects:
                 y3 = y - minHeight / 2.0
-                if not self.Equals(y3, constrainedObject.GetY()):
+                if not self.Equals(y3, constrainedObject.y):
                     changed = True
-                    constrainedObject.Move(dc, constrainedObject.GetX(), y3, False)
+                    constrainedObject.Move(dc, constrainedObject.x, y3, False)
             return changed
         elif self._constraintType == CONSTRAINT_MIDALIGNED_BOTTOM:
             changed = False
             for constrainedObject in self._constrainedObjects:
                 y3 = y + minHeight / 2.0
-                if not self.Equals(y3, constrainedObject.GetY()):
+                if not self.Equals(y3, constrainedObject.y):
                     changed = True
-                    constrainedObject.Move(dc, constrainedObject.GetX(), y3, False)
+                    constrainedObject.Move(dc, constrainedObject.x, y3, False)
             return changed
         
         return False
@@ -383,15 +383,15 @@ class CompositeShape(RectangleShape):
     def __init__(self):
         RectangleShape.__init__(self, 100.0, 100.0)
 
-        self._oldX = self._xpos
-        self._oldY = self._ypos
+        self._oldX = self.x
+        self._oldY = self.y
 
         self._constraints = [] 
         self._divisions = [] # In case it's a container
         
     def OnDraw(self, dc):
-        x1 = self._xpos - self._width / 2.0
-        y1 = self._ypos - self._height / 2.0
+        x1 = self.x - self.w / 2.0
+        y1 = self.y - self.h / 2.0
 
         if self._shadowMode != SHADOW_NONE:
             if self._shadowBrush:
@@ -399,12 +399,12 @@ class CompositeShape(RectangleShape):
             dc.SetPen(wx.Pen(wx.WHITE, 1, wx.TRANSPARENT))
 
             if self._cornerRadius:
-                dc.DrawRoundedRectangle(x1 + self._shadowOffsetX, y1 + self._shadowOffsetY, self._width, self._height, self._cornerRadius)
+                dc.DrawRoundedRectangle(x1 + self._shadowOffsetX, y1 + self._shadowOffsetY, self.w, self.h, self._cornerRadius)
             else:
-                dc.DrawRectangle(x1 + self._shadowOffsetX, y1 + self._shadowOffsetY, self._width, self._height)
+                dc.DrawRectangle(x1 + self._shadowOffsetX, y1 + self._shadowOffsetY, self.w, self.h)
 
         # For debug purposes /pi
-        #dc.DrawRectangle(x1, y1, self._width, self._height)
+        #dc.DrawRectangle(x1, y1, self.w, self.h)
         
     def OnDrawContents(self, dc):
         for object in self._children:
@@ -419,7 +419,7 @@ class CompositeShape(RectangleShape):
 
         for object in self._children:
             object.Erase(dc)
-            object.Move(dc, object.GetX() + diffX, object.GetY() + diffY, display)
+            object.Move(dc, object.x + diffX, object.y + diffY, display)
 
         return True
 
@@ -441,7 +441,7 @@ class CompositeShape(RectangleShape):
         dc.SetPen(dottedPen)
         dc.SetBrush(wx.TRANSPARENT_BRUSH)
 
-        self.GetEventHandler().OnDrawOutline(dc, self.GetX() + offsetX, self.GetY() + offsetY, self.GetWidth(), self.GetHeight())
+        self.handler.OnDrawOutline(dc, self.x + offsetX, self.y + offsetY, self.w, self.h)
 
     def OnBeginDragLeft(self, x, y, keys = 0, attachment = 0):
         global _objectStartX, _objectStartY
@@ -464,7 +464,7 @@ class CompositeShape(RectangleShape):
         offsetX = xx - _objectStartX
         offsetY = yy - _objectStartY
 
-        self.GetEventHandler().OnDrawOutline(dc, self.GetX() + offsetX, self.GetY() + offsetY, self.GetWidth(), self.GetHeight())
+        self.handler.OnDrawOutline(dc, self.x + offsetX, self.y + offsetY, self.w, self.h)
 
     def OnEndDragLeft(self, x, y, keys = 0, attachment = 0):
         dc = wx.ClientDC(self.GetCanvas())
@@ -475,7 +475,7 @@ class CompositeShape(RectangleShape):
 
         if not self._draggable:
             if self._parent:
-                self._parent.GetEventHandler().OnEndDragLeft(x, y, keys, 0)
+                self._parent.handler.OnEndDragLeft(x, y, keys, 0)
             return
             
         self.Erase(dc)
@@ -486,7 +486,7 @@ class CompositeShape(RectangleShape):
         offsetX = xx - _objectStartX
         offsetY = yy - _objectStartY
 
-        self.Move(dc, self.GetX() + offsetX, self.GetY() + offsetY)
+        self.Move(dc, self.x + offsetX, self.y + offsetY)
 
         if self._canvas and not self._canvas.GetQuickEditMode():
             self._canvas.Redraw(dc)
@@ -499,17 +499,17 @@ class CompositeShape(RectangleShape):
             for division in self._divisions:
                 hit = division.HitTest(x, y)
                 if hit:
-                    division.GetEventHandler().OnRightClick(x, y, keys, hit[0])
+                    division.handler.OnRightClick(x, y, keys, hit[0])
                     break
 
     def SetSize(self, w, h, recursive = True):
         self.SetAttachmentSize(w, h)
 
-        xScale = float(w) / max(1, self.GetWidth())
-        yScale = float(h) / max(1, self.GetHeight())
+        xScale = float(w) / max(1, self.w)
+        yScale = float(h) / max(1, self.h)
 
-        self._width = w
-        self._height = h
+        self.w = w
+        self.h = h
 
         if not recursive:
             return
@@ -519,8 +519,8 @@ class CompositeShape(RectangleShape):
 
         for object in self._children:
             # Scale the position first
-            newX = (object.GetX() - self.GetX()) * xScale + self.GetX()
-            newY = (object.GetY() - self.GetY()) * yScale + self.GetY()
+            newX = (object.x - self.x) * xScale + self.x
+            newY = (object.y - self.y) * yScale + self.y
             object.Show(False)
             object.Move(dc, newX, newY)
             object.Show(True)
@@ -652,19 +652,19 @@ class CompositeShape(RectangleShape):
                 child.CalculateSize()
 
             w, h = child.GetBoundingBoxMax()
-            if child.GetX() + w / 2.0 > maxX:
-                maxX = child.GetX() + w / 2.0
-            if child.GetX() - w / 2.0 < minX:
-                minX = child.GetX() - w / 2.0
-            if child.GetY() + h / 2.0 > maxY:
-                maxY = child.GetY() + h / 2.0
-            if child.GetY() - h / 2.0 < minY:
-                minY = child.GetY() - h / 2.0
+            if child.x + w / 2.0 > maxX:
+                maxX = child.x + w / 2.0
+            if child.x - w / 2.0 < minX:
+                minX = child.x - w / 2.0
+            if child.y + h / 2.0 > maxY:
+                maxY = child.y + h / 2.0
+            if child.y - h / 2.0 < minY:
+                minY = child.y - h / 2.0
 
-        self._width = maxX - minX
-        self._height = maxY - minY
-        self._xpos = self._width / 2.0 + minX
-        self._ypos = self._height / 2.0 + minY
+        self.w = maxX - minX
+        self.h = maxY - minY
+        self.x = self.w / 2.0 + minX
+        self.y = self.h / 2.0 + minY
 
     def Recompute(self):
         """Recomputes any constraints associated with the object. If FALSE is
@@ -701,12 +701,12 @@ class CompositeShape(RectangleShape):
         self._divisions.append(division)
         self.AddChild(division)
 
-        division.SetSize(self._width, self._height)
+        division.SetSize(self.w, self.h)
 
         dc = wx.ClientDC(self.GetCanvas())
         self.GetCanvas().PrepareDC(dc)
         
-        division.Move(dc, self.GetX(), self.GetY())
+        division.Move(dc, self.x, self.y)
         self.Recompute()
         division.Show(True)
 
@@ -778,10 +778,10 @@ class DivisionControlPoint(ControlPoint):
     def OnBeginDragLeft(self, x, y, keys = 0, attachment = 0):
         global originalX, originalY, originalW, originalH
 
-        originalX = self._shape.GetX()
-        originalY = self._shape.GetY()
-        originalW = self._shape.GetWidth()
-        originalH = self._shape.GetHeight()
+        originalX = self._shape.x
+        originalY = self._shape.y
+        originalW = self._shape.w
+        originalH = self._shape.h
 
         ControlPoint.OnBeginDragLeft(self, x, y, keys, attachment)
 
@@ -795,17 +795,17 @@ class DivisionControlPoint(ControlPoint):
         divisionParent = division.GetParent()
 
         # Need to check it's within the bounds of the parent composite
-        x1 = divisionParent.GetX() - divisionParent.GetWidth() / 2.0
-        y1 = divisionParent.GetY() - divisionParent.GetHeight() / 2.0
-        x2 = divisionParent.GetX() + divisionParent.GetWidth() / 2.0
-        y2 = divisionParent.GetY() + divisionParent.GetHeight() / 2.0
+        x1 = divisionParent.x - divisionParent.w / 2.0
+        y1 = divisionParent.y - divisionParent.h / 2.0
+        x2 = divisionParent.x + divisionParent.w / 2.0
+        y2 = divisionParent.y + divisionParent.h / 2.0
 
         # Need to check it has not made the division zero or negative
         # width / height
-        dx1 = division.GetX() - division.GetWidth() / 2.0
-        dy1 = division.GetY() - division.GetHeight() / 2.0
-        dx2 = division.GetX() + division.GetWidth() / 2.0
-        dy2 = division.GetY() + division.GetHeight() / 2.0
+        dx1 = division.x - division.w / 2.0
+        dy1 = division.y - division.h / 2.0
+        dx2 = division.x + division.w / 2.0
+        dy2 = division.y + division.h / 2.0
 
         success = True
         if division.GetHandleSide() == DIVISION_SIDE_LEFT:
@@ -843,7 +843,7 @@ class DivisionControlPoint(ControlPoint):
             division.Move(dc, originalX, originalY)
 
         divisionParent.Draw(dc)
-        division.GetEventHandler().OnDrawControlPoints(dc)
+        division.handler.OnDrawControlPoints(dc)
 
 
 
@@ -1006,10 +1006,10 @@ class DivisionShape(CompositeShape):
         dc.SetBrush(wx.TRANSPARENT_BRUSH)
         dc.SetBackgroundMode(wx.TRANSPARENT)
 
-        x1 = self.GetX() - self.GetWidth() / 2.0
-        y1 = self.GetY() - self.GetHeight() / 2.0
-        x2 = self.GetX() + self.GetWidth() / 2.0
-        y2 = self.GetY() + self.GetHeight() / 2.0
+        x1 = self.x - self.w / 2.0
+        y1 = self.y - self.h / 2.0
+        x2 = self.x + self.w / 2.0
+        y2 = self.y + self.h / 2.0
 
         # Should subtract 1 pixel if drawing under Windows
         if sys.platform[:3] == "win":
@@ -1026,7 +1026,7 @@ class DivisionShape(CompositeShape):
         # For testing purposes, draw a rectangle so we know
         # how big the division is.
         #dc.SetBrush(wx.RED_BRUSH)
-        #dc.DrawRectangle(x1, y1, self.GetWidth(), self.GetHeight())
+        #dc.DrawRectangle(x1, y1, self.w, self.h)
         
     def OnDrawContents(self, dc):
         CompositeShape.OnDrawContents(self, dc)
@@ -1036,7 +1036,7 @@ class DivisionShape(CompositeShape):
         diffY = y - oldy
         for object in self._children:
             object.Erase(dc)
-            object.Move(dc, object.GetX() + diffX, object.GetY() + diffY, display)
+            object.Move(dc, object.x + diffX, object.y + diffY, display)
         return True
 
     def OnDragLeft(self, draw, x, y, keys = 0, attachment = 0):
@@ -1045,7 +1045,7 @@ class DivisionShape(CompositeShape):
                 hit = self._parent.HitTest(x, y)
                 if hit:
                     attachment, dist = hit
-                self._parent.GetEventHandler().OnDragLeft(draw, x, y, keys, attachment)
+                self._parent.handler.OnDragLeft(draw, x, y, keys, attachment)
             return
         Shape.OnDragLeft(self, draw, x, y, keys, attachment)
 
@@ -1055,7 +1055,7 @@ class DivisionShape(CompositeShape):
                 hit = self._parent.HitTest(x, y)
                 if hit:
                     attachment, dist = hit
-                self._parent.GetEventHandler().OnBeginDragLeft(x, y, keys, attachment)
+                self._parent.handler.OnBeginDragLeft(x, y, keys, attachment)
             return
         Shape.OnBeginDragLeft(x, y, keys, attachment)
             
@@ -1067,7 +1067,7 @@ class DivisionShape(CompositeShape):
                 hit = self._parent.HitTest(x, y)
                 if hit:
                     attachment, dist = hit
-                self._parent.GetEventHandler().OnEndDragLeft(x, y, keys, attachment)
+                self._parent.handler.OnEndDragLeft(x, y, keys, attachment)
             return
 
         dc = wx.ClientDC(self.GetCanvas())
@@ -1075,20 +1075,20 @@ class DivisionShape(CompositeShape):
 
         dc.SetLogicalFunction(wx.COPY)
 
-        self._xpos, self._ypos = self._canvas.Snap(self._xpos, self._ypos)
-        self.GetEventHandler().OnMovePre(dc, x, y, self._oldX, self._oldY)
+        self.x, self.y = self._canvas.Snap(self.x, self.y)
+        self.handler.OnMovePre(dc, x, y, self._oldX, self._oldY)
 
         self.ResetControlPoints()
         self.Draw(dc)
         self.MoveLinks(dc)
-        self.GetEventHandler().OnDrawControlPoints(dc)
+        self.handler.OnDrawControlPoints(dc)
 
         if self._canvas and not self._canvas.GetQuickEditMode():
             self._canvas.Redraw(dc)
 
     def SetSize(self, w, h, recursive = True):
-        self._width = w
-        self._height = h
+        self.w = w
+        self.h = h
         RectangleShape.SetSize(self, w, h, recursive)
 
     def CalculateSize(self):
@@ -1103,7 +1103,7 @@ class DivisionShape(CompositeShape):
                 hit = self._parent.HitTest(x, y)
                 if hit:
                     attachment, dist = hit
-                self._parent.GetEventHandler().OnRightClick(x, y, keys, attachment)
+                self._parent.handler.OnRightClick(x, y, keys, attachment)
 
     # Divide wx.HORIZONTALly or wx.VERTICALly
     def Divide(self, direction):
@@ -1112,12 +1112,12 @@ class DivisionShape(CompositeShape):
         vertically (direction is wxVERTICAL).
         """
         # Calculate existing top-left, bottom-right
-        x1 = self.GetX() - self.GetWidth() / 2.0
-        y1 = self.GetY() - self.GetHeight() / 2.0
+        x1 = self.x - self.w / 2.0
+        y1 = self.y - self.h / 2.0
 
         compositeParent = self.GetParent()
-        oldWidth = self.GetWidth()
-        oldHeight = self.GetHeight()
+        oldWidth = self.w
+        oldHeight = self.h
         if self.Selected():
             self.Select(False)
 
@@ -1128,10 +1128,10 @@ class DivisionShape(CompositeShape):
             # Dividing vertically means notionally putting a horizontal
             # line through it.
             # Break existing piece into two.
-            newXPos1 = self.GetX()
-            newYPos1 = y1 + self.GetHeight() / 4.0
-            newXPos2 = self.GetX()
-            newYPos2 = y1 + 3 * self.GetHeight() / 4.0
+            newXPos1 = self.x
+            newYPos1 = y1 + self.h / 4.0
+            newXPos2 = self.x
+            newYPos2 = y1 + 3 * self.h / 4.0
             newDivision = compositeParent.OnCreateDivision()
             newDivision.Show(True)
 
@@ -1174,10 +1174,10 @@ class DivisionShape(CompositeShape):
             # Dividing horizontally means notionally putting a vertical line
             # through it.
             # Break existing piece into two.
-            newXPos1 = x1 + self.GetWidth() / 4.0
-            newYPos1 = self.GetY()
-            newXPos2 = x1 + 3 * self.GetWidth() / 4.0
-            newYPos2 = self.GetY()
+            newXPos1 = x1 + self.w / 4.0
+            newYPos1 = self.y
+            newXPos2 = x1 + 3 * self.w / 4.0
+            newYPos2 = self.y
             newDivision = compositeParent.OnCreateDivision()
             newDivision.Show(True)
 
@@ -1253,20 +1253,20 @@ class DivisionShape(CompositeShape):
         node = self._controlPoints[0]
 
         if self._handleSide == DIVISION_SIDE_LEFT and node:
-            node._xoffset = -maxX / 2.0
-            node._yoffset = 0.0
+            node.xoffset = -maxX / 2.0
+            node.yoffset = 0.0
 
         if self._handleSide == DIVISION_SIDE_TOP and node:
-            node._xoffset = 0.0
-            node._yoffset = -maxY / 2.0
+            node.xoffset = 0.0
+            node.yoffset = -maxY / 2.0
 
         if self._handleSide == DIVISION_SIDE_RIGHT and node:
-            node._xoffset = maxX / 2.0
-            node._yoffset = 0.0
+            node.xoffset = maxX / 2.0
+            node.yoffset = 0.0
 
         if self._handleSide == DIVISION_SIDE_BOTTOM and node:
-            node._xoffset = 0.0
-            node._yoffset = maxY / 2.0
+            node.xoffset = 0.0
+            node.yoffset = maxY / 2.0
 
     def AdjustLeft(self, left, test):
         """Adjust a side.
@@ -1274,7 +1274,7 @@ class DivisionShape(CompositeShape):
         Returns FALSE if it's not physically possible to adjust it to
         this point.
         """
-        x2 = self.GetX() + self.GetWidth() / 2.0
+        x2 = self.x + self.w / 2.0
 
         if left >= x2:
             return False
@@ -1284,12 +1284,12 @@ class DivisionShape(CompositeShape):
 
         newW = x2 - left
         newX = left + newW / 2.0
-        self.SetSize(newW, self.GetHeight())
+        self.SetSize(newW, self.h)
 
         dc = wx.ClientDC(self.GetCanvas())
         self.GetCanvas().PrepareDC(dc)
 
-        self.Move(dc, newX, self.GetY())
+        self.Move(dc, newX, self.y)
         return True
 
     def AdjustTop(self, top, test):
@@ -1298,7 +1298,7 @@ class DivisionShape(CompositeShape):
         Returns FALSE if it's not physically possible to adjust it to
         this point.
         """
-        y2 = self.GetY() + self.GetHeight() / 2.0
+        y2 = self.y + self.h / 2.0
 
         if top >= y2:
             return False
@@ -1308,12 +1308,12 @@ class DivisionShape(CompositeShape):
 
         newH = y2 - top
         newY = top + newH / 2.0
-        self.SetSize(self.GetWidth(), newH)
+        self.SetSize(self.w, newH)
 
         dc = wx.ClientDC(self.GetCanvas())
         self.GetCanvas().PrepareDC(dc)
 
-        self.Move(dc, self.GetX(), newY)
+        self.Move(dc, self.x, newY)
         return True
 
     def AdjustRight(self, right, test):
@@ -1322,7 +1322,7 @@ class DivisionShape(CompositeShape):
         Returns FALSE if it's not physically possible to adjust it to
         this point.
         """
-        x1 = self.GetX() - self.GetWidth() / 2.0
+        x1 = self.x - self.w / 2.0
 
         if right <= x1:
             return False
@@ -1332,12 +1332,12 @@ class DivisionShape(CompositeShape):
 
         newW = right - x1
         newX = x1 + newW / 2.0
-        self.SetSize(newW, self.GetHeight())
+        self.SetSize(newW, self.h)
 
         dc = wx.ClientDC(self.GetCanvas())
         self.GetCanvas().PrepareDC(dc)
 
-        self.Move(dc, newX, self.GetY())
+        self.Move(dc, newX, self.y)
         return True
     
     def AdjustTop(self, top, test):
@@ -1346,7 +1346,7 @@ class DivisionShape(CompositeShape):
         Returns FALSE if it's not physically possible to adjust it to
         this point.
         """
-        y1 = self.GetY() - self.GetHeight() / 2.0
+        y1 = self.y - self.h / 2.0
 
         if bottom <= y1:
             return False
@@ -1356,12 +1356,12 @@ class DivisionShape(CompositeShape):
 
         newH = bottom - y1
         newY = y1 + newH / 2.0
-        self.SetSize(self.GetWidth(), newH)
+        self.SetSize(self.w, newH)
 
         dc = wx.ClientDC(self.GetCanvas())
         self.GetCanvas().PrepareDC(dc)
 
-        self.Move(dc, self.GetX(), newY)
+        self.Move(dc, self.x, newY)
         return True
 
     # Resize adjoining divisions.
