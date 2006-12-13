@@ -60,10 +60,55 @@ class ShapeTextLine(object):
         return self._line
 
 
+
+class NullEventHandler(object):
+    """
+    Null object so we don't have to keep checking
+    for ShapeEvtHandler._previousHandler
+
+    This also gives a nice, concise view of the
+    various event handlers.
+    """
+    def OnDraw(self, dc): pass
+    def OnMoveLinks(self, dc): pass
+    def OnMoveLink(self, dc, moveControlPoints = True): pass
+    def OnDrawContents(self, dc): pass
+    def OnDrawBranches(self, dc, erase = False): pass
+    def OnSize(self, x, y): pass
+    def OnMovePre(self, dc, x, y, old_x, old_y, display = True): return True
+    def OnMovePost(self, dc, x, y, old_x, old_y, display = True): return True
+    def OnErase(self, dc): pass
+    def OnEraseContents(self, dc): pass
+    def OnHighlight(self, dc): pass
+    def OnLeftClick(self, x, y, keys, attachment): pass            
+    def OnLeftDoubleClick(self, x, y, keys = 0, attachment = 0): pass
+    def OnRightClick(self, x, y, keys = 0, attachment = 0): pass
+    def OnDragLeft(self, draw, x, y, keys = 0, attachment = 0): pass
+    def OnBeginDragLeft(self, x, y, keys = 0, attachment = 0): pass
+    def OnEndDragLeft(self, x, y, keys = 0, attachment = 0): pass
+    def OnDragRight(self, draw, x, y, keys = 0, attachment = 0): pass
+    def OnBeginDragRight(self, x, y, keys = 0, attachment = 0): pass
+    def OnEndDragRight(self, x, y, keys = 0, attachment = 0): pass
+
+    # > Control points ('handles') redirect control to the actual shape,
+    # > to make it easier to override sizing behaviour.
+    # ... so what? the shape can be it's own previousHandler then.
+    # @TODO: Figure out why that warranted a comment. :)
+    def OnSizingDragLeft(self, pt, draw, x, y, keys = 0, attachment = 0): pass
+    def OnSizingBeginDragLeft(self, pt, x, y, keys = 0, attachment = 0): pass
+    def OnSizingEndDragLeft(self, pt, x, y, keys = 0, attachment = 0): pass
+    
+    def OnDrawOutline(self, dc, x, y, w, h): pass
+    def OnDrawControlPoints(self, dc): pass
+    def OnEraseControlPoints(self, dc): pass
+
+    # Can override this to prevent or intercept line reordering.
+    def OnChangeAttachment(self, attachment, line, ordering): pass
+
     
 class ShapeEvtHandler(object):
     def __init__(self, prev = None, shape = None):
-        self._previousHandler = prev
+        self.prev = prev or NullEventHandler()
         self._handlerShape = shape
 
     def __del__(self):
@@ -76,136 +121,29 @@ class ShapeEvtHandler(object):
         return self._handlerShape
 
     def SetPreviousHandler(self, handler):
-        self._previousHandler = handler
+        self.prev = handler
 
     def GetPreviousHandler(self):
-        return self._previousHandler
+        return self.prev
 
     def OnDelete(self):
         if self!=self.GetShape():
             del self
-            
-    def OnDraw(self, dc):
-        if self._previousHandler:
-            self._previousHandler.OnDraw(dc)
 
-    def OnMoveLinks(self, dc):
-        if self._previousHandler:
-            self._previousHandler.OnMoveLinks(dc)
-            
-    def OnMoveLink(self, dc, moveControlPoints = True):
-        if self._previousHandler:
-            self._previousHandler.OnMoveLink(dc, moveControlPoints)
-            
-    def OnDrawContents(self, dc):
-        if self._previousHandler:
-            self._previousHandler.OnDrawContents(dc)
-            
-    def OnDrawBranches(self, dc, erase = False):
-        if self._previousHandler:
-            self._previousHandler.OnDrawBranches(dc, erase = erase)
+    def __getattr__(self, name):
+        """
+        This gets called if an event method has
+        not been overwritten. By default, we just
+        pass the event to the previous handler.
+        """
+        def proxy(*args, **kw):
+            return getattr(self.prev, name)(*args, **kw)
+        return proxy
 
-    def OnSize(self, x, y):
-        if self._previousHandler:
-            self._previousHandler.OnSize(x, y)
-            
-    def OnMovePre(self, dc, x, y, old_x, old_y, display = True):
-        if self._previousHandler:
-            return self._previousHandler.OnMovePre(dc, x, y, old_x, old_y, display)
-        else:
-            return True
-
-    def OnMovePost(self, dc, x, y, old_x, old_y, display = True):
-        if self._previousHandler:
-            return self._previousHandler.OnMovePost(dc, x, y, old_x, old_y, display)
-        else:
-            return True
-
-    def OnErase(self, dc):
-        if self._previousHandler:
-            self._previousHandler.OnErase(dc)
-
-    def OnEraseContents(self, dc):
-        if self._previousHandler:
-            self._previousHandler.OnEraseContents(dc)
-
-    def OnHighlight(self, dc):
-        if self._previousHandler:
-            self._previousHandler.OnHighlight(dc)
-
-    def OnLeftClick(self, x, y, keys, attachment):
-        if self._previousHandler:
-            self._previousHandler.OnLeftClick(x, y, keys, attachment)
-            
-    def OnLeftDoubleClick(self, x, y, keys = 0, attachment = 0):
-        if self._previousHandler:
-            self._previousHandler.OnLeftDoubleClick(x, y, keys, attachment)
-
-    def OnRightClick(self, x, y, keys = 0, attachment = 0):
-        if self._previousHandler:
-            self._previousHandler.OnRightClick(x, y, keys, attachment)
-
-    def OnDragLeft(self, draw, x, y, keys = 0, attachment = 0):
-        if self._previousHandler:
-            self._previousHandler.OnDragLeft(draw, x, y, keys, attachment)
-
-    def OnBeginDragLeft(self, x, y, keys = 0, attachment = 0):
-        if self._previousHandler:
-            self._previousHandler.OnBeginDragLeft(x, y, keys, attachment)
-
-    def OnEndDragLeft(self, x, y, keys = 0, attachment = 0):
-        if self._previousHandler:
-            self._previousHandler.OnEndDragLeft(x, y, keys, attachment)
-        
-    def OnDragRight(self, draw, x, y, keys = 0, attachment = 0):
-        if self._previousHandler:
-            self._previousHandler.OnDragRight(draw, x, y, keys, attachment)
-
-    def OnBeginDragRight(self, x, y, keys = 0, attachment = 0):
-        if self._previousHandler:
-           self._previousHandler.OnBeginDragRight(x, y, keys, attachment)
-
-    def OnEndDragRight(self, x, y, keys = 0, attachment = 0):
-        if self._previousHandler:
-            self._previousHandler.OnEndDragRight(x, y, keys, attachment)
-
-    # Control points ('handles') redirect control to the actual shape,
-    # to make it easier to override sizing behaviour.
-    def OnSizingDragLeft(self, pt, draw, x, y, keys = 0, attachment = 0):
-        if self._previousHandler:
-            self._previousHandler.OnSizingDragLeft(pt, draw, x, y, keys, attachment)
-
-    def OnSizingBeginDragLeft(self, pt, x, y, keys = 0, attachment = 0):
-        if self._previousHandler:
-            self._previousHandler.OnSizingBeginDragLeft(pt, x, y, keys, attachment)
-            
-    def OnSizingEndDragLeft(self, pt, x, y, keys = 0, attachment = 0):
-        if self._previousHandler:
-            self._previousHandler.OnSizingEndDragLeft(pt, x, y, keys, attachment)
-
-    def OnBeginSize(self, w, h):
-        pass
-    
-    def OnEndSize(self, w, h):
-        pass
-    
-    def OnDrawOutline(self, dc, x, y, w, h):
-        if self._previousHandler:
-            self._previousHandler.OnDrawOutline(dc, x, y, w, h)
-
-    def OnDrawControlPoints(self, dc):
-        if self._previousHandler:
-            self._previousHandler.OnDrawControlPoints(dc)
-
-    def OnEraseControlPoints(self, dc):
-        if self._previousHandler:
-            self._previousHandler.OnEraseControlPoints(dc)
-
-    # Can override this to prevent or intercept line reordering.
-    def OnChangeAttachment(self, attachment, line, ordering):
-        if self._previousHandler:
-            self._previousHandler.OnChangeAttachment(attachment, line, ordering)
-
+    # these two didn't proxy to _previousHandler.
+    # they just said "pass" by default. why?
+    def OnBeginSize(self, w, h): pass
+    def OnEndSize(self, w, h): pass
 
             
 class Shape(ShapeEvtHandler):
@@ -2334,7 +2272,9 @@ class RectangleShape(Shape):
             if self._cornerRadius:
                 dc.DrawRoundedRectangle(x1 + self._shadowOffsetX, y1 + self._shadowOffsetY, self._width, self._height, self._cornerRadius)
             else:
-                dc.DrawRectangle(x1 + self._shadowOffsetX, y1 + self._shadowOffsetY, self._width, self._height)
+                dc.DrawRectangle(x1 + self._shadowOffsetX,
+                                 y1 + self._shadowOffsetY,
+                                 self._width, self._height)
 
         if self._pen:
             if self._pen.GetWidth() == 0:
@@ -2847,6 +2787,7 @@ class EllipseShape(Shape):
         self._height = h
         
     def OnDraw(self, dc):
+                
         if self._shadowMode != SHADOW_NONE:
             if self._shadowBrush:
                 dc.SetBrush(self._shadowBrush)

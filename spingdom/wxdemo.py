@@ -15,6 +15,8 @@
 
 import wx
 import __init__ as ogl
+import sping
+
 
 print """
 ###########################################################
@@ -206,7 +208,7 @@ class DividedShape(ogl.DividedShape):
 
 class MyEvtHandler(ogl.ShapeEvtHandler):
     def __init__(self, log, frame):
-        ogl.ShapeEvtHandler.__init__(self)
+        super(MyEvtHandler, self).__init__()
         self.log = log
         self.statbarFrame = frame
 
@@ -251,7 +253,7 @@ class MyEvtHandler(ogl.ShapeEvtHandler):
 
     def OnEndDragLeft(self, x, y, keys=0, attachment=0):
         shape = self.GetShape()
-        ogl.ShapeEvtHandler.OnEndDragLeft(self, x, y, keys, attachment)
+        self.prev.OnEndDragLeft(x, y, keys, attachment)
 
         if not shape.Selected():
             self.OnLeftClick(x, y, keys, attachment)
@@ -260,12 +262,12 @@ class MyEvtHandler(ogl.ShapeEvtHandler):
 
 
     def OnSizingEndDragLeft(self, pt, x, y, keys, attch):
-        ogl.ShapeEvtHandler.OnSizingEndDragLeft(self, pt, x, y, keys, attch)
+        self.prev.OnSizingEndDragLeft(pt, x, y, keys, attch)
         self.UpdateStatusBar(self.GetShape())
 
 
     def OnMovePost(self, dc, x, y, oldX, oldY, display):
-        ogl.ShapeEvtHandler.OnMovePost(self, dc, x, y, oldX, oldY, display)
+        self.prev.OnMovePost(dc, x, y, oldX, oldY, display)
         self.UpdateStatusBar(self.GetShape())
 
 
