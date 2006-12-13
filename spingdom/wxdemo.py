@@ -186,7 +186,7 @@ class DividedShape(ogl.DividedShape):
         rnum = 0
 
         if canvas is None:
-            canvas = self.GetCanvas()
+            canvas = self.canvas
 
         dc = wx.ClientDC(canvas)  # used for measuring
 
@@ -201,7 +201,7 @@ class DividedShape(ogl.DividedShape):
         ogl.DividedShape.OnSizingEndDragLeft(self, pt, x, y, keys, attch)
         self.SetRegionSizes()
         self.ReformatRegions()
-        self.GetCanvas().Refresh()
+        self.canvas.Refresh()
 
 
 #----------------------------------------------------------------------
@@ -221,7 +221,7 @@ class MyEvtHandler(ogl.ShapeEvtHandler):
 
     def OnLeftClick(self, x, y, keys=0, attachment=0):
         shape = self.shape
-        canvas = shape.GetCanvas()
+        canvas = shape.canvas
         dc = wx.ClientDC(canvas)
         canvas.PrepareDC(dc)
 
@@ -230,13 +230,12 @@ class MyEvtHandler(ogl.ShapeEvtHandler):
             canvas.Redraw(dc)
         else:
             redraw = False
-            shapeList = canvas.GetDiagram().GetShapeList()
             toUnselect = []
 
-            for s in shapeList:
+            for s in canvas.diagram.children:
                 if s.Selected():
                     # If we unselect it now then some of the objects in
-                    # shapeList will become invalid (the control points are
+                    # will become invalid (the control points are
                     # shapes too!) and bad things will happen...
                     toUnselect.append(s)
 
@@ -289,8 +288,6 @@ class TestWindow(ogl.ShapeCanvas):
         self.frame = frame
         self.SetBackgroundColour("LIGHT BLUE") #wx.WHITE)
         self.diagram = ogl.Diagram()
-        self.SetDiagram(self.diagram)
-        self.diagram.SetCanvas(self)
         self.shapes = []
         self.save_gdi = []
 
@@ -309,8 +306,9 @@ class TestWindow(ogl.ShapeCanvas):
         
         self.MyAddShape(
             ogl.CircleShape(80), 
-            75, 110, wx.Pen(wx.BLUE, 3), wx.GREEN_BRUSH, "Circle"
-            )
+            75, 110, wx.Pen(wx.BLUE, 3), wx.GREEN_BRUSH, "Circle",
+            ogl.SHADOW_RIGHT)
+
             
         self.MyAddShape(
             ogl.TextShape(120, 45), 
@@ -339,8 +337,8 @@ class TestWindow(ogl.ShapeCanvas):
             
         self.MyAddShape(
             RoundedRectangleShape(95, 70), 
-            345, 145, wx.Pen(wx.RED, 2), rRectBrush, "Rounded Rect"
-            )
+            345, 145, wx.Pen(wx.RED, 2), rRectBrush, "Rounded Rect",
+            ogl.SHADOW_LEFT)
 
         bmp = images.getTest2Bitmap()
         mask = wx.Mask(bmp, wx.BLUE)
@@ -353,6 +351,7 @@ class TestWindow(ogl.ShapeCanvas):
         dc = wx.ClientDC(self)
         self.PrepareDC(dc)
 
+        # make a chain:
         for x in range(len(self.shapes)):
             fromShape = self.shapes[x]
             if x+1 == len(self.shapes):
@@ -371,7 +370,7 @@ class TestWindow(ogl.ShapeCanvas):
             line.Show(True)
 
 
-    def MyAddShape(self, shape, x, y, pen, brush, text):
+    def MyAddShape(self, shape, x, y, pen, brush, text, shadowMode=None):
         # Composites have to be moved for all children to get in place
         if isinstance(shape, ogl.CompositeShape):
             dc = wx.ClientDC(self)
@@ -387,7 +386,9 @@ class TestWindow(ogl.ShapeCanvas):
         if text:
             for line in text.split('\n'):
                 shape.AddText(line)
-        #shape.SetShadowMode(ogl.SHADOW_RIGHT)
+
+        if shadowMode:
+            shape.SetShadowMode(shadowMode)
         self.diagram.AddShape(shape)
         shape.Show(True)
 

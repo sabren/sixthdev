@@ -15,10 +15,15 @@ import wx
 from lines import LineShape
 from composit import *
 
-NoDragging, StartDraggingLeft, ContinueDraggingLeft, StartDraggingRight, ContinueDraggingRight = 0, 1, 2, 3, 4
+NoDragging = 0
+StartDraggingLeft = 1
+ContinueDraggingLeft = 2
+StartDraggingRight = 3
+ContinueDraggingRight = 4
 
 KEY_SHIFT, KEY_CTRL = 1, 2
 
+DEFAULT_MOUSE_TOLERANCE = 3
 
 
 # Helper function: True if 'contains' wholly contains 'contained'.
@@ -39,32 +44,50 @@ def WhollyContains(contains, contained):
     right2 = xp2 + w2 / 2.0
     bottom2 = yp2 + h2 / 2.0
     
-    return ((left1 <= left2) and (top1 <= top2) and (right1 >= right2) and (bottom1 >= bottom2))
-    
+    return ((left1 <= left2)
+            and (top1 <= top2)
+            and (right1 >= right2)
+            and (bottom1 >= bottom2))
 
 
 class ShapeCanvas(wx.ScrolledWindow):
-    def __init__(self, parent = None, id = -1, pos = wx.DefaultPosition, size = wx.DefaultSize, style = wx.BORDER, name = "ShapeCanvas"):
-        wx.ScrolledWindow.__init__(self, parent, id, pos, size, style, name)
 
-        self._shapeDiagram = None
+    """
+    This is not so much a canvas for drawing as
+    the top-level component or contral that
+    responds to user interaction and other
+    events from wx.
+
+    .mouseTolerance sets the tolerance within which
+    a mouse move is ignored. The default is 3 pixels.
+
+
+    with .avoidRefreshes=True, refreshes are minimized,
+    but the diagram may need manual refreshing occasionally.
+    """
+    
+    def __init__(self, parent = None, id = -1,
+                 pos = wx.DefaultPosition, size = wx.DefaultSize,
+                 style = wx.BORDER, name = "ShapeCanvas"):
+        
+        wx.ScrolledWindow.__init__(self, parent, id, pos, size, style, name)
+        
+        self.diagram = None
         self._dragState = NoDragging
         self._draggedShape = None
         self._oldDragX = 0
         self._oldDragY = 0
         self._firstDragX = 0
         self._firstDragY = 0
-        self._checkTolerance = True
+        self._checkTolerance = True # this MAY actually be private...
+        self.mouseTolerance = DEFAULT_MOUSE_TOLERANCE
+        self.avoidRefreshes = False
+        self.snapToGrid = False
+        self.gridSpacing = 25.0
 
         wx.EVT_PAINT(self, self.OnPaint)
         wx.EVT_MOUSE_EVENTS(self, self.OnMouseEvent)
-
-    def SetDiagram(self, diag):
-        self._shapeDiagram = diag
-
-    def GetDiagram(self):
-        return self._shapeDiagram
-    
+   
     def OnPaint(self, evt):
         dc = wx.PaintDC(self)
         self.PrepareDC(dc)
@@ -72,8 +95,8 @@ class ShapeCanvas(wx.ScrolledWindow):
         dc.SetBackground(wx.Brush(self.GetBackgroundColour(), wx.SOLID))
         dc.Clear()
 
-        if self.GetDiagram():
-            self.GetDiagram().Redraw(dc)
+        if self.diagram:
+            self.diagram.draw(dc)
 
     def OnMouseEvent(self, evt):
         dc = wx.ClientDC(self)
@@ -94,10 +117,11 @@ class ShapeCanvas(wx.ScrolledWindow):
         # from, this may not be an intentional drag at all.
         if dragging:
             if self._checkTolerance:
-                # the difference between two logical coordinates is a logical coordinate
+                # the difference between two logical coordinates
+                # is a logical coordinate
                 dx = abs(x - self._firstDragX) 
                 dy = abs(y - self._firstDragY)
-                toler = self.GetDiagram().GetMouseTolerance()
+                toler = self.mouseTolerance
                 if (dx <= toler) and (dy <= toler):
                     return
             # If we've ignored the tolerance once, then ALWAYS ignore
@@ -271,7 +295,7 @@ class ShapeCanvas(wx.ScrolledWindow):
         #     the other objects
         # (b) to find the control points FIRST if they exist
 
-        rl = self.GetDiagram().GetShapeList()[:]
+        rl = self.diagram.children[:]
         rl.reverse()
         for object in rl:
             # First pass for lines, which might be inside a container, so we
@@ -321,22 +345,42 @@ class ShapeCanvas(wx.ScrolledWindow):
         return nearest_object, nearest_attachment
 
     def AddShape(self, object, addAfter = None):
-        self.GetDiagram().AddShape(object, addAfter)
-
+        object.canvas = self
+        self.diagram.AddShape(object, addAfter)
+        # @TODO: remove Shape.canvas!!
+        # @TODO: remove canvas.AddShape!! 
+        # There is NO reason for diagrams or
+        # shapes to have a reference to canvas.
+        # (And anyway the canvas is more like
+        # the control)
+        
     def InsertShape(self, object):
-        self.GetDiagram().InsertShape(object)
+        self.diagram.InsertShape(object)
 
     def RemoveShape(self, object):
-        self.GetDiagram().RemoveShape(object)
+        self.diagram.RemoveShape(object)
 
-    def GetQuickEditMode(self):
-        return self.GetDiagram().GetQuickEditMode()
-    
+    def quickRedraw(self, dc):
+        if self.avoidRefreshes:
+            pass
+        else:
+            self.Redraw(dc)
+
     def Redraw(self, dc):
-        self.GetDiagram().Redraw(dc)
+        self.SetCursor(wx.HOURGLASS_CURSOR)
+        self.diagram.draw(dc)
+        self.SetCursor(wx.STANDARD_CURSOR)
 
     def Snap(self, x, y):
-        return self.GetDiagram().Snap(x, y)
+        """
+        Snaps the coordinate to the nearest grid position,
+        if .snapToGrid is on.
+        """
+        if self.snapToGrid:
+            return (self.gridSpacing * int(x / self.gridSpacing + 0.5),
+                    self.gridSpacing * int(y / self.gridSpacing + 0.5))
+        return x, y
+
 
     def OnLeftClick(self, x, y, keys = 0):
         pass

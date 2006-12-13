@@ -224,7 +224,7 @@ class LineShape(Shape):
         for i in range(3):
             if self._labelObjects[i]:
                 self._labelObjects[i].Select(False)
-                self._labelObjects[i].RemoveFromCanvas(self._canvas)
+                self._labelObjects[i].RemoveFromCanvas(self.canvas)
         self._labelObjects = []
         self.ClearArrowsAtPosition(-1)
 
@@ -1082,28 +1082,28 @@ class LineShape(Shape):
 
     def MakeControlPoints(self):
         """Make handle control points."""
-        if self._canvas and self._lineControlPoints:
+        if self.canvas and self._lineControlPoints:
             first = self._lineControlPoints[0]
             last = self._lineControlPoints[-1]
 
-            control = LineControlPoint(self._canvas, self, CONTROL_POINT_SIZE, first[0], first[1], CONTROL_POINT_ENDPOINT_FROM)
+            control = LineControlPoint(self.canvas, self, CONTROL_POINT_SIZE, first[0], first[1], CONTROL_POINT_ENDPOINT_FROM)
             control._point = first
-            self._canvas.AddShape(control)
+            self.canvas.AddShape(control)
             self._controlPoints.append(control)
 
             for point in self._lineControlPoints[1:-1]:
-                control = LineControlPoint(self._canvas, self, CONTROL_POINT_SIZE, point[0], point[1], CONTROL_POINT_LINE)
+                control = LineControlPoint(self.canvas, self, CONTROL_POINT_SIZE, point[0], point[1], CONTROL_POINT_LINE)
                 control._point = point
-                self._canvas.AddShape(control)
+                self.canvas.AddShape(control)
                 self._controlPoints.append(control)
 
-            control = LineControlPoint(self._canvas, self, CONTROL_POINT_SIZE, last[0], last[1], CONTROL_POINT_ENDPOINT_TO)
+            control = LineControlPoint(self.canvas, self, CONTROL_POINT_SIZE, last[0], last[1], CONTROL_POINT_ENDPOINT_TO)
             control._point = last
-            self._canvas.AddShape(control)
+            self.canvas.AddShape(control)
             self._controlPoints.append(control)
 
     def ResetControlPoints(self):
-        if self._canvas and self._lineControlPoints and self._controlPoints:
+        if self.canvas and self._lineControlPoints and self._controlPoints:
             for i in range(min(len(self._controlPoints), len(self._lineControlPoints))):
                 point = self._lineControlPoints[i]
                 control = self._controlPoints[i]
@@ -1124,10 +1124,10 @@ class LineShape(Shape):
 
                         if self._labelObjects[i]:
                             self._labelObjects[i].Select(False)
-                            self._labelObjects[i].RemoveFromCanvas(self._canvas)
+                            self._labelObjects[i].RemoveFromCanvas(self.canvas)
 
                         self._labelObjects[i] = self.OnCreateLabelShape(self, region, w, h)
-                        self._labelObjects[i].AddToCanvas(self._canvas)
+                        self._labelObjects[i].AddToCanvas(self.canvas)
                         self._labelObjects[i].Show(True)
                         if dc:
                             self._labelObjects[i].Move(dc, x + xx, y + yy)
@@ -1137,14 +1137,14 @@ class LineShape(Shape):
                 if self._labelObjects[i]:
                     self._labelObjects[i].Select(False, dc)
                     self._labelObjects[i].Erase(dc)
-                    self._labelObjects[i].RemoveFromCanvas(self._canvas)
+                    self._labelObjects[i].RemoveFromCanvas(self.canvas)
                     self._labelObjects[i] = None
 
     # Control points ('handles') redirect control to the actual shape, to
     # make it easier to override sizing behaviour.
     def OnSizingDragLeft(self, pt, draw, x, y, keys = 0, attachment = 0):
-        dc = wx.ClientDC(self.GetCanvas())
-        self.GetCanvas().PrepareDC(dc)
+        dc = wx.ClientDC(self.canvas)
+        self.canvas.PrepareDC(dc)
 
         dc.SetLogicalFunction(OGLRBLF)
 
@@ -1153,7 +1153,7 @@ class LineShape(Shape):
         dc.SetBrush(wx.TRANSPARENT_BRUSH)
 
         if pt._type == CONTROL_POINT_LINE:
-            x, y = self._canvas.Snap(x, y)
+            x, y = self.canvas.Snap(x, y)
 
             pt.x = x
             pt.y = y
@@ -1172,12 +1172,12 @@ class LineShape(Shape):
             self.SetBrush(old_brush)
 
     def OnSizingBeginDragLeft(self, pt, x, y, keys = 0, attachment = 0):
-        dc = wx.ClientDC(self.GetCanvas())
-        self.GetCanvas().PrepareDC(dc)
+        dc = wx.ClientDC(self.canvas)
+        self.canvas.PrepareDC(dc)
 
         if pt._type == CONTROL_POINT_LINE:
             pt._originalPos = pt._point
-            x, y = self._canvas.Snap(x, y)
+            x, y = self.canvas.Snap(x, y)
 
             self.Erase(dc)
 
@@ -1209,17 +1209,17 @@ class LineShape(Shape):
             self.SetBrush(old_brush)
 
         if pt._type == CONTROL_POINT_ENDPOINT_FROM or pt._type == CONTROL_POINT_ENDPOINT_TO:
-            self._canvas.SetCursor(wx.StockCursor(wx.CURSOR_BULLSEYE))
+            self.canvas.SetCursor(wx.StockCursor(wx.CURSOR_BULLSEYE))
             pt._oldCursor = wx.STANDARD_CURSOR
 
     def OnSizingEndDragLeft(self, pt, x, y, keys = 0, attachment = 0):
-        dc = wx.ClientDC(self.GetCanvas())
-        self.GetCanvas().PrepareDC(dc)
+        dc = wx.ClientDC(self.canvas)
+        self.canvas.PrepareDC(dc)
 
         self.SetDisableLabel(False)
 
         if pt._type == CONTROL_POINT_LINE:
-            x, y = self._canvas.Snap(x, y)
+            x, y = self.canvas.Snap(x, y)
 
             rpt = wx.RealPoint(x, y)
 
@@ -1237,14 +1237,14 @@ class LineShape(Shape):
 
         if pt._type == CONTROL_POINT_ENDPOINT_FROM:
             if pt._oldCursor:
-                self._canvas.SetCursor(pt._oldCursor)
+                self.canvas.SetCursor(pt._oldCursor)
 
             if self.GetFrom():
                 self.GetFrom().MoveLineToNewAttachment(dc, self, x, y)
 
         if pt._type == CONTROL_POINT_ENDPOINT_TO:
             if pt._oldCursor:
-                self._canvas.SetCursor(pt._oldCursor)
+                self.canvas.SetCursor(pt._oldCursor)
 
             if self.GetTo():
                 self.GetTo().MoveLineToNewAttachment(dc, self, x, y)

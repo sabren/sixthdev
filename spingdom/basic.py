@@ -138,7 +138,7 @@ class Shape(ShapeEvtHandler):
         self.shape = self
         self._id = 0
         self._formatted = False
-        self._canvas = canvas
+        self.canvas = canvas
         self.x = 0.0
         self.y = 0.0
         self._pen = BlackForegroundPen
@@ -213,8 +213,8 @@ class Shape(ShapeEvtHandler):
 
         self.shape = None
         
-        if self._canvas:
-            self.RemoveFromCanvas(self._canvas)
+        if self.canvas:
+            self.RemoveFromCanvas(self.canvas)
 
         if self.handler:
             self.handler.OnDelete()
@@ -227,10 +227,6 @@ class Shape(ShapeEvtHandler):
         """TRUE if the shape may be dragged by the user."""
         return True
     
-    def GetCanvas(self):
-        """Get the internal canvas."""
-        return self._canvas
-
     def GetBranchStyle(self):
         return self._branchStyle
 
@@ -299,9 +295,9 @@ class Shape(ShapeEvtHandler):
         SHADOW_RIGHT
           Shadow on the right side.
         """
-        if redraw and self.GetCanvas():
-            dc = wx.ClientDC(self.GetCanvas())
-            self.GetCanvas().PrepareDC(dc)
+        if redraw and self.canvas:
+            dc = wx.ClientDC(self.canvas)
+            self.canvas.PrepareDC(dc)
             self.Erase(dc)
             self._shadowMode = mode
             self.Draw(dc)
@@ -314,7 +310,7 @@ class Shape(ShapeEvtHandler):
 
     def SetCanvas(self, theCanvas):
         """Identical to Shape.Attach."""
-        self._canvas = theCanvas
+        self.canvas = theCanvas
         for shape in self._children:
             shape.SetCanvas(theCanvas)
 
@@ -343,7 +339,7 @@ class Shape(ShapeEvtHandler):
         if self.Selected():
             self.Select(False)
         
-        self._canvas = None
+        self.canvas = None
         theCanvas.RemoveShape(self)
         for object in self._children:
             object.RemoveFromCanvas(theCanvas)
@@ -704,7 +700,7 @@ class Shape(ShapeEvtHandler):
     def OnEraseContents(self, dc):
         if not self._visible:
             return
-
+        
         xp, yp = self.x, self.y
         minX, minY = self.GetBoundingBoxMin()
         maxX, maxY = self.GetBoundingBoxMax()
@@ -848,12 +844,11 @@ class Shape(ShapeEvtHandler):
 
         self.ApplyAttachmentOrdering(ordering)
 
-        dc = wx.ClientDC(self.GetCanvas())
-        self.GetCanvas().PrepareDC(dc)
+        dc = wx.ClientDC(self.canvas)
+        self.canvas.PrepareDC(dc)
         self.MoveLinks(dc)
 
-        if not self.GetCanvas().GetQuickEditMode():
-            self.GetCanvas().Redraw(dc)
+        self.canvas.quickRedraw(dc)
 
     # Reorders the lines according to the given list
     def ApplyAttachmentOrdering(self, linesToSort):
@@ -920,8 +915,8 @@ class Shape(ShapeEvtHandler):
                 self._parent.handler.OnDragLeft(draw, x, y, keys, attachment)
             return
 
-        dc = wx.ClientDC(self.GetCanvas())
-        self.GetCanvas().PrepareDC(dc)
+        dc = wx.ClientDC(self.canvas)
+        self.canvas.PrepareDC(dc)
         dc.SetLogicalFunction(OGLRBLF)
 
         dottedPen = wx.Pen(wx.Colour(0, 0, 0), 1, wx.DOT)
@@ -931,7 +926,7 @@ class Shape(ShapeEvtHandler):
         xx = x + DragOffsetX
         yy = y + DragOffsetY
 
-        xx, yy = self._canvas.Snap(xx, yy)
+        xx, yy = self.canvas.Snap(xx, yy)
         w, h = self.GetBoundingBoxMax()
         self.handler.OnDrawOutline(dc, xx, yy, w, h)
 
@@ -949,14 +944,14 @@ class Shape(ShapeEvtHandler):
         DragOffsetX = self.x - x
         DragOffsetY = self.y - y
 
-        dc = wx.ClientDC(self.GetCanvas())
-        self.GetCanvas().PrepareDC(dc)
+        dc = wx.ClientDC(self.canvas)
+        self.canvas.PrepareDC(dc)
         
         # New policy: don't erase shape until end of drag.
         # self.Erase(dc)
         xx = x + DragOffsetX
         yy = y + DragOffsetY
-        xx, yy = self._canvas.Snap(xx, yy)
+        xx, yy = self.canvas.Snap(xx, yy)
         dc.SetLogicalFunction(OGLRBLF)
 
         dottedPen = wx.Pen(wx.Colour(0, 0, 0), 1, wx.DOT)
@@ -965,11 +960,11 @@ class Shape(ShapeEvtHandler):
 
         w, h = self.GetBoundingBoxMax()
         self.handler.OnDrawOutline(dc, xx, yy, w, h)
-        self._canvas.CaptureMouse()
+        self.canvas.CaptureMouse()
 
     def OnEndDragLeft(self, x, y, keys = 0, attachment = 0):
-        if self._canvas.HasCapture():
-            self._canvas.ReleaseMouse()
+        if self.canvas.HasCapture():
+            self.canvas.ReleaseMouse()
         if self._sensitivity & OP_DRAG_LEFT != OP_DRAG_LEFT:
             if self._parent:
                 hit = self._parent.HitTest(x, y)
@@ -978,20 +973,19 @@ class Shape(ShapeEvtHandler):
                 self._parent.handler.OnEndDragLeft(x, y, keys, attachment)
             return
 
-        dc = wx.ClientDC(self.GetCanvas())
-        self.GetCanvas().PrepareDC(dc)
+        dc = wx.ClientDC(self.canvas)
+        self.canvas.PrepareDC(dc)
 
         dc.SetLogicalFunction(wx.COPY)
         xx = x + DragOffsetX
         yy = y + DragOffsetY
-        xx, yy = self._canvas.Snap(xx, yy)
+        xx, yy = self.canvas.Snap(xx, yy)
 
         # New policy: erase shape at end of drag.
         self.Erase(dc)
 
         self.Move(dc, xx, yy)
-        if self._canvas and not self._canvas.GetQuickEditMode():
-            self._canvas.Redraw(dc)
+        self.canvas.quickRedraw(dc)
 
     def OnDragRight(self, draw, x, y, keys = 0, attachment = 0):
         if self._sensitivity & OP_DRAG_RIGHT != OP_DRAG_RIGHT:
@@ -1026,11 +1020,11 @@ class Shape(ShapeEvtHandler):
         
     def Attach(self, can):
         """Set the shape's internal canvas pointer to point to the given canvas."""
-        self._canvas = can
+        self.canvas = can
 
     def Detach(self):
         """Disassociates the shape from its canvas."""
-        self._canvas = None
+        self.canvas = None
 
     def Move(self, dc, x, y, display = True):
         """Move the shape to the given position.
@@ -1071,9 +1065,9 @@ class Shape(ShapeEvtHandler):
 
     def Flash(self):
         """Flash the shape."""
-        if self.GetCanvas():
-            dc = wx.ClientDC(self.GetCanvas())
-            self.GetCanvas().PrepareDC(dc)
+        if self.canvas:
+            dc = wx.ClientDC(self.canvas)
+            self.canvas.PrepareDC(dc)
 
             dc.SetLogicalFunction(OGLRBLF)
             self.Draw(dc)
@@ -1174,8 +1168,8 @@ class Shape(ShapeEvtHandler):
         line.SetTo(other)
         line.SetAttachments(attachFrom, attachTo)
 
-        dc = wx.ClientDC(self._canvas)
-        self._canvas.PrepareDC(dc)
+        dc = wx.ClientDC(self.canvas)
+        self.canvas.PrepareDC(dc)
         self.MoveLinks(dc)
         
     def RemoveLine(self, line):
@@ -1204,36 +1198,36 @@ class Shape(ShapeEvtHandler):
         left = -widthMin / 2.0
         right = widthMin / 2.0 + (maxX - minX)
 
-        control = ControlPoint(self._canvas, self, CONTROL_POINT_SIZE, left, top, CONTROL_POINT_DIAGONAL)
-        self._canvas.AddShape(control)
+        control = ControlPoint(self.canvas, self, CONTROL_POINT_SIZE, left, top, CONTROL_POINT_DIAGONAL)
+        self.canvas.AddShape(control)
         self._controlPoints.append(control)
 
-        control = ControlPoint(self._canvas, self, CONTROL_POINT_SIZE, 0, top, CONTROL_POINT_VERTICAL)
-        self._canvas.AddShape(control)
+        control = ControlPoint(self.canvas, self, CONTROL_POINT_SIZE, 0, top, CONTROL_POINT_VERTICAL)
+        self.canvas.AddShape(control)
         self._controlPoints.append(control)
 
-        control = ControlPoint(self._canvas, self, CONTROL_POINT_SIZE, right, top, CONTROL_POINT_DIAGONAL)
-        self._canvas.AddShape(control)
+        control = ControlPoint(self.canvas, self, CONTROL_POINT_SIZE, right, top, CONTROL_POINT_DIAGONAL)
+        self.canvas.AddShape(control)
         self._controlPoints.append(control)
 
-        control = ControlPoint(self._canvas, self, CONTROL_POINT_SIZE, right, 0, CONTROL_POINT_HORIZONTAL)
-        self._canvas.AddShape(control)
+        control = ControlPoint(self.canvas, self, CONTROL_POINT_SIZE, right, 0, CONTROL_POINT_HORIZONTAL)
+        self.canvas.AddShape(control)
         self._controlPoints.append(control)
 
-        control = ControlPoint(self._canvas, self, CONTROL_POINT_SIZE, right, bottom, CONTROL_POINT_DIAGONAL)
-        self._canvas.AddShape(control)
+        control = ControlPoint(self.canvas, self, CONTROL_POINT_SIZE, right, bottom, CONTROL_POINT_DIAGONAL)
+        self.canvas.AddShape(control)
         self._controlPoints.append(control)
 
-        control = ControlPoint(self._canvas, self, CONTROL_POINT_SIZE, 0, bottom, CONTROL_POINT_VERTICAL)
-        self._canvas.AddShape(control)
+        control = ControlPoint(self.canvas, self, CONTROL_POINT_SIZE, 0, bottom, CONTROL_POINT_VERTICAL)
+        self.canvas.AddShape(control)
         self._controlPoints.append(control)
 
-        control = ControlPoint(self._canvas, self, CONTROL_POINT_SIZE, left, bottom, CONTROL_POINT_DIAGONAL)
-        self._canvas.AddShape(control)
+        control = ControlPoint(self.canvas, self, CONTROL_POINT_SIZE, left, bottom, CONTROL_POINT_DIAGONAL)
+        self.canvas.AddShape(control)
         self._controlPoints.append(control)
 
-        control = ControlPoint(self._canvas, self, CONTROL_POINT_SIZE, left, 0, CONTROL_POINT_HORIZONTAL)
-        self._canvas.AddShape(control)
+        control = ControlPoint(self.canvas, self, CONTROL_POINT_SIZE, left, 0, CONTROL_POINT_HORIZONTAL)
+        self.canvas.AddShape(control)
         self._controlPoints.append(control)
 
     def MakeMandatoryControlPoints(self):
@@ -1707,6 +1701,7 @@ class Shape(ShapeEvtHandler):
 
     # Draw or erase the branches (not the actual arcs though)
     def OnDrawBranchesAttachment(self, dc, attachment, erase = False):
+
         count = self.GetAttachmentLineCount(attachment)
         if count == 0:
             return
@@ -1807,14 +1802,14 @@ class Shape(ShapeEvtHandler):
 
     def GetBackgroundPen(self):
         """Return pen of the right colour for the background."""
-        if self.GetCanvas():
-            return wx.Pen(self.GetCanvas().GetBackgroundColour(), 1, wx.SOLID)
+        if self.canvas:
+            return wx.Pen(self.canvas.GetBackgroundColour(), 1, wx.SOLID)
         return WhiteBackgroundPen
 
     def GetBackgroundBrush(self):
         """Return brush of the right colour for the background."""
-        if self.GetCanvas():
-            return wx.Brush(self.GetCanvas().GetBackgroundColour(), wx.SOLID)
+        if self.canvas:
+            return wx.Brush(self.canvas.GetBackgroundColour(), wx.SOLID)
         return WhiteBackgroundBrush
 
     def GetParent(self):
@@ -1974,8 +1969,8 @@ class Shape(ShapeEvtHandler):
     def OnSizingDragLeft(self, pt, draw, x, y, keys = 0, attachment = 0):
         bound_x, bound_y = self.GetBoundingBoxMin()
 
-        dc = wx.ClientDC(self.GetCanvas())
-        self.GetCanvas().PrepareDC(dc)
+        dc = wx.ClientDC(self.canvas)
+        self.canvas.PrepareDC(dc)
 
         dc.SetLogicalFunction(OGLRBLF)
 
@@ -2053,10 +2048,10 @@ class Shape(ShapeEvtHandler):
             self.handler.OnDrawOutline(dc, pt._controlPointDragPosX, pt._controlPointDragPosY, newWidth, newHeight)
 
     def OnSizingBeginDragLeft(self, pt, x, y, keys = 0, attachment = 0):
-        self._canvas.CaptureMouse()
+        self.canvas.CaptureMouse()
 
-        dc = wx.ClientDC(self.GetCanvas())
-        self.GetCanvas().PrepareDC(dc)
+        dc = wx.ClientDC(self.canvas)
+        self.canvas.PrepareDC(dc)
 
         dc.SetLogicalFunction(OGLRBLF)
 
@@ -2156,11 +2151,11 @@ class Shape(ShapeEvtHandler):
             self.handler.OnDrawOutline(dc, pt._controlPointDragPosX, pt._controlPointDragPosY, newWidth, newHeight)
             
     def OnSizingEndDragLeft(self, pt, x, y, keys = 0, attachment = 0):
-        dc = wx.ClientDC(self.GetCanvas())
-        self.GetCanvas().PrepareDC(dc)
+        dc = wx.ClientDC(self.canvas)
+        self.canvas.PrepareDC(dc)
 
-        if self._canvas.HasCapture():
-            self._canvas.ReleaseMouse()
+        if self.canvas.HasCapture():
+            self.canvas.ReleaseMouse()
         dc.SetLogicalFunction(wx.COPY)
         self.Recompute()
         self.ResetControlPoints()
@@ -2187,8 +2182,8 @@ class Shape(ShapeEvtHandler):
         width, height = self.GetBoundingBoxMax()
         self.handler.OnEndSize(width, height)
 
-        if not self._canvas.GetQuickEditMode() and pt._eraseObject:
-            self._canvas.Redraw(dc)
+        if pt._eraseObject:
+            self.canvas.quickRedraw(dc)
 
 
             
@@ -2549,8 +2544,8 @@ class PolygonShape(Shape):
     # Make as many control points as there are vertices
     def MakeControlPoints(self):
         for point in self._points:
-            control = PolygonControlPoint(self._canvas, self, CONTROL_POINT_SIZE, point, point[0], point[1])
-            self._canvas.AddShape(control)
+            control = PolygonControlPoint(self.canvas, self, CONTROL_POINT_SIZE, point, point[0], point[1])
+            self.canvas.AddShape(control)
             self._controlPoints.append(control)
 
     def ResetControlPoints(self):
@@ -2624,8 +2619,8 @@ class PolygonShape(Shape):
     # Control points ('handles') redirect control to the actual shape, to
     # make it easier to override sizing behaviour.
     def OnSizingDragLeft(self, pt, draw, x, y, keys = 0, attachment = 0):
-        dc = wx.ClientDC(self.GetCanvas())
-        self.GetCanvas().PrepareDC(dc)
+        dc = wx.ClientDC(self.canvas)
+        self.canvas.PrepareDC(dc)
 
         dc.SetLogicalFunction(OGLRBLF)
 
@@ -2640,8 +2635,8 @@ class PolygonShape(Shape):
         self.handler.OnDrawOutline(dc, self.x, self.y, pt.GetNewSize()[0], pt.GetNewSize()[1])
 
     def OnSizingBeginDragLeft(self, pt, x, y, keys = 0, attachment = 0):
-        dc = wx.ClientDC(self.GetCanvas())
-        self.GetCanvas().PrepareDC(dc)
+        dc = wx.ClientDC(self.canvas)
+        self.canvas.PrepareDC(dc)
 
         self.Erase(dc)
         
@@ -2668,14 +2663,14 @@ class PolygonShape(Shape):
 
         self.handler.OnDrawOutline(dc, self.x, self.y, pt.GetNewSize()[0], pt.GetNewSize()[1])
 
-        self._canvas.CaptureMouse()
+        self.canvas.CaptureMouse()
 
     def OnSizingEndDragLeft(self, pt, x, y, keys = 0, attachment = 0):
-        dc = wx.ClientDC(self.GetCanvas())
-        self.GetCanvas().PrepareDC(dc)
+        dc = wx.ClientDC(self.canvas)
+        self.canvas.PrepareDC(dc)
 
-        if self._canvas.HasCapture():
-            self._canvas.ReleaseMouse()
+        if self.canvas.HasCapture():
+            self.canvas.ReleaseMouse()
         dc.SetLogicalFunction(wx.COPY)
 
         # If we're changing shape, must reset the original points
@@ -2688,8 +2683,8 @@ class PolygonShape(Shape):
         self.Recompute()
         self.ResetControlPoints()
         self.Move(dc, self.x, self.y)
-        if not self._canvas.GetQuickEditMode():
-            self._canvas.Redraw(dc)
+
+        self.canvas.quickRedraw(dc)
 
 
 
@@ -2975,7 +2970,7 @@ class ControlPoint(RectangleShape):
     def __init__(self, theCanvas, object, size, the_xoffset, the_yoffset, the_type):
         RectangleShape.__init__(self, size, size)
 
-        self._canvas = theCanvas
+        self.canvas = theCanvas
         self._shape = object
         self.xoffset = the_xoffset
         self.yoffset = the_yoffset

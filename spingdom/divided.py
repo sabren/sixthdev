@@ -26,8 +26,8 @@ class DividedShapeControlPoint(ControlPoint):
 
     # Implement resizing of divided object division
     def OnDragLeft(self, draw, x, y, keys = 0, attachment = 0):
-        dc = wx.ClientDC(self.GetCanvas())
-        self.GetCanvas().PrepareDC(dc)
+        dc = wx.ClientDC(self.canvas)
+        self.canvas.PrepareDC(dc)
 
         dc.SetLogicalFunction(OGLRBLF)
         dottedPen = wx.Pen(wx.Colour(0, 0, 0), 1, wx.DOT)
@@ -43,8 +43,8 @@ class DividedShapeControlPoint(ControlPoint):
         dc.DrawLine(x1, y1, x2, y2)
 
     def OnBeginDragLeft(self, x, y, keys = 0, attachment = 0):
-        dc = wx.ClientDC(self.GetCanvas())
-        self.GetCanvas().PrepareDC(dc)
+        dc = wx.ClientDC(self.canvas)
+        self.canvas.PrepareDC(dc)
 
         dc.SetLogicalFunction(OGLRBLF)
         dottedPen = wx.Pen(wx.Colour(0, 0, 0), 1, wx.DOT)
@@ -59,11 +59,11 @@ class DividedShapeControlPoint(ControlPoint):
         y2 = y
 
         dc.DrawLine(x1, y1, x2, y2)
-        self._canvas.CaptureMouse()
+        self.canvas.CaptureMouse()
 
     def OnEndDragLeft(self, x, y, keys = 0, attachment = 0):
-        dc = wx.ClientDC(self.GetCanvas())
-        self.GetCanvas().PrepareDC(dc)
+        dc = wx.ClientDC(self.canvas)
+        self.canvas.PrepareDC(dc)
 
         dividedObject = self._shape
         if not dividedObject.GetRegions()[self.regionId]:
@@ -74,8 +74,8 @@ class DividedShapeControlPoint(ControlPoint):
 
         dc.SetLogicalFunction(wx.COPY)
 
-        if self._canvas.HasCapture():
-            self._canvas.ReleaseMouse()
+        if self.canvas.HasCapture():
+            self.canvas.ReleaseMouse()
 
         # Find the old top and bottom of this region,
         # and calculate the new proportion for this region
@@ -357,8 +357,8 @@ class DividedShape(RectangleShape):
             actualY = min(maxY, y)
 
             if region != self.GetRegions()[-1]:
-                controlPoint = DividedShapeControlPoint(self._canvas, self, i, CONTROL_POINT_SIZE, 0, actualY - self.y, 0)
-                self._canvas.AddShape(controlPoint)
+                controlPoint = DividedShapeControlPoint(self.canvas, self, i, CONTROL_POINT_SIZE, 0, actualY - self.y, 0)
+                self.canvas.AddShape(controlPoint)
                 self._controlPoints.append(controlPoint)
 
             currentY = actualY
