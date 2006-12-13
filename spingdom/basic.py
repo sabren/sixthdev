@@ -123,16 +123,16 @@ class Shape(ShapeEvtHandler):
 
     Shape(canvas = None)
     
-    The wxShape is the top-level, abstract object that all other objects
-    are derived from. All common functionality is represented by wxShape's
+    Shape is the top-level, abstract object that all other objects
+    are derived from. All common functionality is represented by Shape's
     members, and overriden members that appear in derived classes and have
-    behaviour as documented for wxShape, are not documented separately.
+    behaviour as documented for Shape, are not documented separately.
     """
     
     GraphicsInSizeToContents = False
     
     def __init__(self, canvas = None):
-        ShapeEvtHandler.__init__(self)
+        super(Shape, self).__init__()
         
         self.handler = self
         self.shape = self
