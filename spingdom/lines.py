@@ -863,14 +863,11 @@ class LineShape(Shape):
 
         return n, num
 
-    def OnDrawOutline(self, dc, x, y, w, h):
+    def OnDrawOutline(self, x, y, w, h):
         old_pen = self._pen
         old_brush = self._brush
 
-        dottedPen = wx.Pen(wx.Colour(0, 0, 0), 1, wx.DOT)
-        self.SetPen(dottedPen)
-        self.SetBrush(wx.TRANSPARENT_BRUSH)
-
+        dc = self.buildOutlineDC()
         self.handler.OnDraw(dc)
 
         if old_pen:

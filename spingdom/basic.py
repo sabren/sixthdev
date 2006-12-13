@@ -82,7 +82,7 @@ class NullEventHandler(object):
     def OnSizingBeginDragLeft(self, pt, x, y, keys = 0, attachment = 0): pass
     def OnSizingEndDragLeft(self, pt, x, y, keys = 0, attachment = 0): pass
     
-    def OnDrawOutline(self, dc, x, y, w, h): pass
+    def OnDrawOutline(self, x, y, w, h): pass
     def OnDrawControlPoints(self, dc): pass
     def OnEraseControlPoints(self, dc): pass
 
@@ -915,20 +915,13 @@ class Shape(ShapeEvtHandler):
                 self._parent.handler.OnDragLeft(draw, x, y, keys, attachment)
             return
 
-        dc = wx.ClientDC(self.canvas)
-        self.canvas.PrepareDC(dc)
-        dc.SetLogicalFunction(OGLRBLF)
-
-        dottedPen = wx.Pen(wx.Colour(0, 0, 0), 1, wx.DOT)
-        dc.SetPen(dottedPen)
-        dc.SetBrush(wx.TRANSPARENT_BRUSH)
 
         xx = x + DragOffsetX
         yy = y + DragOffsetY
 
         xx, yy = self.canvas.Snap(xx, yy)
         w, h = self.GetBoundingBoxMax()
-        self.handler.OnDrawOutline(dc, xx, yy, w, h)
+        self.handler.OnDrawOutline(xx, yy, w, h)
 
     def OnBeginDragLeft(self, x, y, keys = 0, attachment = 0):
         global DragOffsetX, DragOffsetY
@@ -944,22 +937,12 @@ class Shape(ShapeEvtHandler):
         DragOffsetX = self.x - x
         DragOffsetY = self.y - y
 
-        dc = wx.ClientDC(self.canvas)
-        self.canvas.PrepareDC(dc)
-        
-        # New policy: don't erase shape until end of drag.
-        # self.Erase(dc)
         xx = x + DragOffsetX
         yy = y + DragOffsetY
         xx, yy = self.canvas.Snap(xx, yy)
-        dc.SetLogicalFunction(OGLRBLF)
-
-        dottedPen = wx.Pen(wx.Colour(0, 0, 0), 1, wx.DOT)
-        dc.SetPen(dottedPen)
-        dc.SetBrush(wx.TRANSPARENT_BRUSH)
 
         w, h = self.GetBoundingBoxMax()
-        self.handler.OnDrawOutline(dc, xx, yy, w, h)
+        self.handler.OnDrawOutline(xx, yy, w, h)
         self.canvas.CaptureMouse()
 
     def OnEndDragLeft(self, x, y, keys = 0, attachment = 0):
@@ -1008,23 +991,29 @@ class Shape(ShapeEvtHandler):
                 self._parent.handler.OnEndDragRight(x, y, keys, attachment)
             return
 
-    def OnDrawOutline(self, dc, x, y, w, h):
+
+
+    def OnDrawOutline(self, x, y, w, h):
+        dc = self.buildOutlineDC()
         points = [[x - w / 2.0, y - h / 2.0],
                 [x + w / 2.0, y - h / 2.0],
                 [x + w / 2.0, y + h / 2.0],
                 [x - w / 2.0, y + h / 2.0],
                 [x - w / 2.0, y - h / 2.0],
                 ]
-
         dc.DrawLines(points)
-        
-    def Attach(self, can):
-        """Set the shape's internal canvas pointer to point to the given canvas."""
-        self.canvas = can
 
-    def Detach(self):
-        """Disassociates the shape from its canvas."""
-        self.canvas = None
+    def buildOutlineDC(self):
+        assert self.canvas
+        dc = wx.ClientDC(self.canvas)
+        self.canvas.PrepareDC(dc)
+        dc.SetLogicalFunction(OGLRBLF)
+        
+        dottedPen = wx.Pen(wx.Colour(0, 0, 0), 1, wx.DOT)
+        dc.SetPen(dottedPen)
+        dc.SetBrush(wx.TRANSPARENT_BRUSH)
+        return dc
+        
 
     def Move(self, dc, x, y, display = True):
         """Move the shape to the given position.
@@ -1969,15 +1958,6 @@ class Shape(ShapeEvtHandler):
     def OnSizingDragLeft(self, pt, draw, x, y, keys = 0, attachment = 0):
         bound_x, bound_y = self.GetBoundingBoxMin()
 
-        dc = wx.ClientDC(self.canvas)
-        self.canvas.PrepareDC(dc)
-
-        dc.SetLogicalFunction(OGLRBLF)
-
-        dottedPen = wx.Pen(wx.Colour(0, 0, 0), 1, wx.DOT)
-        dc.SetPen(dottedPen)
-        dc.SetBrush(wx.TRANSPARENT_BRUSH)
-
         if self.GetCentreResize():
             # Maintain the same centre point
             new_width = 2.0 * abs(x - self.x)
@@ -2006,7 +1986,7 @@ class Shape(ShapeEvtHandler):
             pt._controlPointDragEndWidth = new_width
             pt._controlPointDragEndHeight = new_height
 
-            self.handler.OnDrawOutline(dc, self.x, self.y, new_width, new_height)
+            self.handler.OnDrawOutline(self.x, self.y, new_width, new_height)
         else:
             # Don't maintain the same centre point
             newX1 = min(pt._controlPointDragStartX, x)
@@ -2045,15 +2025,10 @@ class Shape(ShapeEvtHandler):
 
             pt._controlPointDragEndWidth = newWidth
             pt._controlPointDragEndHeight = newHeight
-            self.handler.OnDrawOutline(dc, pt._controlPointDragPosX, pt._controlPointDragPosY, newWidth, newHeight)
+            self.handler.OnDrawOutline(pt._controlPointDragPosX, pt._controlPointDragPosY, newWidth, newHeight)
 
     def OnSizingBeginDragLeft(self, pt, x, y, keys = 0, attachment = 0):
         self.canvas.CaptureMouse()
-
-        dc = wx.ClientDC(self.canvas)
-        self.canvas.PrepareDC(dc)
-
-        dc.SetLogicalFunction(OGLRBLF)
 
         bound_x, bound_y = self.GetBoundingBoxMin()
         self.handler.OnBeginSize(bound_x, bound_y)
@@ -2078,10 +2053,6 @@ class Shape(ShapeEvtHandler):
         # We may require the old width and height
         pt._controlPointDragStartWidth = bound_x
         pt._controlPointDragStartHeight = bound_y
-
-        dottedPen = wx.Pen(wx.Colour(0, 0, 0), 1, wx.DOT)
-        dc.SetPen(dottedPen)
-        dc.SetBrush(wx.TRANSPARENT_BRUSH)
 
         if self.GetCentreResize():
             new_width = 2.0 * abs(x - self.x)
@@ -2109,7 +2080,7 @@ class Shape(ShapeEvtHandler):
 
             pt._controlPointDragEndWidth = new_width
             pt._controlPointDragEndHeight = new_height
-            self.handler.OnDrawOutline(dc, self.x, self.y, new_width, new_height)
+            self.handler.OnDrawOutline(self.x, self.y, new_width, new_height)
         else:
             # Don't maintain the same centre point
             newX1 = min(pt._controlPointDragStartX, x)
@@ -2148,7 +2119,7 @@ class Shape(ShapeEvtHandler):
 
             pt._controlPointDragEndWidth = newWidth
             pt._controlPointDragEndHeight = newHeight
-            self.handler.OnDrawOutline(dc, pt._controlPointDragPosX, pt._controlPointDragPosY, newWidth, newHeight)
+            self.handler.OnDrawOutline(pt._controlPointDragPosX, pt._controlPointDragPosY, newWidth, newHeight)
             
     def OnSizingEndDragLeft(self, pt, x, y, keys = 0, attachment = 0):
         dc = wx.ClientDC(self.canvas)
@@ -2530,21 +2501,25 @@ class PolygonShape(Shape):
             dc.SetBrush(self._brush)
         dc.DrawPolygon(self._points, self.x, self.y)
 
-    def OnDrawOutline(self, dc, x, y, w, h):
-        dc.SetBrush(wx.TRANSPARENT_BRUSH)
+    def OnDrawOutline(self, x, y, w, h):
+        dc = self.buildOutlineDC()
+
         # Multiply all points by proportion of new size to old size
         x_proportion = abs(float(w) / self._originalWidth)
         y_proportion = abs(float(h) / self._originalHeight)
 
         intPoints = []
         for point in self._originalPoints:
-            intPoints.append(wx.Point(x_proportion * point[0], y_proportion * point[1]))
+            intPoints.append(wx.Point(x_proportion * point[0],
+                                      y_proportion * point[1]))
         dc.DrawPolygon(intPoints, x, y)
 
     # Make as many control points as there are vertices
     def MakeControlPoints(self):
         for point in self._points:
-            control = PolygonControlPoint(self.canvas, self, CONTROL_POINT_SIZE, point, point[0], point[1])
+            control = PolygonControlPoint(self.canvas, self,
+                                          CONTROL_POINT_SIZE,
+                                          point, point[0], point[1])
             self.canvas.AddShape(control)
             self._controlPoints.append(control)
 
@@ -2632,7 +2607,7 @@ class PolygonShape(Shape):
         
         pt.CalculateNewSize(x, y)
 
-        self.handler.OnDrawOutline(dc, self.x, self.y, pt.GetNewSize()[0], pt.GetNewSize()[1])
+        self.handler.OnDrawOutline(self.x, self.y, pt.GetNewSize()[0], pt.GetNewSize()[1])
 
     def OnSizingBeginDragLeft(self, pt, x, y, keys = 0, attachment = 0):
         dc = wx.ClientDC(self.canvas)
@@ -2661,7 +2636,7 @@ class PolygonShape(Shape):
 
         pt.CalculateNewSize(x, y)
 
-        self.handler.OnDrawOutline(dc, self.x, self.y, pt.GetNewSize()[0], pt.GetNewSize()[1])
+        self.handler.OnDrawOutline(self.x, self.y, pt.GetNewSize()[0], pt.GetNewSize()[1])
 
         self.canvas.CaptureMouse()
 

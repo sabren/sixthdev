@@ -433,15 +433,8 @@ class CompositeShape(RectangleShape):
         offsetX = xx - _objectStartX
         offsetY = yy - _objectStartY
 
-        dc = wx.ClientDC(self.canvas)
-        self.canvas.PrepareDC(dc)
-
-        dc.SetLogicalFunction(OGLRBLF)
-        dottedPen = wx.Pen(wx.Colour(0, 0, 0), 1, wx.DOT)
-        dc.SetPen(dottedPen)
-        dc.SetBrush(wx.TRANSPARENT_BRUSH)
-
-        self.handler.OnDrawOutline(dc, self.x + offsetX, self.y + offsetY, self.w, self.h)
+        self.handler.OnDrawOutline(self.x + offsetX, self.y + offsetY,
+                                   self.w, self.h)
 
     def OnBeginDragLeft(self, x, y, keys = 0, attachment = 0):
         global _objectStartX, _objectStartY
@@ -449,22 +442,14 @@ class CompositeShape(RectangleShape):
         _objectStartX = x
         _objectStartY = y
 
-        dc = wx.ClientDC(self.canvas)
-        self.canvas.PrepareDC(dc)
-
-        #self.Erase(dc)
-        
-        dc.SetLogicalFunction(OGLRBLF)
-        dottedPen = wx.Pen(wx.Colour(0, 0, 0), 1, wx.DOT)
-        dc.SetPen(dottedPen)
-        dc.SetBrush(wx.TRANSPARENT_BRUSH)
         self.canvas.CaptureMouse()
 
         xx, yy = self.canvas.Snap(x, y)
         offsetX = xx - _objectStartX
         offsetY = yy - _objectStartY
 
-        self.handler.OnDrawOutline(dc, self.x + offsetX, self.y + offsetY, self.w, self.h)
+        self.handler.OnDrawOutline(self.x + offsetX, self.y + offsetY,
+                                   self.w, self.h)
 
     def OnEndDragLeft(self, x, y, keys = 0, attachment = 0):
         dc = wx.ClientDC(self.canvas)

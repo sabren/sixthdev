@@ -280,13 +280,13 @@ class OpPolyDraw(DrawOp):
 
             self._points[i] = x1 * cosTheta - y1 * sinTheta + x * (1 - cosTheta) + y * sinTheta, x1 * sinTheta + y1 * cosTheta + y * (1 - cosTheta) + x * sinTheta
 
-    def OnDrawOutline(self, dc, x, y, w, h, oldW, oldH):
-        dc.SetBrush(wx.TRANSPARENT_BRUSH)
+    def OnDrawOutline(self, x, y, w, h, oldW, oldH):
 
         # Multiply all points by proportion of new size to old size
         x_proportion = abs(w / oldW)
         y_proportion = abs(h / oldH)
 
+        dc = self.buildOutlineDC()
         dc.DrawPolygon([(x_proportion * x, y_proportion * y) for x, y in self._points], x, y)
 
     def GetPerimeterPoint(self, x1, y1, x2, y2, xOffset, yOffset, attachmentMode):
@@ -726,14 +726,14 @@ class DrawnShape(RectangleShape):
 
         return whichMetaFile
 
-    def OnDrawOutline(self, dc, x, y, w, h):
+    def OnDrawOutline(self, x, y, w, h):
         if self._metafiles[self._currentAngle].GetOutlineOp() != -1:
             op = self._metafiles[self._currentAngle].GetOps()[self._metafiles[self._currentAngle].GetOutlineOp()]
-            if op.OnDrawOutline(dc, x, y, w, h, self.w, self.h):
+            if op.OnDrawOutline(x, y, w, h, self.w, self.h):
                 return
 
         # Default... just use a rectangle
-        RectangleShape.OnDrawOutline(self, dc, x, y, w, h)
+        RectangleShape.OnDrawOutline(self, x, y, w, h)
 
     # Get the perimeter point using the special outline op, if there is one,
     # otherwise use default wxRectangleShape scheme
