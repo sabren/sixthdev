@@ -1,4 +1,10 @@
 # -*- coding: iso-8859-1 -*-
+###########################################################
+#
+# This file is based on the wxPython Demo app's OGL demo.
+#
+###########################################################
+#
 # 11/20/2003 - Jeff Grimmett (grimmtooth@softhome.net)
 #
 # o Updated for wx namespace
@@ -14,25 +20,33 @@
 #
 
 import wx
+import wx.py as py
 import __init__ as ogl
-import sping
+from wx import ImageFromStream, BitmapFromImage
+import cStringIO
+
+global dom
+global out
 
 
-print """
-###########################################################
-This file is taken from the wxPython Demo application.
+def getMondrianData():
+    return \
+'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00 \x00\x00\x00 \x08\x06\x00\
+\x00\x00szz\xf4\x00\x00\x00\x04sBIT\x08\x08\x08\x08|\x08d\x88\x00\x00\x00qID\
+ATX\x85\xed\xd6;\n\x800\x10E\xd1{\xc5\x8d\xb9r\x97\x16\x0b\xad$\x8a\x82:\x16\
+o\xda\x84pB2\x1f\x81Fa\x8c\x9c\x08\x04Z{\xcf\xa72\xbcv\xfa\xc5\x08 \x80r\x80\
+\xfc\xa2\x0e\x1c\xe4\xba\xfaX\x1d\xd0\xde]S\x07\x02\xd8>\xe1wa-`\x9fQ\xe9\
+\x86\x01\x04\x10\x00\\(Dk\x1b-\x04\xdc\x1d\x07\x14\x98;\x0bS\x7f\x7f\xf9\x13\
+\x04\x10@\xf9X\xbe\x00\xc9 \x14K\xc1<={\x00\x00\x00\x00IEND\xaeB`\x82' 
 
-Note: You need the wxPython Demo app installed to run this,
-at least for now. I'm just using this as a test harness
-until I get some real unit tests in place.
+def getMondrianBitmap():
+    return BitmapFromImage(getMondrianImage())
+def getMondrianImage():
+    stream = cStringIO.StringIO(getMondrianData())
+    return ImageFromStream(stream)
 
-You may also need to pup the demo directory on your python
-path, or just update the hard coded path in this file.
-###########################################################
-"""
-import sys; sys.path.append("c:/Program Files/wxPython2.7 Docs and Demos/demo")
 
-import images
+
 
 #----------------------------------------------------------------------
 
@@ -274,9 +288,45 @@ class MyEvtHandler(ogl.ShapeEvtHandler):
         self.log.WriteText("%s\n" % self.shape)
 
 
+try:
+    from outline import OutlinePanel
+except ImportError:
+    class OutlinePanel(wx.Panel):
+        pass
+
+
 #----------------------------------------------------------------------
 
-class TestWindow(ogl.ShapeCanvas):
+class TestPanel(wx.Panel):
+    def __init__(self, parent, log, frame):
+        wx.Panel.__init__(self, parent, -1)
+
+
+        global dom, out
+        dom = ShapeDemo(self, log, frame)
+        out = OutlinePanel(self)
+        shell = py.shell.Shell(self)
+        
+        box = wx.BoxSizer(wx.VERTICAL)
+        box2 = wx.BoxSizer(wx.HORIZONTAL)
+        box2.Add(out, 3, wx.EXPAND)
+        box2.Add(dom, 7, wx.EXPAND)
+        box.Add(box2, 8, wx.EXPAND)
+        box.Add(shell, 2, wx.EXPAND)
+        #box.Add(SampleWindow(win, "two"), 0, wx.EXPAND)
+        #box.Add(py.shell.Shell, 0, wx.EXPAND)
+        #, 0, wx.EXPAND)
+        #self.shell = add(self, , (0,400),(900,200))
+
+
+        self.SetAutoLayout(True)
+        self.SetSizer(box)
+        self.Layout()
+
+        out.SetFocus()
+
+
+class ShapeDemo(ogl.ShapeCanvas):
     def __init__(self, parent, log, frame):
         ogl.ShapeCanvas.__init__(self, parent)
 
@@ -340,7 +390,7 @@ class TestWindow(ogl.ShapeCanvas):
             345, 145, wx.Pen(wx.RED, 2), rRectBrush, "Rounded Rect",
             ogl.SHADOW_LEFT)
 
-        bmp = images.getTest2Bitmap()
+        bmp = getMondrianBitmap()
         mask = wx.Mask(bmp, wx.BLUE)
         bmp.SetMask(mask)
 
@@ -410,13 +460,27 @@ class TestWindow(ogl.ShapeCanvas):
 
 #----------------------------------------------------------------------
 
+
+class AppFrame(wx.Frame):
+    def __init__(self):
+        wx.Frame.__init__(self,None, -1, "Spingdom Demo",
+                          size=(900,600),
+                          style=wx.DEFAULT_FRAME_STYLE )
+        ogl.OGLInitialize()
+
+        self.status = wx.StatusBar(self, -1)
+        self.SetStatusBar(self.status)
+        
+        TestPanel(self, None, self)
+        self.Show(True)
+        
+
 def runTest(frame, nb, log):
     # This creates some pens and brushes that the OGL library uses.
     # It should be called after the app object has been created, but
     # before OGL is used.
     ogl.OGLInitialize()
-
-    win = TestWindow(nb, log, frame)
+    win = TestPanel(nb, log, frame)
     return win
     
 #----------------------------------------------------------------------
@@ -439,6 +503,10 @@ more.
 
 if __name__ == '__main__':
     import sys, os
-    import run
-    run.main(['', os.path.basename(sys.argv[0])] + sys.argv[1:])
+    #import run
+    #run.main(['', os.path.basename(sys.argv[0])] + sys.argv[1:])
 
+    app = wx.PySimpleApp()
+    frame = AppFrame()
+    app.MainLoop()
+    app.Destroy()
