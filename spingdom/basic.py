@@ -35,13 +35,13 @@ class ShapeTextLine(object):
     def __init__(self, the_x, the_y, the_line):
         self.x = the_x
         self.y = the_y
-        self.line = the_line
+        self.text = the_line
 
     def SetText(self, text):
-        self.line = text
+        self.text = text
 
     def GetText(self):
-        return self.line
+        return self.text
 
 
 
@@ -195,6 +195,7 @@ class Shape(ShapeEvtHandler):
 
     def GetClassName(self):
         return str(self.__class__).split(".")[-1][:-2]
+
 
     def Delete(self):
         """
@@ -905,7 +906,7 @@ class Shape(ShapeEvtHandler):
         if self._sensitivity & OP_CLICK_RIGHT != OP_CLICK_RIGHT:
             attachment, dist = self._parent.HitTest(x, y)
             self._parent.handler.OnRightClick(x, y, keys, attachment)
-            
+
     def OnDragLeft(self, draw, x, y, keys = 0, attachment = 0):
         if self._sensitivity & OP_DRAG_LEFT != OP_DRAG_LEFT:
             if self._parent:
@@ -2489,9 +2490,8 @@ class PolygonShape(Shape):
             if self._shadowBrush:
                 dc.SetBrush(self._shadowBrush)
             dc.SetPen(TransparentPen)
-
-            dc.DrawPolygon(self._points, self.x + self._shadowOffsetX, self.y, self._shadowOffsetY)
-
+            dc.DrawPolygon(self._points, self.x + self._shadowOffsetX,
+                           self.y, self._shadowOffsetY)
         if self._pen:
             if self._pen.GetWidth() == 0:
                 dc.SetPen(TransparentPen)
@@ -2500,6 +2500,9 @@ class PolygonShape(Shape):
         if self._brush:
             dc.SetBrush(self._brush)
         dc.DrawPolygon(self._points, self.x, self.y)
+
+    def draw(self, canvas):
+        pass
 
     def OnDrawOutline(self, x, y, w, h):
         dc = self.buildOutlineDC()
