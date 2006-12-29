@@ -136,7 +136,7 @@ class Shape(ShapeEvtHandler):
         
         self.handler = self
         self.shape = self
-        self._id = 0
+        self.id = 0
         self._formatted = False
         self.canvas = canvas
         self.x = 0.0
@@ -637,7 +637,7 @@ class Shape(ShapeEvtHandler):
 
     def AssignNewIds(self):
         """Assign new ids to this image and its children."""
-        self._id = wx.NewId()
+        self.id = wx.NewId()
         for child in self._children:
             child.AssignNewIds()
 
@@ -1368,8 +1368,8 @@ class Shape(ShapeEvtHandler):
         else:
             maxN = 3
             for point in self._attachmentPoints:
-                if point._id > maxN:
-                    maxN = point._id
+                if point.id > maxN:
+                    maxN = point.id
             return maxN + 1
 
     def AttachmentIsValid(self, attachment):
@@ -1378,7 +1378,7 @@ class Shape(ShapeEvtHandler):
             return attachment in range(4)
 
         for point in self._attachmentPoints:
-            if point._id == attachment:
+            if point.id == attachment:
                 return True
         return False
 
@@ -1396,7 +1396,7 @@ class Shape(ShapeEvtHandler):
         elif self._attachmentMode == ATTACHMENT_MODE_EDGE:
             if len(self._attachmentPoints):
                 for point in self._attachmentPoints:
-                    if point._id == attachment:
+                    if point.id == attachment:
                         return self.x + point.x, self.y + point.y
                 return None
             else:
@@ -1921,13 +1921,6 @@ class Shape(ShapeEvtHandler):
         """
         return self._attachmentMode
 
-    def SetId(self, i):
-        """Set the integer identifier for this shape."""
-        self._id = i
-
-    def GetId(self):
-        """Return the integer identifier for this shape."""
-        return self._id
 
     def IsShown(self):
         """TRUE if the shape is in a visible state, FALSE otherwise.
@@ -2536,8 +2529,8 @@ class PolygonShape(Shape):
     def GetNumberOfAttachments(self):
         maxN = max(len(self._points) - 1, 0)
         for point in self._attachmentPoints:
-            if point._id > maxN:
-                maxN = point._id
+            if point.id > maxN:
+                maxN = point.id
         return maxN + 1
 
     def GetAttachmentPosition(self, attachment, nth = 0, no_arcs = 1, line = None):
@@ -2554,7 +2547,7 @@ class PolygonShape(Shape):
             return True
 
         for point in self._attachmentPoints:
-            if point._id == attachment:
+            if point.id == attachment:
                 return True
 
         return False

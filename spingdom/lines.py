@@ -64,9 +64,9 @@ class ArrowHead(object):
 
             self._arrowName = name
             self._metaFile = mf
-            self._id = arrowId
-            if self._id == -1:
-                self._id = wx.NewId()
+            self.id = arrowId
+            if self.id == -1:
+                self.id = wx.NewId()
             
     def _GetType(self):
         return self._arrowType
@@ -111,9 +111,6 @@ class ArrowHead(object):
 
     def GetMetaFile(self):
         return self._metaFile
-
-    def GetId(self):
-        return self._id
 
     def GetArrowEnd(self):
         return self._arrowEnd
@@ -1383,7 +1380,7 @@ class LineShape(Shape):
     def FindArrowHeadId(self, arrowId):
         """Find arrowhead by id."""
         for arrow in self._arcArrows:
-            if arrowId == arrow.GetId():
+            if arrowId == arrow.id:
                 return arrow
 
         return None
@@ -1402,7 +1399,7 @@ class LineShape(Shape):
     def DeleteArrowHeadId(self, id):
         """Delete arrowhead by id."""
         for arrow in self._arcArrows:
-            if arrowId == arrow.GetId():
+            if arrowId == arrow.id:
                 self._arcArrows.remove(arrow)
                 return True
         return False

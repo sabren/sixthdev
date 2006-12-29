@@ -330,8 +330,8 @@ class DividedShape(RectangleShape):
 
         maxN = n - 1
         for point in self._attachmentPoints:
-            if point._id > maxN:
-                maxN = point._id
+            if point.id > maxN:
+                maxN = point.id
 
         return maxN + 1
 

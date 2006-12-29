@@ -94,7 +94,7 @@ class Diagram(object):
         Return the shape for the given identifier.
         """
         for shape in self.children:
-            if shape.GetId() == id:
+            if shape.id == id:
                 return shape
         return None
 
