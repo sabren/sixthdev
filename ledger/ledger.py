@@ -17,7 +17,7 @@ class CommentTest(unittest.TestCase):
         c = Comment()
         c.addCommentLine("; 1")
         c.addCommentLine("; 2")
-        self.assertEquals("; 1\n; 2", str(c))
+        self.assertEquals("; 1\n; 2\n", str(c))
 
 class Comment:
     def __init__(self):
@@ -190,7 +190,7 @@ class ParserTest(unittest.TestCase):
                 asset:checking
             ;   a transaction comment
 
-            2006/01/02 (1000) whatever mart : unreconciled check 1000
+            2006/01/02=2006/01/03 (1000) whatever mart : unreconciled check 1000
                 expense:groceries                        10.00
                 expense:hardware                          5.00
                 asset:checking
@@ -209,7 +209,9 @@ class ParserTest(unittest.TestCase):
         assert book[2].items[1].amount ==  50
         assert isinstance(book[3], Transaction)
         assert book[3].memo.count("unreconciled")
+        assert book[3].posted == "2006/01/02"
         self.assertEquals("1000", book[3].checknum)
+        self.assertEquals(book[3].cleared, "2006/01/03")
         assert book[3].items[0].amount == 10
         assert book[3].items[1].amount ==  5
         assert book[3].items[1].implied == False
@@ -218,7 +220,7 @@ class ParserTest(unittest.TestCase):
 
 reHeadLine = re.compile(
     r"""
-    (?P<date>\d{4}/\d{2}/\d{2})
+    (?P<date>\d{4}/\d{2}/\d{2})(\=(?P<effective>\d{4}/\d{2}/\d{2}))?
     (?P<star>\s+[*])?
     (\s+[(](?P<checknum>\d+)[)])? # check number.. discard for now
     \s+
@@ -254,14 +256,15 @@ def parseLedger(text):
             entry = Transaction(posted=match["date"],
                                 isReconciled = bool(match["star"]),
                                 party = match["party"].strip(),
-                                cleared = match["cleared"],
+                                cleared = match["cleared"] or match["effective"]
+                                ,
                                 checknum = match["checknum"],
                                 memo = match["memo"])
         elif reItemLine.match(line):
             match = reItemLine.match(line).groupdict()
             entry.addItem(match["account"], match["amount"])
     return res
-        
+
 
 # * Balance History
 """
