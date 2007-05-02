@@ -1,23 +1,28 @@
-#!/usr/bin/env python2.4
+#!/usr/bin/env python2.5
 # ledger.py
-import re
-import copy
-import unittest
-from itertools import groupby
-from handy import trim
-from decimal import Decimal
 from datetime import date
-from strongbox import Strongbox, attr
+from decimal import Decimal
+from handy import trim
+from itertools import groupby
 from pytypes import Date
+from strongbox import Strongbox, attr
+import time
+import copy
+import sys, os
+import re
 
-# * Comments
+def balance(book, account):
+    return sum([t.effectOnAccount(account) for t in book])
 
-class CommentTest(unittest.TestCase):
-    def test_str(self):
-        c = Comment()
-        c.addCommentLine("; 1")
-        c.addCommentLine("; 2")
-        self.assertEquals("; 1\n; 2\n", str(c))
+def bankView(book):
+    res = [t.clone() for t in transactionsOnly(book)]
+    for item in res:
+        if item.cleared:
+            #print item.posted , "<----", item.cleared
+            item.posted = item.cleared
+            item.cleared = None            
+    res.sort(lambda a, b: cmp(parseDate(a.posted), parseDate(b.posted)))
+    return res
 
 class Comment:
     def __init__(self):
@@ -32,82 +37,110 @@ class Comment:
     def effectOnAccount(self, account):
         return 0
 
-# * Transactions and Items
-"""
-A basic transaction contains line items with
-credits and debits. The line items must add up to 0.
-"""
-class TransactionTest(unittest.TestCase):
-    def test(self):
-        t = Transaction(
-            posted =  "2005/01/01",
-            party = "fred flintstone",
-            memo = ": owed him money",
-            cleared = "2005/05/02",
-            isReconciled = False,
-            items = [])
-        t.addItem("liability:fred", "10.00"),
-        self.assertRaises(ValueError, t.validate)
-        t.addItem("asset:checking", "-10.00"),
-        t.validate() # should work now.
+def dailyHistory(book, account):
+    return history(book, account, groupField=transactionDay)
 
-    def test_effectOnAccount(self):
-        t = Transaction(None, None, None, items = [
-            Item(account="asset:cash", amount="-6"),
-            Item(account="expense:a",  amount="2"),
-            Item(account="expense:b",  amount="3"),
-            Item(account="expense:c",  amount="1"),])
-        self.assertEquals(-6, t.effectOnAccount("asset:"))
-        self.assertEquals(-6, t.effectOnAccount("asset:cash"))
-        self.assertEquals(-6, t.effectOnAccount("a"))
-        self.assertEquals(0,  t.effectOnAccount("equity"))
-        self.assertEquals(2,  t.effectOnAccount("expense:a"))
-        self.assertEquals(3,  t.effectOnAccount("expense:b"))
-        self.assertEquals(1,  t.effectOnAccount("expense:c"))
-        self.assertEquals(6,  t.effectOnAccount("expense:"))
 
-    def test_str(self):
-        t = Transaction(posted="2005/01/01",
-                        checknum="232",
-                        party="asdf",
-                        isReconciled = True,
-                        memo=": xxx", items = [
-            Item(account="asset:cash", amount="-600"),
-            Item(account="expense:a",  amount="2"),
-            Item(account="expense:b",  amount="3"),
-            Item(account="expense:c",  amount="595", implied=True),])
-        self.assertEquals(str(t), trim(
-            """
-            2005/01/01 * (232) asdf : xxx
-                asset:cash                               -600.00
-                expense:a                                   2.00
-                expense:b                                   3.00
-                expense:c
-            """))
-        
-      
+def emacsView(book, account):
+    yield "("
+    for item in transactionsOnly(book):
+        if item.state == '*':
+            continue
+        elif item.effectOnAccount(account):
+            yield "".join(item.asEmacs(account))
+    yield ")"
+
+def history(book, account, groupField):
+    total = 0
+    res = []
+    for month, mbook in groupby(transactionsOnly(book), groupField):
+        total += balance(mbook, account)
+        res.append((month, total))
+    return res
+
 class Item(Strongbox):
     account = attr(str)
     amount = attr(Decimal)
     implied = attr(bool, default=False)
+    state = attr(str, okay=['*','!','']) # cleared, pending, default 
+    charPos = attr(int, default=0)
 
     def clone(self):
         return Item(account=self.account, amount=Decimal(self.amount))
-        
+
+def monthlyHistory(book, account):
+    return history(book, account, groupField=transactionMonth)
+
+def parseDate(datestr):
+    return [int(x) for x in datestr.split("/")]
+
+def parseLedger(text):
+    entry = None
+    res = []
+    charPos = 2 # we start at 0, emacs starts at 1, plus we're always 1 char behind
+    for rawline in text.split("\n"):
+        line = rawline.strip() 
+        if line == "":
+            if entry:
+                res.append(entry)
+            entry = None
+        elif line.startswith(";"):
+            if entry is None:
+                entry = Comment()
+            entry.addCommentLine(line)
+        elif reHeadLine.match(line):
+            match = reHeadLine.match(line).groupdict()
+            entry = Transaction(posted=match["date"],
+                                state = match["state"],
+                                party = match["party"].strip(),
+                                cleared = (match["cleared"]
+                                           or match["effective"]),
+                                checknum = match["checknum"],
+                                memo = match["memo"],
+                                charPos=charPos)
+        elif reItemLine.match(line):
+            match = reItemLine.match(line).groupdict()
+            entry.addItem(match["account"], match["amount"], match['state'], charPos)
+
+        charPos += len(rawline)+1 # +1 for len('\n')
+    return res
+
+reHeadLine = re.compile(
+    r"""
+    (?P<date>\d{4}/\d{2}/\d{2})(\=(?P<effective>\d{4}/\d{2}/\d{2}))?
+    (?P<state>\s+[*|!])?
+    (\s+[(](?P<checknum>\d+)[)])? # check number.. discard for now
+    \s+
+    (?P<party>([^:{])+)
+    (\{(?P<cleared>\d{4}/\d{2}/\d{2})\}\s*)?
+    (?P<memo>:.*)?
+    """, re.VERBOSE)
+
+reItemLine = re.compile(
+    r"""
+    ^
+    \s*
+    (?P<state>\s+[*|!])?
+    \s*
+    (?P<account>\w+(:\w+)*)
+    \s*
+    (?P<amount>-?\d+\.\d{2})?
+    """, re.VERBOSE)
 
 class Transaction:
-    def __init__(self, posted, party, checknum=None, memo=None,
-                 cleared=None, isReconciled=False,
-                 items = None):
+    def __init__(self, posted, party, checknum=None, memo=None, cleared=None,
+                 state='',  items = None, charPos=0):
         self.posted = posted
         self.party = party
         self.memo = memo
         self.cleared = cleared
-        self.isReconciled = isReconciled
+        self.state = state.strip() if state else ''
+        self.isReconciled = bool(state=='*')
         self.items = items or []
         self.validate()
         self.comment = Comment()
         self.checknum = checknum
+        self.charPos = charPos
 
     def __str__(self):
         res = []
@@ -132,23 +165,47 @@ class Transaction:
         else:
             res.append("\n")
         return "".join(res)
-        
 
-    def clone(self):
-        return Transaction(posted =self.posted, party=self.party,
-                           memo=self.memo, cleared=self.cleared,
-                           isReconciled = self.isReconciled,
-                           items = [i.clone() for i in self.items])
+    def addCommentLine(self, line):
+        self.comment.addCommentLine(line)
 
-    def addItem(self, account, amount_in):
+    def addItem(self, account, amount_in, state, charPos):
         implied = False
         amount = amount_in
         if amount is None:
             implied = True
             amount = -self.total()
+        if not state:
+            state = self.state or ''
         self.items.append(Item(account=account,
                                amount=Decimal(amount),
-                               implied=implied))
+                               implied=implied,
+                               state=state.strip(),
+                               charPos=charPos))
+
+    def asEmacs(self, account):
+        _ = ' '
+        yield '("<stdin>" '  # @TODO: filename
+        yield str(self.charPos)
+        yield _
+
+        # this is the emacs date format...
+        y,m,d = [int(part) for part in self.posted.split('/')]
+        date = time.mktime((y,m,d, 0,0,0,0,0,0))
+        yield "(%s %s 0)" % (int(date / 65536),  int(date % 65536))
+        
+        yield _
+        yield ('"%s"' % self.checknum) if self.checknum else 'nil'
+        yield _
+        yield '"%s"' % ((self.party + ' ' + self.memo) if self.memo else self.party)
+        yield '\n'
+        for item in self.items:
+            if item.account.startswith(account):
+                yield '  (%s "%s" "%s" %s)' % (
+                    item.charPos, item.account, item.amount,
+                    't' if item.state=='*' else 'pending' if item.state=='!' else 'nil' )
+        yield ")"
+        
 
     def bankDate(self):
         if self.cleared:
@@ -156,221 +213,43 @@ class Transaction:
         else:
             return date(self.posted)
 
-    def addCommentLine(self, line):
-        self.comment.addCommentLine(line)
-
-    def validate(self):
-        if not self.total() == 0:
-            raise ValueError("total should be 0, was %s" % self.total())
-
-    def total(self):
-        return sum([item.amount for item in self.items])
+    def clone(self):
+        return Transaction(posted =self.posted, party=self.party,
+                           memo=self.memo, cleared=self.cleared,
+                           isReconciled = self.isReconciled,
+                           items = [i.clone() for i in self.items])
 
     def effectOnAccount(self, account):
         return sum([item.amount for item in self.items
                     if item.account.startswith(account)])
 
+    def total(self):
+        return sum([item.amount for item in self.items])
 
-# * Ledger Parser
-"""
-The ledger is represented as a list of Comments and Transactions
-"""
-class ParserTest(unittest.TestCase):
-    def test(self):
-        ledger = trim(
-            """
-            ; one line comment
-            
-            ; multi 
-            ;      line
-            ;           comment
+    def validate(self):
+        if not self.total() == 0:
+            raise ValueError("total should be 0, was %s" % self.total())
 
-            2006/01/01 * paycheck {2006/01/02} : this one is reconciled
-                income:whatever                         -50.00
-                asset:checking
-            ;   a transaction comment
+def transactionDay(trans):
+    return trans.posted
 
-            2006/01/02=2006/01/03 (1000) whatever mart : unreconciled check 1000
-                expense:groceries                        10.00
-                expense:hardware                          5.00
-                asset:checking
-            """)
-
-        book = parseLedger(ledger)
-        self.assertEquals(4, len(book))
-        assert isinstance(book[0], Comment)
-        assert len(book[0].lines) == 1
-        assert isinstance(book[1], Comment)
-        self.assertEquals(len(book[1].lines), 3)
-        assert isinstance(book[2], Transaction)
-        assert book[2].posted == "2006/01/01"
-        self.assertEquals(book[2].cleared, "2006/01/02")
-        assert book[2].items[0].amount == -50
-        assert book[2].items[1].amount ==  50
-        assert isinstance(book[3], Transaction)
-        assert book[3].memo.count("unreconciled")
-        assert book[3].posted == "2006/01/02"
-        self.assertEquals("1000", book[3].checknum)
-        self.assertEquals(book[3].cleared, "2006/01/03")
-        assert book[3].items[0].amount == 10
-        assert book[3].items[1].amount ==  5
-        assert book[3].items[1].implied == False
-        assert book[3].items[2].amount == -15
-        assert book[3].items[2].implied == True
-
-reHeadLine = re.compile(
-    r"""
-    (?P<date>\d{4}/\d{2}/\d{2})(\=(?P<effective>\d{4}/\d{2}/\d{2}))?
-    (?P<star>\s+[*])?
-    (\s+[(](?P<checknum>\d+)[)])? # check number.. discard for now
-    \s+
-    (?P<party>([^:{])+)
-    (\{(?P<cleared>\d{4}/\d{2}/\d{2})\}\s*)?
-    (?P<memo>:.*)?
-    """, re.VERBOSE)
-
-reItemLine = re.compile(
-    r"""
-    ^
-    \s*
-    (?P<account>\w+(:\w+)*)
-    \s*
-    (?P<amount>-?\d+\.\d{2})?
-    """, re.VERBOSE)
-
-def parseLedger(text):
-    entry = None
-    res = []
-    for rawline in text.split("\n"):        
-        line = rawline.strip()       
-        if line == "":
-            if entry:
-                res.append(entry)
-            entry = None
-        elif line.startswith(";"):
-            if entry is None:
-                entry = Comment()
-            entry.addCommentLine(line)
-        elif reHeadLine.match(line):
-            match = reHeadLine.match(line).groupdict()
-            entry = Transaction(posted=match["date"],
-                                isReconciled = bool(match["star"]),
-                                party = match["party"].strip(),
-                                cleared = match["cleared"] or match["effective"]
-                                ,
-                                checknum = match["checknum"],
-                                memo = match["memo"])
-        elif reItemLine.match(line):
-            match = reItemLine.match(line).groupdict()
-            entry.addItem(match["account"], match["amount"])
-    return res
-
-
-# * Balance History
-"""
-Take an account, group it by month.
-"""
-
-class HistoryTest(unittest.TestCase):
-    def test(self):
-        book = parseLedger(trim(
-            """
-            ; yadda yadda yadda
-            
-            2005/01/01 opening balance
-              equity:open           -100.00
-              asset:cash             100.00
-
-            2005/02/05 the store
-              expense:stuff            5.00
-              asset:cash              -5.00
-
-            2005/02/10 the store again
-              expense:stuff            5.00
-              asset:cash              -5.00
-
-            2005/03/01 beat up kid for lunch money
-              asset:cash                5.00
-              income:extortion         -5.00
-            """))
-        
-        self.assertEquals(95, balance(book, "asset:"))
-        self.assertEquals(monthlyHistory(book, "asset:"),
-               [("2005/01", 100),
-                ("2005/02", 90),
-                ("2005/03", 95)])
-        self.assertEquals(monthlyHistory(book, "expense:"),
-               [("2005/01",  0),
-                ("2005/02", 10),
-                ("2005/03", 10)])
-        self.assertEquals(monthlyHistory(book, "income:"),
-               [("2005/01",  0),
-                ("2005/02",  0),
-                ("2005/03", -5)])
-
-
-
-# * bankView and History
-
-class BankViewTest(unittest.TestCase):
-    def test(self):
-        book = parseLedger(trim(
-            """
-            2005/01/01 * asdf {2005/02/01}
-                expense:asdf                               10.00
-                asset:checking
-            """))
-
-        assert bankView(book)[0].posted == "2005/02/01"
-        assert bankView(book)[0].cleared is None
-        self.assertEquals(str(bankView(book)[0]), trim(
-            """
-            2005/02/01 * asdf
-                expense:asdf                               10.00
-                asset:checking                            -10.00
-            """))
-
-def bankView(book):
-    res = [t.clone() for t in transactionsOnly(book)]
-    for item in res:
-        if item.cleared:
-            #print item.posted , "<----", item.cleared
-            item.posted = item.cleared
-            item.cleared = None            
-    res.sort(lambda a, b: cmp(parseDate(a.posted), parseDate(b.posted)))
-    return res
-
-def balance(book, account):
-    return sum([t.effectOnAccount(account) for t in book])
+def transactionMonth(trans):
+    return trans.posted[:7]
 
 def transactionsOnly(book):
     return [x for x in book if isinstance(x, Transaction)]
 
-def parseDate(datestr):
-    return [int(x) for x in datestr.split("/")]
 
-def byMonth(trans):
-    return trans.posted[:7]
 
-def byDay(trans):
-    return trans.posted
-
-def history(book, account, filter):
-    total = 0
-    res = []
-    for month, mbook in groupby(transactionsOnly(book), filter):
-        total += balance(mbook, account)
-        res.append((month, total))
-    return res
-
-def monthlyHistory(book, account):
-    return history(book, account, byMonth)
-
-def dailyHistory(book, account):
-    return history(book, account, byDay)
-    
-# * --
 if __name__=="__main__":
-    unittest.main()
-        
     
+    if "emacs" in sys.argv:
+        assert sys.argv[1:5] == ['-f','-','--uncleared','emacs']
+        assert len(sys.argv) == 6, "emacs option requires account name"
+        account = sys.argv[5]        
+        book = parseLedger(sys.stdin.read())
+        for item in emacsView(book, account):
+            print item
+    else:
+        os.execvp('ledger', sys.argv[1:])
+        
