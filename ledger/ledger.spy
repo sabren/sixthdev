@@ -1,0 +1,183 @@
+#!/usr/bin/env python2.4
+import unittest
+from ledger import *
+
+# * Ledger Parser
+"""
+The ledger is represented as a list of Comments and Transactions
+"""
+class ParserTest(unittest.TestCase):
+    def test(self):
+        ledger = trim(
+            """
+            ; one line comment
+            
+            ; multi 
+            ;      line
+            ;           comment
+
+            2006/01/01 * paycheck {2006/01/02} : this one is reconciled
+                income:whatever                         -50.00
+                asset:checking
+            ;   a transaction comment
+
+            2006/01/02=2006/01/03 (1000) whatever mart : unreconciled check
+                expense:groceries                        10.00
+                expense:hardware                          5.00
+                asset:checking
+            """)
+
+        book = parseLedger(ledger)
+        self.assertEquals(4, len(book))
+        assert isinstance(book[0], Comment)
+        assert len(book[0].lines) == 1
+        assert isinstance(book[1], Comment)
+        self.assertEquals(len(book[1].lines), 3)
+        assert isinstance(book[2], Transaction)
+        assert book[2].posted == "2006/01/01"
+        self.assertEquals(book[2].cleared, "2006/01/02")
+        assert book[2].items[0].amount == -50
+        assert book[2].items[1].amount ==  50
+        assert isinstance(book[3], Transaction)
+        assert book[3].memo.count("unreconciled")
+        assert book[3].posted == "2006/01/02"
+        self.assertEquals("1000", book[3].checknum)
+        self.assertEquals(book[3].cleared, "2006/01/03")
+        assert book[3].items[0].amount == 10
+        assert book[3].items[1].amount ==  5
+        assert book[3].items[1].implied == False
+        assert book[3].items[2].amount == -15
+        assert book[3].items[2].implied == True
+
+
+# * Comments
+
+class CommentTest(unittest.TestCase):
+    def test_str(self):
+        c = Comment()
+        c.addCommentLine("; 1")
+        c.addCommentLine("; 2")
+        self.assertEquals("; 1\n; 2\n", str(c))
+
+# * Transactions and Items
+"""
+A basic transaction contains line items with
+credits and debits. The line items must add up to 0.
+"""
+class TransactionTest(unittest.TestCase):
+    def test(self):
+        t = Transaction(
+            posted =  "2005/01/01",
+            party = "fred flintstone",
+            memo = ": owed him money",
+            cleared = "2005/05/02",
+            isReconciled = False,
+            items = [])
+        t.addItem("liability:fred", "10.00"),
+        self.assertRaises(ValueError, t.validate)
+        t.addItem("asset:checking", "-10.00"),
+        t.validate() # should work now.
+
+    def test_effectOnAccount(self):
+        t = Transaction(None, None, None, items = [
+            Item(account="asset:cash", amount="-6"),
+            Item(account="expense:a",  amount="2"),
+            Item(account="expense:b",  amount="3"),
+            Item(account="expense:c",  amount="1"),])
+        self.assertEquals(-6, t.effectOnAccount("asset:"))
+        self.assertEquals(-6, t.effectOnAccount("asset:cash"))
+        self.assertEquals(-6, t.effectOnAccount("a"))
+        self.assertEquals(0,  t.effectOnAccount("equity"))
+        self.assertEquals(2,  t.effectOnAccount("expense:a"))
+        self.assertEquals(3,  t.effectOnAccount("expense:b"))
+        self.assertEquals(1,  t.effectOnAccount("expense:c"))
+        self.assertEquals(6,  t.effectOnAccount("expense:"))
+
+    def test_str(self):
+        t = Transaction(posted="2005/01/01",
+                        checknum="232",
+                        party="asdf",
+                        isReconciled = True,
+                        memo=": xxx", items = [
+            Item(account="asset:cash", amount="-600"),
+            Item(account="expense:a",  amount="2"),
+            Item(account="expense:b",  amount="3"),
+            Item(account="expense:c",  amount="595", implied=True),])
+        self.assertEquals(str(t), trim(
+            """
+            2005/01/01 * (232) asdf : xxx
+                asset:cash                               -600.00
+                expense:a                                   2.00
+                expense:b                                   3.00
+                expense:c
+            """))
+        
+
+# * Balance History
+"""
+Take an account, group it by month.
+"""
+
+class HistoryTest(unittest.TestCase):
+    def test(self):
+        book = parseLedger(trim(
+            """
+            ; yadda yadda yadda
+            
+            2005/01/01 opening balance
+              equity:open           -100.00
+              asset:cash             100.00
+
+            2005/02/05 the store
+              expense:stuff            5.00
+              asset:cash              -5.00
+
+            2005/02/10 the store again
+              expense:stuff            5.00
+              asset:cash              -5.00
+
+            2005/03/01 beat up kid for lunch money
+              asset:cash                5.00
+              income:extortion         -5.00
+            """))
+        
+        self.assertEquals(95, balance(book, "asset:"))
+        self.assertEquals(monthlyHistory(book, "asset:"),
+               [("2005/01", 100),
+                ("2005/02", 90),
+                ("2005/03", 95)])
+        self.assertEquals(monthlyHistory(book, "expense:"),
+               [("2005/01",  0),
+                ("2005/02", 10),
+                ("2005/03", 10)])
+        self.assertEquals(monthlyHistory(book, "income:"),
+               [("2005/01",  0),
+                ("2005/02",  0),
+                ("2005/03", -5)])
+
+
+
+# * bankView and History
+
+class BankViewTest(unittest.TestCase):
+    def test(self):
+        book = parseLedger(trim(
+            """
+            2005/01/01 * asdf {2005/02/01}
+                expense:asdf                               10.00
+                asset:checking
+            """))
+
+        assert bankView(book)[0].posted == "2005/02/01"
+        assert bankView(book)[0].cleared is None
+        self.assertEquals(str(bankView(book)[0]), trim(
+            """
+            2005/02/01 * asdf
+                expense:asdf                               10.00
+                asset:checking                            -10.00
+            """))
+
+    
+# * --
+if __name__=="__main__":
+    unittest.main()
