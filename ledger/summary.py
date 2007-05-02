@@ -1,18 +1,18 @@
-#!/usr/local/bin/python2.4
+#!/usr/local/bin/python2.5
 import ledger
 import sys
 
 book = ledger.bankView(ledger.parseLedger(sys.stdin.read()))
 
 if "-D" in sys.argv:
-    filter = ledger.byDay
+    report = ledger.dailyHistory
 else:
-    filter = ledger.byMonth
+    report = ledger.monthlyHistory
 
 if "-r" in sys.argv:
     book = [t for t in book if t.isReconciled]
 
 
-for month, balance in ledger.history(book, "asset:checking", filter):
+for month, balance in report(book, "asset:checking"):
     print "%10s %-15s" % (month, balance)
 
