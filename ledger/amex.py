@@ -1,6 +1,25 @@
 #!/usr/bin/python2.5
+"""
+Log into americanexpress.com/merchant/
+
+click view your statement
+change date range if you want
+leave other settings to the defaults
+
+click download
+csv
+saves as MFAS
+
+now run:
+   python amex.py MFAS
+
+and copy/paste the transactions into the ledger.
+
+"""
+
 import decimal
 import sys
+
 
 # import pdb; pdb.set_trace()
 
