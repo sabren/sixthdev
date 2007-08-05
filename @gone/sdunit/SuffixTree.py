@@ -2,6 +2,35 @@
 # cleaner, object-oriented suffix tree implementation
 # unfortunately, it doesn't work. :/
 
+# [0531.2002 06:05] note to self: see this paper!
+# http://www.cs.lth.se/~jesper/lic.pdf
+
+## 1 v nil
+## 2 Repeat
+## 3 r Canonize:
+## 4 If r 6 = nil , then
+## 5 If tpos (r)+proj = tfront , then endpoint found,
+## 6 else
+## 7 Assign u an unused node.
+## 8 depth(u) depth(ins ) +proj .
+## 9 pos (u) front . proj .
+## 10 Create edges (ins; u) and(u; r).
+## 11 Remove edge (ins; r).
+## 12 If r is an internal node, then
+## 13 pos (r) pos (r) +proj .
+## 14 else
+## 15 If child (ins; tfront ) =nil , thenu ins,
+## 16 else endpoint found.
+## 17 If not endpoint found, then
+## 18 s leaf (front . depth(u)).
+## 19 Create edge (u; s).
+## 20 suf (v) u, v u, ins suf (ins ).
+## 21 until endpoint found.
+## 22 suf (v) ins.
+## 23 proj proj + 1,front front + 1.
+
+
+
 class EndOfTheText:
     def __cmp__(self, other):
         return 1

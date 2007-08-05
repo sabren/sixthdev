@@ -72,7 +72,7 @@ class LineIndex:
 
     def _callbackForWalk(self, arg, dirname, fnames):
         for fname in fnames:
-            if fname.endswith(".py"):
+            if fname.endswith(".py") or fname.endswith(".cgi"):
                 self.indexFile(dirname, fname)
 
 
