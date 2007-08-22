@@ -1,32 +1,114 @@
+from narrative import testcase
 import unittest
 
-#*** the solution compiler should be easy:
-# just "for x in solution" or list(solution)
-
-class SolutionTest(unittest.TestCase):
-    def test(self):
-        # is like a list but you can only append
-        s = Solution()
-        assert list(s) == []
-        s.append("a")
-        assert list(s) == ["a"]
-        s.append("b")
-        s.append("c")
-        assert list(s) == ["a","b","c"]
-        assert str(s) == "abc"
 
 class Solution(object):
+
+    # make split char configurable (but classwide)
+    splitter = "."
+
     def __init__(self):
         self.parts = []
+        self.visible = True
+        self.blazes = {}
+
+    #def __iter__(self):
+    #    return self.parts.__iter__()
+
+    def __iter__(self):
+        for item in self.parts:
+            if isinstance(item, Solution):
+                for child in item:
+                    yield child
+            else:
+                yield item
+
+    def __getitem__(self, trail):
+        split = trail.split(self.splitter, 1)
+        head, tail = split[0], split[1:]
+        assert len(tail) in [0,1] # because of 1 in trail.split()
+        if tail:
+            return self.getBlazes()[head][tail[0]]
+        else:
+            return self.getBlazes()[head]
+
+    def __str__(self):
+        return "".join(self)
 
     def append(self, x):
         self.parts.append(x)
 
-    def __iter__(self):
-        return self.parts.__iter__()
+    def blaze(self, name):
+        return self.addChild(name, self.placeHolder())
 
-    def __str__(self):
-        return "".join(self)
+    def addChild(self, name, child):
+        self.getBlazes()[name] = child
+        self.append(child)
+        return child
+        
+
+    def clear(self, trail=None):
+        if trail:
+            self[trail].clear()
+        else:
+            self.parts = []
+            self.blazes = {}
+
+    def extend(self, other):
+        self.parts.extend(other.parts)
+        for k, v in other.getBlazes().items():
+            self.getBlazes()[k] = v
+
+    def getBlazes(self):
+        return self.blazes
+
+    def hide(self):
+        self.visible = False
+
+    def hideAll(self):
+        self.hide()
+        for kid in self.blazes.values():
+            kid.hideAll()
+
+    def placeHolder(self):
+        return Solution()
+
+    def show(self):
+        self.visible = True
+
+    def snapShot(self):
+        if self.visible:
+            return "".join(list(self.visibleParts()))
+        else:
+            return ""
+
+    def visibleParts(self):
+        for item in self.parts:
+            if isinstance(item, Solution):
+                yield item.snapShot()
+            else:
+                yield item
+
+
+
+
+############################################
+
+
+#*** the solution compiler should be easy:
+# just "for x in solution" or list(solution)
+@testcase
+def testSolution(self):
+    # is like a list but you can only append
+    s = Solution()
+    assert list(s) == []
+    s.append("a")
+    assert list(s) == ["a"]
+    s.append("b")
+    s.append("c")
+    assert list(s) == ["a","b","c"]
+    assert str(s) == "abc"
+        
 
 
 #*** want to give big picture and fill details in later
@@ -48,44 +130,24 @@ class BlazeTest(unittest.TestCase):
         
     def test(self):
         self.assertEquals("[{}]", "".join(self.solution))
-        
+
+class BlazesShouldBeSolutions(BlazeTest):
+    def test(self):
+        """
+        blaze should return the placeholder so that
+        linehound can maintain a stack as it goes along
+        """
+        assert isinstance(self.solution.blaze('bleh'),Solution)
 
 #*****  just map the name to a placeholder
-
-def _Solution_getBlazes(self):
-    if not hasattr(self, "blazes"):
-        self.blazes = {}
-    return self.blazes
-    
-def _Solution_blaze(self, name):
-    place = self.placeHolder()
-    self.getBlazes()[name] = place
-    self.append(place)
-
-# tack it on to the original class:
-Solution.getBlazes = _Solution_getBlazes
-Solution.blaze = _Solution_blaze
 
 #***** reason for placeholder is that
 #***** could just insert to the list but then it screws up our keys
 #***** so: placeholder() -> Solution()
 
-def _Solution_placeHolder(self):
-    return Solution()
-Solution.placeHolder = _Solution_placeHolder
-
 #**** we don't actualy want to see those placeholders
 #**** plus lose ability to iterate when we went nested
 #**** but easy to fix: __iter__
-
-def _Solution___iter__(self):
-    for item in self.parts:
-        if isinstance(item, Solution):
-            for child in item:
-                yield child
-        else:
-            yield item
-Solution.__iter__ = _Solution___iter__
 
 #*** want to extend without screwing up the blazes
 
@@ -115,7 +177,7 @@ class AtTest(unittest.TestCase):
             words.blaze(x)
             for y in alphabet:
                 words[x].blaze(y)
-
+                
         # add some words to the tree:
         words["t.w"].append("twas")
         words["a._"].append("a")
@@ -129,24 +191,6 @@ class AtTest(unittest.TestCase):
                            " ".join(words))
 
        
-# so here's how we do that:
-
-def _Solution___getitem__(self, trail):
-    split = trail.split(self.splitter, 1)
-    head, tail = split[0], split[1:]
-    assert len(tail) in [0,1] # because of 1 in trail.split()
-    if tail:
-        return self.getBlazes()[head][tail[0]]
-    else:
-        return self.getBlazes()[head]
-    
-Solution.__getitem__ = _Solution___getitem__
-
-#***** make split char configurable (but classwide)
-Solution.splitter = "."
-
-
-
 #**** how to extend the point?
 #***** this already works
 #**** how to replace the point?
@@ -165,16 +209,6 @@ class ClearTest(unittest.TestCase):
         self.assertEquals("[]", "".join(s))
         s["content"].append("after")
         self.assertEquals("[after]", "".join(s))
-
-
-def _Solution_clear(self, trail=None):
-    if trail:
-        self[trail].clear()
-    else:
-        self.parts = []
-        self.blazes = {}
-Solution.clear = _Solution_clear
-
 
 
 # finally, we wan to be able to merge two solutions together
@@ -196,11 +230,45 @@ class ExtendTest(unittest.TestCase):
 
 # but because of the nested structures and names, we need to a little
 # more work:
-def _Solution_extend(self, other):
-    self.parts.extend(other.parts)
-    for k, v in other.getBlazes().items():
-        self.getBlazes()[k] = v
-Solution.extend = _Solution_extend
+
+# * hiding nodes
+"""
+While working on brickslayer, I realized it might make
+more sense to have all the source code in the actual
+files, and simply mark out chunks to be included in the
+narrative. This is akin to an HTML page where some of the
+elements are hidden by default.
+
+Besides clearing up quite a bit of headache when it comes
+to explaining where code should go, and making it easier to
+see the entire solution with all variations at once, this
+makes it possible to add a trail on top of an existing codebase.
+"""
+
+@testcase
+def testSnapshot(self):
+
+    s = Solution()
+    s.append("<")
+    
+    a = s.blaze("a")
+    a.append("[")
+
+    b = a.blaze("b")
+    b.append("{")
+    b.append("}")
+
+    a.append("]")
+    s.append(">")
+
+    self.assertEquals("<[{}]>", "".join(s))
+    self.assertEquals("<[{}]>", s.snapShot())
+    s["a.b"].hide()
+    self.assertEquals("<[]>", s.snapShot())
+    s["a"].hide()
+    self.assertEquals("<>", s.snapShot())
+    s["a.b"].show()
+    self.assertEquals("<>", s.snapShot())
 
 
 """

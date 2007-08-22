@@ -1,6 +1,13 @@
 """
 This is BlazeHound, our XML-based solution compiler.
 
+Use this if you want to build the entire solution up
+through the narrative with all the code embedded
+directly in the xml.
+
+If your code is in a source file with tags embedded
+in the comments, you want to use LineHound.
+
 Here's what we're shooting for: We should be able
 to put a bunch of ideas in the same file and have it
 all mixed up, and modify things as we go along so
@@ -114,9 +121,9 @@ So:
 """
 import xml.sax
 class BlazeHound(xml.sax.ContentHandler):
-    def __init__(self):
+    def __init__(self, root=None):
         xml.sax.ContentHandler.__init__(self)
-        self.root = Solution()     # root Solution 
+        self.root = root or Solution()     # root Solution 
         self.stack = []            # child Solutions
         self.current = self.root   # current Solution
 

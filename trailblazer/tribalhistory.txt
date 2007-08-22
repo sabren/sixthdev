@@ -52,6 +52,9 @@ the team develops a solid understanding of <em>how things are</em>,
 but (to borrow a phrase from Daniel Quinn) almost nobody remembers
 <em>how things came to be this way</em>.
 
+Once the code reaches a certain level of complexity, it is very hard
+for new users to get involved, without the help of a community.
+
 
 The Trouble with Docs
 ---------------------
