@@ -32,7 +32,9 @@ NoteOff	= 0x80
 # to custom events. This will let the user remap keys
 # at some point, but the main purpose is to ease the
 # transition from pygame to wxpython.
-EXIT, UP, DOWN, UPFAST, DOWNFAST, SETSTART, SETSTOP, TOSTART, PLAY = range(9)
+(EXIT, UP, DOWN, UPFAST, DOWNFAST, SETSTART, SETSTOP, TOSTART, TOEND,
+ PLAY, STOP, ROTATE_HANDS, FASTER, SLOWER, METRONOME
+ )= range(15)
 
 
 
@@ -40,20 +42,21 @@ def comparison(goals, actuals):
     return [compareOne(goal, actual) for (goal, actual) in zip(goals, actuals)]
 
 
+
 def compareOne(goal, actual):
     if goal in (PRESS, HOLD):
         if actual in (PRESS, HOLD):
-            return green
+            return HIT
         else:
-            return colormap[goal]
+            return goal
     else:
         if actual in (PRESS, HOLD):
-            return red
+            return MISS
         else:
             return None
 
 def yPos(y):
-    offset = y / 8 # add an extra line every 8 boxes (2:4 time sig)
+    offset = y / 4 # add an extra line every 4 boxes (2:4 time sig)
     offset += 2 * (y / 16) # +2 every 16 (remeber 2/16 != 1/8 for ints!!)
     return offset + 10 + y * KEYH
 
@@ -69,17 +72,54 @@ class AutoPlayer(object):
         self.whereToStop  = len(score) - 1
         self.playing = None
         self.pos = 0
-        
-    def play(self):
+        self.tickSpeed = 0.2
+        self.beat = -1
+        self.visible = False
+
+    def faster(self):
+        self.tickSpeed -= 0.1
+        if self.tickSpeed < 0:
+            self.tickSpeed = 0
+
+    def slower(self):
+        self.tickSpeed += 0.1
+
+
+    def stop(self):
         if self.playing:
             self.playing.stop()
+        
+    def play(self):
+        self.stop()
         self.pos = self.whereToStart
         self.playing = clockwork.spawn(self.gen_notes())
+
+    def metronome(self):
+        self.stop()
+        self.playing = clockwork.spawn(self.gen_metro())
+
+    def do_metro(self):
+        self.beat += 1
+        if self.beat % 16 == 0:
+            device.send(NoteOn + 9, 35, 60)
+        elif self.beat % 4 == 0:
+            # 10th channel is percussion
+            device.send(NoteOn + 9, 37, 40)
+
+    def gen_metro(self):
+        while True:
+            yield clockwork.sleep(self.tickSpeed)
+            self.do_metro()
 
     def gen_notes(self):
 
         prev = [0] * keyboard.numkeys # blank piano
 
+        for x in range(16):
+            yield clockwork.sleep(self.tickSpeed)
+            self.do_metro()
+
+        self.visible = True
         while self.pos < self.whereToStop:
             state = self.score[self.pos]
             for (e, (was, now)) in enumerate(zip(prev, state)):
@@ -91,15 +131,18 @@ class AutoPlayer(object):
                     device.send(NoteOff, i, 0)
             prev = state
 
-            yield clockwork.sleep(0.50)
+            yield clockwork.sleep(self.tickSpeed)
+            self.do_metro()
+
+            
             self.pos += 1
             
         # now be quiet, even if selection cuts off mid-note:
         for i in range(keyboard.numkeys):
             device.send(NoteOff, i+keyboard.leftmost_key, 0)
 
-        self.playing = False
-
+        self.visible = False
+        self.playing = None
 
 
 def loopback(whereToStop, whereToStart, pos):
@@ -133,22 +176,27 @@ class Cursor(object):
 
 
 
+
 class AbstractPianoArt(object):
+
+    sep = None
+    
     
     def drawScore(self, score):
         for i, row in enumerate(score):
             if i % 2: pal = dimA
             else: pal = dimB
-            self.drawPiano(10, yPos(i), pal, colors(row))
+            self.drawPiano(10, yPos(i), pal, row)
 
     def clearBright(self, score, line):
         if line % 2: pal = dimA
         else: pal = dimB
-        self.drawPiano(10, yPos(line), pal, colors(score[line]))
+        self.drawPiano(10, yPos(line), pal, score[line])
 
-    def drawKey(self, x, y, w,h, color, highlightColor=None):
+    def drawKey(self, x, y, w,h, color, mark=None):
 
         borderColor = (50,50,50)
+        highlightColor = colormap.get(mark)
 
         # draw black outline:
         self.drawRect(borderColor, x, y, w, h)
@@ -156,24 +204,36 @@ class AbstractPianoArt(object):
         # draw square itself:
         self.drawRect(color, x+1, y, w-1, h)
 
-        if highlightColor == blue2:
+        if mark == HOLD:
             
             # kludge for continued notes...
-            self.drawRect(blue, x+2, y-3, w-3, h+2)
+            self.drawRect(highlightColor, x+2, y-3, w-3, h+2)
 
         elif highlightColor:
             self.drawRect(highlightColor, x+2, y+2, w-3, h-3)
 
 
-    def drawPiano(self, x, y, palette, colors, keyw=16, keyh=KEYH):
+    def drawPiano(self, x, y, palette, marks, keyw=16, keyh=KEYH):
+        
         for k in range(KEY_RANGE):
-            self.drawKey(x+keyw*k, y, keyw, keyh, keycolor(palette, k), colors[k])
+            fade = False
+            if (self.sep and k > self.sep):
+                shift = 2
+                if self.hand == LEFT_HAND: fade = True
+            else:
+                shift = 0
+                if self.hand == RIGHT_HAND: fade = True
+            self.drawKey(x+keyw*k+shift, y, keyw, keyh,
+                         keycolor(palette, k, fade), marks[k])
 
     def drawBracket(self, top, bot):
         self.drawRect((0,0,0), 5, 0, 5, WINH)
         self.drawRect(brackcolor, 5, yPos(top), 5, yPos(bot-top))
 
 
+    def separate(self, where):
+        self.sep = where
+            
 
     # this is all you have to Implement:
     def drawRect(self, color, x, y, w, h):
@@ -207,15 +267,20 @@ class PyGameUI(AbstractPianoArt):
 
     def setupEventMap(self):
         self.eventMap = {
-            pygame.K_ESCAPE: EXIT,
+            pygame.K_ESCAPE: STOP,
             pygame.K_DOWN : DOWN,
             pygame.K_UP : UP,
             pygame.K_PAGEDOWN: DOWNFAST,
             pygame.K_PAGEUP : UPFAST,
             pygame.K_LEFTBRACKET: SETSTART,
             pygame.K_RIGHTBRACKET: SETSTOP,
-            pygame.K_SPACE: TOSTART,
+            pygame.K_MINUS: TOSTART,
+            pygame.K_SPACE: TOEND,
             pygame.K_p : PLAY,
+            pygame.K_m : METRONOME,
+            pygame.K_TAB: ROTATE_HANDS,
+            pygame.K_F2: FASTER,
+            pygame.K_F3: SLOWER,
         }
 
 
@@ -225,64 +290,11 @@ class PyGameUI(AbstractPianoArt):
         elif event.type == pygame.KEYDOWN:
             return self.eventMap.get(event.key)
 
-        
 
 
-import wx
-NEEDBLIT = 55555555555555
-
-class PianoRollFrame(wx.Frame, AbstractPianoArt):
-    def __init__(self, parent, id, title, queue, *a, **kw):
-        wx.Frame.__init__(self, parent, id, title, *a, **kw)
-        self.queue = queue
-##         self.Bind(wx.EVT_PAINT, self.OnPaint)
-
-##     def OnPaint(self, e):
-##         self.queue.put(NEEDBLIT)
-
-
-class WxUI(AbstractPianoArt):
-    """
-    This class drives the PianoRollFrame.
-
-    It talks to us by putting events into the queue.
-    
-    We talk to it by using wx.CallAfter()
-    
-    """
-
-    def __init__(self, win, queue):
-        self.queue = queue
-        self.win = win
-        self.dc = wx.MemoryDC()
-        self.dc.SelectObject(wx.EmptyBitmap(WINW, WINH))
-
-    def flip(self):
-        wx.ClientDC(self.win).Blit(0,0,WINW,WINH, self.dc, 0,0)
-
-    def drawRect(self, color, x, y, w, h):
-        c = wx.Colour(*color)
-        self.dc.SetBrush(wx.Brush(c))
-        self.dc.SetPen(wx.Pen(c))
-        self.dc.DrawRectangle(x, y, w, h)
-
-    def quit(self):
-        print "quitting..."
-
-    def putEvent(self, e):
-        self.queue.append(e)
-        
-    def getEvent(self):
-        try:
-            e = self.queue.get(False)
-            self.queue.task_done()
-            if e == NEEDBLIT:
-                self.blit()
-            else:
-                return e
-        except Queue.Empty:
-            pass
-
+LEFT_HAND  = -1
+BOTH_HANDS = 0
+RIGHT_HAND = +1
 
 def main(ui):
 
@@ -293,20 +305,20 @@ def main(ui):
 
 
     score = readmidi.buildScore(midifile)
-
     
     player = AutoPlayer(score)
     liveKeyboard = keyboard.Keyboard()
     device.pyCallback = liveKeyboard
     
 
-
+    ui.hand = BOTH_HANDS
+    ui.separate(30)
     ui.drawScore(score)
     ui.drawBracket(player.whereToStart, player.whereToStop)
     ui.flip()
     
     # -----
-   
+
     cursor = Cursor(len(score))
     while True:
 
@@ -317,13 +329,15 @@ def main(ui):
         anymidi.tick()
                
         e = ui.getEvent()
-        if e: print e
 
         if e == EXIT:        break
         elif e == DOWN:      cursor.down()
         elif e == UP:        cursor.up()
         elif e == DOWNFAST:  cursor.down(8)
         elif e == UPFAST:    cursor.up(8)
+        elif e == FASTER :   player.faster()
+        elif e == SLOWER :   player.slower()
+        elif e == METRONOME : player.metronome()
 
         # loopback support:
 
@@ -338,21 +352,38 @@ def main(ui):
         elif e == TOSTART:
             cursor.jump(player.whereToStart)
 
+        elif e == TOEND:
+            cursor.jump(player.whereToStop)
+
+        elif e == ROTATE_HANDS:
+            if ui.hand == LEFT_HAND: ui.hand = BOTH_HANDS
+            elif ui.hand == RIGHT_HAND: ui.hand = LEFT_HAND
+            else: ui.hand = RIGHT_HAND
+            ui.drawScore(score)
+            
+
         # player support:
         elif e == PLAY:
             player.play()
+        elif e == STOP:
+            player.stop()
 
         snap = liveKeyboard.snapshot()
 
         # if input matches the goal, move forward one line
-        if snap == map(abs,score[cursor.pos]):
+
+        if ui.hand == LEFT_HAND: r = None, ui.sep
+        elif ui.hand == RIGHT_HAND: r = ui.sep, None
+        else: r = None, None
+        
+        if snap[r[0]:r[1]] == map(abs,score[cursor.pos][r[0]:r[1]]):
             cursor.jump(loopback(player.whereToStop,
                                  player.whereToStart, cursor.pos + 1))
 
         # always draw the computer's cursor first...
-        if player.playing:
+        if player.visible:
             ui.drawPiano(10, yPos(player.pos), computerCursor,
-                              colors(score[player.pos]))
+                              score[player.pos])
             
         # so that the user's cursor covers it:
         ui.drawPiano(10, yPos(cursor.pos), midiCursor,
@@ -365,7 +396,7 @@ def main(ui):
 
 
 if __name__ == '__main__':
-    USE_PYGAME = True # False
+    USE_PYGAME = False # True
 
     if USE_PYGAME:
         main(PyGameUI())
@@ -373,6 +404,7 @@ if __name__ == '__main__':
         import wx
         import threading
         import Queue
+        exec open('wxui.py')
 
         queue = Queue.Queue(0)
 
