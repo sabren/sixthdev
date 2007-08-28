@@ -6,7 +6,7 @@ turcanator: a (somewhat primitive) midi piano tutor
 
 """
 import sys
-import pygame
+global pygame
 import clockwork
 import readmidi
 import keyboard
@@ -19,6 +19,7 @@ from colors import *
 KEYH=10
 KEY_RANGE=60
 
+WINW=1024
 WINH=700
 
 # midi event numbers
@@ -132,27 +133,66 @@ class Cursor(object):
 
 
 
-
-class PyGameUI(object):
-    def __init__(self):
-
-        # set up the screen
-        pygame.init()
-        self.screen = pygame.display.set_mode([1024, WINH])
-        pygame.display.set_caption("the turcanator v0.2")
-        self.screen.fill([0,0,0])
+class AbstractPianoArt(object):
     
-        
-    def drawScore(self, score, x):
+    def drawScore(self, score):
         for i, row in enumerate(score):
             if i % 2: pal = dimA
             else: pal = dimB
-            self.drawPiano(x, yPos(i), pal, colors(row))
+            self.drawPiano(10, yPos(i), pal, colors(row))
 
     def clearBright(self, score, line):
         if line % 2: pal = dimA
         else: pal = dimB
         self.drawPiano(10, yPos(line), pal, colors(score[line]))
+
+    def drawKey(self, x, y, w,h, color, highlightColor=None):
+
+        borderColor = (50,50,50)
+
+        # draw black outline:
+        self.drawRect(borderColor, x, y, w, h)
+
+        # draw square itself:
+        self.drawRect(color, x+1, y, w-1, h)
+
+        if highlightColor == blue2:
+            
+            # kludge for continued notes...
+            self.drawRect(blue, x+2, y-3, w-3, h+2)
+
+        elif highlightColor:
+            self.drawRect(highlightColor, x+2, y+2, w-3, h-3)
+
+
+    def drawPiano(self, x, y, palette, colors, keyw=16, keyh=KEYH):
+        for k in range(KEY_RANGE):
+            self.drawKey(x+keyw*k, y, keyw, keyh, keycolor(palette, k), colors[k])
+
+    def drawBracket(self, top, bot):
+        self.drawRect((0,0,0), 5, 0, 5, WINH)
+        self.drawRect(brackcolor, 5, yPos(top), 5, yPos(bot-top))
+
+
+
+    # this is all you have to Implement:
+    def drawRect(self, color, x, y, w, h):
+        raise NotImplementedError
+
+
+    
+class PyGameUI(AbstractPianoArt):
+    def __init__(self):
+        global pygame
+        import pygame
+        
+        # set up the screen
+        pygame.init()
+        pygame.key.set_repeat(100, 10)
+        self.screen = pygame.display.set_mode([WINW, WINH])
+        pygame.display.set_caption("the turcanator v0.2")
+        self.screen.fill([0,0,0])
+        self.setupEventMap()
 
     def flip(self):
         pygame.display.flip()
@@ -161,43 +201,24 @@ class PyGameUI(object):
         pygame.display.quit()
 
 
-    def drawKey(self, x, y, w,h, color, highlight):
-
-        border = (50,50,50)
-
-        # draw black outline:
-        pygame.draw.rect(self.screen, border, pygame.Rect(x,y,w,h), 1)
-
-        # draw square itself:
-        pygame.draw.rect(self.screen, color,  pygame.Rect(x+1,y,w-1,h))
-
-        if highlight == blue2:
-            
-            # kludge for continued notes...
-            pygame.draw.rect(self.screen, blue, pygame.Rect(x+2,y-3,w-3,h+2))
-
-        elif highlight:
-            pygame.draw.rect(self.screen, highlight, pygame.Rect(x+2,y+2,w-3,h-3))
+    def drawRect(self, color, x, y, w, h):
+        pygame.draw.rect(self.screen, color, pygame.Rect(x,y,w,h))
 
 
-    def drawPiano(self, x, y, palette, colors, keyw=16, keyh=KEYH):
-        for k in range(KEY_RANGE):
-            self.drawKey(x+keyw*k, y, keyw, keyh, keycolor(palette, k), colors[k])
+    def setupEventMap(self):
+        self.eventMap = {
+            pygame.K_ESCAPE: EXIT,
+            pygame.K_DOWN : DOWN,
+            pygame.K_UP : UP,
+            pygame.K_PAGEDOWN: DOWNFAST,
+            pygame.K_PAGEUP : UPFAST,
+            pygame.K_LEFTBRACKET: SETSTART,
+            pygame.K_RIGHTBRACKET: SETSTOP,
+            pygame.K_SPACE: TOSTART,
+            pygame.K_p : PLAY,
+        }
 
 
-    eventMap = {
-        pygame.K_ESCAPE: EXIT,
-        pygame.K_DOWN : DOWN,
-        pygame.K_UP : UP,
-        pygame.K_PAGEDOWN: DOWNFAST,
-        pygame.K_PAGEUP : UPFAST,
-        pygame.K_LEFTBRACKET: SETSTART,
-        pygame.K_RIGHTBRACKET: SETSTOP,
-        pygame.K_SPACE: TOSTART,
-        pygame.K_p : PLAY,
-    }
-
-    
     def getEvent(self):
         event = pygame.event.poll()
         if event.type == pygame.QUIT: return EXIT
@@ -205,12 +226,62 @@ class PyGameUI(object):
             return self.eventMap.get(event.key)
 
         
-    def drawBracket(self, top, bot):
-        pygame.draw.rect(self.screen, (0,0,0), pygame.Rect(5, 0, 5, WINH))
-        pygame.draw.rect(self.screen, brackcolor,
-                         pygame.Rect(5, yPos(top), 5, yPos(bot-top)))
-        
 
+
+import wx
+NEEDBLIT = 55555555555555
+
+class PianoRollFrame(wx.Frame, AbstractPianoArt):
+    def __init__(self, parent, id, title, queue, *a, **kw):
+        wx.Frame.__init__(self, parent, id, title, *a, **kw)
+        self.queue = queue
+##         self.Bind(wx.EVT_PAINT, self.OnPaint)
+
+##     def OnPaint(self, e):
+##         self.queue.put(NEEDBLIT)
+
+
+class WxUI(AbstractPianoArt):
+    """
+    This class drives the PianoRollFrame.
+
+    It talks to us by putting events into the queue.
+    
+    We talk to it by using wx.CallAfter()
+    
+    """
+
+    def __init__(self, win, queue):
+        self.queue = queue
+        self.win = win
+        self.dc = wx.MemoryDC()
+        self.dc.SelectObject(wx.EmptyBitmap(WINW, WINH))
+
+    def flip(self):
+        wx.ClientDC(self.win).Blit(0,0,WINW,WINH, self.dc, 0,0)
+
+    def drawRect(self, color, x, y, w, h):
+        c = wx.Colour(*color)
+        self.dc.SetBrush(wx.Brush(c))
+        self.dc.SetPen(wx.Pen(c))
+        self.dc.DrawRectangle(x, y, w, h)
+
+    def quit(self):
+        print "quitting..."
+
+    def putEvent(self, e):
+        self.queue.append(e)
+        
+    def getEvent(self):
+        try:
+            e = self.queue.get(False)
+            self.queue.task_done()
+            if e == NEEDBLIT:
+                self.blit()
+            else:
+                return e
+        except Queue.Empty:
+            pass
 
 
 def main(ui):
@@ -230,7 +301,7 @@ def main(ui):
     
 
 
-    ui.drawScore(score, 10)
+    ui.drawScore(score)
     ui.drawBracket(player.whereToStart, player.whereToStop)
     ui.flip()
     
@@ -245,9 +316,8 @@ def main(ui):
         clockwork.tick()
         anymidi.tick()
                
-
         e = ui.getEvent()
-
+        if e: print e
 
         if e == EXIT:        break
         elif e == DOWN:      cursor.down()
@@ -276,7 +346,8 @@ def main(ui):
 
         # if input matches the goal, move forward one line
         if snap == map(abs,score[cursor.pos]):
-            cursor.jump(loopback(player.whereToStop, player.whereToStart, cursor.pos + 1))
+            cursor.jump(loopback(player.whereToStop,
+                                 player.whereToStart, cursor.pos + 1))
 
         # always draw the computer's cursor first...
         if player.playing:
@@ -292,6 +363,26 @@ def main(ui):
 
 
 
+
 if __name__ == '__main__':
-    main(PyGameUI())
+    USE_PYGAME = True # False
+
+    if USE_PYGAME:
+        main(PyGameUI())
+    else:
+        import wx
+        import threading
+        import Queue
+
+        queue = Queue.Queue(0)
+
+        app = wx.App(redirect = False)
+        frame = PianoRollFrame(None, -1, "turcanator", queue, size=(WINW,WINH))
+        frame.Show(True)
+        
+        t = threading.Thread(target=main, args=(WxUI(frame, queue),))
+        t.start()
+
+        app.MainLoop()
+        queue.put(EXIT)
 
