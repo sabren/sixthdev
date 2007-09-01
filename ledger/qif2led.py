@@ -32,9 +32,12 @@ if __name__=="__main__":
     data = parseqif.parseQif(f)
 
     for item in data:
-        print item.date, "(%s)" % item.num, xpayee.get(item.payee, item.payee.lower())
-        print "    asset:checking", item.amount
-        print "    asset:checking"
+        print item.date,
+        if item.num:
+            print "(%s)" % item.num,
+        print xpayee.get(item.payee, item.payee.lower())
+        print "    asset:checking %30s" % item.amount
+        print "    other:account"
         print
 
         

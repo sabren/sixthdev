@@ -6,7 +6,6 @@ based on :
     http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/306103
 """
 from pytypes import Date
-import cash2led
 import sys
  
 class QifItem:
@@ -40,7 +39,11 @@ class QifItem:
         tmpstring = ','.join( [str(self.__dict__[field]) for field in self.order] )
         tmpstring = tmpstring.replace('None', '')
         return tmpstring
-    
+
+
+def fmtDate(d):
+    return "%04i/%02i/%02i" % (d.y, d.m, d.d)
+
 def parseQif(infile):
     """
     Parse a qif file and return a list of entries.
@@ -60,7 +63,7 @@ def parseQif(infile):
             items.append(curItem)
             curItem = QifItem()
         elif line[0] == 'D':
-            curItem.date = cash2led.fmtDate(Date(
+            curItem.date = fmtDate(Date(
                 line[1:-1].replace("' ","/200").replace(" ","")))
         elif line[0] == 'T':
             curItem.amount = line[1:-1]
