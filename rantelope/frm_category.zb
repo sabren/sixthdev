@@ -5,11 +5,10 @@
 <b>rename category:</b> {:name:}
 
 <form method="post" action="rantelope.app">
-<input type="hidden" name="what" value="category">
 {:html.hidden("ID", ID):}
-{:html.hidden("channelID", channelID):}
+{:html.hidden("channelID", channel.ID):}
 
 {:html.text("name", name):}
-<input type="submit" name="action" value="save">
+<input type="submit" name="action" value="save category">
 
 </form>

@@ -1,7 +1,7 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python2.5
 """
 Rantelope!
-(c)2002-2006 Sabren Enterprises, Inc.
+(c)2002-2007 Sabren Enterprises, Inc.
 This program is free software,
 licensed under the GNU GPL.
 """
@@ -13,8 +13,7 @@ from sixthday import Auth
 from strongbox import *
 import clerks as arlo
 import crypt
-import ransacker
-import sixthday
+#import ransacker
 import os
 import sys
 import unittest
@@ -23,6 +22,10 @@ import storage
 import sqlGuru
 from weblib import RequestBuilder, Response
 from sesspool import Sess, InMemorySessPool
+from strongbox import BoxView
+import zebra
+import cStringIO
+import weblib
 
 
 ROOT = "/home/sabren/web/withoutane.com/"
@@ -32,7 +35,7 @@ ROOT = "/home/sabren/web/withoutane.com/"
 # this doesn't effect MySQL's auto_increment 
 auto = None
 
-# * parse rant files
+
 class RantParser(object):
     def __init__(self, path):
         self.url = path
@@ -72,7 +75,7 @@ def toHTML(rant, comments):
     return "".join(res)
 
 
-# * Author
+
 class Author(Strongbox):
     ID = attr(long, default=auto)
     fname = attr(str)
@@ -89,9 +92,19 @@ class Author(Strongbox):
         raise ValueError, "passwords are encrypted"
     def isPassword(self, value):
         return self.cryptpwd == crypt.crypt(value, self.cryptpwd[:2])
+
+
+
+class Comment(Strongbox):
+    ID = attr(long, default=auto)
+    topicID = long
+    posted = attr(DateTime, default="now")
+    name = attr(str)
+    mail = attr(str)
+    link = attr(str)
+    comment = attr(str)
     
     
-# * Story
 
 class TagTest(unittest.TestCase):
     def test(self):
@@ -106,8 +119,8 @@ class Story(Strongbox):
     A document, blog entry, or other text.
     """
     ID = attr(long, default=auto)    
-    channel = link(forward)
-    category = link(forward)
+    channel = link(lambda : Channel)
+    category = link(lambda : Category)
     posted = attr(DateTime, default="now")
     title = attr(str)
     url = attr(str)
@@ -131,13 +144,13 @@ class Story(Strongbox):
         #@TODO: capture timezone from config?
         return self.posted.to_datetime().isoformat()+"-05:00"
     
-# * Category
+
 class Category(Strongbox):
     """
     A category of story.
     """
     ID = attr(long, default=auto)
-    channel = link(forward)
+    channel = link(lambda : Channel)
     name = attr(str)
     
 
@@ -159,9 +172,11 @@ def transform(xml, xsl):
     proc.appendStylesheet(xslObj)
     xmlObj = DefaultFactory.fromString(xml)
     return proc.run(xmlObj)
-  
 
-# * Channel
+
+
+NUM_ON_FRONTPAGE = 5
+
 class Channel(Strongbox):
     """
     A collection of Stories. (A blog, for example)
@@ -188,26 +203,20 @@ class Channel(Strongbox):
         self.sort()
         return zebra.fetch("atom.zb", BoxView(self))
 
-    def OLD_toHTML(self, input=None):  #@TODO: get rid of this?
-        RSS = input or self.toRSS()
-        res = transform(RSS, self.template)
-        res = "\n".join(res.split("\n")[1:])
-        return res
-
     def toHTML(self, input=None):
         self.sort()
         model = {}
         bv = BoxView(self)
         for k in bv.keys():
             model[k] = bv[k]
-        model["stories"] = [BoxView(s) for s in self.stories[:5]]
+        model["stories"] = [BoxView(s) for s in self.stories[:NUM_ON_FRONTPAGE]]
         return zebra.fetch(self.template, model)
         
 
     def archiveList(self):
         res = []
         self.sort()
-        for s in self.stories[10:]:
+        for s in self.stories[NUM_ON_FRONTPAGE:]:
             url = s.url
             if not url.startswith("rants"):
                 url = "rants/" + url
@@ -235,13 +244,6 @@ class Channel(Strongbox):
         print >> open(self.path + "archive.inc.php", "w"), self.archiveList()
         print >> open(self.path + "feed.atom", "w"), self.toAtom()
         
-        
-
-        
-# * db mapping
-Story.channel.type = Channel
-Story.category.type = Category
-Category.channel.type = Channel
 
 SCHEMA = Schema({
     Channel: "rnt_channel",
@@ -254,11 +256,12 @@ SCHEMA = Schema({
     Story.channel: "channelID",
     Story.category: "categoryID",
     Author: "rnt_author",
+    Comment: "rant_comment",
 })
 
 
 
-# * AuthorAuth
+
 """
 Authentication based on rantelope Author class
 """
@@ -308,7 +311,7 @@ class AuthorAuth(Auth):
             res = match[0].ID
         return res
     
-# * StoryIndex
+
 class StoryIndexTest(unittest.TestCase):
     
     def test_basics(self):
@@ -336,7 +339,7 @@ class StoryIndexTest(unittest.TestCase):
         idx.addStory(blank)
 
 
-class StoryIndex(ransacker.SQLiteIndex):
+class StoryIndex(object): # ransacker.SQLiteIndex):
 
     def __init__(self, clerk, filename):
         self.clerk = clerk
@@ -385,90 +388,78 @@ class StoryIndex(ransacker.SQLiteIndex):
         return [self.clerk.fetch(Story, ID) for ID,score in matchIDs]
     
 
+def private(f):
+    f.private = True
+    return f
 
+
+class RantelopeApp(object):
         
-# * RantelopeApp
-
-class RantelopeApp(sixthday.AdminApp):
-
     def __init__(self, clerk, input, user):
-        super(RantelopeApp, self).__init__(clerk, input)
+
+        self.input = input
         self.user = user
 
+        # out is just a buffer:
+        self.out = cStringIO.StringIO()
         
+        self.errors = []
+        self.model = {"errors":[]}
+        for key in self.input.keys():
+            self.model[key] = self.input[key]
+
+        self.clerk = clerk
+
+
+    ## dispatch methods
+
+    def act(self):
+        """
+        ex: actor.act();   actor.act('jump')
+        returns output buffer built by calls to write()
+        """
+        action = self.input.get("action", "").replace(" ", "_")              
+        assert type(action) == str, "action should be string, but was: %s" % action
+        method = getattr(self, "act_" + action, None)
+        if not method: method = getattr(self, action, None)
+        assert method, "Homie don't know how to %s" % action
+        method()
+        return self.out.getvalue()
+
     def act_(self):
         self.list_channel()
 
-    ## authors #########################
 
-    def list_author(self):
-        authors = [BoxView(a) for a in self.clerk.match(Author)]
-        self.generic_list(authors, "lst_author")
+    ## create methods 
 
     def create_author(self):
         self.generic_create(Author, "frm_author")
 
-    def edit_author(self):
-        self.generic_show(Author, "frm_author")
-
-    def save_author(self):
-        a = self._getInstance(Author)
-        if self.input.get("password"):
-            a.password = self.input["password"]
-        self.clerk.store(a)
-        self.redirect(action="list&what=author")
-
-
-    ## channels ########################
-
-    def list_channel(self):
-        channels = [BoxView(c) for c in self.clerk.match(Channel)]
-        self.generic_list(channels, "lst_channel")
-
     def create_channel(self):
         self.generic_create(Channel, "frm_channel")
-        
-    def edit_channel(self):
-        self.generic_show(Channel, "frm_channel")
 
-    def show_channel(self):
-        chan = self.clerk.fetch(Channel, long(self.input["ID"]))
-        model = {"errors":[]}
-        model.update(BoxView(chan))
-
-        print >> self, zebra.fetch("sho_channel", model)
-
-    def save_channel(self):
-        chan = self.generic_save(Channel)
-        if chan.stories:
-            chan.writeFiles()
-        self.redirect(action='show&what=channel&ID=%s' % chan.ID)
-
-    ## categories ######################
-
-    def save_category(self):
-        cat = self.generic_save(Category)
-        self.redirect(action='show&what=channel&ID=%s' % cat.channel.ID)
-
-    def edit_category(self):
-        self.generic_show(Category, "frm_category")  
-
-    ## stories #########################
-
-    def studyChannel(self, channelID):
-        assert channelID, "must supply valid channelID"
-        chan = self.clerk.fetch(Channel, channelID)
-        self.model["categories"] = [(c.ID, c.name) for c in chan.categories]
-        # @TODO: will need to limit number of past stories soon.
-        self.model["stories"] = [BoxView(s) for s in chan.stories]
-	self.model["stories"].sort(lambda a,b: -cmp(a["posted"], b["posted"]))
-        return chan
+    def generic_create(self, klass, template):
+        self._showObject(klass(), template)
 
     def create_story(self):
         c = self.studyChannel(self.input.get("channelID"))
         self.model["siteurl"] = c.url
         self.generic_create(Story, "frm_story")
-        
+
+    ## edit/show methods ####################
+
+    def edit_author(self):
+        self.generic_show(Author, "frm_author")
+
+    def edit_channel(self):
+        self.generic_show(Channel, "frm_channel")
+
+    def edit_category(self):
+        self.generic_show(Category, "frm_category")  
+
+    def show_story(self):
+        self.generic_show(Story, "sho_story")
+
     def edit_story(self):
         s = self.clerk.fetch(Story, self.input["ID"])
         c = self.studyChannel(s.channel.ID)
@@ -476,6 +467,56 @@ class RantelopeApp(sixthday.AdminApp):
         self.model["stories"] = []
         self.model["channelID"] = c.ID
         self.generic_show(Story, "frm_story")
+
+    def generic_show(self, klass, template):
+        self._showObject(self._getInstance(klass), template)
+
+    def show_channel(self):
+        chan = self.clerk.fetch(Channel, long(self.input["ID"]))
+        model = {"errors":[]}
+        model.update(BoxView(chan))
+        self.write(zebra.fetch("sho_channel", model))
+
+
+    ## list methods #######################
+
+    def list_author(self):
+        authors = [BoxView(a) for a in self.clerk.match(Author)]
+        self.generic_list(authors, "lst_author")
+
+
+    def list_comments(self):
+        self.generic_list([BoxView(c) for c in self.clerk.match(Comment)][:100], "lst_comment")
+
+    def list_channel(self):
+        channels = [BoxView(c) for c in self.clerk.match(Channel)]
+        self.generic_list(channels, "lst_channel")
+
+    def generic_list(self, listOfDicts, template):
+        self.model["each"] = listOfDicts
+        self._runZebra(template)
+        
+
+    ## save methods
+
+
+    def save_author(self):
+        a = self._getInstance(Author)
+        if self.input.get("password"):
+            a.password = self.input["password"]
+        self.clerk.store(a)
+        self.redirect(action="list_author")
+
+    def save_channel(self):
+        chan = self.generic_save(Channel)
+        if chan.stories:
+            chan.writeFiles()
+        self.redirect(action='show_channel&ID=%s' % chan.ID)
+
+
+    def save_category(self):
+        cat = self.generic_save(Category)
+        self.redirect(action='show_channel&ID=%s' % cat.channel.ID)
 
     def save_story(self):
         ## first save to database:
@@ -496,9 +537,17 @@ class RantelopeApp(sixthday.AdminApp):
         self.clerk.store(story)
 
         ## go back to the channel:
-        self.redirect(action='create&what=story&channelID='
+        self.redirect(action='create_story&channelID='
                             + str(story.channel.ID))        
-        
+
+
+    def generic_save(self, klass):
+        obj = self._getInstance(klass)
+        return self.clerk.store(obj)
+
+
+    ## delete ###############################
+
     def delete_story(self):
         ## first save to database:
         story = self._getInstance(Story)
@@ -509,28 +558,144 @@ class RantelopeApp(sixthday.AdminApp):
             assert 0, "this story belongs to " + story.author.username
 
         ## go back to the channel:
-        self.redirect(action='create&what=story&channelID='
+        self.redirect(action='create_story&channelID='
                             + str(story.channel.ID))        
         
-    def show_story(self):
-        self.generic_show(Story, "sho_story")
+
+
+    ## channels ########################
+
+
+    def studyChannel(self, channelID):
+        assert channelID, "must supply valid channelID"
+        chan = self.clerk.fetch(Channel, channelID)
+        self.model["categories"] = [(c.ID, c.name) for c in chan.categories]
+        # @TODO: will need to limit number of past stories soon.
+        self.model["stories"] = [BoxView(s) for s in chan.stories]
+	self.model["stories"].sort(lambda a,b: -cmp(a["posted"], b["posted"]))
+        return chan
+
 
     ## publishing ######################
         
     def act_publish(self):
         ## now write the XML file:
         publish(self.clerk, self.input["channelID"])
-        self.redirect(action="create&what=story&status=published&channelID="
+        self.redirect(action="create_story&status=published&channelID="
                       + self.input["channelID"])
 
 
-# * runTests
+
+
+    ###[ private methods ]###########################################
+
+
+    def _getInstance(self, klass):
+        if self.input.get("ID"):
+            obj = self.clerk.fetch(klass, self.input["ID"])
+        else:
+            obj = klass()
+        obj.noisyUpdate(**self.input.form)
+        return obj
+        
+
+    def _runZebra(self, template):
+        try:
+            self.write(zebra.fetch(template, self.model))
+        except IOError:
+            self.complain("unable to load %s.zb" % template)
+
+
+    def _showObject(self, obj, template):
+        self.consult(BoxView(obj))
+        self.consult(self.input) # so we can pre-populate via url
+        self._runZebra(template)
+
+
+
+    ####### This used to be App ######################################
+        
+    """
+    A base class for web pages that act differently based on a parameter.
+    """
+    
+    #@TODO: subclass that uses Signature to pass values to act_XXX?
+
+    """
+    App(input) where input=a dict, usually with a key called 'action'.
+    
+    This class is designed to make it easy to write classes that can
+    be called directly through a URL. It's just a base class, and only
+    provides enough logic to handle dispatching actions right now.    
+    
+    The input dict should have a key called "action" that will tell the
+    actor what to do. The App subclass must have a method caled act_XXX
+    where XXX is whatever "action" mapped to.
+    """
+
+    ## public methods ############################################
+
+
+    def complain(self, problems):
+        """
+        Generic error handler. Pass it a string or list of strings.
+        """
+        if type(problems)==type(""):
+            probs = [problems]
+        else:
+            probs = problems
+        for prob in probs:
+            self.errors.append(prob)
+            self.model["errors"].append({"error":prob})
+
+    def consult(self, model):
+        """
+        updates the App's internal model based on the
+        passed in model dictionary.
+        """
+        for item in model.keys():
+            self.model[item] = model[item]
+
+
+    def redirect(self, url=None, action=None):
+        """
+        Throws weblib.Redirect
+        """
+        if not ((url is not None) ^ (action is not None)):
+            raise TypeError, "syntax: actor.redirect(url XOR action)"
+        if url:
+            where=url
+            
+        else:
+            #@TODO: why __weblib_ignore_form__ again?
+            where="?action=%s&__weblib_ignore_form__=1" % (action)
+            
+        raise weblib.Redirect, where
+
+
+    def write(self, what):
+        """
+        write something to output..
+        """
+        self.out.write(what)
+
+
+
+
+
+
+
+############## END OF RantelopeApp #######################################
+
+
+
+
 def runTests(*x):
     sys.argv.remove("--test")
     unittest.main()
 
 
-# * addFile
+
 def sqlDate(rantDate):
     if rantDate.startswith("["):
         # new style: [2006.0210 20:17]
@@ -568,13 +733,11 @@ def addFile(filename):
     else:
         print ".rantelope file not found: can't determine relative path"
 
-# * publish
+
 def publish(CLERK, channelID):
     chan=CLERK.fetch(Channel, channelID)
     chan.writeFiles()
     
-
-# * parseCommandLine
 
 def parseCommandLine():
     parser = OptionParser()
@@ -585,8 +748,7 @@ def parseCommandLine():
     
     return options, args
 
-# * --
-if __name__=="__main__":
+def main():
     options, args = parseCommandLine()
     if options.addFile:
         addFile(options.addFile)
@@ -594,6 +756,10 @@ if __name__=="__main__":
         #@TODO: fix path kludge
         os.chdir("/home/sabren/web/withoutane.com/rantelope")
         from sqlRantelope import clerk
+
         clerk.schema = SCHEMA
         #import pdb; pdb.set_trace()
         publish(clerk, 1)
+
+if __name__=="__main__":
+    main()

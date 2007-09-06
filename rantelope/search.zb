@@ -11,7 +11,7 @@
 
 * for results:
     * body:
-        <p><a href="rantelope.app?action=show&what=story&ID={:ID:}">
+        <p><a href="rantelope.app?action=show_story&ID={:ID:}">
            {:title:}</p>
 * none:
     * if query:

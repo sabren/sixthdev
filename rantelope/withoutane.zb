@@ -4,9 +4,9 @@
 * for stories:
     <div class="entry">
     <h1>{:xmlEncode(title):}</h1>
-    {:description:}
+    {:content:}
     * if url:
-        <div class="tagline"><a href="/rants/{:url:}">{:posted:}</a></div>
+        <div class="tagline"><a href="{:url:}">{:posted:}</a></div>
     * el:
         <div class="tagline">{:posted:}</div>
     </div>

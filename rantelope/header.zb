@@ -51,7 +51,8 @@ h1 {
 
 <table border="0" padding="0" spacing="0" width="100%" class="navbar">
 <tr><td><a accesskey="c" href="rantelope.app">[c]hannels</a>
-| <a href="rantelope.app?action=list&what=author">authors</a>
+| <a href="rantelope.app?action=list_author">authors</a>
+| <a href="rantelope.app?action=list_comments">comments</a>
 | <a href="search.app">search</a>
 * if scope.get('channelID'):
     | <a accesskey="p" href="rantelope.app?action=publish&channelID={:channelID:}">[p]ublish</a> |

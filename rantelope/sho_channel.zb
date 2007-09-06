@@ -36,9 +36,9 @@
 </table>
 
 
-[<a href="rantelope.app?action=edit&what=channel&ID={:ID:}">edit configuration</a>]
+[<a href="rantelope.app?action=edit_channel&ID={:ID:}">edit configuration</a>]
 &nbsp;&nbsp;
-[<a href="rantelope.app?action=create&what=story&channelID={:ID:}">add story</a>]
+[<a href="rantelope.app?action=create_story&channelID={:ID:}">add story</a>]
 
 <hr>
 <p><b>Categories in this channel:</b></p>
@@ -47,16 +47,15 @@
     * head:
         <ul>
     * body:
-        <li><a href="rantelope.app?action=edit&what=category&ID={:ID:}">{:name:}</a></li>
+        <li><a href="rantelope.app?action=edit_category&ID={:ID:}">{:name:}</a></li>
     * foot:
         </ul>
 
 <b>add category:</b>
 <form method="post" action="rantelope.app">
-<input type="hidden" name="what" value="category">
 <input type="hidden" name="channelID" value="{:ID:}">
 <input type="text" name="name" value="">
-<input type="submit" name="action" value="save">
+<input type="submit" name="action" value="save channel">
 </form>
 
 

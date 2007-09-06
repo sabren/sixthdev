@@ -10,7 +10,6 @@
 
 
 <form action="rantelope.app" method="POST">
-  <input type="hidden" name="what" value="author">
 
 * if ID:
     <b>edit this author:</b>
@@ -35,5 +34,5 @@
 
   <p>new plaintext password: {:html.text("password",""):}</p>
 
-  <input name="action" value="save" type="submit">
+  <input name="action" value="save author" type="submit">
 </form>

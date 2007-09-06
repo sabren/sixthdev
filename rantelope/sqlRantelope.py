@@ -21,6 +21,17 @@ clerk = clerks.CallbackClerk(sto, SCHEMA)
 ## search engine stuff ############################
 import atexit
 from rantelope import StoryIndex
-index = StoryIndex(clerk, "db/index.rk")
-clerk.onStore(Story, index.addStory)
-atexit.register(index.close)
+##############################
+#
+# ! ! ! ! WARNING ! ! ! !
+#
+# be careful before changing this path: the full path
+# is currently needed because of onerant.app calling
+# this file through importing rantelope on the OTHER
+# blogs, eg cashflowblogging.com
+#
+# @TODO: clean this mess up!
+#
+#index = StoryIndex(clerk, "/home/sabren/web/withoutane.com/rantelope/db/index.rk")
+#clerk.onStore(Story, index.addStory)
+#atexit.register(index.close)

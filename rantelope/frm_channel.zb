@@ -7,7 +7,6 @@
 
 
 <form action="rantelope.app" method="POST">
-<input type="hidden" name="what" value="channel">
 
 * exec:
     from zebra import html
@@ -45,5 +44,5 @@
 
 </table>
 
-<input name="action" value="save" type="submit">
+<input name="action" value="save channel" type="submit">
 </form>

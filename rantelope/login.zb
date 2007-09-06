@@ -13,7 +13,7 @@ th {
 }
 </style>
 <script language="javascript">
-function window.onLoad() {
+window.onload = function () {
     document.forms[0].auth_username.focus();
 }
 </script>

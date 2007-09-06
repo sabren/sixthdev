@@ -14,7 +14,7 @@
 {:description:}
 
 <p>
-[ <a href="rantelope.app?action=edit&what=story&ID={:ID:}">edit</a> ]
+[ <a href="rantelope.app?action=edit_story&ID={:ID:}">edit</a> ]
 </p>
 <hr/>
 
@@ -26,7 +26,7 @@
 <hr/>
 
 <form action="rantelope.app" method="POST">
-  <input type="hidden" name="what" value="comment">
+
   {:html.hidden("storyID", ID):}
   <b>add a comment:</b>
 
@@ -41,5 +41,5 @@
             rows="7" cols="40"></textarea></td></tr>
   </table>
   <br/>
-  <input name="action" value="save" type="submit">
+  <input name="action" value="save comment" type="submit">
 </form>
