@@ -8,10 +8,14 @@ leave other settings to the defaults
 
 click download
 csv
-saves as MFAS
+saves as MFAS.csv
+
+copy to p:/bankdata
+
 
 now run:
-   python amex.py MFAS
+   dos2unix MFAS.csv
+   python amex.py MFAS.csv > mfas.led
 
 and copy/paste the transactions into the ledger.
 
@@ -45,7 +49,7 @@ if __name__=="__main__":
             data = line.split(",")
             init_date = fixdate(unquote(data[2]))
 
-            print "%s amex {%s}" % ( init_date, real_date)
+            print "%s=%s amex" % ( init_date, real_date)
 
         if line.startswith("Totals"):
             data = line.split(",")
