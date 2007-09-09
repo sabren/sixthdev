@@ -71,7 +71,7 @@ class TransactionTest(unittest.TestCase):
             party = "fred flintstone",
             memo = ": owed him money",
             cleared = "2005/05/02",
-            isReconciled = False,
+            state='',
             items = [])
         t.addItem("liability:fred", "10.00"),
         self.assertRaises(ValueError, t.validate)
@@ -97,7 +97,7 @@ class TransactionTest(unittest.TestCase):
         t = Transaction(posted="2005/01/01",
                         checknum="232",
                         party="asdf",
-                        isReconciled = True,
+                        state = '*',
                         memo=": xxx", items = [
             Item(account="asset:cash", amount="-600"),
             Item(account="expense:a",  amount="2"),

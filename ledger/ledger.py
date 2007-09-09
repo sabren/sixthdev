@@ -77,8 +77,10 @@ def parseDate(datestr):
 def parseLedger(text):
     entry = None
     res = []
+    lineNum = 0
     charPos = 2 # we start at 0, emacs starts at 1, plus we're always 1 char behind
     for rawline in text.split("\n"):
+        lineNum += 1
         line = rawline.strip() 
         if line == "":
             if entry:
@@ -99,6 +101,7 @@ def parseLedger(text):
                                 memo = match["memo"],
                                 charPos=charPos)
         elif reItemLine.match(line):
+            assert entry, "got item before entry on line %s" % lineNum
             match = reItemLine.match(line).groupdict()
             entry.addItem(match["account"], match["amount"], match['state'], charPos)
 
@@ -169,7 +172,7 @@ class Transaction:
     def addCommentLine(self, line):
         self.comment.addCommentLine(line)
 
-    def addItem(self, account, amount_in, state, charPos):
+    def addItem(self, account, amount_in, state='', charPos=0):
         implied = False
         amount = amount_in
         if amount is None:
@@ -184,6 +187,12 @@ class Transaction:
                                charPos=charPos))
 
     def asEmacs(self, account):
+
+        def dequote(s):
+            return s.replace('"',r'\"').replace("'",r"\\'")
+
+        
+        
         _ = ' '
         yield '("<stdin>" '  # @TODO: filename
         yield str(self.charPos)
@@ -197,7 +206,8 @@ class Transaction:
         yield _
         yield ('"%s"' % self.checknum) if self.checknum else 'nil'
         yield _
-        yield '"%s"' % ((self.party + ' ' + self.memo) if self.memo else self.party)
+        yield '"%s"' % dequote((self.party + ' ' + self.memo)
+                               if self.memo else self.party)
         yield '\n'
         for item in self.items:
             if item.account.startswith(account):
@@ -216,7 +226,7 @@ class Transaction:
     def clone(self):
         return Transaction(posted =self.posted, party=self.party,
                            memo=self.memo, cleared=self.cleared,
-                           isReconciled = self.isReconciled,
+                           state = self.state,
                            items = [i.clone() for i in self.items])
 
     def effectOnAccount(self, account):
