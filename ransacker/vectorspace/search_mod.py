@@ -6,11 +6,10 @@ This should index and search and do all kinds of fun stuff
 """
 
 import sys
-try:
-    from Numeric import *
-except:
-    from numpy import *
+
+from numpy import *
 import re
+import string
 from string import lower
 from stemmer import PorterStemmer
 from vecmath import vcos
@@ -70,7 +69,7 @@ class VectorSearchEngine(object):
         index = 0
 
         for this_vec in self.doc_vecs:
-            assert isinstance(this_vec, ArrayType)
+            assert isinstance(this_vec, ndarray)
             cosine = vcos(this_vec, in_qvec)
             if cosine > self.threshold:
                 cosines[index] = cosine

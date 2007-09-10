@@ -1,9 +1,9 @@
 
 __ver__="$Id$"
 
-import anydbm
+import sqlite3 as sqlite
 import ransacker
-
+import os
 
 class SQLiteIndex(ransacker.Index):
     """
@@ -14,7 +14,6 @@ class SQLiteIndex(ransacker.Index):
         return s.replace("'","''")
 
     def __init__(self, path):
-        import sqlite, os
         new = not os.path.exists(path)
         self.dbc = sqlite.connect(path)
         self.cur = self.dbc.cursor()
