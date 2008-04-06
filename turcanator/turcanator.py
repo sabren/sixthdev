@@ -33,8 +33,8 @@ NoteOff	= 0x80
 # at some point, but the main purpose is to ease the
 # transition from pygame to wxpython.
 (EXIT, UP, DOWN, UPFAST, DOWNFAST, SETSTART, SETSTOP, TOSTART, TOEND,
- PLAY, STOP, ROTATE_HANDS, FASTER, SLOWER, METRONOME
- )= range(15)
+ PLAY, STOP, ROTATE_HANDS, FASTER, SLOWER, METRONOME, SEPRIGHT, SEPLEFT
+ )= range(17)
 
 
 
@@ -88,6 +88,7 @@ class AutoPlayer(object):
     def stop(self):
         if self.playing:
             self.playing.stop()
+        self.beat = -1
         
     def play(self):
         self.stop()
@@ -281,6 +282,8 @@ class PyGameUI(AbstractPianoArt):
             pygame.K_TAB: ROTATE_HANDS,
             pygame.K_F2: FASTER,
             pygame.K_F3: SLOWER,
+            pygame.K_LEFT: SEPLEFT,
+            pygame.K_RIGHT: SEPRIGHT,
         }
 
 
@@ -360,8 +363,17 @@ def main(ui):
             elif ui.hand == RIGHT_HAND: ui.hand = LEFT_HAND
             else: ui.hand = RIGHT_HAND
             ui.drawScore(score)
-            
 
+        elif e == SEPLEFT:
+            ui.sep -= 1
+            if ui.sep <= 0 : ui.sep = 0
+            ui.drawScore(score)
+        elif e == SEPRIGHT:
+            maxsep = 80 # @TODO: FIX!
+            ui.sep += 1
+            if ui.sep >= maxsep : ui.sep = maxsep
+            ui.drawScore(score)
+            
         # player support:
         elif e == PLAY:
             player.play()

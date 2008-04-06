@@ -21,6 +21,8 @@ class PianoRollFrame(wx.Frame, AbstractPianoArt):
             wx.WXK_TAB: ROTATE_HANDS,
             wx.WXK_F2 : SLOWER,
             wx.WXK_F3: FASTER,
+            wx.WXK_LEFT: SEPLEFT,
+            wx.WXK_RIGHT: SEPRIGHT,
             ord('P'): PLAY,
             ord('M'): METRONOME,
             ord('['): SETSTART,
