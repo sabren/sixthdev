@@ -36,7 +36,7 @@ if __name__=="__main__":
         if item.num:
             print "(%s)" % item.num,
         print xpayee.get(item.payee, item.payee.lower())
-        print "    asset:checking %30s" % item.amount
+        print "    asset:checking %33s" % item.amount
         print "    other:account"
         print
 
