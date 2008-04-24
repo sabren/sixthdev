@@ -1,5 +1,47 @@
 #!/usr/bin/env python2.5
-# ledger.py
+"""
+Ledger is a text-based double-entry account program:
+
+  http://www.newartisans.com/software/ledger.html
+  http://sourceforge.net/projects/ledger/
+  
+This is a python module for working with files in a
+subset of the ledger syntax. It currently handles
+basic transactions and comments.
+"""
+LICENSE=\
+'''
+Copyright (c) 2008 Sabren Enterprises Inc
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    
+    * Redistributions in binary form must reproduce the above
+      copyright notice, this list of conditions and the following
+      disclaimer in the documentation and/or other materials provided
+      with the distribution.
+    
+    * Neither the name of the <ORGANIZATION> nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
+TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
+USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+'''
 from datetime import date
 from decimal import Decimal
 from handy import trim
@@ -11,20 +53,13 @@ import copy
 import sys, os
 import re
 
-def balance(book, account):
-    return sum([t.effectOnAccount(account) for t in book])
-
-def bankView(book):
-    res = [t.clone() for t in transactionsOnly(book)]
-    for item in res:
-        if item.cleared:
-            #print item.posted , "<----", item.cleared
-            item.posted = item.cleared
-            item.cleared = None            
-    res.sort(lambda a, b: cmp(parseDate(a.posted), parseDate(b.posted)))
-    return res
+## object model ######################################################
 
 class Comment:
+    """
+    A comment inside the ledger file.
+    Can be freestanding or part of a Transaction.
+    """
     def __init__(self):
         self.lines = []
 
@@ -37,28 +72,10 @@ class Comment:
     def effectOnAccount(self, account):
         return 0
 
-def dailyHistory(book, account):
-    return history(book, account, groupField=transactionDay)
-
-
-def emacsView(book, account):
-    yield "("
-    for item in transactionsOnly(book):
-        if item.state == '*':
-            continue
-        elif item.effectOnAccount(account):
-            yield "".join(item.asEmacs(account))
-    yield ")"
-
-def history(book, account, groupField):
-    total = 0
-    res = []
-    for month, mbook in groupby(transactionsOnly(book), groupField):
-        total += balance(mbook, account)
-        res.append((month, total))
-    return res
-
 class Item(Strongbox):
+    """
+    A line item inside a Transaction.
+    """
     account = attr(str)
     amount = attr(Decimal)
     implied = attr(bool, default=False)
@@ -68,71 +85,12 @@ class Item(Strongbox):
     def clone(self):
         return Item(account=self.account, amount=Decimal(self.amount))
 
-def monthlyHistory(book, account):
-    return history(book, account, groupField=transactionMonth)
-
-def parseDate(datestr):
-    return [int(x) for x in datestr.split("/")]
-
-def parseLedger(text):
-    entry = None
-    res = []
-    lineNum = 0
-    charPos = 2 # we start at 0, emacs starts at 1, plus we're always 1 char behind
-    for rawline in text.split("\n"):
-        lineNum += 1
-        line = rawline.strip() 
-        if line == "":
-            if entry:
-                res.append(entry)
-            entry = None
-        elif line.startswith(";"):
-            if entry is None:
-                entry = Comment()
-            entry.addCommentLine(line)
-        elif reHeadLine.match(line):
-            match = reHeadLine.match(line).groupdict()
-            entry = Transaction(posted=match["date"],
-                                state = match["state"],
-                                party = match["party"].strip(),
-                                cleared = (match["cleared"]
-                                           or match["effective"]),
-                                checknum = match["checknum"],
-                                memo = match["memo"],
-                                charPos=charPos)
-        elif reItemLine.match(line):
-            assert entry, "got item before entry on line %s" % lineNum
-            match = reItemLine.match(line).groupdict()
-            entry.addItem(match["account"], match["amount"], match['state'], charPos)
-
-        charPos += len(rawline)+1 # +1 for len('\n')
-    return res
-
-reHeadLine = re.compile(
-    r"""
-    (?P<date>\d{4}/\d{2}/\d{2})(\=(?P<effective>\d{4}/\d{2}/\d{2}))?
-    (?P<state>\s+[*|!])?
-    (\s+[(](?P<checknum>\d+)[)])? # check number.. discard for now
-    \s+
-    (?P<party>([^:{])+)
-    (\{(?P<cleared>\d{4}/\d{2}/\d{2})\}\s*)?
-    (?P<memo>:.*)?
-    """, re.VERBOSE)
-
-reItemLine = re.compile(
-    r"""
-    ^
-    \s*
-    (?P<state>\s+[*|!])?
-    \s*
-    (?P<account>\w+(:\w+)*)
-    \s*
-    (?P<amount>-?\d+\.\d{2})?
-    """, re.VERBOSE)
-
 class Transaction:
-    def __init__(self, posted, party, checknum=None, memo=None, cleared=None,
-                 state='',  items = None, charPos=0):
+    """
+    An individual transaction. Contains Items and possibly a Comment.
+    """
+    def __init__(self, posted, party, checknum=None, memo=None,
+                 cleared=None, state='',  items = None, charPos=0):
         self.posted = posted
         self.party = party
         self.memo = memo
@@ -213,7 +171,9 @@ class Transaction:
             if item.account.startswith(account):
                 yield '  (%s "%s" "%s" %s)' % (
                     item.charPos, item.account, item.amount,
-                    't' if item.state=='*' else 'pending' if item.state=='!' else 'nil' )
+                    ('t' if item.state=='*'
+                     else ('pending' if item.state=='!'
+                           else 'nil' )))
         yield ")"
         
 
@@ -239,6 +199,126 @@ class Transaction:
     def validate(self):
         if not self.total() == 0:
             raise ValueError("total should be 0, was %s" % self.total())
+
+
+## parser ############################################################
+
+reHeadLine = re.compile(
+    r"""
+    (?P<date>\d{4}/\d{2}/\d{2})(\=(?P<effective>\d{4}/\d{2}/\d{2}))?
+    (?P<state>\s+[*|!])?
+    (\s+[(](?P<checknum>\d+)[)])? # check number.. discard for now
+    \s+
+    (?P<party>([^:{])+)
+    (\{(?P<cleared>\d{4}/\d{2}/\d{2})\}\s*)?
+    (?P<memo>:.*)?
+    """, re.VERBOSE)
+
+reItemLine = re.compile(
+    r"""
+    ^
+    \s*
+    (?P<state>\s+[*|!])?
+    \s*
+    (?P<account>\w+(:\w+)*)
+    \s*
+    (?P<amount>-?\d+\.\d{2})?
+    """, re.VERBOSE)
+
+def parseDate(datestr):
+    return [int(x) for x in datestr.split("/")]
+
+def parseLedger(text):
+    """
+    returns a list containing Comments and Transactions
+    """
+    entry = None
+    res = []
+    lineNum = 0
+    charPos = 2 # we start at 0, emacs starts at 1
+                # plus we're always 1 char behind (because...?)
+    for rawline in text.split("\n"):
+        lineNum += 1
+        line = rawline.strip() 
+        if line == "":
+            if entry:
+                res.append(entry)
+            entry = None
+        elif line.startswith(";"):
+            if entry is None:
+                entry = Comment()
+            entry.addCommentLine(line)
+        elif reHeadLine.match(line):
+            match = reHeadLine.match(line).groupdict()
+            entry = Transaction(posted=match["date"],
+                                state = match["state"],
+                                party = match["party"].strip(),
+                                cleared = (match["cleared"]
+                                           or match["effective"]),
+                                checknum = match["checknum"],
+                                memo = match["memo"],
+                                charPos=charPos)
+        elif reItemLine.match(line):
+            assert entry, "got item before entry on line %s" % lineNum
+            match = reItemLine.match(line).groupdict()
+            entry.addItem(match["account"], match["amount"],
+                          match['state'], charPos)
+
+        charPos += len(rawline)+1 # +1 for len('\n')
+    return res
+
+
+
+
+
+## helper functions and reports ######################################
+
+def balance(book, account):
+    return sum([t.effectOnAccount(account) for t in book])
+
+def bankView(book):
+    """
+    This shows the bank's view of the ledger. That is,
+    it sorts by the effective or cleared-on date. This
+    is useful when trying to reconcile with a bank
+    statement.
+    """
+    res = [t.clone() for t in transactionsOnly(book)]
+    for item in res:
+        if item.cleared:
+            #print item.posted , "<----", item.cleared
+            item.posted = item.cleared
+            item.cleared = None            
+    res.sort(lambda a, b: cmp(parseDate(a.posted), parseDate(b.posted)))
+    return res
+
+
+def dailyHistory(book, account):
+    return history(book, account, groupField=transactionDay)
+
+def emacsView(book, account):
+    """
+    This attempts to mimic ledger's --emacs flag.
+    """
+    yield "("
+    for item in transactionsOnly(book):
+        if item.state == '*':
+            continue
+        elif item.effectOnAccount(account):
+            yield "".join(item.asEmacs(account))
+    yield ")"
+
+def history(book, account, groupField):
+    total = 0
+    res = []
+    for month, mbook in groupby(transactionsOnly(book), groupField):
+        total += balance(mbook, account)
+        res.append((month, total))
+    return res
+
+
+def monthlyHistory(book, account):
+    return history(book, account, groupField=transactionMonth)
 
 def transactionDay(trans):
     return trans.posted
