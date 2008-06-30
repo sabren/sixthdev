@@ -33,11 +33,17 @@ class ParserTest(unittest.TestCase):
         assert len(book[0].lines) == 1
         assert isinstance(book[1], Comment)
         self.assertEquals(len(book[1].lines), 3)
-        assert isinstance(book[2], Transaction)
-        assert book[2].posted == "2006/01/01"
-        self.assertEquals(book[2].cleared, "2006/01/02")
-        assert book[2].items[0].amount == -50
-        assert book[2].items[1].amount ==  50
+
+        t = book[2]
+        assert isinstance(t, Transaction)
+        assert t.isReconciled
+        assert t.posted == "2006/01/01"
+        self.assertEquals(t.cleared, "2006/01/02")
+        assert t.items[0].amount == -50
+        assert t.items[1].amount ==  50
+        assert t.items
+
+        
         assert isinstance(book[3], Transaction)
         assert book[3].memo.count("unreconciled")
         assert book[3].posted == "2006/01/02"
@@ -176,6 +182,68 @@ class BankViewTest(unittest.TestCase):
                 expense:asdf                               10.00
                 asset:checking                            -10.00
             """))
+
+
+class MergeTest(unittest.TestCase):
+    def test(self):
+        book1 = parseLedger(trim(
+            """
+            2008/03/01 mar
+                a:b                                        10
+                x:y
+
+            ; comment a
+            
+            2008/05/01 may
+                a:b                                       -10
+                x:y
+            """))
+
+        assert len(book1)==3
+
+        book2 = parseLedger(trim(
+            """
+            ; comment b
+            
+            2008/04/01 apr
+                a:b                                        10
+                x:y
+
+            ; comment c
+            
+            2008/06/01 jun
+                a:b                                       -10
+                x:y
+            """))
+
+        assert len(book2) == 4
+
+        book3 = merged(book1,book2)
+
+        try:
+            self.assertEquals(len(book1)+len(book2), len(book3))
+
+            # should be:
+            it = book3.__iter__()
+
+            assert it.next().party=='mar'
+            assert str(it.next()).count("comment b")
+            assert it.next().party=='apr'
+            assert str(it.next()).count("comment a")
+            assert it.next().party=='may'
+            assert str(it.next()).count("comment c")
+            assert it.next().party=='jun'
+            
+        except:
+            print
+            print "merge test failed. here's the merged book:"
+            print "------------------------------------------"
+            for item in book3: print item
+            raise
+    
+        
+
+
 
     
 # * --

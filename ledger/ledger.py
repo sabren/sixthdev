@@ -89,32 +89,36 @@ class Transaction:
     """
     An individual transaction. Contains Items and possibly a Comment.
     """
-    def __init__(self, posted, party, checknum=None, memo=None,
-                 cleared=None, state='',  items = None, charPos=0):
+    def __init__(self, posted, party, checknum=None, memo=None, preComment=None,
+                 cleared=None, state='',  items = None, lineNum=0, charPos=0):
         self.posted = posted
         self.party = party
         self.memo = memo
         self.cleared = cleared
         self.state = state.strip() if state else ''
-        self.isReconciled = bool(state=='*')
+        self.isReconciled = bool(self.state=='*')
         self.items = items or []
         self.validate()
         self.comment = Comment()
         self.checknum = checknum
+        self.lineNum = lineNum
         self.charPos = charPos
+        self.preComment = preComment
 
     def __str__(self):
+
         res = []
-        res.append(self.posted + " ")
-        if self.isReconciled:
-            res.append("* ")
-        if self.checknum:
-            res.append("(%s) " % self.checknum)
+        
+        if self.preComment:
+            res.append(str(self.preComment))
+            
+        res.append(self.posted)
+        if self.cleared: res.append("=%s" % self.cleared)
+        res.append(" ")
+        if self.isReconciled: res.append("* ")
+        if self.checknum: res.append("(%s) " % self.checknum)
         res.append(self.party)
-        if self.cleared:
-            res.append(" {%s}" % self.cleared)
-        if self.memo:
-            res.append(" " + self.memo)
+        if self.memo: res.append(" " + self.memo)
         res.append("\n")
         for i in self.items:
             if i.implied:
@@ -206,7 +210,7 @@ class Transaction:
 reHeadLine = re.compile(
     r"""
     (?P<date>\d{4}/\d{2}/\d{2})(\=(?P<effective>\d{4}/\d{2}/\d{2}))?
-    (?P<state>\s+[*|!])?
+    (?P<state>\s+[\*|!])?
     (\s+[(](?P<checknum>\d+)[)])? # check number.. discard for now
     \s+
     (?P<party>([^:{])+)
@@ -250,6 +254,10 @@ def parseLedger(text):
             entry.addCommentLine(line)
         elif reHeadLine.match(line):
             match = reHeadLine.match(line).groupdict()
+            preComment = None
+            if entry is not None:
+                assert isinstance(entry, Comment)
+                preComment = entry
             entry = Transaction(posted=match["date"],
                                 state = match["state"],
                                 party = match["party"].strip(),
@@ -257,7 +265,9 @@ def parseLedger(text):
                                            or match["effective"]),
                                 checknum = match["checknum"],
                                 memo = match["memo"],
-                                charPos=charPos)
+                                preComment = preComment,
+                                lineNum = lineNum,
+                                charPos=charPos)        
         elif reItemLine.match(line):
             assert entry, "got item before entry on line %s" % lineNum
             match = reItemLine.match(line).groupdict()
@@ -293,6 +303,18 @@ def bankView(book):
     return res
 
 
+def checkTransactionOrder(book):
+    last =None
+    for t in transactionsOnly(book):
+        if t.party == 'opening balance' and last is None:
+            continue # b/c sometimes we have transactions from december up front
+        tdate = parseDate(t.posted)
+        if tdate < last and last is not None:
+            print "transaction out of order on line %s" % t.lineNum
+            print "---------------------------------" + ("-"*len(str(t.lineNum)))
+            print t
+        last = tdate
+
 def dailyHistory(book, account):
     return history(book, account, groupField=transactionDay)
 
@@ -316,7 +338,55 @@ def history(book, account, groupField):
         res.append((month, total))
     return res
 
+def _genMerge(book1, book2):
+    """
+    recursively merge two books.
+    (assumes they are sorted by date)
+    """
 
+    def holdComments(book, hold):
+        while book:
+            if isinstance(book[0], Transaction):
+                return
+            else: # comments:
+                hold.append(book.pop(0))
+            
+    # wow this is ugly :(
+    # this is messy because we're trying to keep the comments
+    # in place while we merge the others :/
+    hold1 = []
+    hold2 = []
+
+    holdComments(book1, hold1)
+    while book1:
+        holdComments(book2, hold2)
+        if len(book2) == 0:
+            while hold1: yield hold1.pop(0)
+            while hold2: yield hold2.pop(0)
+            break
+        else:
+            d1 = parseDate(book1[0].posted)
+            d2 = parseDate(book2[0].posted)
+            if d1 < d2:
+                while hold1: yield hold1.pop(0)
+                yield book1.pop(0)
+                holdComments(book1, hold1)
+            else:
+                while hold2: yield hold2.pop(0)
+                yield book2.pop(0)
+
+    for c1 in hold1: yield c1
+    for c2 in hold2: yield c2
+
+    # done. one list is empty, empty the other:
+    if book1:
+        for item in book1: yield item
+    else:
+        for item in book2: yield item
+        
+def merged(book1, book2):
+    return list(_genMerge(book1[:], book2[:]))
+    
 def monthlyHistory(book, account):
     return history(book, account, groupField=transactionMonth)
 
@@ -330,8 +400,9 @@ def transactionsOnly(book):
     return [x for x in book if isinstance(x, Transaction)]
 
 
-
 if __name__=="__main__":
+
+    #@TODO: real option parsing here
     
     if "emacs" in sys.argv:
         assert sys.argv[1:5] == ['-f','-','--uncleared','emacs']
@@ -339,6 +410,13 @@ if __name__=="__main__":
         account = sys.argv[5]        
         book = parseLedger(sys.stdin.read())
         for item in emacsView(book, account):
+            print item
+    elif "--check" in sys.argv:
+        fname = sys.argv[-1]
+        checkTransactionOrder(parseLedger(open(fname).read()))
+    elif "--merge" in sys.argv:
+        book1, book2 = [parseLedger(open(f).read()) for f in sys.argv[-2:]]
+        for item in merged(book1, book2):
             print item
     else:
         os.execvp('ledger', sys.argv[1:])
