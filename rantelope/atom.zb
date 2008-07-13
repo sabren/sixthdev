@@ -1,6 +1,6 @@
 * exec:
     from handy import xmlEncode
-    entries = stories[:10]
+    entries = [o for o in stories if o.status!='draft'][:10]
     top = url
 
 <?xml version="1.0"?>
