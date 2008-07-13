@@ -1,0 +1,60 @@
+*#
+*# This file is the zebra template for listing
+*# all comments
+*# 
+*# $Id$ 
+
+* include header;
+
+<script type="text/javascript">
+//<![CDATA[
+
+function set_comment_status(ID, comStatus) {
+    var req = new XMLHttpRequest();
+    req.open("POST", "?action=set_comment_status");
+    req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded"); 
+    req.send("ID="+ID+"&status="+comStatus);
+    req.onreadystatechange = function() { callback(req, comStatus, ID); }
+}
+
+function callback(req, comStatus, ID) {
+    if (req.readyState == 4) {
+        if (req.status == 200) {
+            document.getElementById("comment"+ID).className=comStatus + " comment";
+        } else {
+            alert('status was:' + req.status + '\n\n' + req.responseText); 
+        }
+    }
+}
+//]]></script>
+
+
+
+<h2>comments</h2>
+
+* exec:
+    comments = sorted(each, reverse=True, key=lambda x: x.posted)
+
+* for comments:
+    * exec:
+        from handy import xmlEncode
+        from pytypes import DateTime
+        # convert link to string because might be null. :)
+        if str(link).lower().startswith("http://"):
+            whom = '<a href="' + link + '" rel="nofollow">' + xmlEncode(name) + '</a>'
+        else:
+            whom = name
+        sigline = "by %s [%s] <br/> on <a href='/%s'>/%s</a>" % (whom, posted.toUS(), topic.topic, topic.topic)
+    <div id="comment{:ID:}" class="{:status:} comment">
+          <div>{:xmlEncode(comment):}</div>
+          <div style="padding-top:2px; text-align:right; font-size:75%">{:sigline:}</div>
+          <button onclick="set_comment_status({:ID:}, 'new')" class="new">new</button>
+          <button onclick="set_comment_status({:ID:}, 'approved')" class="approved">approved</button>
+          <button onclick="set_comment_status({:ID:}, 'spam')" class="spam">spam</button>
+          <button onclick="set_comment_status({:ID:}, 'trash')" class="trash">trash</button>
+    </div>
+
+* none:
+    <p><i>No comments found.</i></p>
+
+* include footer;

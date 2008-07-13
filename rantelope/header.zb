@@ -3,9 +3,9 @@
 <title>rantelope 0.02 alpha</title>
 
 <style type="text/css">
-body, p, table { 
+body, table { 
     font-family: verdana;
-    font-size: x-small;
+    font-size: 10pt;
     background: #ffeecc;
 }
 
@@ -42,6 +42,57 @@ h1 {
   margin-left: 0px;
 }
 
+#sidebar {
+  position: absolute;
+  left: 10px;
+  top: 50px;
+  width: 230px;
+}
+
+#main {
+  width: 650px;
+  background: white;
+  margin-left: 250px;
+  padding: 25px;
+}
+
+.entry {
+  padding-top: 25px;
+  padding-bottom: 25px;
+  border-bottom: dashed silver 1px;
+}
+
+.draft {
+  background: #eee;
+  color: #666;
+}
+
+.comment {
+  padding: 5px;
+  margin: 5px;
+  margin-bottom: 20px;
+}
+
+.new {
+  background: #efe;
+  border: solid green 1px;  
+}
+
+.approved {
+  background: #eef;
+  border: solid green 1px;  
+}
+
+.spam {
+  border: solid red 1px;
+  background: #fee;
+}
+
+.trash {
+  border: solid silver 1px;
+  background: #eee;
+}
+
 </style>
 
 </head>
@@ -68,4 +119,6 @@ h1 {
     * body:
         {:error:}
     * foot:
-        <hr>
+        <hr/>
+
+<div id="main">

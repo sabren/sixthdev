@@ -11,6 +11,7 @@ from optparse import OptionParser
 from pytypes import DateTime
 from sixthday import Auth
 from strongbox import *
+import strongbox
 import clerks as arlo
 import crypt
 #import ransacker
@@ -97,13 +98,20 @@ class Author(Strongbox):
 
 class Comment(Strongbox):
     ID = attr(long, default=auto)
-    topicID = long
     posted = attr(DateTime, default="now")
+    # spam comments get marked for later baysean filtering
+    status = attr(str, default='new', okay=['new','approved','spam','trash'])
     name = attr(str)
     mail = attr(str)
     link = attr(str)
     comment = attr(str)
-    
+    topic = strongbox.link(lambda : Topic)
+
+# @TODO: get rid of this
+class Topic(Strongbox):
+    ID = attr(long, default=auto)
+    topic = attr(str)
+    comments = linkset(Comment, "topic")
     
 
 class TagTest(unittest.TestCase):
@@ -122,6 +130,7 @@ class Story(Strongbox):
     channel = link(lambda : Channel)
     category = link(lambda : Category)
     posted = attr(DateTime, default="now")
+    status = attr(str, okay=['published','draft'])
     title = attr(str)
     url = attr(str)
     description = attr(str)
@@ -209,14 +218,14 @@ class Channel(Strongbox):
         bv = BoxView(self)
         for k in bv.keys():
             model[k] = bv[k]
-        model["stories"] = [BoxView(s) for s in self.stories[:NUM_ON_FRONTPAGE]]
+        model["stories"] = [BoxView(s) for s in [o for o in self.stories if o.status !='draft'][:NUM_ON_FRONTPAGE]]
         return zebra.fetch(self.template, model)
         
 
     def archiveList(self):
         res = []
         self.sort()
-        for s in self.stories[NUM_ON_FRONTPAGE:]:
+        for s in [o for o in self.stories if o.status !='draft'][NUM_ON_FRONTPAGE:]:
             url = s.url
             if not url.startswith("rants"):
                 url = "rants/" + url
@@ -257,6 +266,8 @@ SCHEMA = Schema({
     Story.category: "categoryID",
     Author: "rnt_author",
     Comment: "rant_comment",
+    Comment.topic: "topicID",
+    Topic: "rant_topic",
 })
 
 
@@ -486,7 +497,7 @@ class RantelopeApp(object):
 
 
     def list_comments(self):
-        self.generic_list([BoxView(c) for c in self.clerk.match(Comment)][:100], "lst_comment")
+        self.generic_list([BoxView(c) for c in self.clerk.match(Comment)], "lst_comment")
 
     def list_channel(self):
         channels = [BoxView(c) for c in self.clerk.match(Channel)]
@@ -545,6 +556,22 @@ class RantelopeApp(object):
         obj = self._getInstance(klass)
         return self.clerk.store(obj)
 
+    ## comemnt methods ######################
+
+    def set_comment_status(self):
+        comID = self.input.get('ID')
+        status = self.input.get('status')
+        if comID is None:
+            self.write('give me an ID')
+        elif status is None:
+            self.write('give me a status')
+        else:
+            self.write("<p>setting comment #%s to status '%s'</p>" % (comID, status))
+            com = self._getInstance(Comment)
+            com.status = status
+            self.clerk.store(com)
+            self.write("<p>ok</p>")
+
 
     ## delete ###############################
 
@@ -581,7 +608,7 @@ class RantelopeApp(object):
     def act_publish(self):
         ## now write the XML file:
         publish(self.clerk, self.input["channelID"])
-        self.redirect(action="create_story&status=published&channelID="
+        self.redirect(action="create_story&message=published&channelID="
                       + self.input["channelID"])
 
 
@@ -678,6 +705,8 @@ class RantelopeApp(object):
         write something to output..
         """
         self.out.write(what)
+
+        
 
 
 

@@ -6,7 +6,9 @@
 * include header;
 
 * exec:
+    from rantelope import Story
     from zebra import html
+    import handy
 
 <!-- graphical editor -->
 <script language="javascript" type="text/javascript"
@@ -37,9 +39,7 @@ function toggleTiny(id) {
 }
 </script>
 
-<button onclick="javascript:toggleTiny('description')">toggle tiny</button>
-
-* if scope.get('status') == 'published':
+* if scope.get('message') == 'published':
      <p><b style="color:green">publish successful!</b></p
 
 <form action="rantelope.app" method="POST">
@@ -48,7 +48,8 @@ function toggleTiny(id) {
 * if ID:
     <input type="hidden" name="ID" value="{:ID:}">
 
-  <table style="border-bottom:solid maroon 1px; border-left: solid gray 1px; background: white">
+  <h2>create story</h2>
+  <table style="background: white">
     <tr><th>title:</th>
         <td>{:html.text("title",title,'size="40"'):}
         </td></tr>
@@ -57,31 +58,74 @@ function toggleTiny(id) {
     <tr><th>tags:</th>
         <td>{:html.text("csvtags", csvtags, 'size="40"'):}</td></tr>
     <tr><th>posted:</th>
-        <td>{:html.text("posted", posted, 'size="20"'):}</td></tr>
+        <td>{:html.text("posted", posted, 'size="20"'):}
+        <strong style="padding-left: 10px">status:</strong> {:html.select('status', Story.status.okay, status):}
+        </td></tr>
     <tr><td colspan="2"><textarea name="description" id="description"
-            rows="20" cols="60">{:description:}</textarea></td></tr>
+            rows="20" cols="60">{:handy.xmlEncode(description):}</textarea></td></tr>
   </table>
 
   <br/>
-  <input name="action" value="save story" type="submit"> 
+  <input name="action" value="save story" type="submit">
+
   * if ID:
       <input name="action" value="delete story" type="submit"> 
 </form>
 
+  <button onclick="javascript:toggleTiny('description');">toggle tiny</button>
 
-* for stories:
+
+
+<div id="sidebar">
+* if stories:
+    <h3>stories in this channel</h3>
+
+* exec:
+    drafts = [s for s in stories if s.status=='draft']
+    published = [s for s in stories if s.status=='published']
+
+* for drafts:
     * head:
-        <b>other stories in this channel:</b>
-        <table width="100%">
+        <b>drafts:</b>
+        <ul>
     * body:
-        <tr><td style="border-top: solid silver 1px">
-            <a href="rantelope.app?action=edit_story&ID={:ID:}"
-                   >{:title:}</a></td></tr>
-        <tr><td>{:description:}</td></tr>
+        <li><a href="rantelope.app?action=edit_story&ID={:ID:}"
+                   >{:title:}</a></li>
     * foot:
-        </table>
+        </ul>
+
+* for published:
+    * head:
+        <b>published stories:</b>
+        <ul>
+    * body:
+        <li><a href="rantelope.app?action=edit_story&ID={:ID:}"
+                   >{:title:}</a></li>
+    * foot:
+        </ul>
+
+</div>
+
+* if stories:
+    <h2>last 3 stories</h2>
+    
+* exec:
+    last3 = stories[:3]
+* for last3:
+    * body:
+        <div class="entry {:status:}">
+        <h3><a href="rantelope.app?action=edit_story&ID={:ID:}"
+        >{:title:}</a>
+        * if status == 'draft':
+            ({:status:})
+        </h3>
+        {:description:}
+        </div>
+
 
 <script language="javascript">
    document.forms[0].title.focus();
 </script>
+
+* include footer;
 
