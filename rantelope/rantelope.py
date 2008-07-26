@@ -122,6 +122,8 @@ class TagTest(unittest.TestCase):
         assert s.tags == []
 
 
+now = DateTime("now")
+DEFAULTURL = "rants/%s/%02i/" % (now.y, now.m)
 class Story(Strongbox):
     """
     A document, blog entry, or other text.
@@ -132,7 +134,7 @@ class Story(Strongbox):
     posted = attr(DateTime, default="now")
     status = attr(str, okay=['published','draft'])
     title = attr(str)
-    url = attr(str)
+    url = attr(str, default=DEFAULTURL)
     description = attr(str)
     author = link(Author)
     csvtags = attr(str)
