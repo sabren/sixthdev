@@ -1,0 +1,115 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>boxspring</title>
+
+<!-- imports -->
+<style type="text/css">
+@import url("jquery.svg.css");
+@import url("boxspring.css");
+</style>
+<script type="text/javascript" src="jquery-1.2.6.js" ></script>
+<script type="text/javascript" src="jquery.svg.js"></script>
+<script type="text/javascript" src="iutil.js"></script>
+<script type="text/javascript" src="idrag.js"></script>
+
+<script type="text/javascript">
+
+var SVG;
+var NEXT_SHAPE_ID = 0;
+
+
+$(document).ready(function() {
+	$("#canvas").svg();
+    SVG = jQuery('#canvas').svg('get');
+	SVG.circle(null, 130, 75, 50, {fill: 'none', stroke: 'red', 'stroke-width': 3});
+
+	var line = $(SVG.line(null, 250, 250, 275, 275, { stroke: 'silver', 'stroke-width':3}));
+	line.attr('id', 'line');
+});
+
+function nextShapeId() {
+    return 'shape'+(NEXT_SHAPE_ID++);
+}
+
+function new_Shape(className) {
+    shape = $('#proto .'+className).clone()
+	    .attr('id', nextShapeId())
+	    .appendTo('#canvas');
+	return shape;
+}
+
+function take_draggable(it) {
+   it.DraggableDestroy();
+   it.removeClass("draggable");
+}
+
+function make_draggable(it, callback) {
+    it.Draggable({
+		zIndex: 	1000,
+		ghosting:	true,
+		opacity: 	0.7,
+		onDrag:     callback,
+	});
+	it.addClass("draggable");
+}
+</script>
+</head>
+<body>
+
+<div id="proto">
+ 
+  <div class="card shape" 
+      ondblclick="take_draggable($(this))"
+      onblur="make_card_draggable($(this))"
+   >
+    <input class="head"
+        ondblclick="on_card_element_dblclick($(this))" 
+        onblur="make_card_draggable($(this).parent())"
+        type="text" value="untitled"/>
+    <textarea class="body" 
+        ondblclick="on_card_element_dblclick($(this))" 
+        onblur="make_card_draggable($(this).parent())"
+        rows="5" cols="25" >click here to edit!</textarea>
+  </div>
+  <script type="application/javascript">
+
+  function new_Card() {
+      card = new_Shape('card');
+      make_card_draggable(card);
+	  return card;
+  }
+  
+  function make_card_draggable(it) {
+      make_draggable(it, function (x,y) { on_card_drag(card, x,y); });
+  }
+
+  function on_card_drag(card, x, y) {
+      $('#line').attr('x2').baseVal.value = x;
+      $('#line').attr('y2').baseVal.value = y;
+  }
+
+  function on_card_text_click(it) {
+      take_draggable(it.parent());
+	  it.focus();
+  }
+
+  function on_card_text_blur(it) {
+      make_card_draggable(it.parent());
+  }
+  </script>
+</div>
+
+
+<div id="appbar">
+  <button onclick="new_Card()">[box]</button>
+  <button>[arrow]</button>
+  <button>[save]</button>
+  <button>[load]</button>
+</div>
+
+<!-- viewBox="0 0 500 500"      preserveAspectRatio="xMidYMid slice" -->
+<div id="canvas"></div>
+</body>
+</html>

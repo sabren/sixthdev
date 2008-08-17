@@ -1,0 +1,61 @@
+@charset "utf-8";
+/* CSS Document */
+
+
+body {
+  background: #eee;
+}
+
+stop.begin { stop-color:yellow; }
+stop.end { stop-color:blue; }
+body.invalid stop.end { stop-color:red; }
+#err { display:none; }
+body.invalid #err { display:inline; }
+.fig { stroke:black; stroke-width:5; }
+.invalid { fill: red; }
+
+
+.draggable textarea,
+.draggable input {
+  border: none;
+}
+
+
+.card {
+  color: black;
+  background: white;
+  border: solid silver 1px;
+  width: 300px;
+  height: 200px;
+  position: absolute;
+}
+
+.card h2 {
+  border-bottom: solid #0099FF 1px;
+  font-size:16px;
+}
+
+.card .head {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+
+#appbar {
+	font-family: "Franklin Gothic Demi Cond";
+	color: #FFFFFF;
+	background-color: #333333;
+	margin-bottom: 10px;
+	padding: 5px;
+}
+
+#proto { display: none; }
+#canvas svg {
+	float: left;
+	width:800px;
+	height:600px;
+	margin:auto;
+	border: solid grey 1px;
+	z-index: -50;
+	background:#f8f8f8;
+}
