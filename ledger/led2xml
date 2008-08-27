@@ -1,0 +1,1 @@
+ledger -f $1 xml | sed s/en:/en-/g | sed s/tr:/tr-/g
