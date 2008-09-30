@@ -46,8 +46,14 @@ rules = [
      "the planet"),
 
     #"TMobile*HotSpot"
-    #"GODADDY.COM"
-    #"WWW.SAFARIBOOKS"
+
+    (r".*GODADY.COM",
+     "expense:domains",
+     "godaddy"),
+
+    (r".*SAFARIBOOKS",
+     "expense:services",
+     "safari"),
 
     (r".*GOOGLE \*ADWORDS",
      "expense:marketing",
@@ -99,11 +105,12 @@ for line in stream:
                 else:
                     print "     asset:checking %32s" % amount
                     print "     %s" % account
-                print
                 break
         else: # no break in for
             print ';', date, desc
             print ';', "     %-30s  %15s" % ('asset:checking', -amount)
             print ';', '     ???'
-            print
-    
+            
+        print "; balance: %s" % runBal
+        print
+
