@@ -1,16 +1,23 @@
-
 import re
+import sys
 from decimal import Decimal
 from amex import fixdate
 
 # this is called reconcile.py but it doesn't
 # reconcile anything yet. so far, it just attempts
 # to parse a bofa statement (downloaded in pipe format)
+
+# @TODO: pipe format is only available for corporate accounts
+
 # and generates transactions so I can manually copy
 # and paste the missing ones into the real ledger
 
-rules = [
-    
+
+
+rule_list = [
+        
+    # corporate
+    # -----------------------------------------------
     # statement regexp , ledger account, ledger note
 
     (r"AMERICAN EXPRESS DES:SETTLEMENT",
@@ -45,8 +52,6 @@ rules = [
      "expense:datacenter",
      "the planet"),
 
-    #"TMobile*HotSpot"
-
     (r".*GODADY.COM",
      "expense:domains",
      "godaddy"),
@@ -70,8 +75,8 @@ rules = [
     (r"Monthly Maintenance Fee",
       "expense:fees:bofa",
       "monthly maintenance fee"),
+
 ]
-rules = [(re.compile(ex), acct, note) for ex,acct,note in rules]
 
 
 def all_lines(filenames):
@@ -79,38 +84,44 @@ def all_lines(filenames):
         for line in open(f):
             yield line
 
-import sys
-if len(sys.argv) > 1:
-    stream = all_lines(sys.argv[1:])
-else:
-    stream = sys.stdin
 
-for line in stream:
-    line = line.strip()
-    if not line: continue
-    fields = line.replace('"','').strip().split("|")
-    
-    if fields[0][0].isdigit() and not fields[1].startswith("Beginning"):
+def main(rule_list):
+    rules = [(re.compile(ex), acct, note) for ex,acct,note in rule_list]
 
-        date, desc, amount, runBal = fields
-        date = fixdate(date)
-        amount = Decimal(amount)
+    if len(sys.argv) > 1:
+        stream = all_lines(sys.argv[1:])
+    else:
+        stream = sys.stdin
 
-        for rule, account, note in rules:
-            if rule.match(desc):
-                print date, note
-                if amount < 0:
-                    print "     %-30s  %15s" % ( account, -amount)
-                    print "     asset:checking"
-                else:
-                    print "     asset:checking %32s" % amount
-                    print "     %s" % account
-                break
-        else: # no break in for
-            print ';', date, desc
-            print ';', "     %-30s  %15s" % ('asset:checking', -amount)
-            print ';', '     ???'
-            
-        print "; balance: %s" % runBal
-        print
+    for line in stream:
+        line = line.strip()
+        if not line: continue
+        fields = line.replace('"','').strip().split("|")
+
+        if fields[0][0].isdigit() and not fields[1].startswith("Beginning"):
+
+            date, desc, amount, runBal = fields
+            date = fixdate(date)
+            amount = Decimal(amount)
+
+            for rule, account, note in rules:
+                if rule.match(desc):
+                    print date, note
+                    if amount < 0:
+                        print "     %-30s  %15s" % ( account, -amount)
+                        print "     asset:checking"
+                    else:
+                        print "     asset:checking %32s" % amount
+                        print "     %s" % account
+                    break
+            else: # no break in for
+                print ';', date, desc
+                print ';', "     %-30s  %15s" % ('asset:checking', -amount)
+                print ';', '     ???'
+
+            print "; balance: %s" % runBal
+            print
+
+if __name__ == '__main__':
+    main(rule_list)
 
