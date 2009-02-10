@@ -1,18 +1,13 @@
+#!/bin/env python3.0
 import re
 import sys
 from decimal import Decimal
 from amex import fixdate
 
-# this is called reconcile.py but it doesn't
-# reconcile anything yet. so far, it just attempts
-# to parse a bofa statement (downloaded in pipe format)
+# this attempts to parse a bofa statement (downloaded in pipe format)
+# and converts it to a ledger file for reconcilliation.
 
 # @TODO: pipe format is only available for corporate accounts
-
-# and generates transactions so I can manually copy
-# and paste the missing ones into the real ledger
-
-
 
 rule_list = [
         
@@ -20,15 +15,19 @@ rule_list = [
     # -----------------------------------------------
     # statement regexp , ledger account, ledger note
 
+    (r"2Checkout.com",
+     "income:hosting",
+     "2co"),
+
     (r"AMERICAN EXPRESS DES:SETTLEMENT",
      "expense:fees:amex|asset:merchant",
      "amex"),
 
-    (r"BOFA MS 1924   DES:MERCH FEES",
+    (r"BOFA MS 1924 DES:MERCH FEES",
      "expense:fees:bofams",
      "bofa ms fees"),
 
-    (r"BOFA MS 1924   DES:MERCH SETL",
+    (r"BOFA MS 1924 DES:MERCH SETL",
      "asset:merchant",
      "bofa ms"),
 
@@ -39,6 +38,14 @@ rule_list = [
     (r"ADP PAYROLL FEES DES:ADP - FEES",
      "expense:fees:adp",
      "adp processing fee"),
+
+    (r".*ODESK",
+     "expense:contractors:odesk",
+     "odesk"),
+
+    (r"OVERDRAFT ITEM FEE",
+     "expense:fees:overdraft",
+     "overdraft fee"),
 
     (r"PAYPAL",
      "income:hosting",
@@ -52,7 +59,7 @@ rule_list = [
      "expense:datacenter",
      "the planet"),
 
-    (r".*GODADY.COM",
+    (r".*GODADDY.COM",
      "expense:domains",
      "godaddy"),
 
@@ -98,7 +105,11 @@ def main(rule_list):
         if not line: continue
         fields = line.replace('"','').strip().split("|")
 
-        if fields[0][0].isdigit() and not fields[1].startswith("Beginning"):
+        if fields[0][0].isdigit():
+
+            if fields[1].startswith("Beginning"):
+                print(';; %s\n' % ' '.join(map(str, fields)))
+                continue
 
             date, desc, amount, runBal = fields
             date = fixdate(date)
@@ -106,21 +117,22 @@ def main(rule_list):
 
             for rule, account, note in rules:
                 if rule.match(desc):
-                    print date, note
+                    print(date, note)
                     if amount < 0:
-                        print "     %-30s  %15s" % ( account, -amount)
-                        print "     asset:checking"
+                        print("    %-30s  %16s" % ( account, -amount))
+                        print("    asset:checking")
                     else:
-                        print "     asset:checking %32s" % amount
-                        print "     %s" % account
+                        print("    asset:checking %33s" % amount)
+                        print("    %s" % account)
                     break
-            else: # no break in for
-                print ';', date, desc
-                print ';', "     %-30s  %15s" % ('asset:checking', -amount)
-                print ';', '     ???'
+            else: # no rule matched inside the for loop.
+                print(';', date, desc)
+                print(';', "    %-30s  %16s" % ('asset:checking', -amount))
+                print(';', '    ???')
 
-            print "; balance: %s" % runBal
-            print
+            print()
+            print("; balance: %s" % runBal)
+            print()
 
 if __name__ == '__main__':
     main(rule_list)
