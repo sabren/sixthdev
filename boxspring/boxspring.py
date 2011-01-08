@@ -1,9 +1,9 @@
 #!/usr/bin/python
 from PythonCard import model, dialog
-from boxspring import Drawing, Box
-from wxPython.wx import *
+from glyph import Glyph, Drawing, Box
 import wx
 import pickle
+
 
 class MyBox(Box):
     def __init__(self, x, y):
