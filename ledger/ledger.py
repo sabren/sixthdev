@@ -53,6 +53,11 @@ import copy
 import sys, os
 import re
 
+# transaction states
+CLEARED = '*'
+PENDING = '!'
+DEFAULT = ''
+
 ## object model ######################################################
 
 class Comment:
@@ -60,8 +65,9 @@ class Comment:
     A comment inside the ledger file.
     Can be freestanding or part of a Transaction.
     """
-    def __init__(self):
+    def __init__(self, text=None):
         self.lines = []
+        if text: self.addCommentLine("; %s " % text)
 
     def __str__(self):
         return "\n".join(self.lines + [""])
@@ -79,7 +85,7 @@ class Item(Strongbox):
     account = attr(str)
     amount = attr(Decimal)
     implied = attr(bool, default=False)
-    state = attr(str, okay=['*','!','']) # cleared, pending, default 
+    state = attr(str, okay=[CLEARED,PENDING,DEFAULT])
     charPos = attr(int, default=0)
 
     def clone(self):
@@ -94,9 +100,9 @@ class Transaction:
         self.posted = posted
         self.party = party
         self.memo = memo
-        self.cleared = cleared
+        self.cleared = cleared # date
         self.state = state.strip() if state else ''
-        self.isReconciled = bool(self.state=='*')
+        self.isReconciled = bool(self.state==CLEARED)
         self.items = items or []
         self.validate()
         self.comment = Comment()
@@ -175,7 +181,7 @@ class Transaction:
             if item.account.startswith(account):
                 yield '  (%s "%s" "%s" %s)' % (
                     item.charPos, item.account, item.amount,
-                    ('t' if item.state=='*'
+                    ('t' if item.state==CLEARED
                      else ('pending' if item.state=='!'
                            else 'nil' )))
         yield ")"
@@ -204,6 +210,14 @@ class Transaction:
         if not self.total() == 0:
             raise ValueError("total should be 0, was %s" % self.total())
 
+    def setState(self, state):
+        self.state = state
+        for i in self.items:
+            i.state = state
+
+
+Comment.type = Comment
+Transaction.type = Transaction
 
 ## parser ############################################################
 
@@ -310,9 +324,9 @@ def checkTransactionOrder(book):
             continue # b/c sometimes we have transactions from december up front
         tdate = parseDate(t.posted)
         if tdate < last and last is not None:
-            print "transaction out of order on line %s" % t.lineNum
-            print "---------------------------------" + ("-"*len(str(t.lineNum)))
-            print t
+            print("transaction out of order on line %s" % t.lineNum)
+            print("---------------------------------" + ("-"*len(str(t.lineNum))))
+            print(t)
         last = tdate
 
 def dailyHistory(book, account):
@@ -324,7 +338,7 @@ def emacsView(book, account):
     """
     yield "("
     for item in transactionsOnly(book):
-        if item.state == '*':
+        if item.state == CLEARED:
             continue
         elif item.effectOnAccount(account):
             yield "".join(item.asEmacs(account))
@@ -410,14 +424,14 @@ if __name__=="__main__":
         account = sys.argv[5]        
         book = parseLedger(sys.stdin.read())
         for item in emacsView(book, account):
-            print item
+            print(item)
     elif "--check" in sys.argv:
         fname = sys.argv[-1]
         checkTransactionOrder(parseLedger(open(fname).read()))
     elif "--merge" in sys.argv:
         book1, book2 = [parseLedger(open(f).read()) for f in sys.argv[-2:]]
         for item in merged(book1, book2):
-            print item
+            print(item)
     else:
         os.execvp('ledger', sys.argv[1:])
         

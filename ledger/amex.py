@@ -60,7 +60,7 @@ if __name__=="__main__":
 
         elif line[0] == '4100320225':
             init_date = fixdate(line[2])
-            print "%s=%s amex" % ( init_date, real_date)
+            print("%s=%s amex" % ( init_date, real_date))
 
         elif line[0] == "Totals":
 
@@ -73,7 +73,7 @@ if __name__=="__main__":
             whatTheyTook=cleanup(line[-3])
             whatWeStartedWith=cleanup(line[-5])
 
-            print "    asset:checking %33s" % whatIgot
-            print "    expense:fees:amex %30s" % whatTheyTook
-            print "    asset:merchant %33s" % -decimal.Decimal(whatWeStartedWith)
+            print("    asset:checking %33s" % whatIgot)
+            print("    expense:fees:amex %30s" % whatTheyTook)
+            print("    asset:merchant %33s" % -decimal.Decimal(whatWeStartedWith))
 

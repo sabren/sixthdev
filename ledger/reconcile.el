@@ -28,11 +28,12 @@
   (global-set-key [f4] 'first-bank-entry)
   (global-set-key [f5] 'find-next-ledger-match)
   (global-set-key [f6] 'accept-entry-match)
-  (global-set-key [f7] 'move-bank-entry-to-ledger)
+  (global-set-key [f7] 'move-and-accept-entry)
+  (global-set-key [f8] 'move-bank-entry-to-ledger)
 
   ; this is mostly for debugging, and you actually can use this
   ; one in either buffer:
-  (global-set-key [f12] 'goto-next-ledger-entry)) 
+  (global-set-key [f12] 'goto-next-ledger-entry))
 ;
 ; Basically, you hit the first-bank-entry key to find the 
 ; first match (it's based on the payee string, NOT the amount)
@@ -180,7 +181,7 @@
    (string< goal-date posted)))
 
 
-(defun next-bank-entry ()
+(defun first-bank-entry ()
   (interactive)
   (beginning-of-buffer)
   (goto-next-ledger-entry)
@@ -219,7 +220,9 @@
 	(save-buffer))))
    
 
-(defun move-bank-entry-to-ledger ()
+
+
+(defun copy-bank-entry-to-ledger ()
   (interactive)
   (let ((goal-date (current-entry-field posted)))
     (copy-entry)
@@ -228,7 +231,14 @@
      (yank)
      (insert "\n")
      (backward-paragraph 2)
-     (goto-next-ledger-entry))
-    (accept-entry-match)))
+     (goto-next-ledger-entry))))
 
+(defun move-bank-entry-to-ledger ()
+  (interactive)
+  (copy-bank-entry-to-ledger)
+  (cut-entry))
 
+(defun move-and-accept-entry ()
+  (interactive)
+  (copy-bank-entry-to-ledger)
+  (accept-entry-match))
